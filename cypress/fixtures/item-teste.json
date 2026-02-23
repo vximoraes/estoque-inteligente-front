@@ -1,17 +1,17 @@
 {
-  "componenteValido": {
+  "itemValido": {
     "nome": "Arduino Uno R3",
     "estoque_minimo": 10,
     "descricao": "Placa Arduino Uno R3 original com ATmega328P"
   },
-  "componenteSemDescricao": {
+  "itemSemDescricao": {
     "nome": "Resistor 220Ω",
     "estoque_minimo": 100
   },
-  "componenteLimiteCaracteres": {
-    "nome": "Este é um nome muito longo para testar o limite de caracteres permitido no campo nome do componente",
+  "itemLimiteCaracteres": {
+    "nome": "Este é um nome muito longo para testar o limite de caracteres permitido no campo nome do item",
     "estoque_minimo": 5,
-    "descricao": "Esta é uma descrição muito longa para testar o limite de 200 caracteres permitido no campo descrição do componente. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    "descricao": "Esta é uma descrição muito longa para testar o limite de 200 caracteres permitido no campo descrição do item. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
   },
   "movimentacaoEntrada": {
     "tipo": "Entrada",

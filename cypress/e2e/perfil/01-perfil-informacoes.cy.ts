@@ -11,7 +11,7 @@ describe("Perfil — Informações e Estatísticas", () => {
       cy.get("#senha").type(senha);
       cy.contains("button", "Entrar").click();
 
-      cy.url().should('include', '/componentes');
+      cy.url().should('include', '/itens');
     });
 
     cy.visit(`${frontendUrl}/perfil`);
@@ -31,7 +31,7 @@ describe("Perfil — Informações e Estatísticas", () => {
   });
 
   it("Mostra estatísticas do usuário", () => {
-    cy.get('[data-test="total-componentes-value"]')
+    cy.get('[data-test="total-itens-value"]')
       .should("be.visible")
       .invoke("text")
       .should("match", /\d+/);

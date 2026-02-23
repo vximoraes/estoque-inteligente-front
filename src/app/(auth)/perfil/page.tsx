@@ -71,7 +71,7 @@ export default function HomePage() {
   const observerTarget = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
   const [stats, setStats] = useState({
-    totalComponentes: 0,
+    totalItens: 0,
     totalMovimentacoes: 0,
     totalOrcamentos: 0
   })
@@ -188,15 +188,15 @@ export default function HomePage() {
       
       setIsLoadingStats(true)
       try {
-        // Buscar componentes do usuário
-        const componentesResponse = await get<any>('/componentes?limite=100')
-        const componentesDoUsuario = componentesResponse.data?.docs?.filter(
+        // Buscar itens do usuário
+        const itensResponse = await get<any>('/itens?limite=100')
+        const itensDoUsuario = itensResponse.data?.docs?.filter(
           (comp: any) => {
             const compUsuarioId = comp.usuario?._id || comp.usuario
             return compUsuarioId === user.id || String(compUsuarioId) === String(user.id)
           }
         ) || []
-        const totalComponentes = componentesDoUsuario.length
+        const totalItens = itensDoUsuario.length
 
         // Buscar movimentações do usuário
         const movimentacoesResponse = await get<any>('/movimentacoes?limite=100')
@@ -219,7 +219,7 @@ export default function HomePage() {
         const totalOrcamentos = orcamentosDoUsuario.length
 
         setStats({
-          totalComponentes,
+          totalItens,
           totalMovimentacoes,
           totalOrcamentos
         })
@@ -601,9 +601,9 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
-                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-componentes">
-                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalComponentes.toString()} data-test="total-componentes-value">{stats.totalComponentes}</p>
-                    <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-itens">
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalItens.toString()} data-test="total-itens-value">{stats.totalItens}</p>
+                    <p className="text-sm text-gray-500 mt-3">Itens cadastrados</p>
                   </div>
 
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-movimentacoes">

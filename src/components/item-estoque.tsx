@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Edit, Trash2, PlusCircle, MinusCircle, Package } from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
 
-interface ComponenteEletronicoProps {
+interface ItemEstoqueProps {
   id?: string;
   nome: string;
   categoria: string;
@@ -20,7 +20,7 @@ interface ComponenteEletronicoProps {
   'data-test'?: string;
 }
 
-export default function ComponenteEletronico({
+export default function ItemEstoque({
   id = '',
   nome,
   categoria,
@@ -35,7 +35,7 @@ export default function ComponenteEletronico({
   onSaida,
   isLoading = false,
   'data-test': dataTest
-}: ComponenteEletronicoProps) {
+}: ItemEstoqueProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -91,7 +91,7 @@ export default function ComponenteEletronico({
   return (
     <div 
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] min-w-0 flex flex-col cursor-pointer relative overflow-hidden"
-      data-test={dataTest || `componente-${id}`}
+      data-test={dataTest || `item-${id}`}
       title={componentTitle}
       onClick={handleClick}
     >
@@ -110,7 +110,7 @@ export default function ComponenteEletronico({
       {/* Header com imagem e ações */}
       <div className="flex items-start justify-between mb-2 gap-2 overflow-hidden" data-test="header">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0 overflow-hidden" data-test="component-info">
-          {/* Ícone/Imagem do componente */}
+          {/* Ícone/Imagem do item */}
           <div 
             className={`w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
               imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
@@ -124,7 +124,7 @@ export default function ComponenteEletronico({
                 src={imagemComTimestamp} 
                 alt={nome}
                 className="w-full h-full object-cover"
-                title={`Imagem do componente: ${nome}`}
+                title={`Imagem do item: ${nome}`}
               />
             ) : (
               <Package className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
@@ -155,7 +155,7 @@ export default function ComponenteEletronico({
           <button
             onClick={handleEdit}
             className="p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 flex-shrink-0 cursor-pointer"
-            title={`Editar componente: ${nome}`}
+            title={`Editar item: ${nome}`}
             data-test="edit-button"
           >
             <Edit size={20} />
@@ -163,7 +163,7 @@ export default function ComponenteEletronico({
           <button
             onClick={handleDelete}
             className="p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 flex-shrink-0 cursor-pointer"
-            title={`Excluir componente: ${nome}`}
+            title={`Excluir item: ${nome}`}
             data-test="delete-button"
           >
             <Trash2 size={20} />
@@ -239,7 +239,7 @@ export default function ComponenteEletronico({
           isOpen={isImageModalOpen}
           onClose={() => setIsImageModalOpen(false)}
           imagemUrl={imagemComTimestamp}
-          nomeComponente={nome}
+          nomeItem={nome}
         />
       )}
     </div>

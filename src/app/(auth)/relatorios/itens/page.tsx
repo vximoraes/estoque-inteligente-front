@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/table";
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { EstoqueApiResponse } from '@/types/componentes';
+import { EstoqueApiResponse } from '@/types/itens';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
-import { generateComponentesPDF } from '@/utils/pdfGenerator';
-import { generateComponentesCSV } from '@/utils/csvGenerator';
+import { generateItensPDF } from '@/utils/pdfGenerator';
+import { generateItensCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from "@/hooks/use-session";
 
@@ -29,7 +29,7 @@ interface CategoriasApiResponse {
   };
 }
 
-function RelatorioComponentesPageContent() {
+function RelatorioItensPageContent() {
   const {user} = useSession()
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
@@ -107,40 +107,40 @@ function RelatorioComponentesPageContent() {
   // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
   const estoquesFiltrados = todosEstoques
     .filter((estoque) => {
-      // Validar se o estoque tem componente e localização
-      if (!estoque?.componente || !estoque?.localizacao) {
+      // Validar se o estoque tem item e localização
+      if (!estoque?.item || !estoque?.localizacao) {
         return false;
       }
 
       const matchSearch = !searchTerm || 
-        estoque.componente.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        estoque.componente._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estoque.item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estoque.item._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         estoque.localizacao.nome?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchCategoria = !categoriaFilter || 
-        estoque.componente.categoria === categoriaFilter;
+        estoque.item.categoria === categoriaFilter;
       
       const matchStatus = !statusFilter || 
-        estoque.componente.status === statusFilter;
+        estoque.item.status === statusFilter;
       
       return matchSearch && matchCategoria && matchStatus;
     })
     .sort((a, b) => {
-      // Ordenar alfabeticamente pelo nome do componente
-      const nomeA = a.componente?.nome?.toLowerCase() || '';
-      const nomeB = b.componente?.nome?.toLowerCase() || '';
+      // Ordenar alfabeticamente pelo nome do item
+      const nomeA = a.item?.nome?.toLowerCase() || '';
+      const nomeB = b.item?.nome?.toLowerCase() || '';
       return nomeA.localeCompare(nomeB, 'pt-BR');
     });
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
-  const totalComponentes = new Set(
+  const totalItens = new Set(
     estoquesFiltrados
-      .filter(e => e?.componente?._id)
-      .map(e => e.componente._id)
+      .filter(e => e?.item?._id)
+      .map(e => e.item._id)
   ).size;
-  const emEstoque = estoquesFiltrados.filter(e => e?.componente?.status === 'Em Estoque').length;
-  const baixoEstoque = estoquesFiltrados.filter(e => e?.componente?.status === 'Baixo Estoque').length;
-  const indisponiveis = estoquesFiltrados.filter(e => e?.componente?.status === 'Indisponível').length;
+  const emEstoque = estoquesFiltrados.filter(e => e?.item?.status === 'Em Estoque').length;
+  const baixoEstoque = estoquesFiltrados.filter(e => e?.item?.status === 'Baixo Estoque').length;
+  const indisponiveis = estoquesFiltrados.filter(e => e?.item?.status === 'Indisponível').length;
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -186,15 +186,15 @@ function RelatorioComponentesPageContent() {
 
       if (format === 'PDF') {
         // Gerar PDF
-        await generateComponentesPDF({
+        await generateItensPDF({
           estoques: estoquesSelecionados,
           fileName: fileName.trim(),
-          title: 'RELATÓRIO DE COMPONENTES',
+          title: 'RELATÓRIO DE ITENS',
           includeStats: true,
           userName: user?.name
         });
 
-        toast.success(`PDF gerado com sucesso! ${estoquesSelecionados.length} componente(s) exportado(s).`, {
+        toast.success(`PDF gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`, {
           position: 'bottom-right',
           autoClose: 3000,
           hideProgressBar: false,
@@ -208,13 +208,13 @@ function RelatorioComponentesPageContent() {
         handleCloseExportarModal();
       } else if (format === 'CSV') {
         // Gerar CSV
-        generateComponentesCSV({
+        generateItensCSV({
           estoques: estoquesSelecionados,
           fileName: fileName.trim(),
           includeStats: true,
         });
 
-        toast.success(`CSV gerado com sucesso! ${estoquesSelecionados.length} componente(s) exportado(s).`, {
+        toast.success(`CSV gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`, {
           position: 'bottom-right',
           autoClose: 3000,
           hideProgressBar: false,
@@ -278,7 +278,7 @@ function RelatorioComponentesPageContent() {
   const isSomeSelected = selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-componentes-page">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-itens-page">
       <Cabecalho 
         pagina="Relatórios" 
         acao="Componentes"
@@ -307,13 +307,13 @@ function RelatorioComponentesPageContent() {
           <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
           <StatCard
             title="Total de"
-            subtitle="componentes"
-            value={totalComponentes}
+            subtitle="itens"
+            value={totalItens}
             icon={Package}
             iconColor="text-blue-600"
             iconBgColor="bg-blue-100"
-            data-test="stat-total-componentes"
-            hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
+            data-test="stat-total-itens"
+            hoverTitle={`Total de itens cadastrados: ${totalItens}`}
           />
 
           <StatCard
@@ -323,7 +323,7 @@ function RelatorioComponentesPageContent() {
             iconColor="text-green-600"
             iconBgColor="bg-green-100"
             data-test="stat-em-estoque"
-            hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
+            hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
           />
 
           <StatCard
@@ -333,7 +333,7 @@ function RelatorioComponentesPageContent() {
             iconColor="text-yellow-600"
             iconBgColor="bg-yellow-100"
             data-test="stat-baixo-estoque"
-            hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
+            hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
           />
 
           <StatCard
@@ -343,7 +343,7 @@ function RelatorioComponentesPageContent() {
             iconColor="text-red-600"
             iconBgColor="bg-red-100"
             data-test="stat-indisponiveis"
-            hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
+            hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
           />
         </div>
         </div>
@@ -354,7 +354,7 @@ function RelatorioComponentesPageContent() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 type="text"
-                placeholder="Pesquisar componentes..."
+                placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -380,7 +380,7 @@ function RelatorioComponentesPageContent() {
               style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
               data-test="exportar-button"
               onClick={handleOpenExportarModal}
-              title={selectedItems.size === 0 ? 'Selecione componentes para exportar' : `Exportar ${selectedItems.size} componente(s)`}
+              title={selectedItems.size === 0 ? 'Selecione itens para exportar' : `Exportar ${selectedItems.size} item(ns)`}
             >
               <img src="../gerar-pdf.svg" alt="" className="w-5" />
               Exportar
@@ -430,7 +430,7 @@ function RelatorioComponentesPageContent() {
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
-            Erro ao carregar componentes: {error.message}
+            Erro ao carregar itens: {error.message}
           </div>
         )}
 
@@ -442,7 +442,7 @@ function RelatorioComponentesPageContent() {
               <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
               <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
             </div>
-            <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+            <p className="mt-4 text-gray-600 font-medium">Carregando itens...</p>
           </div>
         ) : estoquesFiltrados.length > 0 ? (
           <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
@@ -466,7 +466,7 @@ function RelatorioComponentesPageContent() {
                         />
                       </TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-componente">COMPONENTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-item">COMPONENTE</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-quantidade">QUANTIDADE</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-status">STATUS</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-localizacao">LOCALIZAÇÃO</TableHead>
@@ -474,7 +474,7 @@ function RelatorioComponentesPageContent() {
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow data-test="componente-row" key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow data-test="item-row" key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
@@ -484,36 +484,36 @@ function RelatorioComponentesPageContent() {
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-codigo">
-                          <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
-                            {estoque.componente._id.slice(-8)}
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="item-codigo">
+                          <span className="truncate block max-w-[200px]" title={estoque.item._id}>
+                            {estoque.item._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-nome">
-                          <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
-                            {estoque.componente.nome}
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="item-nome">
+                          <span className="truncate block max-w-[200px]" title={estoque.item.nome}>
+                            {estoque.item.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium" data-test="componente-quantidade">
+                        <TableCell className="text-center px-8 py-3 font-medium" data-test="item-quantidade">
                           {estoque.quantidade}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 whitespace-nowrap">
-                          <div className="flex justify-center" data-test="componente-status">
+                          <div className="flex justify-center" data-test="item-status">
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
-                                estoque.componente.status === 'Em Estoque'
+                                estoque.item.status === 'Em Estoque'
                                   ? 'bg-green-100 text-green-800'
-                                  : estoque.componente.status === 'Baixo Estoque'
+                                  : estoque.item.status === 'Baixo Estoque'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-red-100 text-red-800'
                               }`}
-                              title={estoque.componente.status}
+                              title={estoque.item.status}
                             >
-                              {estoque.componente.status}
+                              {estoque.item.status}
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3 font-medium" data-test="componente-localizacao">
+                        <TableCell className="text-left px-8 py-3 font-medium" data-test="item-localizacao">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>
@@ -538,7 +538,7 @@ function RelatorioComponentesPageContent() {
                   <Package className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+                  {searchTerm ? 'Nenhum item encontrado para sua pesquisa.' : 'Não há itens cadastrados...'}
                 </p>
               </div>
             </div>
@@ -566,7 +566,7 @@ function RelatorioComponentesPageContent() {
   );
 }
 
-export default function RelatorioComponentesPage() {
+export default function RelatorioItensPage() {
   return (
     <Suspense fallback={
       <div className="w-full h-screen flex flex-col items-center justify-center">
@@ -577,7 +577,7 @@ export default function RelatorioComponentesPage() {
         <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
       </div>
     }>
-      <RelatorioComponentesPageContent />
+      <RelatorioItensPageContent />
     </Suspense>
   );
 }

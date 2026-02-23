@@ -9,7 +9,7 @@ describe("Perfil — Edição de Foto", () => {
       cy.get("#email").type(email);
       cy.get("#senha").type(senha);
       cy.contains("button", "Entrar").click();
-      cy.url().should('include', '/componentes');
+      cy.url().should('include', '/itens');
     });
 
     cy.visit(`${frontendUrl}/perfil`);

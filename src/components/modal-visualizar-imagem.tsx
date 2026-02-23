@@ -5,14 +5,14 @@ interface ModalVisualizarImagemProps {
   isOpen: boolean;
   onClose: () => void;
   imagemUrl: string;
-  nomeComponente: string;
+  nomeItem: string;
 }
 
 export default function ModalVisualizarImagem({
   isOpen,
   onClose,
   imagemUrl,
-  nomeComponente
+  nomeItem
 }: ModalVisualizarImagemProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -55,7 +55,7 @@ export default function ModalVisualizarImagem({
         {/* Imagem */}
         <img
           src={imagemUrl}
-          alt={nomeComponente}
+          alt={nomeItem}
           className="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto"
           data-test="modal-visualizar-imagem-img"
           onClick={handleContentClick}

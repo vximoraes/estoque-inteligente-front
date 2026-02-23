@@ -4,13 +4,13 @@ describe('Componentes - Cadastro e Edição', () => {
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
-  let componenteIdCriado: string;
+  let itemIdCriado: string;
 
   beforeEach(() => {
-    cy.intercept('GET', `${apiUrl}/componentes*`).as('getComponentes');
-    cy.intercept('POST', `${apiUrl}/componentes`).as('createComponente');
-    cy.intercept('PUT', `${apiUrl}/componentes/*`).as('updateComponente');
-    cy.intercept('PATCH', `${apiUrl}/componentes/*`).as('patchComponente');
+    cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
+    cy.intercept('POST', `${apiUrl}/itens`).as('createComponente');
+    cy.intercept('PUT', `${apiUrl}/itens/*`).as('updateComponente');
+    cy.intercept('PATCH', `${apiUrl}/itens/*`).as('patchComponente');
     cy.intercept('GET', `${apiUrl}/categorias*`).as('getCategorias');
     cy.intercept('POST', `${apiUrl}/categorias`).as('createCategoria');
 
@@ -19,19 +19,19 @@ describe('Componentes - Cadastro e Edição', () => {
 
   describe('Adicionar Componente', () => {
     beforeEach(() => {
-      cy.visit(`${frontendUrl}/componentes`);
+      cy.visit(`${frontendUrl}/itens`);
       cy.wait('@getComponentes');
 
       cy.contains('button', 'Adicionar').click();
 
-      cy.url().should('include', '/componentes/adicionar');
+      cy.url().should('include', '/itens/adicionar');
       cy.wait('@getCategorias');
     });
 
     it('Deve redirecionar para tela de cadastro ao clicar em Adicionar', () => {
-      cy.url().should('include', '/componentes/adicionar');
+      cy.url().should('include', '/itens/adicionar');
 
-      cy.contains('Componentes').should('be.visible');
+      cy.contains('Itens').should('be.visible');
       cy.contains('Adicionar').should('be.visible');
     });
 
@@ -93,7 +93,7 @@ describe('Componentes - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve criar componente com sucesso com dados válidos', () => {
+    it('Deve criar item com sucesso com dados válidos', () => {
       const nomeComponente = `Componente Teste ${Date.now()}`;
 
       cy.get('#nome').type(nomeComponente);
@@ -105,23 +105,23 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.get('#estoqueMinimo').clear().type('10');
 
-      cy.get('#descricao').type('Descrição do componente de teste');
+      cy.get('#descricao').type('Descrição do item de teste');
 
       cy.contains('button', 'Salvar').click();
 
       cy.wait('@createComponente').then((createInterception) => {
         expect(createInterception.response?.statusCode).to.be.oneOf([200, 201]);
 
-        componenteIdCriado = createInterception.response?.body?.data?._id;
+        itemIdCriado = createInterception.response?.body?.data?._id;
 
-        cy.url().should('include', '/componentes');
+        cy.url().should('include', '/itens');
         cy.url().should('not.include', '/novo');
 
         cy.contains('sucesso', { matchCase: false }).should('be.visible');
       });
     });
 
-    it('Deve permitir criar categoria durante cadastro de componente', () => {
+    it('Deve permitir criar categoria durante cadastro de item', () => {
       cy.get('body').then($body => {
         if ($body.text().includes('Nova Categoria') || $body.text().includes('Criar Categoria')) {
           cy.log('Funcionalidade de criar categoria disponível');
@@ -130,12 +130,12 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve validar nome único (não permitir duplicata)', () => {
-      // Busca um componente existente via API
+      // Busca um item existente via API
       const apiUrl = Cypress.env('API_URL');
       
       cy.request({
         method: 'GET',
-        url: `${apiUrl}/componentes?limit=1`,
+        url: `${apiUrl}/itens?limit=1`,
         headers: { Authorization: `Bearer ${window.localStorage.getItem('token')}` },
         failOnStatusCode: false
       }).then((response) => {
@@ -164,48 +164,48 @@ describe('Componentes - Cadastro e Edição', () => {
   });
 
   describe('Editar Componente', () => {
-    let primeiroComponente: any;
+    let primeiroItem: any;
 
     beforeEach(() => {
-      cy.visit(`${frontendUrl}/componentes`);
+      cy.visit(`${frontendUrl}/itens`);
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
-        if (componentes.length > 0) {
-          primeiroComponente = componentes[0];
+        const itens = interception.response?.body?.data?.docs || [];
+        if (itens.length > 0) {
+          primeiroItem = itens[0];
         }
       });
     });
 
     it('Deve redirecionar para tela de edição ao clicar em Editar', () => {
-      if (!primeiroComponente) return;
+      if (!primeiroItem) return;
 
-      cy.getByData('componente-card-0').within(() => {
+      cy.getByData('item-card-0').within(() => {
         cy.getByData('edit-button').click();
       });
 
-      cy.url().should('include', `/componentes/editar/${primeiroComponente._id}`);
+      cy.url().should('include', `/itens/editar/${primeiroItem._id}`);
     });
 
     it('Deve pré-preencher todos os campos com dados atuais', () => {
-      if (!primeiroComponente) return;
+      if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/componentes/editar/${primeiroComponente._id}`);
+      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
-      cy.get('#nome').should('have.value', primeiroComponente.nome);
-      cy.get('#estoqueMinimo').should('have.value', primeiroComponente.estoque_minimo.toString());
+      cy.get('#nome').should('have.value', primeiroItem.nome);
+      cy.get('#estoqueMinimo').should('have.value', primeiroItem.estoque_minimo.toString());
 
-      if (primeiroComponente.descricao) {
-        cy.get('#descricao').should('have.value', primeiroComponente.descricao);
+      if (primeiroItem.descricao) {
+        cy.get('#descricao').should('have.value', primeiroItem.descricao);
       }
     });
 
-    it('Deve atualizar componente com sucesso', () => {
-      if (!primeiroComponente) return;
+    it('Deve atualizar item com sucesso', () => {
+      if (!primeiroItem) return;
 
       const novaDescricao = `Descrição atualizada ${Date.now()}`;
 
-      cy.visit(`${frontendUrl}/componentes/editar/${primeiroComponente._id}`);
+      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
       cy.get('#descricao').clear().type(novaDescricao);
@@ -215,7 +215,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.wait('@patchComponente', { timeout: 10000 }).then((interception) => {
         expect(interception.response?.statusCode).to.be.oneOf([200, 201]);
 
-        cy.url().should('include', '/componentes');
+        cy.url().should('include', '/itens');
         cy.url().should('not.include', '/editar');
 
         cy.contains(/atualizado|sucesso/i).should('be.visible');
@@ -223,12 +223,12 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve recalcular status ao alterar estoque mínimo', () => {
-      if (!primeiroComponente || primeiroComponente.quantidade <= 0) return;
+      if (!primeiroItem || primeiroItem.quantidade <= 0) return;
 
-      cy.visit(`${frontendUrl}/componentes/editar/${primeiroComponente._id}`);
+      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
-      const novoEstoqueMinimo = primeiroComponente.quantidade + 10;
+      const novoEstoqueMinimo = primeiroItem.quantidade + 10;
       cy.get('#estoqueMinimo').clear().type(novoEstoqueMinimo.toString());
 
       cy.contains('button', 'Salvar').click();
@@ -237,21 +237,21 @@ describe('Componentes - Cadastro e Edição', () => {
         expect(interception.response?.statusCode).to.be.oneOf([200, 201]);
       });
 
-      cy.url().should('include', '/componentes');
+      cy.url().should('include', '/itens');
       cy.url().should('not.include', '/editar');
     });
 
     it('Deve permitir alterar/remover imagem', () => {
-      if (!primeiroComponente) return;
+      if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/componentes/editar/${primeiroComponente._id}`);
+      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
       cy.get('body').then($body => {
         if ($body.text().includes('Imagem') || $body.find('input[type="file"]').length > 0) {
           cy.log('Campo de imagem presente no formulário de edição');
 
-          if (primeiroComponente.imagem) {
+          if (primeiroItem.imagem) {
             cy.get('body').then($btn => {
               if ($btn.text().includes('Remover') || $btn.find('[data-testid*="remove"]').length > 0) {
                 cy.log('Botão de remover imagem encontrado');
@@ -263,9 +263,9 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve manter mesmas validações do cadastro', () => {
-      if (!primeiroComponente) return;
+      if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/componentes/editar/${primeiroComponente._id}`);
+      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
       cy.get('#nome').clear();
@@ -279,7 +279,7 @@ describe('Componentes - Cadastro e Edição', () => {
 
   describe('Upload de Imagem', () => {
     it('Deve aceitar formatos válidos de imagem (JPG, PNG, GIF, WEBP)', () => {
-      cy.visit(`${frontendUrl}/componentes/adicionar`);
+      cy.visit(`${frontendUrl}/itens/adicionar`);
       cy.wait('@getCategorias');
 
       cy.get('body').then($body => {
@@ -292,7 +292,7 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve exibir preview da imagem após upload', () => {
-      cy.visit(`${frontendUrl}/componentes/adicionar`);
+      cy.visit(`${frontendUrl}/itens/adicionar`);
       cy.wait('@getCategorias');
 
       cy.get('body').then($body => {
@@ -308,7 +308,7 @@ describe('Componentes - Cadastro e Edição', () => {
   });
 
   after(() => {
-    if (componenteIdCriado) {
+    if (itemIdCriado) {
       const apiUrl = Cypress.env('API_URL');
       const email = Cypress.env('TEST_USER_EMAIL');
       const senha = Cypress.env('TEST_USER_PASSWORD');
@@ -322,13 +322,13 @@ describe('Componentes - Cadastro e Edição', () => {
 
         cy.request({
           method: 'PATCH',
-          url: `${apiUrl}/componentes/${componenteIdCriado}/inativar`,
+          url: `${apiUrl}/itens/${itemIdCriado}/inativar`,
           headers: {
             Authorization: `Bearer ${token}`
           },
           failOnStatusCode: false
         }).then(() => {
-          cy.log(`Componente de teste ${componenteIdCriado} removido`);
+          cy.log(`Componente de teste ${itemIdCriado} removido`);
         });
       });
     }

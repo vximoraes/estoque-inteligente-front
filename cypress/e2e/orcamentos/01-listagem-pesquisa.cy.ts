@@ -31,12 +31,12 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
 
           cy.request({
             method: 'GET',
-            url: `${apiUrl}/componentes?limit=1`,
+            url: `${apiUrl}/itens?limit=1`,
             headers: { Authorization: `Bearer ${authToken}` }
           }).then((compResponse) => {
-            const componentes = compResponse.body?.data?.docs || [];
+            const itens = compResponse.body?.data?.docs || [];
             
-            if (componentes.length > 0) {
+            if (itens.length > 0) {
               cy.request({
                 method: 'GET',
                 url: `${apiUrl}/fornecedores?limit=1`,
@@ -52,8 +52,8 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
                     body: {
                       nome: `Orçamento Teste Listagem ${Date.now()}`,
                       descricao: 'Orçamento criado para testes de listagem',
-                      componentes: [{
-                        componente: componentes[0]._id,
+                      itens: [{
+                        item: itens[0]._id,
                         fornecedor: fornecedores[0]._id,
                         quantidade: 10,
                         valor_unitario: 25.50
@@ -92,7 +92,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
     cy.getByData("senha-input").should('be.visible').clear().type(senha);
     cy.getByData("botao-entrar").click();
 
-    cy.url({ timeout: 30000 }).should('include', '/componentes');
+    cy.url({ timeout: 30000 }).should('include', '/itens');
     
     cy.visit(`${frontendUrl}/orcamentos`, { failOnStatusCode: false });
     cy.wait('@getOrcamentos', { timeout: 30000 });

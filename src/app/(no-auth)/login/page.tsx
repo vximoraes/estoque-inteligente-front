@@ -38,7 +38,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError("E-mail ou senha incorretos.");
       } else if (result?.ok) {
-        router.push("/componentes");
+        router.push("/itens");
       }
     } catch (err) {
       setError("Erro ao fazer login. Tente novamente.");

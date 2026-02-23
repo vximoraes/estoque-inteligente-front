@@ -1,6 +1,6 @@
 import path from 'path'
 
-describe('Tela de relatórios de componentes.', () => {
+describe('Tela de relatórios de itens.', () => {
   const frontendUrl = Cypress.env('FRONTEND_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
@@ -14,16 +14,16 @@ describe('Tela de relatórios de componentes.', () => {
   describe('Validação da Tabela', () => {
     it('Deve verificar se os cabeçalhos da tabela estão corretos', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
 
       cy.get('[data-test="table-head-codigo"]').should('be.visible')
-      cy.get('[data-test="table-head-componente"]').should('be.visible')
+      cy.get('[data-test="table-head-item"]').should('be.visible')
       cy.get('[data-test="table-head-quantidade"]').should('be.visible')
       cy.get('[data-test="table-head-status"]').should('be.visible')
       cy.get('[data-test="table-head-localizacao"]').should('be.visible')
 
       cy.get('[data-test="table-head-codigo"]').should('contain.text', 'CÓDIGO')
-      cy.get('[data-test="table-head-componente"]').should('contain.text', 'COMPONENTE')
+      cy.get('[data-test="table-head-item"]').should('contain.text', 'COMPONENTE')
       cy.get('[data-test="table-head-quantidade"]').should('contain.text', 'QUANTIDADE')
       cy.get('[data-test="table-head-status"]').should('contain.text', 'STATUS')
       cy.get('[data-test="table-head-localizacao"]').should('contain.text', 'LOCALIZAÇÃO')
@@ -34,17 +34,17 @@ describe('Tela de relatórios de componentes.', () => {
 
     it('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
 
-      cy.get('[data-test="componente-row"]').should('exist')
-      cy.get('[data-test="componente-row"]').should('have.length.greaterThan', 0)
+      cy.get('[data-test="item-row"]').should('exist')
+      cy.get('[data-test="item-row"]').should('have.length.greaterThan', 0)
 
-      cy.get('[data-test="componente-row"]').each((row) => {
+      cy.get('[data-test="item-row"]').each((row) => {
         cy.wrap(row).within(() => {
-          cy.get('[data-test="componente-codigo"]').should('be.visible')
-          cy.get('[data-test="componente-nome"]').should('be.visible')
-          cy.get('[data-test="componente-quantidade"]').should('be.visible')
-          cy.get('[data-test="componente-localizacao"]').should('be.visible')
+          cy.get('[data-test="item-codigo"]').should('be.visible')
+          cy.get('[data-test="item-nome"]').should('be.visible')
+          cy.get('[data-test="item-quantidade"]').should('be.visible')
+          cy.get('[data-test="item-localizacao"]').should('be.visible')
         })
       })
     })
@@ -53,10 +53,10 @@ describe('Tela de relatórios de componentes.', () => {
   describe('Funcionalidade de Checkboxes', () => {
     it('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
 
-      cy.get('[data-test="componente-row"]').should('exist')
-      cy.get('[data-test="componente-row"]').should('have.length.greaterThan', 0)
+      cy.get('[data-test="item-row"]').should('exist')
+      cy.get('[data-test="item-row"]').should('have.length.greaterThan', 0)
 
       cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
         cy.wrap(checkbox).should('not.be.checked')
@@ -83,9 +83,9 @@ describe('Tela de relatórios de componentes.', () => {
   describe('Filtros de Relatório', () => {
     it('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
 
-      cy.get('[data-test="componente-status"]').first().invoke('text').then((e) => {
+      cy.get('[data-test="item-status"]').first().invoke('text').then((e) => {
         if (status.includes(e)) {
           cy.get('[data-test="filtros-button"]').should('be.visible')
           cy.get('[data-test="filtros-button"]').click()
@@ -96,8 +96,8 @@ describe('Tela de relatórios de componentes.', () => {
           cy.get('[data-test="aplicar-filtros-button"]').should('be.visible')
           cy.get('[data-test="aplicar-filtros-button"]').click()
           cy.wait(500)
-          cy.get('[data-test="componente-row"]').each((produto_status) => {
-            const statusAtual = produto_status.find('[data-test="componente-status"]').text()
+          cy.get('[data-test="item-row"]').each((produto_status) => {
+            const statusAtual = produto_status.find('[data-test="item-status"]').text()
             expect(statusAtual).to.eq(e)
           })
           cy.get('[data-test="filter-tag-status"]').contains(e)
@@ -110,7 +110,7 @@ describe('Tela de relatórios de componentes.', () => {
 
     it('Deve realizar uma pesquisa pelo filtro baseado na categoria.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="filtros-button"]').should('be.visible')
       cy.get('[data-test="filtros-button"]').click()
       cy.get('[data-test="filtro-categoria-dropdown"]').should('be.visible')
@@ -121,8 +121,8 @@ describe('Tela de relatórios de componentes.', () => {
         cy.contains(cabos).click()
         cy.get('[data-test="aplicar-filtros-button"]').should('be.visible')
         cy.get('[data-test="aplicar-filtros-button"]').click()
-        cy.get('[data-test="componente-row"]').should('exist')
-        cy.get('[data-test="componente-row"]').should('be.visible')
+        cy.get('[data-test="item-row"]').should('exist')
+        cy.get('[data-test="item-row"]').should('be.visible')
         cy.get('[data-test="filter-tag-categoria"]').contains(cabos)
       })
     })
@@ -131,9 +131,9 @@ describe('Tela de relatórios de componentes.', () => {
   describe('Estatísticas', () => {
     it('Deve verificar se as informações das estatísticas estão visíveis.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.wait(500)
-      cy.get('[data-test="stat-total-componentes"]').within((e) => {
+      cy.get('[data-test="stat-total-itens"]').within((e) => {
         const paragrafos = e.find('p')
         let texto = ''
         for (const p of paragrafos) {
@@ -141,7 +141,7 @@ describe('Tela de relatórios de componentes.', () => {
         }
         texto = texto.trim()
         if (texto) {
-          expect(texto).contain('Total de componentes')
+          expect(texto).contain('Total de itens')
         }
       })
 
@@ -184,14 +184,14 @@ describe('Tela de relatórios de componentes.', () => {
   })
 
   describe('Busca de Componentes', () => {
-    it('Deve pesquisar um componente pelo nome.', () => {
+    it('Deve pesquisar um item pelo nome.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
-      cy.get('[data-test="componente-row"]').first().find('[data-test="componente-nome"]').first().invoke('text').then((e) => {
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
+      cy.get('[data-test="item-row"]').first().find('[data-test="item-nome"]').first().invoke('text').then((e) => {
         cy.get('[data-test="search-input"]').type(e)
         cy.wait(500)
-        cy.get('[data-test="componente-row"]').each((componente_nome) => {
-          const nome = componente_nome.find('[data-test="componente-nome"]').text()
+        cy.get('[data-test="item-row"]').each((item_nome) => {
+          const nome = item_nome.find('[data-test="item-nome"]').text()
           expect(e).to.eq(nome)
         })
       })
@@ -199,23 +199,23 @@ describe('Tela de relatórios de componentes.', () => {
   })
 
   describe('Exportação de Relatórios', () => {
-    it('Botão de Exportar deve estar sem interação se nenhum componente com checkbox seletada estiver presente.', () => {
+    it('Botão de Exportar deve estar sem interação se nenhum item com checkbox seletada estiver presente.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="exportar-button"]').should('not.be.enabled')
       cy.get('[data-test="checkbox-select-item"]').first().click()
     })
 
-    it('Botão de Exportar deve estar interativo se ao menos um componente estiver selecionado.', () => {
+    it('Botão de Exportar deve estar interativo se ao menos um item estiver selecionado.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="checkbox-select-item"]').first().click()
       cy.get('[data-test="exportar-button"]').should('be.enabled')
     })
 
     it('Não deve Exportar um .pdf se o campo nome estiver vazio.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="checkbox-select-item"]').first().click()
       cy.get('[data-test="exportar-button"]').click()
       cy.get('[data-test="modal-exportar-content"]').should('be.visible')
@@ -226,7 +226,7 @@ describe('Tela de relatórios de componentes.', () => {
 
     it('Não deve exportar um .csv se o campo nome estiver vazio.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="checkbox-select-item"]').first().click()
       cy.get('[data-test="exportar-button"]').click()
       cy.get('[data-test="modal-exportar-content"]').should('be.visible')
@@ -245,7 +245,7 @@ describe('Tela de relatórios de componentes.', () => {
       const dateString = `${year}-${month}-${day}`
 
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="checkbox-select-item"]').first().click()
       cy.get('[data-test="exportar-button"]').click()
       cy.get('[data-test="format-radio-pdf"]').check().should('be.checked')
@@ -266,7 +266,7 @@ describe('Tela de relatórios de componentes.', () => {
       const dateString = `${year}-${month}-${day}`
 
       cy.get('[data-test="sidebar-btn-relatorios"]').click()
-      cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click()
       cy.get('[data-test="checkbox-select-item"]').first().click()
       cy.get('[data-test="exportar-button"]').click()
       cy.get('[data-test="format-radio-csv"]').check().should('be.checked')

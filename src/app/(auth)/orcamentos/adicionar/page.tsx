@@ -11,11 +11,11 @@ import { get, post } from '@/lib/fetchData'
 import { Plus, Minus, Trash2, ChevronDown } from 'lucide-react'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { ComponenteOrcamento } from '@/types/orcamentos'
-import { ApiResponse } from '@/types/componentes'
+import { ItemOrcamento } from '@/types/orcamentos'
+import { ApiResponse } from '@/types/itens'
 import { FornecedorApiResponse } from '@/types/fornecedores'
 import { PulseLoader } from 'react-spinners'
-import ModalSelecionarComponente from '@/components/modal-selecionar-componente'
+import ModalSelecionarItem from '@/components/modal-selecionar-item'
 
 export default function AdicionarOrcamentoPage() {
   const router = useRouter()
@@ -23,10 +23,10 @@ export default function AdicionarOrcamentoPage() {
 
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
-  const [componentes, setComponentes] = useState<ComponenteOrcamento[]>([])
+  const [itens, setItens] = useState<ItemOrcamento[]>([])
   const [errors, setErrors] = useState<{ nome?: string }>({})
 
-  const [isComponenteModalOpen, setIsComponenteModalOpen] = useState(false)
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [isFornecedorDropdownOpen, setIsFornecedorDropdownOpen] = useState<number | null>(null)
   const [fornecedorPesquisa, setFornecedorPesquisa] = useState('')
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
@@ -112,8 +112,8 @@ export default function AdicionarOrcamentoPage() {
       return
     }
 
-    if (componentes.length === 0) {
-      toast.error('Adicione pelo menos um componente ao orçamento.', {
+    if (itens.length === 0) {
+      toast.error('Adicione pelo menos um item ao orçamento.', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -125,9 +125,9 @@ export default function AdicionarOrcamentoPage() {
       return
     }
 
-    const componentesInvalidos = componentes.filter(c => !c.componente || !c.fornecedor)
-    if (componentesInvalidos.length > 0) {
-      toast.error('Preencha todos os campos do(s) componente(s).', {
+    const itensInvalidos = itens.filter(c => !c.item || !c.fornecedor)
+    if (itensInvalidos.length > 0) {
+      toast.error('Preencha todos os campos do(s) item(ns).', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -142,8 +142,8 @@ export default function AdicionarOrcamentoPage() {
     const orcamentoData = {
       nome,
       descricao: descricao || undefined,
-      componentes: componentes.map(c => ({
-        componente: c.componente,
+      itens: itens.map(c => ({
+        item: c.item,
         fornecedor: c.fornecedor,
         quantidade: c.quantidade,
         valor_unitario: c.valor_unitario
@@ -152,33 +152,33 @@ export default function AdicionarOrcamentoPage() {
     createOrcamentoMutation.mutate(orcamentoData)
   }
 
-  const handleAdicionarComponente = () => {
-    setIsComponenteModalOpen(true)
+  const handleAdicionarItem = () => {
+    setIsItemModalOpen(true)
   }
 
-  const handleAdicionarComponentesMultiplos = (componentesSelecionados: Array<{ id: string; nome: string }>) => {
-    const novosComponentes = componentesSelecionados.map(comp => ({
-      componente: comp.id,
+  const handleAdicionarItensMultiplos = (itensSelecionados: Array<{ id: string; nome: string }>) => {
+    const novosItens = itensSelecionados.map(comp => ({
+      item: comp.id,
       nome: comp.nome,
       fornecedor: '',
       quantidade: 1,
       valor_unitario: 0,
       subtotal: 0
     }))
-    setComponentes([...componentes, ...novosComponentes])
+    setItens([...itens, ...novosItens])
   }
 
-  const handleRemoverComponente = (index: number) => {
-    const novosComponentes = componentes.filter((_, i) => i !== index)
-    setComponentes(novosComponentes)
+  const handleRemoverItem = (index: number) => {
+    const novosItens = itens.filter((_, i) => i !== index)
+    setItens(novosItens)
   }
 
 
   const handleFornecedorSelect = (index: number, fornecedorId: string, fornecedorNome: string) => {
-    const novosComponentes = [...componentes]
-    novosComponentes[index].fornecedor = fornecedorId
-    novosComponentes[index].fornecedor_nome = fornecedorNome
-    setComponentes(novosComponentes)
+    const novosItens = [...itens]
+    novosItens[index].fornecedor = fornecedorId
+    novosItens[index].fornecedor_nome = fornecedorNome
+    setItens(novosItens)
     setIsFornecedorDropdownOpen(null)
     setFornecedorPesquisa('')
     setDropdownPosition(null)
@@ -199,23 +199,23 @@ export default function AdicionarOrcamentoPage() {
   }
 
   const handleQuantidadeChange = (index: number, delta: number) => {
-    const novosComponentes = [...componentes]
-    const novaQuantidade = Math.max(1, novosComponentes[index].quantidade + delta)
-    novosComponentes[index].quantidade = novaQuantidade
-    novosComponentes[index].subtotal = novaQuantidade * novosComponentes[index].valor_unitario
-    setComponentes(novosComponentes)
+    const novosItens = [...itens]
+    const novaQuantidade = Math.max(1, novosItens[index].quantidade + delta)
+    novosItens[index].quantidade = novaQuantidade
+    novosItens[index].subtotal = novaQuantidade * novosItens[index].valor_unitario
+    setItens(novosItens)
   }
 
   const handleValorUnitarioChange = (index: number, valor: string) => {
-    const novosComponentes = [...componentes]
+    const novosItens = [...itens]
     const valorNumerico = parseFloat(valor) || 0
-    novosComponentes[index].valor_unitario = valorNumerico
-    novosComponentes[index].subtotal = novosComponentes[index].quantidade * valorNumerico
-    setComponentes(novosComponentes)
+    novosItens[index].valor_unitario = valorNumerico
+    novosItens[index].subtotal = novosItens[index].quantidade * valorNumerico
+    setItens(novosItens)
   }
 
   const calcularTotal = () => {
-    return componentes.reduce((total, comp) => total + comp.subtotal, 0)
+    return itens.reduce((total, comp) => total + comp.subtotal, 0)
   }
 
   const handleCancel = () => {
@@ -323,19 +323,19 @@ export default function AdicionarOrcamentoPage() {
                   <Label className="text-sm md:text-base font-medium text-gray-900">Itens do orçamento</Label>
                   <Button
                     type="button"
-                    onClick={handleAdicionarComponente}
+                    onClick={handleAdicionarItem}
                     className="flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm sm:text-base px-3 sm:px-4"
-                    data-test="botao-adicionar-componente"
+                    data-test="botao-adicionar-item"
                   >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Adicionar componente</span>
+                    <span className="hidden sm:inline">Adicionar item</span>
                     <span className="sm:hidden">Adicionar</span>
                   </Button>
                 </div>
 
                 {/* Tabela */}
                 <div className="border rounded-t-lg bg-white flex-1 flex flex-col overflow-hidden" data-test="tabela-itens-orcamento">
-                  {componentes.length === 0 ? (
+                  {itens.length === 0 ? (
                     <>
                       <div className="overflow-x-auto">
                         <table className="w-full caption-bottom text-xs sm:text-sm min-w-[600px]">
@@ -352,7 +352,7 @@ export default function AdicionarOrcamentoPage() {
                         </table>
                       </div>
                       <div className="flex-1 flex items-center justify-center text-gray-500 text-xs sm:text-sm">
-                        Nenhum componente adicionado.
+                        Nenhum item adicionado.
                       </div>
                     </>
                   ) : (
@@ -377,7 +377,7 @@ export default function AdicionarOrcamentoPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {componentes.map((comp, index) => (
+                        {itens.map((comp, index) => (
                           <tr key={index} className="hover:bg-gray-50 border-b">
                             {/* Nome */}
                             <td className="px-4 py-3">
@@ -430,10 +430,10 @@ export default function AdicionarOrcamentoPage() {
                                   type="number"
                                   value={comp.quantidade}
                                   onChange={(e) => {
-                                    const novosComponentes = [...componentes]
-                                    novosComponentes[index].quantidade = Math.max(1, parseInt(e.target.value) || 1)
-                                    novosComponentes[index].subtotal = novosComponentes[index].quantidade * novosComponentes[index].valor_unitario
-                                    setComponentes(novosComponentes)
+                                    const novosItens = [...itens]
+                                    novosItens[index].quantidade = Math.max(1, parseInt(e.target.value) || 1)
+                                    novosItens[index].subtotal = novosItens[index].quantidade * novosItens[index].valor_unitario
+                                    setItens(novosItens)
                                   }}
                                   className="w-16 px-2 py-1 text-center border border-gray-300 rounded-md"
                                   min="1"
@@ -474,9 +474,9 @@ export default function AdicionarOrcamentoPage() {
                               <div className="flex justify-center">
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoverComponente(index)}
+                                  onClick={() => handleRemoverItem(index)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                                  title="Remover componente"
+                                  title="Remover item"
                                   data-test="botao-remover-item"
                                 >
                                   <Trash2 className="w-5 h-5" />
@@ -534,11 +534,11 @@ export default function AdicionarOrcamentoPage() {
         transition={Slide}
       />
 
-      {/* Modal de Seleção de Componentes */}
-      <ModalSelecionarComponente
-        isOpen={isComponenteModalOpen}
-        onClose={() => setIsComponenteModalOpen(false)}
-        onSelectMultiple={handleAdicionarComponentesMultiplos}
+      {/* Modal de Seleção de Itens */}
+      <ModalSelecionarItem
+        isOpen={isItemModalOpen}
+        onClose={() => setIsItemModalOpen(false)}
+        onSelectMultiple={handleAdicionarItensMultiplos}
         multiSelect={true}
       />
 

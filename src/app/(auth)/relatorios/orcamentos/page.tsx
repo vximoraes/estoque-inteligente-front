@@ -138,7 +138,7 @@ function RelatorioOrcamentosPageContent() {
   const valorMedio = totalOrcamentos > 0 ? valorTotal / totalOrcamentos : 0;
   const maiorOrcamento = totalOrcamentos > 0 ? Math.max(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
   const menorOrcamento = totalOrcamentos > 0 ? Math.min(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
-  const totalComponentes = orcamentosFiltrados.reduce((acc, orc) => acc + (orc.componentes?.length || 0), 0);
+  const totalItens = orcamentosFiltrados.reduce((acc, orc) => acc + (orc.itens?.length || 0), 0);
 
   const handleOpenFiltrosModal = () => {
     setIsFiltrosModalOpen(true);
@@ -539,7 +539,7 @@ function RelatorioOrcamentosPageContent() {
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 font-medium" data-test="orcamento-itens">
-                          {orcamento.componentes?.length || 0}
+                          {orcamento.itens?.length || 0}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap" data-test="orcamento-valor-total">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

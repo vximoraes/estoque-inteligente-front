@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { EstoqueData } from '@/types/componentes';
+import { EstoqueData } from '@/types/itens';
 import { Orcamento } from '@/types/orcamentos';
 
 interface PDFGeneratorOptions {
@@ -10,10 +10,10 @@ interface PDFGeneratorOptions {
   userName?:string;
 }
 
-export const generateComponentesPDF = async ({
+export const generateItensPDF = async ({
   estoques,
-  fileName = 'relatorio-componentes',
-  title = 'RELATÓRIO DE COMPONENTES',
+  fileName = 'relatorio-itens',
+  title = 'RELATÓRIO DE ITENS',
   includeStats = true,
   userName = "Javascript"
 }: PDFGeneratorOptions) => {
@@ -65,10 +65,10 @@ export const generateComponentesPDF = async ({
 
   // ==================== ESTATÍSTICAS ====================
   if (includeStats) {
-    const totalComponentes = new Set(estoques.map(e => e.componente._id)).size;
-    const emEstoque = estoques.filter(e => e.componente.status === 'Em Estoque').length;
-    const baixoEstoque = estoques.filter(e => e.componente.status === 'Baixo Estoque').length;
-    const indisponiveis = estoques.filter(e => e.componente.status === 'Indisponível').length;
+    const totalItens = new Set(estoques.map(e => e.item._id)).size;
+    const emEstoque = estoques.filter(e => e.item.status === 'Em Estoque').length;
+    const baixoEstoque = estoques.filter(e => e.item.status === 'Baixo Estoque').length;
+    const indisponiveis = estoques.filter(e => e.item.status === 'Indisponível').length;
     const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
     doc.setFontSize(12);
@@ -80,7 +80,7 @@ export const generateComponentesPDF = async ({
     doc.setFont('helvetica', 'normal');
 
     const stats = [
-      `Total de Componentes Únicos: ${totalComponentes}`,
+      `Total de Itens Únicos: ${totalItens}`,
       `Total de Itens em Estoque: ${quantidadeTotal}`,
       `Em Estoque: ${emEstoque}`,
       `Baixo Estoque: ${baixoEstoque}`,
@@ -101,7 +101,7 @@ export const generateComponentesPDF = async ({
   // ==================== TABELA DE COMPONENTES ====================
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('COMPONENTES SELECIONADOS', margin, yPosition);
+  doc.text('ITENS SELECIONADOS', margin, yPosition);
   yPosition += 8;
 
   // Cabeçalho da tabela
@@ -151,14 +151,14 @@ export const generateComponentesPDF = async ({
     xPos = margin + 2;
 
     // Código (últimos 8 caracteres)
-    const codigo = estoque.componente._id.slice(-8);
+    const codigo = estoque.item._id.slice(-8);
     doc.text(codigo, xPos, yPosition);
     xPos += colWidths.codigo;
 
-    // Produto (nome do componente - truncado se necessário)
-    const nomeProduto = estoque.componente.nome.length > 40
-      ? estoque.componente.nome.substring(0, 37) + '...'
-      : estoque.componente.nome;
+    // Produto (nome do item - truncado se necessário)
+    const nomeProduto = estoque.item.nome.length > 40
+      ? estoque.item.nome.substring(0, 37) + '...'
+      : estoque.item.nome;
     doc.text(nomeProduto, xPos, yPosition);
     xPos += colWidths.produto;
 
@@ -167,7 +167,7 @@ export const generateComponentesPDF = async ({
     xPos += colWidths.quantidade;
 
     // Status com cor
-    const status = estoque.componente.status;
+    const status = estoque.item.status;
     if (status === 'Em Estoque') {
       doc.setTextColor(0, 128, 0); // Verde
     } else if (status === 'Baixo Estoque') {
@@ -299,7 +299,7 @@ export const generateOrcamentosPDF = async ({
     const valorMedio = valorTotal / totalOrcamentos;
     const maiorOrcamento = Math.max(...orcamentos.map(orc => orc.total));
     const menorOrcamento = Math.min(...orcamentos.map(orc => orc.total));
-    const totalComponentes = orcamentos.reduce((acc, orc) => acc + orc.componentes.length, 0);
+    const totalItens = orcamentos.reduce((acc, orc) => acc + orc.itens.length, 0);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -315,7 +315,7 @@ export const generateOrcamentosPDF = async ({
       `Valor Médio: R$ ${valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       `Maior Orçamento: R$ ${maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       `Menor Orçamento: R$ ${menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      `Total de Componentes: ${totalComponentes}`,
+      `Total de Itens: ${totalItens}`,
     ];
 
     stats.forEach((stat) => {
@@ -344,7 +344,7 @@ export const generateOrcamentosPDF = async ({
   const colWidths = {
     codigo: 25,
     nome: 60,
-    componentes: 25,
+    itens: 25,
     valor: 30,
     data: 30,
   };
@@ -355,7 +355,7 @@ export const generateOrcamentosPDF = async ({
   doc.text('NOME', xPos, yPosition);
   xPos += colWidths.nome;
   doc.text('ITENS', xPos, yPosition);
-  xPos += colWidths.componentes;
+  xPos += colWidths.itens;
   doc.text('VALOR TOTAL', xPos, yPosition);
   xPos += colWidths.valor;
   doc.text('DATA', xPos, yPosition);
@@ -393,9 +393,9 @@ export const generateOrcamentosPDF = async ({
     doc.text(nomeOrcamento, xPos, yPosition);
     xPos += colWidths.nome;
 
-    // Número de componentes
-    doc.text(orcamento.componentes.length.toString(), xPos, yPosition);
-    xPos += colWidths.componentes;
+    // Número de itens
+    doc.text(orcamento.itens.length.toString(), xPos, yPosition);
+    xPos += colWidths.itens;
 
     // Valor total
     doc.setTextColor(0, 100, 0); // Verde para valor
@@ -461,7 +461,7 @@ export const generateOrcamentosPDF = async ({
 
 interface Movimentacao {
   _id: string;
-  componente?: { _id?: string; nome?: string };
+  item?: { _id?: string; nome?: string };
   quantidade?: number;
   tipo?: string;
   localizacao?: { nome?: string };
@@ -616,12 +616,12 @@ export const generateMovimentacoesPDF = async ({
     xPos = margin + 2;
 
     // Código (últimos 8 caracteres)
-    const codigo = mov.componente?._id?.slice(-8) || mov._id?.slice(-8) || '-';
+    const codigo = mov.item?._id?.slice(-8) || mov._id?.slice(-8) || '-';
     doc.text(codigo, xPos, yPosition);
     xPos += colWidths.codigo;
 
-    // Produto (nome do componente - truncado se necessário)
-    const nomeProduto = mov.componente?.nome || '-';
+    // Produto (nome do item - truncado se necessário)
+    const nomeProduto = mov.item?.nome || '-';
     const produtoTrunc = nomeProduto.length > 30
       ? nomeProduto.substring(0, 27) + '...'
       : nomeProduto;

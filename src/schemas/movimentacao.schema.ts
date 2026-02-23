@@ -4,9 +4,9 @@ export const movimentacaoSchema = z.object({
   tipo: z.enum(['entrada', 'saida'], {
     message: 'Tipo deve ser "entrada" ou "saida"',
   }),
-  componente: z
+  item: z
     .string()
-    .min(1, 'O componente é obrigatório'),
+    .min(1, 'O item é obrigatório'),
   quantidade: z
     .number()
     .min(1, 'A quantidade deve ser no mínimo 1')

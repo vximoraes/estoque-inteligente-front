@@ -169,10 +169,10 @@ export default function ModalDetalhesOrcamento({
           ) : orcamento ? (
             <div className="space-y-4 text-left">
               {/* Componentes */}
-              {orcamento.componentes && orcamento.componentes.length > 0 && (
+              {orcamento.itens && orcamento.itens.length > 0 && (
                 <div>
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
-                    Componentes ({orcamento.componentes.length})
+                    Componentes ({orcamento.itens.length})
                   </label>
                   <div className="border rounded-lg overflow-x-auto" data-test="modal-detalhes-tabela">
                     <table className="w-full text-sm">
@@ -185,7 +185,7 @@ export default function ModalDetalhesOrcamento({
                         </tr>
                       </thead>
                       <tbody>
-                        {orcamento.componentes.map((comp, index) => (
+                        {orcamento.itens.map((comp, index) => (
                           <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
                             <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
                               <div className="text-sm font-semibold text-gray-900 truncate" title={comp.nome || '-'}>

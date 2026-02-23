@@ -1,4 +1,4 @@
-export interface ComponenteEletronicoData {
+export interface ItemEstoqueData {
   _id: string;
   nome: string;
   quantidade: number;
@@ -28,7 +28,7 @@ export interface Localizacao {
 export interface EstoqueData {
   _id: string;
   localizacao: Localizacao;
-  componente: {
+  item: {
     _id: string;
     nome: string;
     quantidade: number;
@@ -72,7 +72,7 @@ export interface ApiResponse {
   code: number;
   message: string;
   data: {
-    docs: ComponenteEletronicoData[];
+    docs: ItemEstoqueData[];
     totalDocs: number;
     limit: number;
     totalPages: number;

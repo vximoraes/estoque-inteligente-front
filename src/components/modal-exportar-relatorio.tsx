@@ -15,7 +15,7 @@ export default function ModalExportarRelatorio({
   onClose,
   onExport,
 }: ModalExportarRelatorioProps) {
-  const [fileName, setFileName] = useState('relatorio-componentes');
+  const [fileName, setFileName] = useState('relatorio-itens');
   const [format, setFormat] = useState('pdf');
 
   if (!isOpen) return null;

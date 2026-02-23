@@ -8,7 +8,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Estoque Inteligente",
-  description: "Sistema de gerenciamento inteligente de componentes eletrônicos",
+  description: "Sistema de gerenciamento inteligente de estoque",
   icons: {
     icon: "/ei.png",
     shortcut: "/ei.png",

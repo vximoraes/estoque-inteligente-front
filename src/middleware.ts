@@ -12,7 +12,7 @@ export default withAuth(
     const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
 
     if (isPublicRoute && isAuth) {
-      return NextResponse.redirect(new URL("/componentes", req.url));
+      return NextResponse.redirect(new URL("/itens", req.url));
     }
 
     if (!isPublicRoute && !isAuth) {

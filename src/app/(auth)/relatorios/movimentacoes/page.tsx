@@ -124,8 +124,8 @@ function RelatorioMovimentacoesPageContent() {
 
       const matchSearch =
         !searchTerm ||
-        mov.componente?._id?.toLowerCase().includes(texto) ||
-        mov.componente?.nome?.toLowerCase().includes(texto) ||
+        mov.item?._id?.toLowerCase().includes(texto) ||
+        mov.item?.nome?.toLowerCase().includes(texto) ||
         mov.localizacao?.nome?.toLowerCase().includes(texto) ||
         mov.tipo?.toLowerCase().includes(texto) ||
         String(mov.quantidade).includes(searchTerm) ||
@@ -469,9 +469,9 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <span
                             className="truncate block max-w-[200px]"
-                            title={mov.componente?._id || mov._id}
+                            title={mov.item?._id || mov._id}
                           >
-                            {mov.componente?._id?.slice(-8) ||
+                            {mov.item?._id?.slice(-8) ||
                               mov._id?.slice(-8) ||
                               "—"}
                           </span>
@@ -483,9 +483,9 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <span
                             className="truncate block max-w-[200px]"
-                            title={mov.componente?.nome || "Sem nome"}
+                            title={mov.item?.nome || "Sem nome"}
                           >
-                            {mov.componente?.nome || "Sem nome"}
+                            {mov.item?.nome || "Sem nome"}
                           </span>
                         </TableCell>
 

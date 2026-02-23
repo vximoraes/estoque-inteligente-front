@@ -126,7 +126,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
       });
     });
 
-    it('Deve exibir tabela de componentes', () => {
+    it('Deve exibir tabela de itens', () => {
       cy.get('body').then($body => {
         if ($body.find('[data-test="orcamentos-table"] tbody tr').length > 0) {
           cy.getByData("orcamentos-table").within(() => {
@@ -163,7 +163,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
       });
     });
 
-    it('Deve listar todos os componentes do orçamento', () => {
+    it('Deve listar todos os itens do orçamento', () => {
       if (!primeiroOrcamento || !primeiroOrcamento.itens) {
         cy.log('Orçamento sem itens disponível para teste');
         return;
@@ -302,7 +302,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
   });
 
   describe('Informações dos Componentes', () => {
-    it('Deve exibir nome do componente', () => {
+    it('Deve exibir nome do item', () => {
       if (!primeiroOrcamento || !primeiroOrcamento.itens || primeiroOrcamento.itens.length === 0) {
         cy.log('Orçamento sem itens disponível para teste');
         return;
@@ -323,7 +323,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
       });
     });
 
-    it('Deve exibir quantidade do componente', () => {
+    it('Deve exibir quantidade do item', () => {
       if (!primeiroOrcamento || !primeiroOrcamento.itens || primeiroOrcamento.itens.length === 0) {
         cy.log('Orçamento sem itens disponível para teste');
         return;

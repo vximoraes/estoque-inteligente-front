@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: componentes-eletronicos-front
+  name: estoque-inteligente-front
 spec:
   selector:
     matchLabels:
-      app: componentes-eletronicos-front
+      app: estoque-inteligente-front
   template:
     metadata:
       labels:
-        app: componentes-eletronicos-front
+        app: estoque-inteligente-front
     spec:
       containers:
-      - name: componentes-eletronicos-front
-        image: vximoraes/componentes-eletronicos-front:latest
+      - name: estoque-inteligente-front
+        image: vximoraes/estoque-inteligente-front:latest
         resources: {}
         ports:
         - containerPort: 3000
@@ -21,10 +21,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: componentes-eletronicos
+  name: estoque-inteligente
 spec:
   selector:
-    app: componentes-eletronicos-front
+    app: estoque-inteligente-front
   type: ClusterIP
   ports:
   - port: 80

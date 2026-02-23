@@ -45,7 +45,7 @@ interface EstoqueData {
     _id: string;
     nome: string;
   };
-  componente: string;
+  item: string;
   quantidade: number;
 }
 
@@ -61,25 +61,25 @@ interface EstoqueApiResponse {
 interface MovimentacaoRequest {
   tipo: 'saida';
   quantidade: string;
-  componente: string;
+  item: string;
   localizacao: string;
 }
 
-interface ModalSaidaComponenteProps {
+interface ModalSaidaItemProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
+  itemId: string;
+  itemNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalSaidaComponente({
+export default function ModalSaidaItem({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
+  itemId,
+  itemNome,
   onSuccess
-}: ModalSaidaComponenteProps) {
+}: ModalSaidaItemProps) {
   const queryClient = useQueryClient();
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
@@ -110,13 +110,13 @@ export default function ModalSaidaComponente({
   });
 
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', componenteId],
+    queryKey: ['estoques', itemId],
     queryFn: async () => {
       return await get<EstoqueApiResponse>(
-        `/estoques/componente/${componenteId}`
+        `/estoques/item/${itemId}`
       );
     },
-    enabled: isOpen && !!componenteId,
+    enabled: isOpen && !!itemId,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -131,11 +131,11 @@ export default function ModalSaidaComponente({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['componentes']
+        queryKey: ['itens']
       });
 
       queryClient.removeQueries({
-        queryKey: ['estoques', componenteId]
+        queryKey: ['estoques', itemId]
       });
 
       setQuantidade('');
@@ -324,8 +324,8 @@ export default function ModalSaidaComponente({
       return;
     }
 
-    if (!componenteId) {
-      setErrors({ ...errors, quantidade: 'ID do componente não encontrado' });
+    if (!itemId) {
+      setErrors({ ...errors, quantidade: 'ID do item não encontrado' });
       return;
     }
 
@@ -342,7 +342,7 @@ export default function ModalSaidaComponente({
     const movimentacaoData: MovimentacaoRequest = {
       tipo: 'saida',
       quantidade: quantidade.trim(),
-      componente: componenteId.trim(),
+      item: itemId.trim(),
       localizacao: localizacaoSelecionada.trim(),
     };
 
@@ -382,7 +382,7 @@ export default function ModalSaidaComponente({
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
               <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words" data-test="modal-saida-titulo">
-                Registrar saída de {componenteNome}
+                Registrar saída de {itemNome}
               </h2>
             </div>
           </div>

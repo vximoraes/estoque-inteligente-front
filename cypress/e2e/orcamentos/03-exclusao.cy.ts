@@ -18,13 +18,13 @@ describe('Orçamentos - Exclusão', () => {
 
       cy.request({
         method: 'GET',
-        url: `${apiUrl}/componentes?limit=1`,
+        url: `${apiUrl}/itens?limit=1`,
         headers: { Authorization: `Bearer ${authToken}` },
         timeout: 30000
       }).then((compResponse) => {
-        const componentes = compResponse.body?.data?.docs || [];
+        const itens = compResponse.body?.data?.docs || [];
         
-        if (componentes.length > 0) {
+        if (itens.length > 0) {
           cy.request({
             method: 'GET',
             url: `${apiUrl}/fornecedores?limit=1`,
@@ -43,9 +43,9 @@ describe('Orçamentos - Exclusão', () => {
                 body: {
                   nome: nomeOrcamento,
                   descricao: 'Este orçamento será excluído nos testes',
-                  componentes: [
+                  itens: [
                     {
-                      componente: componentes[0]._id,
+                      item: itens[0]._id,
                       fornecedor: fornecedores[0]._id,
                       quantidade: 5,
                       valor_unitario: 10.00

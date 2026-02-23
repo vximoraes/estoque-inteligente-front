@@ -68,7 +68,7 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
   return (
     <>
       <SidebarMenuButton
-        className={"text-[17px] pl-[20px] h-[50px] w-[250px] componentes cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group " + (isRouter ? (isRouter + " hover:bg-[rgba(255,255,255,1)]! shadow-md ") : "hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!")}
+        className={"text-[17px] pl-[20px] h-[50px] w-[250px] itens cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group " + (isRouter ? (isRouter + " hover:bg-[rgba(255,255,255,1)]! shadow-md ") : "hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!")}
         onClick={() => trocarPagina()}
         data-test={dataTest || "sidebar-menu-button"}
       >

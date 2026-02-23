@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const componenteSchema = z.object({
+export const itemSchema = z.object({
   nome: z
     .string()
     .min(1, 'O campo nome é obrigatório')
@@ -20,12 +20,12 @@ export const componenteSchema = z.object({
     .optional(),
 });
 
-export type ComponenteFormData = z.infer<typeof componenteSchema>;
+export type ItemFormData = z.infer<typeof itemSchema>;
 
 
-export const componenteUpdateSchema = componenteSchema.partial();
+export const itemUpdateSchema = itemSchema.partial();
 
-export type ComponenteUpdateFormData = z.infer<typeof componenteUpdateSchema>;
+export type ItemUpdateFormData = z.infer<typeof itemUpdateSchema>;
 
 
 export const categoriaSchema = z.object({

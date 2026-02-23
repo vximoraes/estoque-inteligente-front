@@ -6,7 +6,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   let orcamentoIdCriado: string;
   let authToken: string;
-  let componentesTeste: any[] = [];
+  let itensTeste: any[] = [];
   let fornecedoresTeste: any[] = [];
 
   before(() => {
@@ -20,11 +20,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.request({
         method: 'GET',
-        url: `${apiUrl}/componentes?limit=5`,
+        url: `${apiUrl}/itens?limit=5`,
         headers: { Authorization: `Bearer ${authToken}` }
       }).then((compResponse) => {
         expect(compResponse.status).to.eq(200);
-        componentesTeste = compResponse.body.data.docs || [];
+        itensTeste = compResponse.body.data.docs || [];
       });
 
       cy.request({
@@ -43,7 +43,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     cy.intercept('POST', `${apiUrl}/orcamentos`).as('createOrcamento');
     cy.intercept('PUT', `${apiUrl}/orcamentos/*`).as('updateOrcamento');
     cy.intercept('PATCH', `${apiUrl}/orcamentos/*`).as('patchOrcamento');
-    cy.intercept('GET', `${apiUrl}/componentes*`).as('getComponentes');
+    cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
     cy.intercept('GET', `${apiUrl}/fornecedores*`).as('getFornecedores');
 
     cy.login(email, senha);
@@ -68,7 +68,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
     it('Deve exibir todos os campos obrigatórios do formulário', () => {
       cy.contains('Nome').should('be.visible');
-      cy.getByData("botao-adicionar-componente").should('be.visible');
+      cy.getByData("botao-adicionar-item").should('be.visible');
       cy.contains('button', 'Salvar').should('be.visible');
     });
 
@@ -108,7 +108,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve validar que pelo menos um componente é obrigatório', () => {
+    it('Deve validar que pelo menos um item é obrigatório', () => {
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
 
       cy.get('#nome').type(nomeOrcamento);
@@ -124,93 +124,93 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
     });
 
-    it('Deve abrir modal de seleção ao clicar em Adicionar componente', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve abrir modal de seleção ao clicar em Adicionar item', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
 
-      cy.getByData("modal-selecionar-componentes").should('be.visible');
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.contains(/selecionar componentes|adicionar componentes/i).should('be.visible');
+      cy.getByData("modal-selecionar-itens").should('be.visible');
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.contains(/selecionar itens|adicionar itens/i).should('be.visible');
       });
     });
 
-    it('Modal deve ter campo de pesquisa para filtrar componentes', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Modal deve ter campo de pesquisa para filtrar itens', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
+      cy.getByData("modal-selecionar-itens").within(() => {
         cy.getByData("modal-search-input").should('be.visible');
       });
     });
 
-    it('Deve exibir componentes em grid de cards', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve exibir itens em grid de cards', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componentes-grid").should('be.visible');
-        cy.get('[data-test^="componente-selecao-card-"]').should('have.length.at.least', 1);
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("itens-grid").should('be.visible');
+        cy.get('[data-test^="item-selecao-card-"]').should('have.length.at.least', 1);
       });
     });
 
-    it('Deve permitir seleção múltipla de componentes', () => {
-      if (componentesTeste.length < 2) {
+    it('Deve permitir seleção múltipla de itens', () => {
+      if (itensTeste.length < 2) {
         cy.log('Componentes insuficientes para teste de seleção múltipla');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
-        cy.getByData("componente-selecao-card-1").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
+        cy.getByData("item-selecao-card-1").click();
 
         cy.getByData("contador-selecionados").should('contain', '2');
       });
     });
 
-    it('Deve exibir indicador visual de componente selecionado', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve exibir indicador visual de item selecionado', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
-        cy.getByData("componente-selecao-card-0")
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
+        cy.getByData("item-selecao-card-0")
           .find('[data-test="check-icon"], svg, .check-icon')
           .should('exist');
       });
     });
 
-    it('Deve adicionar componentes selecionados à tabela', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve adicionar itens selecionados à tabela', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -220,42 +220,42 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve pesquisar componentes por nome no modal', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve pesquisar itens por nome no modal', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.intercept('GET', '**/componentes*').as('searchComponentes');
-        cy.getByData("modal-search-input").type(componentesTeste[0].nome);
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.intercept('GET', '**/itens*').as('searchComponentes');
+        cy.getByData("modal-search-input").type(itensTeste[0].nome);
         cy.wait('@searchComponentes');
-        cy.contains(componentesTeste[0].nome).should('be.visible');
+        cy.contains(itensTeste[0].nome).should('be.visible');
       });
     });
   });
 
   describe('Seleção de Fornecedor', () => {
     beforeEach(() => {
-      if (componentesTeste.length === 0 || fornecedoresTeste.length === 0) {
+      if (itensTeste.length === 0 || fornecedoresTeste.length === 0) {
         cy.log('Componentes ou fornecedores insuficientes para teste');
         return;
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
     });
 
-    it('Deve exibir dropdown de fornecedor para cada componente', () => {
+    it('Deve exibir dropdown de fornecedor para cada item', () => {
       cy.getByData("tabela-itens-orcamento").within(() => {
         cy.get('tbody tr').first().within(() => {
           cy.getByData("select-fornecedor").should('exist');
@@ -345,17 +345,17 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   describe('Quantidade do Componente', () => {
     beforeEach(() => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
     });
@@ -456,17 +456,17 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   describe('Valor Unitário', () => {
     beforeEach(() => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
     });
@@ -522,22 +522,22 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   describe('Remover Componente', () => {
     beforeEach(() => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
     });
 
-    it('Deve ter botão de remoção (lixeira) para cada componente', () => {
+    it('Deve ter botão de remoção (lixeira) para cada item', () => {
       cy.getByData("tabela-itens-orcamento").within(() => {
         cy.get('tbody tr').first().within(() => {
           cy.getByData("botao-remover-item").should('exist');
@@ -545,7 +545,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve remover componente ao clicar no botão', () => {
+    it('Deve remover item ao clicar no botão', () => {
       cy.getByData("tabela-itens-orcamento").within(() => {
         cy.get('tbody tr').should('have.length', 1);
         cy.get('tbody tr').first().within(() => {
@@ -558,12 +558,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Total deve ser recalculado após remover componente', () => {
-      cy.getByData("botao-adicionar-componente").click();
+    it('Total deve ser recalculado após remover item', () => {
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-1").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-1").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -587,14 +587,14 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.getByData("total-orcamento").should('contain', '20');
     });
 
-    it('Deve exibir mensagem quando não há componentes', () => {
+    it('Deve exibir mensagem quando não há itens', () => {
       cy.getByData("tabela-itens-orcamento").within(() => {
         cy.get('tbody tr').first().within(() => {
           cy.getByData("botao-remover-item").click();
         });
       });
 
-      cy.contains(/nenhum componente adicionado/i).should('be.visible');
+      cy.contains(/nenhum item adicionado/i).should('be.visible');
     });
   });
 
@@ -609,7 +609,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.url().should('include', '/adicionar');
     });
 
-    it('Deve validar que pelo menos um componente é necessário', () => {
+    it('Deve validar que pelo menos um item é necessário', () => {
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
       cy.get('#nome').type(nomeOrcamento);
       cy.contains('button', 'Salvar').click();
@@ -617,20 +617,20 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.url().should('include', '/adicionar');
     });
 
-    it('Deve validar que todos componentes têm fornecedor', () => {
-      if (componentesTeste.length === 0) {
-        cy.log('Nenhum componente disponível para teste');
+    it('Deve validar que todos itens têm fornecedor', () => {
+      if (itensTeste.length === 0) {
+        cy.log('Nenhum item disponível para teste');
         return;
       }
 
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
       cy.get('#nome').type(nomeOrcamento);
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -640,7 +640,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     });
 
     it('Deve desabilitar botão Salvar durante processamento', () => {
-      if (componentesTeste.length === 0 || fornecedoresTeste.length === 0) {
+      if (itensTeste.length === 0 || fornecedoresTeste.length === 0) {
         cy.log('Componentes ou fornecedores insuficientes para teste');
         return;
       }
@@ -648,11 +648,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
       cy.get('#nome').type(nomeOrcamento);
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -685,7 +685,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     });
 
     it('Deve criar orçamento com sucesso', () => {
-      if (componentesTeste.length === 0 || fornecedoresTeste.length === 0) {
+      if (itensTeste.length === 0 || fornecedoresTeste.length === 0) {
         cy.log('Componentes ou fornecedores insuficientes para teste');
         return;
       }
@@ -694,11 +694,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.get('#nome').type(nomeOrcamento);
       cy.get('#descricao').type('Descrição do orçamento de teste');
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -789,8 +789,8 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.url().should('include', '/editar');
     });
 
-    it('Deve permitir adicionar novos componentes', () => {
-      if (!primeiroOrcamento || componentesTeste.length === 0) return;
+    it('Deve permitir adicionar novos itens', () => {
+      if (!primeiroOrcamento || itensTeste.length === 0) return;
 
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
 
@@ -802,11 +802,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
         });
       });
 
-      cy.getByData("botao-adicionar-componente").click();
+      cy.getByData("botao-adicionar-item").click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-componentes").within(() => {
-        cy.getByData("componente-selecao-card-0").click();
+      cy.getByData("modal-selecionar-itens").within(() => {
+        cy.getByData("item-selecao-card-0").click();
         cy.getByData("botao-confirmar-selecao").click();
       });
 
@@ -817,7 +817,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve permitir remover componentes existentes', () => {
+    it('Deve permitir remover itens existentes', () => {
       if (!primeiroOrcamento || !primeiroOrcamento.itens || primeiroOrcamento.itens.length === 0) return;
 
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);

@@ -1,4 +1,4 @@
-import { EstoqueData } from '@/types/componentes';
+import { EstoqueData } from '@/types/itens';
 import { Orcamento } from '@/types/orcamentos';
 
 interface CSVGeneratorOptions {
@@ -7,29 +7,29 @@ interface CSVGeneratorOptions {
   includeStats?: boolean;
 }
 
-export const generateComponentesCSV = ({
+export const generateItensCSV = ({
   estoques,
-  fileName = 'relatorio-componentes',
+  fileName = 'relatorio-itens',
   includeStats = true,
 }: CSVGeneratorOptions) => {
   // Preparar dados
   const lines: string[] = [];
 
   // ==================== CABEÇALHO ====================
-  lines.push('RELATÓRIO DE COMPONENTES');
+  lines.push('RELATÓRIO DE ITENS');
   lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
   lines.push('');
 
   // ==================== ESTATÍSTICAS ====================
   if (includeStats && estoques.length > 0) {
-    const totalComponentes = new Set(estoques.map(e => e.componente._id)).size;
-    const emEstoque = estoques.filter(e => e.componente.status === 'Em Estoque').length;
-    const baixoEstoque = estoques.filter(e => e.componente.status === 'Baixo Estoque').length;
-    const indisponiveis = estoques.filter(e => e.componente.status === 'Indisponível').length;
+    const totalItens = new Set(estoques.map(e => e.item._id)).size;
+    const emEstoque = estoques.filter(e => e.item.status === 'Em Estoque').length;
+    const baixoEstoque = estoques.filter(e => e.item.status === 'Baixo Estoque').length;
+    const indisponiveis = estoques.filter(e => e.item.status === 'Indisponível').length;
     const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
     lines.push('RESUMO ESTATÍSTICO');
-    lines.push(`Total de Componentes Únicos,${totalComponentes}`);
+    lines.push(`Total de Itens Únicos,${totalItens}`);
     lines.push(`Total de Itens em Estoque,${quantidadeTotal}`);
     lines.push(`Em Estoque,${emEstoque}`);
     lines.push(`Baixo Estoque,${baixoEstoque}`);
@@ -38,7 +38,7 @@ export const generateComponentesCSV = ({
   }
 
   // ==================== TABELA DE COMPONENTES ====================
-  lines.push('COMPONENTES SELECIONADOS');
+  lines.push('ITENS SELECIONADOS');
   
   // Cabeçalho da tabela
   const headers = [
@@ -59,27 +59,27 @@ export const generateComponentesCSV = ({
   estoques.forEach((estoque) => {
     const row = [
       // Código completo
-      `"${estoque.componente._id}"`,
+      `"${estoque.item._id}"`,
       
       // Nome do produto (escapar vírgulas e aspas)
-      `"${escapeCSV(estoque.componente.nome)}"`,
+      `"${escapeCSV(estoque.item.nome)}"`,
       
       // Descrição
-      `"${escapeCSV(estoque.componente.descricao || '-')}"`,
+      `"${escapeCSV(estoque.item.descricao || '-')}"`,
       
       // Categoria (se for string, usar diretamente, se for objeto, pegar o ID)
-      `"${typeof estoque.componente.categoria === 'string' 
-        ? estoque.componente.categoria 
-        : estoque.componente.categoria}"`,
+      `"${typeof estoque.item.categoria === 'string' 
+        ? estoque.item.categoria 
+        : estoque.item.categoria}"`,
       
       // Quantidade
       estoque.quantidade.toString(),
       
       // Estoque mínimo
-      estoque.componente.estoque_minimo.toString(),
+      estoque.item.estoque_minimo.toString(),
       
       // Status
-      `"${estoque.componente.status}"`,
+      `"${estoque.item.status}"`,
       
       // Localização
       `"${escapeCSV(estoque.localizacao.nome)}"`,
@@ -177,7 +177,7 @@ export const generateOrcamentosCSV = ({
     const valorMedio = valorTotal / totalOrcamentos;
     const maiorOrcamento = Math.max(...orcamentos.map(orc => orc.total));
     const menorOrcamento = Math.min(...orcamentos.map(orc => orc.total));
-    const totalComponentes = orcamentos.reduce((acc, orc) => acc + orc.componentes.length, 0);
+    const totalItens = orcamentos.reduce((acc, orc) => acc + orc.itens.length, 0);
 
     lines.push('RESUMO ESTATÍSTICO');
     lines.push(`Total de Orçamentos,${totalOrcamentos}`);
@@ -185,7 +185,7 @@ export const generateOrcamentosCSV = ({
     lines.push(`Valor Médio,R$ ${valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
     lines.push(`Maior Orçamento,R$ ${maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
     lines.push(`Menor Orçamento,R$ ${menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-    lines.push(`Total de Componentes,${totalComponentes}`);
+    lines.push(`Total de Itens,${totalItens}`);
     lines.push('');
   }
 
@@ -217,7 +217,7 @@ export const generateOrcamentosCSV = ({
       `"${escapeCSV(orcamento.descricao || '-')}"`,
       
       // Quantidade de itens
-      orcamento.componentes.length.toString(),
+      orcamento.itens.length.toString(),
       
       // Valor total formatado
       `"R$ ${orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"`,
@@ -297,8 +297,8 @@ export const generateMovimentacoesCSV = ({
   lines.push(headers.join(','));
 
   movimentacoes.forEach((mov) => {
-    const codigo = mov.componente?._id || mov._id || '-';
-    const produto = mov.componente?.nome ? escapeCSV(mov.componente.nome) : '-';
+    const codigo = mov.item?._id || mov._id || '-';
+    const produto = mov.item?.nome ? escapeCSV(mov.item.nome) : '-';
     const quantidade = (mov.quantidade ?? 0).toString();
     const tipo = mov.tipo || '-';
     const local = mov.localizacao?.nome ? escapeCSV(mov.localizacao.nome) : '-';

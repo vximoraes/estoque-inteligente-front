@@ -5,40 +5,40 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
-    cy.intercept('GET', `${apiUrl}/componentes*`).as('getComponentes');
+    cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
     cy.intercept('GET', `${apiUrl}/localizacoes*`).as('getLocalizacoes');
     cy.intercept('POST', `${apiUrl}/movimentacoes`).as('createMovimentacao');
-    cy.intercept('GET', `${apiUrl}/estoques/componente/*`).as('getEstoquesComponente');
+    cy.intercept('GET', `${apiUrl}/estoques/item/*`).as('getEstoquesComponente');
     
     cy.login(email, senha);
-    cy.visit(`${frontendUrl}/componentes`);
+    cy.visit(`${frontendUrl}/itens`);
     cy.wait('@getComponentes');
   });
 
   describe('Entrada de Componente', () => {
     it('Deve abrir modal de entrada ao clicar em Entrada', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componente = componentes[0];
+        if (itens.length > 0) {
+          const item = itens[0];
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
           cy.getByData('modal-entrada').should('be.visible');
-          cy.getByData('modal-entrada-titulo').should('contain', componente.nome);
+          cy.getByData('modal-entrada-titulo').should('contain', item.nome);
         }
       });
     });
 
     it('Deve exibir campos obrigatórios no modal de entrada', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -50,10 +50,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve carregar localizações no dropdown', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -68,10 +68,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve validar localização obrigatória', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -89,10 +89,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve validar quantidade obrigatória e maior que 0', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -116,10 +116,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve validar quantidade máxima de 999.999.999', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -134,13 +134,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve registrar entrada com sucesso', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componente = componentes[0];
-          const quantidadeInicial = componente.quantidade;
+        if (itens.length > 0) {
+          const item = itens[0];
+          const quantidadeInicial = item.quantidade;
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -165,16 +165,16 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
       });
     });
 
-    it('Deve atualizar quantidade total do componente após entrada', () => {
+    it('Deve atualizar quantidade total do item após entrada', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componente = componentes[0];
-          const quantidadeInicial = componente.quantidade;
+        if (itens.length > 0) {
+          const item = itens[0];
+          const quantidadeInicial = item.quantidade;
           const quantidadeEntrada = 3;
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -192,7 +192,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               cy.wait('@getComponentes', { timeout: 10000 });
 
               cy.wait(1000);
-              cy.getByData('componente-card-0').within(() => {
+              cy.getByData('item-card-0').within(() => {
                 const novaQuantidade = quantidadeInicial + quantidadeEntrada;
                 cy.contains(novaQuantidade.toString()).should('be.visible');
               });
@@ -204,10 +204,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve exibir loading no card durante atualização', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -221,7 +221,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               cy.getByData('modal-entrada-quantidade-input').clear().type('5');
               cy.getByData('modal-entrada-confirmar').click();
 
-              cy.getByData('componente-card-0').should('exist');
+              cy.getByData('item-card-0').should('exist');
             }
           });
         }
@@ -230,14 +230,14 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve recalcular status após entrada (Indisponível → Baixo Estoque ou Em Estoque)', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteIndisponivel = componentes.find((c: any) => c.status === 'Indisponível');
+        const itemIndisponivel = itens.find((c: any) => c.status === 'Indisponível');
 
-        if (componenteIndisponivel) {
-          const index = componentes.indexOf(componenteIndisponivel);
+        if (itemIndisponivel) {
+          const index = itens.indexOf(itemIndisponivel);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -255,7 +255,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               cy.wait('@getComponentes', { timeout: 10000 });
 
               cy.wait(1000);
-              cy.getByData(`componente-card-${index}`).within(() => {
+              cy.getByData(`item-card-${index}`).within(() => {
                 cy.contains(/baixo estoque|em estoque/i).should('be.visible');
               });
             }
@@ -267,13 +267,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     it('Deve atualizar estatísticas após entrada', () => {
       cy.wait('@getComponentes').then((interception) => {
         const statsAntes = interception.response?.body?.stats;
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componenteIndisponivel = componentes.find((c: any) => c.status === 'Indisponível');
-          const index = componenteIndisponivel ? componentes.indexOf(componenteIndisponivel) : 0;
+        if (itens.length > 0) {
+          const itemIndisponivel = itens.find((c: any) => c.status === 'Indisponível');
+          const index = itemIndisponivel ? itens.indexOf(itemIndisponivel) : 0;
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('entrada-icon').click();
           });
 
@@ -291,7 +291,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               cy.wait('@getComponentes', { timeout: 10000 }).then((novaInterception) => {
                 const statsDepois = novaInterception.response?.body?.stats;
 
-                if (statsAntes && statsDepois && componenteIndisponivel) {
+                if (statsAntes && statsDepois && itemIndisponivel) {
                   expect(statsDepois.indisponiveis).to.be.lessThan(statsAntes.indisponiveis);
                 }
               });
@@ -305,35 +305,35 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
   describe('Saída de Componente', () => {
     it('Deve abrir modal de saída ao clicar em Saída', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade > 0);
+        const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
           cy.getByData('modal-saida').should('be.visible');
           cy.getByData('modal-saida-titulo').should('be.visible');
         } else {
-          cy.log('Nenhum componente com estoque disponível para teste de saída');
+          cy.log('Nenhum item com estoque disponível para teste de saída');
         }
       });
     });
 
     it('Deve carregar apenas localizações com estoque disponível', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade > 0);
+        const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
@@ -348,14 +348,14 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve validar estoque suficiente antes de permitir saída', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade > 0);
+        const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
@@ -383,14 +383,14 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve registrar saída com sucesso', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade >= 5);
+        const itemComEstoque = itens.find((c: any) => c.quantidade >= 5);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
@@ -421,16 +421,16 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve diminuir quantidade total após saída', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade >= 5);
+        const itemComEstoque = itens.find((c: any) => c.quantidade >= 5);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
-          const quantidadeInicial = componenteComEstoque.quantidade;
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
+          const quantidadeInicial = itemComEstoque.quantidade;
           const quantidadeSaida = 2;
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
@@ -450,7 +450,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               cy.wait('@getComponentes', { timeout: 10000 });
 
               cy.wait(1000);
-              cy.getByData(`componente-card-${index}`).within(() => {
+              cy.getByData(`item-card-${index}`).within(() => {
                 const novaQuantidade = quantidadeInicial - quantidadeSaida;
                 cy.contains(novaQuantidade.toString()).should('be.visible');
               });
@@ -462,16 +462,16 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Deve recalcular status após saída (Em Estoque → Baixo Estoque ou Indisponível)', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteEmEstoque = componentes.find((c: any) =>
+        const itemEmEstoque = itens.find((c: any) =>
           c.status === 'Em Estoque' && c.quantidade <= c.estoque_minimo + 5
         );
 
-        if (componenteEmEstoque) {
-          const index = componentes.indexOf(componenteEmEstoque);
+        if (itemEmEstoque) {
+          const index = itens.indexOf(itemEmEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 
@@ -500,14 +500,14 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
     it('Não deve permitir saída maior que estoque disponível', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        const componenteComEstoque = componentes.find((c: any) => c.quantidade > 0);
+        const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
 
-        if (componenteComEstoque) {
-          const index = componentes.indexOf(componenteComEstoque);
+        if (itemComEstoque) {
+          const index = itens.indexOf(itemComEstoque);
 
-          cy.getByData(`componente-card-${index}`).within(() => {
+          cy.getByData(`item-card-${index}`).within(() => {
             cy.getByData('saida-icon').click();
           });
 

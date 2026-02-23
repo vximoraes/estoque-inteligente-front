@@ -39,7 +39,7 @@ interface LocalizacoesApiResponse {
 interface MovimentacaoRequest {
   tipo: 'entrada';
   quantidade: string;
-  componente: string;
+  item: string;
   localizacao: string;
 }
 
@@ -49,21 +49,21 @@ interface EstoqueApiResponse {
   };
 }
 
-interface ModalEntradaComponenteProps {
+interface ModalEntradaItemProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
+  itemId: string;
+  itemNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalEntradaComponente({
+export default function ModalEntradaItem({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
+  itemId,
+  itemNome,
   onSuccess
-}: ModalEntradaComponenteProps) {
+}: ModalEntradaItemProps) {
   const queryClient = useQueryClient();
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
@@ -96,11 +96,11 @@ export default function ModalEntradaComponente({
   });
 
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', componenteId],
+    queryKey: ['estoques', itemId],
     queryFn: async () => {
-      return await get<EstoqueApiResponse>(`/estoques/componente/${componenteId}`);
+      return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
     },
-    enabled: isOpen && !!componenteId,
+    enabled: isOpen && !!itemId,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -137,11 +137,11 @@ export default function ModalEntradaComponente({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['componentes']
+        queryKey: ['itens']
       });
 
       queryClient.removeQueries({
-        queryKey: ['estoques', componenteId]
+        queryKey: ['estoques', itemId]
       });
 
       setQuantidade('');
@@ -336,8 +336,8 @@ export default function ModalEntradaComponente({
       return;
     }
 
-    if (!componenteId) {
-      setErrors({ ...errors, quantidade: 'ID do componente não encontrado' });
+    if (!itemId) {
+      setErrors({ ...errors, quantidade: 'ID do item não encontrado' });
       return;
     }
 
@@ -354,7 +354,7 @@ export default function ModalEntradaComponente({
     const movimentacaoData: MovimentacaoRequest = {
       tipo: 'entrada',
       quantidade: quantidade.trim(),
-      componente: componenteId.trim(),
+      item: itemId.trim(),
       localizacao: localizacaoSelecionada.trim(),
     };
 
@@ -394,7 +394,7 @@ export default function ModalEntradaComponente({
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
               <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words" data-test="modal-entrada-titulo">
-                Registrar entrada de {componenteNome}
+                Registrar entrada de {itemNome}
               </h2>
             </div>
           </div>

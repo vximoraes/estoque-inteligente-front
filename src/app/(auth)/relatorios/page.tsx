@@ -7,7 +7,7 @@ export default function RelatoriosPage() {
 
   useEffect(() => {
     // Redireciona automaticamente para a primeira opção de relatórios
-    router.replace('/relatorios/componentes')
+    router.replace('/relatorios/itens')
   }, [router])
 
   return null

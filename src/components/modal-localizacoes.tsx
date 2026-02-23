@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, MapPin, Package } from 'lucide-react';
-import { EstoqueData } from '@/types/componentes';
+import { EstoqueData } from '@/types/itens';
 
 interface ModalLocalizacoesProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
-  componenteDescricao?: string;
+  itemId: string;
+  itemNome: string;
+  itemDescricao?: string;
   estoques: EstoqueData[];
   isLoading: boolean;
   totalQuantidade: number;
@@ -17,9 +17,9 @@ interface ModalLocalizacoesProps {
 export default function ModalLocalizacoes({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
-  componenteDescricao,
+  itemId,
+  itemNome,
+  itemDescricao,
   estoques,
   isLoading,
   totalQuantidade
@@ -88,10 +88,10 @@ export default function ModalLocalizacoes({
           </button>
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
-              <h2 className="text-xl font-semibold text-gray-900 break-words" data-test="modal-localizacoes-titulo">{componenteNome}</h2>
+              <h2 className="text-xl font-semibold text-gray-900 break-words" data-test="modal-localizacoes-titulo">{itemNome}</h2>
             </div>
-            {componenteDescricao && (
-              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full" data-test="modal-localizacoes-descricao">{componenteDescricao}</p>
+            {itemDescricao && (
+              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full" data-test="modal-localizacoes-descricao">{itemDescricao}</p>
             )}
             <p className="text-xl font-semibold text-blue-600" data-test="modal-localizacoes-total">
               {isLoading ? "Carregando..." : totalQuantidade}
@@ -137,7 +137,7 @@ export default function ModalLocalizacoes({
           ) : (
             <div className="text-center py-8" data-test="modal-localizacoes-empty">
               <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Nenhuma localização encontrada para este componente.</p>
+              <p className="text-gray-500">Nenhuma localização encontrada para este item.</p>
             </div>
           )}
         </div>

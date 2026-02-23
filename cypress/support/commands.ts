@@ -4,7 +4,7 @@ declare global {
       getByData(seletor: string): Chainable<JQuery<HTMLElement>>
       login(email: string, senha: string): Chainable<void>
       loginViaAPI(email: string, senha: string): Chainable<void>
-      waitForComponentes(): Chainable<void>
+      waitForItens(): Chainable<void>
       clearAllFilters(): Chainable<void>
     }
   }
@@ -27,7 +27,7 @@ Cypress.Commands.add('login', (email: string, senha: string) => {
   
   cy.wait(3000);
   
-  cy.url({ timeout: 30000 }).should('include', '/componentes');
+  cy.url({ timeout: 30000 }).should('include', '/itens');
 })
 
 Cypress.Commands.add('loginViaAPI', (email: string, senha: string) => {
@@ -51,7 +51,7 @@ Cypress.Commands.add('loginViaAPI', (email: string, senha: string) => {
   });
 })
 
-Cypress.Commands.add('waitForComponentes', () => {
+Cypress.Commands.add('waitForItens', () => {
   cy.wait('@getComponentes', { timeout: 10000 });
 })
 

@@ -197,7 +197,7 @@ function PageOrcamentosContent() {
       
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')
-      doc.text('Componentes:', margin, yPosition)
+      doc.text('Itens:', margin, yPosition)
       yPosition += 8
       
       doc.setFontSize(9)
@@ -212,18 +212,18 @@ function PageOrcamentosContent() {
       yPosition += 5
       
       doc.setFont('helvetica', 'normal')
-      orcamento.componentes.forEach((comp: any) => {
+      orcamento.itens.forEach((comp: any) => {
         if (yPosition > 270) {
           doc.addPage()
           yPosition = 20
         }
         
-        const nomeComponente = doc.splitTextToSize(comp.nome || '-', 75)
-        doc.text(nomeComponente, margin, yPosition)
+        const nomeItem = doc.splitTextToSize(comp.nome || '-', 75)
+        doc.text(nomeItem, margin, yPosition)
         doc.text(comp.quantidade.toString(), margin + 80, yPosition)
         doc.text(`R$ ${comp.valor_unitario.toFixed(2)}`, margin + 100, yPosition)
         doc.text(`R$ ${comp.subtotal.toFixed(2)}`, margin + 140, yPosition)
-        yPosition += Math.max(nomeComponente.length * 5, 7)
+        yPosition += Math.max(nomeItem.length * 5, 7)
       })
       
       yPosition += 5

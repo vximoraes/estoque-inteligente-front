@@ -220,11 +220,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               <SidebarMenu className="flex-1" data-test="sidebar-menu">
                 <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[10px] flex flex-col" data-test="sidebar-menu-item">
                   <SidebarButtonMenu
-                    src="/componentes.svg"
-                    srcHover="/componentes-hover.svg"
-                    name="Componentes"
-                    route="/componentes"
-                    data-test="sidebar-btn-componentes"
+                    src="/itens.svg"
+                    srcHover="/itens-hover.svg"
+                    name="Itens"
+                    route="/itens"
+                    data-test="sidebar-btn-itens"
                     path={path}
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
@@ -235,7 +235,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     name="Relatórios"
                     data-test="sidebar-btn-relatorios"
                     subItems={[
-                      { name: "Componentes", route: "/relatorios/componentes" },
+                      { name: "Itens", route: "/relatorios/itens" },
                       { name: "Movimentações", route: "/relatorios/movimentacoes" },
                       { name: "Orçamentos", route: "/relatorios/orcamentos" }
                     ]}
@@ -353,11 +353,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-2 flex-1 mb-6">
               <MobileMenuItem
-                icon="/componentes.svg"
-                iconHover="/componentes-hover.svg"
-                name="Componentes"
-                route="/componentes"
-                isActive={path?.startsWith("/componentes")}
+                icon="/itens.svg"
+                iconHover="/itens-hover.svg"
+                name="Itens"
+                route="/itens"
+                isActive={path?.startsWith("/itens")}
                 onClick={() => {
                   handleItemClick()
                 }}
@@ -372,7 +372,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick()
                 }}
                 subItems={[
-                  { name: "Componentes", route: "/relatorios/componentes" },
+                  { name: "Itens", route: "/relatorios/itens" },
                   { name: "Movimentações", route: "/relatorios/movimentacoes" },
                   { name: "Orçamentos", route: "/relatorios/orcamentos" }
                 ]}
