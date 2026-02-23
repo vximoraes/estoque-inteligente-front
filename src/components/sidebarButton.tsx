@@ -80,7 +80,7 @@ export default function SidebarButtonMenu({
       <>
         <SidebarMenuButton
           className={
-            'flex justify-center items-center h-[50px] w-[80px] cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg ' +
+            'flex justify-center items-center h-[50px] w-20 cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg ' +
             (isRouter
               ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
               : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')
@@ -93,7 +93,7 @@ export default function SidebarButtonMenu({
             src={isHover}
             alt={name}
             data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
-            className="w-[24px] h-[24px]"
+            className="w-6 h-6"
           />
         </SidebarMenuButton>
       </>
@@ -104,7 +104,7 @@ export default function SidebarButtonMenu({
     <>
       <SidebarMenuButton
         className={
-          'text-[17px] pl-[20px] h-[50px] w-[250px] itens cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group ' +
+          'text-[17px] pl-5 h-[50px] w-[250px] itens cursor-pointer flex gap-3 items-center relative transition-all duration-300 ease-in-out group ' +
           (isRouter
             ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
             : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')

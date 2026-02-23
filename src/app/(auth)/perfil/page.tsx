@@ -1158,7 +1158,7 @@ export default function HomePage() {
                   Remover foto de perfil
                 </h2>
                 <div className="max-h-[120px] overflow-y-auto">
-                  <p className="text-gray-600 break-words">
+                  <p className="text-gray-600 wrap-break-word">
                     Tem certeza que deseja remover sua foto de perfil? Esta ação
                     não pode ser desfeita.
                   </p>

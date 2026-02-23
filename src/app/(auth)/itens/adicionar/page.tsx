@@ -423,7 +423,7 @@ export default function AdicionarItemPage() {
                       }
                     }}
                     maxLength={100}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                    className={`w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base ${errors.nome ? 'border-red-500!' : ''}`}
                     data-test="input-nome-item"
                   />
                   {errors.nome && (
@@ -474,7 +474,7 @@ export default function AdicionarItemPage() {
                                 'Selecione uma categoria'}
                           </span>
                           <ChevronDown
-                            className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
+                            className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ml-2 ${
                               isCategoriaDropdownOpen ? 'rotate-180' : ''
                             }`}
                           />
@@ -582,7 +582,7 @@ export default function AdicionarItemPage() {
                       <Button
                         type="button"
                         onClick={() => setIsAddingCategoria(true)}
-                        className="text-white !h-[38px] !w-[38px] sm:!h-[46px] sm:!w-[46px] !p-0 flex items-center justify-center cursor-pointer hover:opacity-90 flex-shrink-0"
+                        className="text-white h-[38px]! w-[38px]! sm:h-[46px]! sm:w-[46px]! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
                         style={{ backgroundColor: '#306FCC' }}
                         data-test="botao-adicionar-categoria"
                       >
@@ -625,7 +625,7 @@ export default function AdicionarItemPage() {
                         setEstoqueMinimo(value);
                       }
                     }}
-                    className="w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base"
+                    className="w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base"
                     data-test="input-estoque-minimo"
                   />
                 </div>
@@ -651,7 +651,7 @@ export default function AdicionarItemPage() {
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+                          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer"
                           aria-label="Remover imagem"
                           data-test="botao-remover-imagem"
                         >
@@ -719,19 +719,19 @@ export default function AdicionarItemPage() {
             </div>
 
             {/* Footer com botões */}
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
                 data-test="botao-cancelar"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={createItemMutation.isPending}
                 data-test="botao-salvar"
