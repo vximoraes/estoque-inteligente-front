@@ -3,7 +3,8 @@ import { z } from 'zod';
 /**
  * Regex para validação de URL
  */
-const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+const urlRegex =
+  /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
 
 /**
  * Schema para criação de fornecedor
@@ -17,11 +18,7 @@ export const fornecedorSchema = z.object({
     .string()
     .max(100, 'O contato deve ter no máximo 100 caracteres')
     .optional(),
-  url: z
-    .string()
-    .regex(urlRegex, 'URL inválida')
-    .optional()
-    .or(z.literal('')),
+  url: z.string().regex(urlRegex, 'URL inválida').optional().or(z.literal('')),
   descricao: z
     .string()
     .max(500, 'A descrição deve ter no máximo 500 caracteres')

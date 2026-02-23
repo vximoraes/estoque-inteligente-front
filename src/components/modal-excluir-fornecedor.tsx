@@ -18,7 +18,7 @@ export default function ModalExcluirFornecedor({
   onClose,
   fornecedorId,
   fornecedorNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirFornecedorProps) {
   const queryClient = useQueryClient();
 
@@ -28,7 +28,7 @@ export default function ModalExcluirFornecedor({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['fornecedores']
+        queryKey: ['fornecedores'],
       });
 
       onSuccess?.();
@@ -91,7 +91,7 @@ export default function ModalExcluirFornecedor({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -118,7 +118,8 @@ export default function ModalExcluirFornecedor({
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o fornecedor <span className="font-semibold">{fornecedorNome}</span>?
+                Tem certeza que deseja excluir o fornecedor{' '}
+                <span className="font-semibold">{fornecedorNome}</span>?
               </p>
             </div>
           </div>
@@ -126,7 +127,9 @@ export default function ModalExcluirFornecedor({
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível excluir o fornecedor</div>
+              <div className="font-medium mb-1">
+                Não foi possível excluir o fornecedor
+              </div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||

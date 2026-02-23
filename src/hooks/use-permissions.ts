@@ -34,7 +34,10 @@ export function usePermissions() {
           setPermissoes(userPermissions);
           setGrupos(userGroups);
 
-          localStorage.setItem('user_permissions', JSON.stringify(userPermissions));
+          localStorage.setItem(
+            'user_permissions',
+            JSON.stringify(userPermissions),
+          );
           localStorage.setItem('user_groups', JSON.stringify(userGroups));
         }
       } catch (error) {
@@ -47,7 +50,10 @@ export function usePermissions() {
     loadPermissions();
   }, [user?.id]);
 
-  const hasPermission = (rota: string, action?: 'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'): boolean => {
+  const hasPermission = (
+    rota: string,
+    action?: 'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir',
+  ): boolean => {
     if (!permissoes || !Array.isArray(permissoes)) {
       return false;
     }
@@ -66,9 +72,11 @@ export function usePermissions() {
   };
 
   const isAdmin = (): boolean => {
-    return hasPermission('usuarios', 'buscar') ||
+    return (
+      hasPermission('usuarios', 'buscar') ||
       hasPermission('usuarios', 'enviar') ||
-      grupos?.some((grupo: string) => grupo.toLowerCase().includes('admin'));
+      grupos?.some((grupo: string) => grupo.toLowerCase().includes('admin'))
+    );
   };
 
   const canManageUsers = (): boolean => {
@@ -81,6 +89,6 @@ export function usePermissions() {
     canManageUsers,
     permissoes,
     grupos,
-    loading
+    loading,
   };
 }

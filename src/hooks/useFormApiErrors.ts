@@ -1,7 +1,7 @@
 import { UseFormSetError, FieldValues, Path } from 'react-hook-form';
 
 export function useFormApiErrors<TFieldValues extends FieldValues>(
-  setError: UseFormSetError<TFieldValues>
+  setError: UseFormSetError<TFieldValues>,
 ) {
   const setApiErrors = (errors?: Array<{ path: string; message: string }>) => {
     if (!errors || !Array.isArray(errors)) return;

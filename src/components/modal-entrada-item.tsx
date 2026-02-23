@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
@@ -39,7 +44,7 @@ interface LocalizacoesApiResponse {
 interface MovimentacaoRequest {
   tipo: 'entrada';
   quantidade: string;
-  componente: string;
+  item: string;
   localizacao: string;
 }
 
@@ -49,32 +54,40 @@ interface EstoqueApiResponse {
   };
 }
 
-interface ModalEntradaComponenteProps {
+interface ModalEntradaItemProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
+  itemId: string;
+  itemNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalEntradaComponente({
+export default function ModalEntradaItem({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
-  onSuccess
-}: ModalEntradaComponenteProps) {
+  itemId,
+  itemNome,
+  onSuccess,
+}: ModalEntradaItemProps) {
   const queryClient = useQueryClient();
   const [quantidade, setQuantidade] = useState('');
-  const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
+  const [localizacaoSelecionada, setLocalizacaoSelecionada] =
+    useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
-  const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string; novaLocalizacao?: string }>({});
+  const [errors, setErrors] = useState<{
+    quantidade?: string;
+    localizacao?: string;
+    novaLocalizacao?: string;
+  }>({});
   const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
   const [novaLocalizacao, setNovaLocalizacao] = useState('');
-  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] = useState(false);
-  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] = useState(false);
-  const [localizacaoToEdit, setLocalizacaoToEdit] = useState<Localizacao | null>(null);
+  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] =
+    useState(false);
+  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] =
+    useState(false);
+  const [localizacaoToEdit, setLocalizacaoToEdit] =
+    useState<Localizacao | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
@@ -82,11 +95,13 @@ export default function ModalEntradaComponente({
     isLoading: isLoadingLocalizacoes,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['localizacoes-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      return await get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
+      return await get<LocalizacoesApiResponse>(
+        `/localizacoes?limit=20&page=${pageParam}`,
+      );
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -96,11 +111,11 @@ export default function ModalEntradaComponente({
   });
 
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', componenteId],
+    queryKey: ['estoques', itemId],
     queryFn: async () => {
-      return await get<EstoqueApiResponse>(`/estoques/componente/${componenteId}`);
+      return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
     },
-    enabled: isOpen && !!componenteId,
+    enabled: isOpen && !!itemId,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -119,7 +134,7 @@ export default function ModalEntradaComponente({
       setLocalizacaoSelecionada(data.data._id);
       setNovaLocalizacao('');
       setIsAddingLocalizacao(false);
-      setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
+      setErrors((prev) => ({ ...prev, novaLocalizacao: undefined }));
       toast.success('Localização criada com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,
@@ -127,8 +142,8 @@ export default function ModalEntradaComponente({
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || error.message;
-      setErrors(prev => ({ ...prev, novaLocalizacao: errorMessage }));
-    }
+      setErrors((prev) => ({ ...prev, novaLocalizacao: errorMessage }));
+    },
   });
 
   const entradaMutation = useMutation({
@@ -137,11 +152,11 @@ export default function ModalEntradaComponente({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['componentes']
+        queryKey: ['itens'],
       });
 
       queryClient.removeQueries({
-        queryKey: ['estoques', componenteId]
+        queryKey: ['estoques', itemId],
       });
 
       setQuantidade('');
@@ -161,8 +176,14 @@ export default function ModalEntradaComponente({
         console.log('errorData completo:', JSON.stringify(errorData));
         console.log('errorData.errors:', errorData.errors);
 
-        if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-          const messages = errorData.errors.map((err: any) => err.message).filter(Boolean);
+        if (
+          errorData.errors &&
+          Array.isArray(errorData.errors) &&
+          errorData.errors.length > 0
+        ) {
+          const messages = errorData.errors
+            .map((err: any) => err.message)
+            .filter(Boolean);
           console.log('mensagens extraídas:', messages);
           if (messages.length > 0) {
             errorMessage = messages.join(', ');
@@ -254,12 +275,12 @@ export default function ModalEntradaComponente({
     if (!observerTarget.current || !isDropdownOpen) return;
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 1.0 }
+      { threshold: 1.0 },
     );
 
     observer.observe(observerTarget.current);
@@ -271,15 +292,21 @@ export default function ModalEntradaComponente({
 
   if (!isOpen) return null;
 
-  const localizacoes = localizacoesData?.pages ? localizacoesData.pages.flatMap(page => page.data.docs) : [];
+  const localizacoes = localizacoesData?.pages
+    ? localizacoesData.pages.flatMap((page) => page.data.docs)
+    : [];
   const estoques = estoquesData?.data?.docs || [];
   const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
-    loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase())
+    loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase()),
   );
-  const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
+  const localizacaoSelecionadaObj = localizacoes.find(
+    (loc) => loc._id === localizacaoSelecionada,
+  );
 
   const getQuantidadeDisponivel = (localizacaoId: string): number => {
-    const estoque = estoques.find((e: any) => e.localizacao._id === localizacaoId);
+    const estoque = estoques.find(
+      (e: any) => e.localizacao._id === localizacaoId,
+    );
     return estoque?.quantidade || 0;
   };
 
@@ -294,7 +321,7 @@ export default function ModalEntradaComponente({
     if (value === '' || /^\d+$/.test(value)) {
       setQuantidade(value);
       if (errors.quantidade) {
-        setErrors(prev => ({ ...prev, quantidade: undefined }));
+        setErrors((prev) => ({ ...prev, quantidade: undefined }));
       }
     }
   };
@@ -304,13 +331,16 @@ export default function ModalEntradaComponente({
     setIsDropdownOpen(false);
     setLocalizacaoPesquisa('');
     if (errors.localizacao) {
-      setErrors(prev => ({ ...prev, localizacao: undefined }));
+      setErrors((prev) => ({ ...prev, localizacao: undefined }));
     }
   };
 
   const handleAddLocalizacao = () => {
     if (!novaLocalizacao.trim()) {
-      setErrors(prev => ({ ...prev, novaLocalizacao: 'Nome da localização é obrigatório' }));
+      setErrors((prev) => ({
+        ...prev,
+        novaLocalizacao: 'Nome da localização é obrigatório',
+      }));
       return;
     }
     createLocalizacaoMutation.mutate(novaLocalizacao.trim());
@@ -336,8 +366,8 @@ export default function ModalEntradaComponente({
       return;
     }
 
-    if (!componenteId) {
-      setErrors({ ...errors, quantidade: 'ID do componente não encontrado' });
+    if (!itemId) {
+      setErrors({ ...errors, quantidade: 'ID do item não encontrado' });
       return;
     }
 
@@ -354,7 +384,7 @@ export default function ModalEntradaComponente({
     const movimentacaoData: MovimentacaoRequest = {
       tipo: 'entrada',
       quantidade: quantidade.trim(),
-      componente: componenteId.trim(),
+      item: itemId.trim(),
       localizacao: localizacaoSelecionada.trim(),
     };
 
@@ -366,7 +396,7 @@ export default function ModalEntradaComponente({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-entrada-backdrop"
@@ -393,16 +423,25 @@ export default function ModalEntradaComponente({
         <div className="px-6 pb-6 space-y-6" data-test="modal-entrada-content">
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
-              <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words" data-test="modal-entrada-titulo">
-                Registrar entrada de {componenteNome}
+              <h2
+                className="text-xl font-semibold text-gray-900 mb-1 break-words"
+                data-test="modal-entrada-titulo"
+              >
+                Registrar entrada de {itemNome}
               </h2>
             </div>
           </div>
 
           {/* Campo Quantidade */}
-          <div className="space-y-2" data-test="modal-entrada-quantidade-container">
+          <div
+            className="space-y-2"
+            data-test="modal-entrada-quantidade-container"
+          >
             <div className="flex justify-between items-center">
-              <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
+              <label
+                htmlFor="quantidade"
+                className="block text-base font-medium text-gray-700"
+              >
                 Quantidade <span className="text-red-500">*</span>
               </label>
               <span className="text-sm text-gray-500">
@@ -417,18 +456,27 @@ export default function ModalEntradaComponente({
               value={quantidade}
               onChange={handleQuantidadeChange}
               maxLength={9}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.quantidade ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.quantidade ? 'border-red-500' : 'border-gray-300'
+              }`}
               disabled={entradaMutation.isPending}
               data-test="modal-entrada-quantidade-input"
             />
             {errors.quantidade && (
-              <p className="text-red-500 text-sm mt-1" data-test="modal-entrada-quantidade-erro">{errors.quantidade}</p>
+              <p
+                className="text-red-500 text-sm mt-1"
+                data-test="modal-entrada-quantidade-erro"
+              >
+                {errors.quantidade}
+              </p>
             )}
           </div>
 
           {/* Campo Localização */}
-          <div className="space-y-2" data-test="modal-entrada-localizacao-container">
+          <div
+            className="space-y-2"
+            data-test="modal-entrada-localizacao-container"
+          >
             <label className="block text-base font-medium text-gray-700">
               Localização <span className="text-red-500">*</span>
             </label>
@@ -437,29 +485,39 @@ export default function ModalEntradaComponente({
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${errors.localizacao ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                    errors.localizacao ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   disabled={isLoadingLocalizacoes || entradaMutation.isPending}
                   data-test="modal-entrada-localizacao-dropdown"
                 >
                   <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
-                    <span className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}>
+                    <span
+                      className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}
+                    >
                       {isLoadingLocalizacoes
                         ? 'Carregando...'
-                        : localizacaoSelecionadaObj?.nome || 'Selecionar localização'
-                      }
+                        : localizacaoSelecionadaObj?.nome ||
+                          'Selecionar localização'}
                     </span>
                     {localizacaoSelecionada && (
-                      <span className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-500'
-                        }`}>
-                        {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
+                      <span
+                        className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${
+                          getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}
+                      >
+                        {getQuantidadeDisponivel(localizacaoSelecionada)}{' '}
+                        disponível
                       </span>
                     )}
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''
-                    }`} />
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
+                      isDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
                 </button>
 
                 {/* Dropdown */}
@@ -481,58 +539,73 @@ export default function ModalEntradaComponente({
                     <div className="overflow-y-auto">
                       {localizacoesFiltradas.length > 0 ? (
                         <>
-                        {localizacoesFiltradas.map((localizacao) => {
-                          const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
-                          return (
-                            <div
-                              key={localizacao._id}
-                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                          {localizacoesFiltradas.map((localizacao) => {
+                            const qtdDisponivel = getQuantidadeDisponivel(
+                              localizacao._id,
+                            );
+                            return (
+                              <div
+                                key={localizacao._id}
+                                className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${
+                                  localizacaoSelecionada === localizacao._id
+                                    ? 'bg-blue-50'
+                                    : ''
                                 }`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => handleLocalizacaoSelect(localizacao)}
-                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
-                                  }`}
-                                title={localizacao.nome}
                               >
-                                <span className="truncate">{localizacao.nome}</span>
-                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${qtdDisponivel > 0
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-gray-100 text-gray-500'
-                                  }`}>
-                                  {qtdDisponivel} disponível
-                                </span>
-                              </button>
-                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setLocalizacaoToEdit(localizacao)
-                                    setIsEditarLocalizacaoModalOpen(true)
-                                  }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                  title="Editar localização"
+                                  onClick={() =>
+                                    handleLocalizacaoSelect(localizacao)
+                                  }
+                                  className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
+                                    localizacaoSelecionada === localizacao._id
+                                      ? 'text-blue-600 font-medium'
+                                      : 'text-gray-900'
+                                  }`}
+                                  title={localizacao.nome}
                                 >
-                                  <Edit size={20} />
+                                  <span className="truncate">
+                                    {localizacao.nome}
+                                  </span>
+                                  <span
+                                    className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${
+                                      qtdDisponivel > 0
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-500'
+                                    }`}
+                                  >
+                                    {qtdDisponivel} disponível
+                                  </span>
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setLocalizacaoToEdit(localizacao)
-                                    setIsExcluirLocalizacaoModalOpen(true)
-                                  }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                  title="Excluir localização"
-                                >
-                                  <Trash2 size={20} />
-                                </button>
+                                <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setLocalizacaoToEdit(localizacao);
+                                      setIsEditarLocalizacaoModalOpen(true);
+                                    }}
+                                    className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                    title="Editar localização"
+                                  >
+                                    <Edit size={20} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setLocalizacaoToEdit(localizacao);
+                                      setIsExcluirLocalizacaoModalOpen(true);
+                                    }}
+                                    className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                    title="Excluir localização"
+                                  >
+                                    <Trash2 size={20} />
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
                           {/* Infinite scroll trigger */}
                           <div ref={observerTarget} className="h-1" />
                           {/* Loading indicator */}
@@ -568,7 +641,9 @@ export default function ModalEntradaComponente({
           {/* Mensagem de erro da API */}
           {entradaMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível registrar a entrada</div>
+              <div className="font-medium mb-1">
+                Não foi possível registrar a entrada
+              </div>
               <div className="text-red-500">
                 {(entradaMutation.error as any)?.response?.data?.message ||
                   (entradaMutation.error as any)?.errors.message ||
@@ -579,7 +654,10 @@ export default function ModalEntradaComponente({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg" data-test="modal-entrada-footer">
+        <div
+          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
+          data-test="modal-entrada-footer"
+        >
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -609,13 +687,13 @@ export default function ModalEntradaComponente({
           className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
           style={{
             zIndex: 100000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsAddingLocalizacao(false);
               setNovaLocalizacao('');
-              setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
+              setErrors((prev) => ({ ...prev, novaLocalizacao: undefined }));
             }
           }}
         >
@@ -629,7 +707,10 @@ export default function ModalEntradaComponente({
                 onClick={() => {
                   setIsAddingLocalizacao(false);
                   setNovaLocalizacao('');
-                  setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
+                  setErrors((prev) => ({
+                    ...prev,
+                    novaLocalizacao: undefined,
+                  }));
                 }}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
@@ -649,7 +730,10 @@ export default function ModalEntradaComponente({
               {/* Campo Nome da Localização */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="novaLocalizacao" className="block text-base font-medium text-gray-700">
+                  <label
+                    htmlFor="novaLocalizacao"
+                    className="block text-base font-medium text-gray-700"
+                  >
                     Nome da Localização <span className="text-red-500">*</span>
                   </label>
                   <span className="text-sm text-gray-500">
@@ -664,12 +748,18 @@ export default function ModalEntradaComponente({
                   onChange={(e) => {
                     setNovaLocalizacao(e.target.value);
                     if (errors.novaLocalizacao) {
-                      setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
+                      setErrors((prev) => ({
+                        ...prev,
+                        novaLocalizacao: undefined,
+                      }));
                     }
                   }}
                   maxLength={100}
-                  className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.novaLocalizacao ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    errors.novaLocalizacao
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -679,7 +769,9 @@ export default function ModalEntradaComponente({
                   autoFocus
                 />
                 {errors.novaLocalizacao && (
-                  <p className="text-red-500 text-sm mt-1">{errors.novaLocalizacao}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.novaLocalizacao}
+                  </p>
                 )}
               </div>
             </div>
@@ -693,7 +785,10 @@ export default function ModalEntradaComponente({
                   onClick={() => {
                     setIsAddingLocalizacao(false);
                     setNovaLocalizacao('');
-                    setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      novaLocalizacao: undefined,
+                    }));
                   }}
                   disabled={createLocalizacaoMutation.isPending}
                   className="flex-1 cursor-pointer"
@@ -719,14 +814,15 @@ export default function ModalEntradaComponente({
 
   return (
     <>
-      {typeof window !== 'undefined' && createPortal(modalContent, document.body)}
+      {typeof window !== 'undefined' &&
+        createPortal(modalContent, document.body)}
       {localizacaoToEdit && (
         <>
           <ModalEditarLocalizacao
             isOpen={isEditarLocalizacaoModalOpen}
             onClose={() => {
-              setIsEditarLocalizacaoModalOpen(false)
-              setLocalizacaoToEdit(null)
+              setIsEditarLocalizacaoModalOpen(false);
+              setLocalizacaoToEdit(null);
             }}
             localizacaoId={localizacaoToEdit._id}
             localizacaoNome={localizacaoToEdit.nome}
@@ -735,8 +831,8 @@ export default function ModalEntradaComponente({
           <ModalExcluirLocalizacao
             isOpen={isExcluirLocalizacaoModalOpen}
             onClose={() => {
-              setIsExcluirLocalizacaoModalOpen(false)
-              setLocalizacaoToEdit(null)
+              setIsExcluirLocalizacaoModalOpen(false);
+              setLocalizacaoToEdit(null);
             }}
             localizacaoId={localizacaoToEdit._id}
             localizacaoNome={localizacaoToEdit.nome}

@@ -5,37 +5,37 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 
-interface ModalExcluirComponenteProps {
+interface ModalExcluirItemProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
+  itemId: string;
+  itemNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalExcluirComponente({
+export default function ModalExcluirItem({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
-  onSuccess
-}: ModalExcluirComponenteProps) {
+  itemId,
+  itemNome,
+  onSuccess,
+}: ModalExcluirItemProps) {
   const queryClient = useQueryClient();
 
   const excluirMutation = useMutation({
     mutationFn: async () => {
-      return await patch(`/componentes/${componenteId}/inativar`);
+      return await patch(`/itens/${itemId}/inativar`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['componentes']
+        queryKey: ['itens'],
       });
 
       onSuccess?.();
       onClose();
     },
     onError: (error: any) => {
-      console.error('Erro ao inativar componente:', error);
+      console.error('Erro ao inativar item:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
       }
@@ -79,7 +79,7 @@ export default function ModalExcluirComponente({
   };
 
   const handleExcluir = () => {
-    if (!componenteId) {
+    if (!itemId) {
       return;
     }
 
@@ -91,7 +91,7 @@ export default function ModalExcluirComponente({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-excluir-backdrop"
@@ -117,20 +117,38 @@ export default function ModalExcluirComponente({
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6" data-test="modal-excluir-content">
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2" data-test="modal-excluir-titulo">
-              Excluir componente
+            <h2
+              className="text-xl font-semibold text-gray-900 mb-2"
+              data-test="modal-excluir-titulo"
+            >
+              Excluir item
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
-              <p className="text-gray-600 break-words" data-test="modal-excluir-mensagem">
-                Tem certeza que deseja excluir o componente <span className="font-semibold" data-test="modal-excluir-nome-componente">{componenteNome}</span>?
+              <p
+                className="text-gray-600 break-words"
+                data-test="modal-excluir-mensagem"
+              >
+                Tem certeza que deseja excluir o item{' '}
+                <span
+                  className="font-semibold"
+                  data-test="modal-excluir-nome-item"
+                >
+                  {itemNome}
+                </span>
+                ?
               </p>
             </div>
           </div>
 
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600" data-test="modal-excluir-erro">
-              <div className="font-medium mb-1">Não foi possível excluir o componente</div>
+            <div
+              className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+              data-test="modal-excluir-erro"
+            >
+              <div className="font-medium mb-1">
+                Não foi possível excluir o item
+              </div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||
@@ -141,7 +159,10 @@ export default function ModalExcluirComponente({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg" data-test="modal-excluir-footer">
+        <div
+          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
+          data-test="modal-excluir-footer"
+        >
           <div className="flex gap-3">
             <Button
               variant="outline"

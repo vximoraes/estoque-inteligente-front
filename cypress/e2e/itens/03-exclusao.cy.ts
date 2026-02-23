@@ -4,42 +4,42 @@ describe('Componentes - Exclusão', () => {
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
-  let componenteTesteId: string;
+  let itemTesteId: string;
 
   before(() => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/login`,
       body: { email, senha },
-      timeout: 30000
+      timeout: 30000,
     }).then((loginResponse) => {
       const token = loginResponse.body.data.user.accesstoken;
 
-        cy.request({
-          method: 'GET',
-          url: `${apiUrl}/categorias?limit=1`,
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 30000
-        }).then((categoriasResponse) => {
+      cy.request({
+        method: 'GET',
+        url: `${apiUrl}/categorias?limit=1`,
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000,
+      }).then((categoriasResponse) => {
         const categorias = categoriasResponse.body?.data?.docs || [];
-        
+
         if (categorias.length > 0) {
           const nomeComponente = `Componente Para Exclusão ${Date.now()}`;
-          
+
           cy.request({
             method: 'POST',
-            url: `${apiUrl}/componentes`,
+            url: `${apiUrl}/itens`,
             headers: { Authorization: `Bearer ${token}` },
             body: {
               nome: nomeComponente,
               categoria: categorias[0]._id,
               estoque_minimo: '5',
-              descricao: 'Este componente será excluído nos testes'
+              descricao: 'Este item será excluído nos testes',
             },
-            timeout: 30000
+            timeout: 30000,
           }).then((createResponse) => {
-            componenteTesteId = createResponse.body?.data?._id;
-            cy.log(`Componente de teste criado: ${componenteTesteId}`);
+            itemTesteId = createResponse.body?.data?._id;
+            cy.log(`Componente de teste criado: ${itemTesteId}`);
           });
         }
       });
@@ -47,22 +47,22 @@ describe('Componentes - Exclusão', () => {
   });
 
   beforeEach(() => {
-    cy.intercept('GET', `${apiUrl}/componentes*`).as('getComponentes');
-    cy.intercept('PATCH', `${apiUrl}/componentes/*/inativar`).as('deleteComponente');
+    cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
+    cy.intercept('PATCH', `${apiUrl}/itens/*/inativar`).as('deleteComponente');
     cy.intercept('GET', `${apiUrl}/estoques*`).as('getEstoques');
-    
+
     cy.login(email, senha);
-    cy.visit(`${frontendUrl}/componentes`);
+    cy.visit(`${frontendUrl}/itens`);
     cy.wait('@getComponentes', { timeout: 30000 });
   });
 
   describe('Modal de Confirmação de Exclusão', () => {
     it('Deve abrir modal de confirmação ao clicar em Excluir', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -72,19 +72,22 @@ describe('Componentes - Exclusão', () => {
       });
     });
 
-    it('Deve exibir o nome do componente no modal', () => {
+    it('Deve exibir o nome do item no modal', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componente = componentes[0];
+        if (itens.length > 0) {
+          const item = itens[0];
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
           cy.getByData('modal-excluir').within(() => {
-            cy.getByData('modal-excluir-nome-componente').should('contain', componente.nome);
+            cy.getByData('modal-excluir-nome-item').should(
+              'contain',
+              item.nome,
+            );
           });
         }
       });
@@ -92,10 +95,10 @@ describe('Componentes - Exclusão', () => {
 
     it('Deve ter botões Cancelar e Excluir no modal', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -109,17 +112,20 @@ describe('Componentes - Exclusão', () => {
 
     it('Deve ter botão Excluir em vermelho (destaque de ação destrutiva)', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
           cy.getByData('modal-excluir').within(() => {
             cy.getByData('modal-excluir-confirmar')
               .should('have.css', 'background-color')
-              .and('match', /rgb\(2[012]\d, 3[0-9], 3[0-9]\)|rgb\(239, 68, 68\)|rgb\(248, 113, 113\)/);
+              .and(
+                'match',
+                /rgb\(2[012]\d, 3[0-9], 3[0-9]\)|rgb\(239, 68, 68\)|rgb\(248, 113, 113\)/,
+              );
           });
         }
       });
@@ -127,10 +133,10 @@ describe('Componentes - Exclusão', () => {
 
     it('Deve fechar modal ao clicar em Cancelar', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -145,44 +151,50 @@ describe('Componentes - Exclusão', () => {
   });
 
   describe('Processo de Exclusão', () => {
-    it('Deve excluir componente ao confirmar', () => {
-      if (!componenteTesteId) {
+    it('Deve excluir item ao confirmar', () => {
+      if (!itemTesteId) {
         cy.log('Componente de teste não foi criado, pulando teste');
         return;
       }
 
       cy.wait('@getComponentes');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         if ($body.text().includes('Para Exclusão')) {
-          cy.contains('Para Exclusão').parents('[data-test^="componente-card-"]').within(() => {
-            cy.getByData('delete-button').click();
-          });
+          cy.contains('Para Exclusão')
+            .parents('[data-test^="item-card-"]')
+            .within(() => {
+              cy.getByData('delete-button').click();
+            });
 
           cy.getByData('modal-excluir').within(() => {
             cy.getByData('modal-excluir-confirmar').click();
           });
 
-          cy.wait('@deleteComponente', { timeout: 30000 }).then((interception) => {
-            expect(interception.response?.statusCode).to.be.oneOf([200, 204]);
-          });
+          cy.wait('@deleteComponente', { timeout: 30000 }).then(
+            (interception) => {
+              expect(interception.response?.statusCode).to.be.oneOf([200, 204]);
+            },
+          );
 
-          cy.contains(/excluído|removido|deletado.*sucesso/i, { timeout: 5000 }).should('be.visible');
+          cy.contains(/excluído|removido|deletado.*sucesso/i, {
+            timeout: 5000,
+          }).should('be.visible');
 
-          componenteTesteId = '';
+          itemTesteId = '';
         }
       });
     });
 
     it('Deve atualizar listagem automaticamente após exclusão', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
-        const totalAntes = componentes.length;
+        const itens = interception.response?.body?.data?.docs || [];
+        const totalAntes = itens.length;
 
         if (totalAntes > 0) {
-          const componenteNome = componentes[0].nome;
+          const itemNome = itens[0].nome;
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -194,9 +206,9 @@ describe('Componentes - Exclusão', () => {
           cy.wait('@getComponentes', { timeout: 30000 });
 
           cy.wait(1000);
-          cy.get('body').then($body => {
+          cy.get('body').then(($body) => {
             const textoAtual = $body.text();
-            cy.log(`Verificando se ${componenteNome} foi removido da listagem`);
+            cy.log(`Verificando se ${itemNome} foi removido da listagem`);
           });
         }
       });
@@ -205,10 +217,10 @@ describe('Componentes - Exclusão', () => {
     it('Deve recalcular estatísticas após exclusão', () => {
       cy.wait('@getComponentes').then((interception) => {
         const statsAntes = interception.response?.body?.stats;
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -217,13 +229,15 @@ describe('Componentes - Exclusão', () => {
           });
 
           cy.wait('@deleteComponente', { timeout: 30000 });
-          cy.wait('@getComponentes', { timeout: 30000 }).then((novaInterception) => {
-            const statsDepois = novaInterception.response?.body?.stats;
+          cy.wait('@getComponentes', { timeout: 30000 }).then(
+            (novaInterception) => {
+              const statsDepois = novaInterception.response?.body?.stats;
 
-            if (statsAntes && statsDepois) {
-              expect(statsDepois.total).to.be.lessThan(statsAntes.total);
-            }
-          });
+              if (statsAntes && statsDepois) {
+                expect(statsDepois.total).to.be.lessThan(statsAntes.total);
+              }
+            },
+          );
         }
       });
     });
@@ -233,12 +247,12 @@ describe('Componentes - Exclusão', () => {
     it('Deve ajustar paginação se era último item da página', () => {
       cy.wait('@getComponentes').then((interception) => {
         const paginationInfo = interception.response?.body?.data;
-        const componentes = paginationInfo?.docs || [];
+        const itens = paginationInfo?.docs || [];
 
-        if (paginationInfo?.page > 1 && componentes.length === 1) {
+        if (paginationInfo?.page > 1 && itens.length === 1) {
           const paginaAtual = paginationInfo.page;
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -266,13 +280,13 @@ describe('Componentes - Exclusão', () => {
   describe('Exclusão Permanente', () => {
     it('Componente excluído não deve aparecer em nova busca', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          const componenteNome = componentes[0].nome;
-          const componenteId = componentes[0]._id;
+        if (itens.length > 0) {
+          const itemNome = itens[0].nome;
+          const itemId = itens[0]._id;
 
-          cy.getByData('componente-card-0').within(() => {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -282,9 +296,9 @@ describe('Componentes - Exclusão', () => {
 
           cy.wait('@deleteComponente', { timeout: 30000 });
 
-          // Verifica que o componente não aparece mais na listagem
+          // Verifica que o item não aparece mais na listagem
           cy.wait('@getComponentes', { timeout: 30000 });
-          cy.get('body').should('not.contain', componenteNome);
+          cy.get('body').should('not.contain', itemNome);
         }
       });
     });
@@ -293,11 +307,11 @@ describe('Componentes - Exclusão', () => {
   describe('Confirmação Obrigatória', () => {
     it('Não deve excluir sem confirmação', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
-        const totalInicial = componentes.length;
+        const itens = interception.response?.body?.data?.docs || [];
+        const totalInicial = itens.length;
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -307,17 +321,17 @@ describe('Componentes - Exclusão', () => {
 
           cy.wait(500);
 
-          cy.getByData('componente-card-0').should('exist');
+          cy.getByData('item-card-0').should('exist');
         }
       });
     });
 
     it('Deve exibir feedback apropriado após exclusão', () => {
       cy.wait('@getComponentes').then((interception) => {
-        const componentes = interception.response?.body?.data?.docs || [];
+        const itens = interception.response?.body?.data?.docs || [];
 
-        if (componentes.length > 0) {
-          cy.getByData('componente-card-0').within(() => {
+        if (itens.length > 0) {
+          cy.getByData('item-card-0').within(() => {
             cy.getByData('delete-button').click();
           });
 
@@ -333,7 +347,7 @@ describe('Componentes - Exclusão', () => {
   });
 
   after(() => {
-    if (componenteTesteId) {
+    if (itemTesteId) {
       const apiUrl = Cypress.env('API_URL');
       const email = Cypress.env('TEST_USER_EMAIL');
       const senha = Cypress.env('TEST_USER_PASSWORD');
@@ -343,21 +357,21 @@ describe('Componentes - Exclusão', () => {
         url: `${apiUrl}/login`,
         body: { email, senha },
         timeout: 30000,
-        failOnStatusCode: false
+        failOnStatusCode: false,
       }).then((loginResponse) => {
         if (loginResponse.body?.data?.user?.accesstoken) {
           const token = loginResponse.body.data.user.accesstoken;
 
           cy.request({
             method: 'PATCH',
-            url: `${apiUrl}/componentes/${componenteTesteId}/inativar`,
+            url: `${apiUrl}/itens/${itemTesteId}/inativar`,
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
             timeout: 30000,
-            failOnStatusCode: false
+            failOnStatusCode: false,
           }).then(() => {
-            cy.log(`Componente de teste ${componenteTesteId} removido na limpeza`);
+            cy.log(`Componente de teste ${itemTesteId} removido na limpeza`);
           });
         }
       });

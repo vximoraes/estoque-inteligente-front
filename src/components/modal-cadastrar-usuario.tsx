@@ -19,7 +19,7 @@ interface ModalCadastrarUsuarioProps {
 export default function ModalCadastrarUsuario({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }: ModalCadastrarUsuarioProps) {
   const queryClient = useQueryClient();
 
@@ -36,7 +36,7 @@ export default function ModalCadastrarUsuario({
 
   const { setApiErrors } = useFormApiErrors<UsuarioFormData>(setError);
 
-  const nomeValue = watch("nome", "");
+  const nomeValue = watch('nome', '');
 
   const cadastrarMutation = useMutation({
     mutationFn: async (data: UsuarioFormData) => {
@@ -44,7 +44,7 @@ export default function ModalCadastrarUsuario({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['usuarios']
+        queryKey: ['usuarios'],
       });
 
       toast.success('Usuário cadastrado com sucesso!', {
@@ -118,7 +118,7 @@ export default function ModalCadastrarUsuario({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -152,7 +152,10 @@ export default function ModalCadastrarUsuario({
           {/* Campo Nome */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <label htmlFor="nome" className="block text-base font-medium text-gray-700">
+              <label
+                htmlFor="nome"
+                className="block text-base font-medium text-gray-700"
+              >
                 Nome <span className="text-red-500">*</span>
               </label>
               <span className="text-sm text-gray-500">
@@ -165,9 +168,10 @@ export default function ModalCadastrarUsuario({
               type="text"
               placeholder="Nome do usuário"
               maxLength={100}
-              {...register("nome")}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.nome ? 'border-red-500' : 'border-gray-300'
-                }`}
+              {...register('nome')}
+              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.nome ? 'border-red-500' : 'border-gray-300'
+              }`}
               disabled={isSubmitting || cadastrarMutation.isPending}
             />
             {errors.nome && (
@@ -177,7 +181,10 @@ export default function ModalCadastrarUsuario({
 
           {/* Campo E-mail */}
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-base font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-base font-medium text-gray-700"
+            >
               E-mail <span className="text-red-500">*</span>
             </label>
             <input
@@ -185,20 +192,25 @@ export default function ModalCadastrarUsuario({
               id="email"
               type="email"
               placeholder="E-mail do usuário"
-              {...register("email")}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+              {...register('email')}
+              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               disabled={isSubmitting || cadastrarMutation.isPending}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           {/* Mensagem de erro da API */}
           {cadastrarMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível cadastrar o usuário</div>
+              <div className="font-medium mb-1">
+                Não foi possível cadastrar o usuário
+              </div>
               <div className="text-red-500">
                 {(cadastrarMutation.error as any)?.response?.data?.message ||
                   (cadastrarMutation.error as any)?.message ||
@@ -227,7 +239,9 @@ export default function ModalCadastrarUsuario({
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {isSubmitting || cadastrarMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
+              {isSubmitting || cadastrarMutation.isPending
+                ? 'Cadastrando...'
+                : 'Cadastrar'}
             </Button>
           </div>
         </div>

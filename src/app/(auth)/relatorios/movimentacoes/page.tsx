@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import StatCard from "@/components/stat-card";
-import Cabecalho from "@/components/cabecalho";
-import ModalFiltros from "@/components/modal-filtros";
-import ModalExportarRelatorio from "@/components/modal-exportar-relatorio";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import StatCard from '@/components/stat-card';
+import Cabecalho from '@/components/cabecalho';
+import ModalFiltros from '@/components/modal-filtros';
+import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { get } from "@/lib/fetchData";
+} from '@/components/ui/table';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { get } from '@/lib/fetchData';
 import {
   Search,
   Filter,
@@ -24,13 +24,13 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-} from "lucide-react";
-import { useState, useEffect, useRef, Suspense } from "react";
-import { PulseLoader } from "react-spinners";
-import { toast, Slide } from "react-toastify";
-import { useSession } from "@/hooks/use-session";
-import { generateMovimentacoesPDF } from "@/utils/pdfGenerator";
-import { generateMovimentacoesCSV } from "@/utils/csvGenerator";
+} from 'lucide-react';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { PulseLoader } from 'react-spinners';
+import { toast, Slide } from 'react-toastify';
+import { useSession } from '@/hooks/use-session';
+import { generateMovimentacoesPDF } from '@/utils/pdfGenerator';
+import { generateMovimentacoesCSV } from '@/utils/csvGenerator';
 
 interface MovimentacoesApiResponse {
   data: {
@@ -42,8 +42,8 @@ interface MovimentacoesApiResponse {
 
 function RelatorioMovimentacoesPageContent() {
   const { user } = useSession();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tipoFilter, setTipoFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [tipoFilter, setTipoFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
@@ -58,19 +58,19 @@ function RelatorioMovimentacoesPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<MovimentacoesApiResponse>({
-    queryKey: ["movimentacoes-relatorio", searchTerm, tipoFilter],
+    queryKey: ['movimentacoes-relatorio', searchTerm, tipoFilter],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append("limit", "20");
-      params.append("page", page.toString());
+      params.append('limit', '20');
+      params.append('page', page.toString());
 
       if (tipoFilter) {
-        params.append("tipo", tipoFilter.toLowerCase());
+        params.append('tipo', tipoFilter.toLowerCase());
       }
 
       const queryString = params.toString();
-      const url = `/movimentacoes${queryString ? `?${queryString}` : ""}`;
+      const url = `/movimentacoes${queryString ? `?${queryString}` : ''}`;
 
       return await get<MovimentacoesApiResponse>(url);
     },
@@ -78,10 +78,10 @@ function RelatorioMovimentacoesPageContent() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    refetchOnMount: "always",
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
-      if (error?.message?.includes("Falha na autenticação")) {
+      if (error?.message?.includes('Falha na autenticação')) {
         return false;
       }
       return failureCount < 3;
@@ -97,7 +97,7 @@ function RelatorioMovimentacoesPageContent() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(observerTarget.current);
@@ -111,11 +111,11 @@ function RelatorioMovimentacoesPageContent() {
     data?.pages.flatMap((page) => page.data.docs) || [];
 
   const normalizeStr = (str: string) => {
-    return String(str ?? "")
+    return String(str ?? '')
       .toLowerCase()
       .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   };
 
   const movimentacoesFiltradas = todasMovimentacoes
@@ -124,13 +124,13 @@ function RelatorioMovimentacoesPageContent() {
 
       const matchSearch =
         !searchTerm ||
-        mov.componente?._id?.toLowerCase().includes(texto) ||
-        mov.componente?.nome?.toLowerCase().includes(texto) ||
+        mov.item?._id?.toLowerCase().includes(texto) ||
+        mov.item?.nome?.toLowerCase().includes(texto) ||
         mov.localizacao?.nome?.toLowerCase().includes(texto) ||
         mov.tipo?.toLowerCase().includes(texto) ||
         String(mov.quantidade).includes(searchTerm) ||
         new Date(mov.data_hora)
-          .toLocaleString("pt-BR")
+          .toLocaleString('pt-BR')
           .toLowerCase()
           .includes(texto);
 
@@ -150,10 +150,10 @@ function RelatorioMovimentacoesPageContent() {
 
   const totalMov = movimentacoesFiltradas.length;
   const entradas = movimentacoesFiltradas.filter(
-    (m) => normalizeStr(m.tipo) === "entrada"
+    (m) => normalizeStr(m.tipo) === 'entrada',
   ).length;
   const saidas = movimentacoesFiltradas.filter(
-    (m) => normalizeStr(m.tipo) === "saida"
+    (m) => normalizeStr(m.tipo) === 'saida',
   ).length;
 
   const handleSelectAll = () => {
@@ -175,24 +175,25 @@ function RelatorioMovimentacoesPageContent() {
     movimentacoesFiltradas.length > 0 &&
     selectedItems.size === movimentacoesFiltradas.length;
   const isSomeSelected =
-    selectedItems.size > 0 && selectedItems.size < movimentacoesFiltradas.length;
+    selectedItems.size > 0 &&
+    selectedItems.size < movimentacoesFiltradas.length;
 
   const handleExport = async (fileName: string, format: string) => {
     try {
       const selecionadas = movimentacoesFiltradas.filter((m) =>
-        selectedItems.has(m._id)
+        selectedItems.has(m._id),
       );
 
-      if (format === "PDF") {
+      if (format === 'PDF') {
         await generateMovimentacoesPDF({
           movimentacoes: selecionadas,
           fileName: fileName.trim(),
-          title: "RELATÓRIO DE MOVIMENTAÇÕES",
+          title: 'RELATÓRIO DE MOVIMENTAÇÕES',
           includeStats: true,
           userName: user?.name,
         });
-        toast.success("PDF gerado com sucesso!", {
-          position: "bottom-right",
+        toast.success('PDF gerado com sucesso!', {
+          position: 'bottom-right',
           autoClose: 3000,
           transition: Slide,
         });
@@ -202,16 +203,16 @@ function RelatorioMovimentacoesPageContent() {
           fileName: fileName.trim(),
           includeStats: true,
         });
-        toast.success("CSV gerado com sucesso!", {
-          position: "bottom-right",
+        toast.success('CSV gerado com sucesso!', {
+          position: 'bottom-right',
           autoClose: 3000,
           transition: Slide,
         });
       }
       setIsExportarModalOpen(false);
     } catch {
-      toast.error("Erro ao exportar relatório.", {
-        position: "bottom-right",
+      toast.error('Erro ao exportar relatório.', {
+        position: 'bottom-right',
         autoClose: 5000,
         transition: Slide,
       });
@@ -235,9 +236,7 @@ function RelatorioMovimentacoesPageContent() {
           >
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">
-                Estatísticas
-              </span>
+              <span className="font-semibold text-gray-700">Estatísticas</span>
             </div>
             {isStatsOpen ? (
               <ChevronUp className="w-5 h-5 text-gray-600" />
@@ -248,7 +247,7 @@ function RelatorioMovimentacoesPageContent() {
 
           <div
             className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${
-              isStatsOpen ? "block mt-4" : "hidden"
+              isStatsOpen ? 'block mt-4' : 'hidden'
             } xl:grid xl:mt-0`}
             data-test="stats-grid"
           >
@@ -311,15 +310,15 @@ function RelatorioMovimentacoesPageContent() {
             disabled={selectedItems.size === 0}
             className={`flex items-center gap-2 text-white transition-all ${
               selectedItems.size > 0
-                ? "hover:opacity-90 cursor-pointer"
-                : "opacity-50 cursor-not-allowed bg-gray-400"
+                ? 'hover:opacity-90 cursor-pointer'
+                : 'opacity-50 cursor-not-allowed bg-gray-400'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: "#306FCC" } : {}}
+            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
             data-test="exportar-button"
             onClick={() => setIsExportarModalOpen(true)}
             title={
               selectedItems.size === 0
-                ? "Selecione movimentações para exportar"
+                ? 'Selecione movimentações para exportar'
                 : `Exportar ${selectedItems.size} movimentação(ões)`
             }
           >
@@ -331,7 +330,10 @@ function RelatorioMovimentacoesPageContent() {
         {/* Filtro aplicado */}
         {tipoFilter && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
+            <div
+              className="flex flex-wrap items-center gap-2"
+              data-test="filters-container"
+            >
               <div
                 data-test="filter-tag-tipo"
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
@@ -339,7 +341,7 @@ function RelatorioMovimentacoesPageContent() {
                 <span className="font-medium">Tipo:</span>
                 <span>{tipoFilter}</span>
                 <button
-                  onClick={() => setTipoFilter("")}
+                  onClick={() => setTipoFilter('')}
                   className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                   title="Remover filtro de tipo"
                   data-test="remove-tipo-filter"
@@ -447,7 +449,7 @@ function RelatorioMovimentacoesPageContent() {
                       <TableRow
                         key={mov._id}
                         className="hover:bg-gray-50 border-b"
-                        style={{ height: "60px" }}
+                        style={{ height: '60px' }}
                         data-test={`movimentacao-row-${mov._id}`}
                       >
                         <TableCell
@@ -469,11 +471,11 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <span
                             className="truncate block max-w-[200px]"
-                            title={mov.componente?._id || mov._id}
+                            title={mov.item?._id || mov._id}
                           >
-                            {mov.componente?._id?.slice(-8) ||
+                            {mov.item?._id?.slice(-8) ||
                               mov._id?.slice(-8) ||
-                              "—"}
+                              '—'}
                           </span>
                         </TableCell>
 
@@ -483,9 +485,9 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <span
                             className="truncate block max-w-[200px]"
-                            title={mov.componente?.nome || "Sem nome"}
+                            title={mov.item?.nome || 'Sem nome'}
                           >
-                            {mov.componente?.nome || "Sem nome"}
+                            {mov.item?.nome || 'Sem nome'}
                           </span>
                         </TableCell>
 
@@ -502,23 +504,25 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <div className="flex justify-center">
                             {(() => {
-                              const tipoRaw = String(mov.tipo ?? "").toLowerCase();
-                              const isEntrada = tipoRaw.includes("entrada");
+                              const tipoRaw = String(
+                                mov.tipo ?? '',
+                              ).toLowerCase();
+                              const isEntrada = tipoRaw.includes('entrada');
                               const isSaida =
-                                tipoRaw.includes("saída") ||
-                                tipoRaw.includes("saida");
+                                tipoRaw.includes('saída') ||
+                                tipoRaw.includes('saida');
 
                               const classes = isEntrada
-                                ? "bg-green-100 text-green-800"
+                                ? 'bg-green-100 text-green-800'
                                 : isSaida
-                                ? "bg-red-100 text-red-800"
-                                : "bg-gray-100 text-gray-800";
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-800';
 
                               const textoFormatado = isEntrada
-                                ? "Entrada"
+                                ? 'Entrada'
                                 : isSaida
-                                ? "Saída"
-                                : String(mov.tipo ?? "").trim() || "-";
+                                  ? 'Saída'
+                                  : String(mov.tipo ?? '').trim() || '-';
 
                               return (
                                 <span
@@ -526,10 +530,10 @@ function RelatorioMovimentacoesPageContent() {
                                   title={textoFormatado}
                                   data-test={`badge-tipo-${
                                     isEntrada
-                                      ? "entrada"
+                                      ? 'entrada'
                                       : isSaida
-                                      ? "saida"
-                                      : "outro"
+                                        ? 'saida'
+                                        : 'outro'
                                   }`}
                                 >
                                   {textoFormatado}
@@ -545,9 +549,9 @@ function RelatorioMovimentacoesPageContent() {
                         >
                           <span
                             className="truncate block max-w-[200px]"
-                            title={mov.localizacao?.nome || "-"}
+                            title={mov.localizacao?.nome || '-'}
                           >
-                            {mov.localizacao?.nome || "-"}
+                            {mov.localizacao?.nome || '-'}
                           </span>
                         </TableCell>
 
@@ -558,10 +562,10 @@ function RelatorioMovimentacoesPageContent() {
                           <span
                             className="truncate block max-w-[150px]"
                             title={new Date(mov.data_hora).toLocaleString(
-                              "pt-BR"
+                              'pt-BR',
                             )}
                           >
-                            {new Date(mov.data_hora).toLocaleString("pt-BR")}
+                            {new Date(mov.data_hora).toLocaleString('pt-BR')}
                           </span>
                         </TableCell>
                       </TableRow>
@@ -595,8 +599,8 @@ function RelatorioMovimentacoesPageContent() {
                 </div>
                 <p className="text-gray-500 text-lg">
                   {searchTerm
-                    ? "Nenhuma movimentação encontrada para sua pesquisa."
-                    : "Não há movimentações cadastradas..."}
+                    ? 'Nenhuma movimentação encontrada para sua pesquisa.'
+                    : 'Não há movimentações cadastradas...'}
                 </p>
               </div>
             </div>
@@ -610,21 +614,21 @@ function RelatorioMovimentacoesPageContent() {
         categoriaFilter=""
         statusFilter={tipoFilter}
         onFiltersChange={(_, status) => {
-          let tipo = String(status ?? "")
+          let tipo = String(status ?? '')
             .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
 
-          if (tipo === "entrada") tipo = "entrada";
-          else if (tipo === "saida") tipo = "saida";
-          else tipo = "";
+          if (tipo === 'entrada') tipo = 'entrada';
+          else if (tipo === 'saida') tipo = 'saida';
+          else tipo = '';
 
           setTipoFilter(tipo);
         }}
         statusOptions={[
-          { value: "", label: "Todos" },
-          { value: "Entrada", label: "Entrada" },
-          { value: "Saída", label: "Saída" },
+          { value: '', label: 'Todos' },
+          { value: 'Entrada', label: 'Entrada' },
+          { value: 'Saída', label: 'Saída' },
         ]}
         showCategoria={false}
       />

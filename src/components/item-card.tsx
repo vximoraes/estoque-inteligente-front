@@ -1,9 +1,9 @@
-"use client"
+'use client';
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
 
-interface ComponenteCardSimplesProps {
+interface ItemCardSimplesProps {
   id: string;
   nome: string;
   categoria: string;
@@ -13,15 +13,15 @@ interface ComponenteCardSimplesProps {
   dataTestId?: string;
 }
 
-export default function ComponenteCardSimples({
+export default function ItemCardSimples({
   id,
   nome,
   categoria,
   imagem,
   onClick,
   isSelected = false,
-  dataTestId
-}: ComponenteCardSimplesProps) {
+  dataTestId,
+}: ItemCardSimplesProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const imagemComTimestamp = React.useMemo(() => {
@@ -41,18 +41,24 @@ export default function ComponenteCardSimples({
     <div
       onClick={() => onClick(id, nome)}
       className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
-        isSelected ? 'border-blue-500 bg-blue-50 selected' : 'border-gray-200 hover:border-blue-300'
+        isSelected
+          ? 'border-blue-500 bg-blue-50 selected'
+          : 'border-gray-200 hover:border-blue-300'
       }`}
       data-test={dataTestId}
     >
       <div className="flex flex-col items-center text-center gap-3">
-        {/* Imagem do componente */}
-        <div 
+        {/* Imagem do item */}
+        <div
           className={`w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
-            imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+            imagemComTimestamp
+              ? 'cursor-pointer hover:opacity-80 transition-opacity'
+              : ''
           }`}
           onClick={handleImageClick}
-          title={imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''}
+          title={
+            imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''
+          }
         >
           {imagemComTimestamp ? (
             <img
@@ -65,7 +71,7 @@ export default function ComponenteCardSimples({
           )}
         </div>
 
-        {/* Nome do componente */}
+        {/* Nome do item */}
         <div className="w-full min-h-[2.5rem] flex items-start">
           <h3
             className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 w-full"
@@ -77,10 +83,7 @@ export default function ComponenteCardSimples({
         </div>
 
         {/* Categoria */}
-        <p
-          className="text-xs text-gray-500 truncate w-full"
-          title={categoria}
-        >
+        <p className="text-xs text-gray-500 truncate w-full" title={categoria}>
           {categoria}
         </p>
       </div>
@@ -91,7 +94,7 @@ export default function ComponenteCardSimples({
           isOpen={isImageModalOpen}
           onClose={() => setIsImageModalOpen(false)}
           imagemUrl={imagemComTimestamp}
-          nomeComponente={nome}
+          nomeItem={nome}
         />
       )}
     </div>
