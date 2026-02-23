@@ -1,6 +1,6 @@
-export interface ComponenteOrcamento {
+export interface ItemOrcamento {
   _id?: string;
-  componente: string;
+  item: string;
   nome: string;
   fornecedor: string;
   fornecedor_nome?: string;
@@ -14,7 +14,7 @@ export interface Orcamento {
   nome: string;
   descricao?: string;
   total: number;
-  componentes: ComponenteOrcamento[];
+  itens: ItemOrcamento[];
   usuario: string;
   createdAt?: string;
   updatedAt?: string;

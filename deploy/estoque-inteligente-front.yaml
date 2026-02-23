@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: estoque-inteligente-front
+spec:
+  selector:
+    matchLabels:
+      app: estoque-inteligente-front
+  template:
+    metadata:
+      labels:
+        app: estoque-inteligente-front
+    spec:
+      containers:
+        - name: estoque-inteligente-front
+          image: vximoraes/estoque-inteligente-front:latest
+          resources: {}
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: estoque-inteligente
+spec:
+  selector:
+    app: estoque-inteligente-front
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000

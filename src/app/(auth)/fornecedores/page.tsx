@@ -1,37 +1,43 @@
-"use client"
-import Cabecalho from "@/components/cabecalho"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+'use client';
+import Cabecalho from '@/components/cabecalho';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import ModalExcluirFornecedor from "@/components/modal-excluir-fornecedor"
-import ModalDetalhesFornecedor from "@/components/modal-detalhes-fornecedor"
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { get } from '@/lib/fetchData'
-import { FornecedorApiResponse } from '@/types/fornecedores'
-import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { useState, useEffect, useRef, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ToastContainer, toast, Slide } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { PulseLoader } from 'react-spinners'
+} from '@/components/ui/table';
+import ModalExcluirFornecedor from '@/components/modal-excluir-fornecedor';
+import ModalDetalhesFornecedor from '@/components/modal-detalhes-fornecedor';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { get } from '@/lib/fetchData';
+import { FornecedorApiResponse } from '@/types/fornecedores';
+import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
 
 function PageFornecedoresContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
-  const [excluirFornecedorId, setExcluirFornecedorId] = useState<string | null>(null)
-  const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false)
-  const [detalhesFornecedorId, setDetalhesFornecedorId] = useState<string | null>(null)
-  const [atualizandoFornecedorId, setAtualizandoFornecedorId] = useState<string | null>(null)
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
-  const observerTarget = useRef<HTMLDivElement>(null)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
+  const [excluirFornecedorId, setExcluirFornecedorId] = useState<string | null>(
+    null,
+  );
+  const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
+  const [detalhesFornecedorId, setDetalhesFornecedorId] = useState<
+    string | null
+  >(null);
+  const [atualizandoFornecedorId, setAtualizandoFornecedorId] = useState<
+    string | null
+  >(null);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -41,63 +47,63 @@ function PageFornecedoresContent() {
     refetch,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery<FornecedorApiResponse>({
     queryKey: ['fornecedores', searchTerm],
     queryFn: async ({ pageParam }) => {
-      const page = (pageParam as number) || 1
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('nome', searchTerm)
-      params.append('limit', '20')
-      params.append('page', page.toString())
+      const page = (pageParam as number) || 1;
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('nome', searchTerm);
+      params.append('limit', '20');
+      params.append('page', page.toString());
 
-      const queryString = params.toString()
-      const url = `/fornecedores${queryString ? `?${queryString}` : ''}`
+      const queryString = params.toString();
+      const url = `/fornecedores${queryString ? `?${queryString}` : ''}`;
 
-      return await get<FornecedorApiResponse>(url)
+      return await get<FornecedorApiResponse>(url);
     },
     getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
-        return false
+        return false;
       }
-      return failureCount < 3
+      return failureCount < 3;
     },
-  })
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
+          fetchNextPage();
         }
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1 },
+    );
 
     if (observerTarget.current) {
-      observer.observe(observerTarget.current)
+      observer.observe(observerTarget.current);
     }
 
     return () => {
       if (observerTarget.current) {
-        observer.unobserve(observerTarget.current)
+        observer.unobserve(observerTarget.current);
       }
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
-    const success = searchParams.get('success')
-    const fornecedorId = searchParams.get('id')
+    const success = searchParams.get('success');
+    const fornecedorId = searchParams.get('id');
 
     if (success === 'created') {
       if (fornecedorId) {
-        setAtualizandoFornecedorId(fornecedorId)
+        setAtualizandoFornecedorId(fornecedorId);
       }
       toast.success('Fornecedor criado com sucesso!', {
         position: 'bottom-right',
@@ -107,12 +113,12 @@ function PageFornecedoresContent() {
         pauseOnHover: true,
         draggable: false,
         transition: Slide,
-      })
-      refetch()
-      router.replace('/fornecedores')
+      });
+      refetch();
+      router.replace('/fornecedores');
     } else if (success === 'updated') {
       if (fornecedorId) {
-        setAtualizandoFornecedorId(fornecedorId)
+        setAtualizandoFornecedorId(fornecedorId);
       }
       toast.success('Fornecedor atualizado com sucesso!', {
         position: 'bottom-right',
@@ -122,33 +128,33 @@ function PageFornecedoresContent() {
         pauseOnHover: true,
         draggable: false,
         transition: Slide,
-      })
-      refetch()
-      router.replace('/fornecedores')
+      });
+      refetch();
+      router.replace('/fornecedores');
     }
-  }, [searchParams, router, refetch])
+  }, [searchParams, router, refetch]);
 
   useEffect(() => {
     if (!isFetching && atualizandoFornecedorId) {
-      setAtualizandoFornecedorId(null)
+      setAtualizandoFornecedorId(null);
     }
-  }, [isFetching, atualizandoFornecedorId])
+  }, [isFetching, atualizandoFornecedorId]);
 
   const handleAdicionarClick = () => {
-    router.push('/fornecedores/adicionar')
-  }
+    router.push('/fornecedores/adicionar');
+  };
 
   const handleEdit = (id: string) => {
-    router.push(`/fornecedores/editar/${id}`)
-  }
+    router.push(`/fornecedores/editar/${id}`);
+  };
 
   const handleDelete = (id: string) => {
-    setExcluirFornecedorId(id)
-    setIsExcluirModalOpen(true)
-  }
+    setExcluirFornecedorId(id);
+    setIsExcluirModalOpen(true);
+  };
 
   const handleExcluirSuccess = async () => {
-    setIsRefetchingAfterDelete(true)
+    setIsRefetchingAfterDelete(true);
 
     toast.success('Fornecedor excluído com sucesso!', {
       position: 'bottom-right',
@@ -158,19 +164,19 @@ function PageFornecedoresContent() {
       pauseOnHover: true,
       draggable: false,
       transition: Slide,
-    })
+    });
 
-    router.refresh()
-    await refetch()
-    setIsRefetchingAfterDelete(false)
-  }
+    router.refresh();
+    await refetch();
+    setIsRefetchingAfterDelete(false);
+  };
 
   const handleViewDetails = (id: string) => {
-    setDetalhesFornecedorId(id)
-    setIsDetalhesModalOpen(true)
-  }
+    setDetalhesFornecedorId(id);
+    setIsDetalhesModalOpen(true);
+  };
 
-  const fornecedores = data?.pages.flatMap((page) => page.data.docs) || []
+  const fornecedores = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
@@ -214,7 +220,9 @@ function PageFornecedoresContent() {
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando fornecedores...</p>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando fornecedores...
+              </p>
             </div>
           ) : fornecedores.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
@@ -222,29 +230,49 @@ function PageFornecedoresContent() {
                 <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                        NOME
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                        URL
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                        CONTATO
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                        DESCRIÇÃO
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">
+                        AÇÕES
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fornecedores.map((fornecedor) => (
-                      <TableRow key={fornecedor._id} className="hover:bg-gray-50 border-b relative" style={{ height: '60px' }}>
-                        {atualizandoFornecedorId === fornecedor._id && isFetching && (
-                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
-                            <div className="flex flex-col items-center">
-                              <div className="relative w-8 h-8">
-                                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                      <TableRow
+                        key={fornecedor._id}
+                        className="hover:bg-gray-50 border-b relative"
+                        style={{ height: '60px' }}
+                      >
+                        {atualizandoFornecedorId === fornecedor._id &&
+                          isFetching && (
+                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+                              <div className="flex flex-col items-center">
+                                <div className="relative w-8 h-8">
+                                  <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                                  <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                                </div>
+                                <p className="mt-2 text-sm text-gray-600">
+                                  Atualizando...
+                                </p>
                               </div>
-                              <p className="mt-2 text-sm text-gray-600">Atualizando...</p>
                             </div>
-                          </div>
-                        )}
+                          )}
                         <TableCell className="font-medium text-left px-8 py-2">
-                          <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={fornecedor.nome}
+                          >
                             {fornecedor.nome}
                           </span>
                         </TableCell>
@@ -264,12 +292,18 @@ function PageFornecedoresContent() {
                           )}
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
-                          <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
+                          <span
+                            className="truncate block max-w-[150px]"
+                            title={fornecedor.contato || '-'}
+                          >
                             {fornecedor.contato || '-'}
                           </span>
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
-                          <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={fornecedor.descricao || '-'}
+                          >
                             {fornecedor.descricao || '-'}
                           </span>
                         </TableCell>
@@ -304,9 +338,16 @@ function PageFornecedoresContent() {
                 </table>
 
                 {/* Observer target for infinite scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                >
                   {isFetchingNextPage && (
-                    <PulseLoader color="#3b82f6" size={5} speedMultiplier={0.8} />
+                    <PulseLoader
+                      color="#3b82f6"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
                   )}
                 </div>
               </div>
@@ -318,7 +359,9 @@ function PageFornecedoresContent() {
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {searchTerm ? 'Nenhum fornecedor encontrado para sua pesquisa.' : 'Não há fornecedores cadastrados...'}
+                  {searchTerm
+                    ? 'Nenhum fornecedor encontrado para sua pesquisa.'
+                    : 'Não há fornecedores cadastrados...'}
                 </p>
               </div>
             </div>
@@ -341,12 +384,14 @@ function PageFornecedoresContent() {
         <ModalExcluirFornecedor
           isOpen={isExcluirModalOpen}
           onClose={() => {
-            setIsExcluirModalOpen(false)
-            setExcluirFornecedorId(null)
+            setIsExcluirModalOpen(false);
+            setExcluirFornecedorId(null);
           }}
           onSuccess={handleExcluirSuccess}
           fornecedorId={excluirFornecedorId}
-          fornecedorNome={fornecedores.find(f => f._id === excluirFornecedorId)?.nome || ''}
+          fornecedorNome={
+            fornecedores.find((f) => f._id === excluirFornecedorId)?.nome || ''
+          }
         />
       )}
 
@@ -355,28 +400,30 @@ function PageFornecedoresContent() {
         <ModalDetalhesFornecedor
           isOpen={isDetalhesModalOpen}
           onClose={() => {
-            setIsDetalhesModalOpen(false)
-            setDetalhesFornecedorId(null)
+            setIsDetalhesModalOpen(false);
+            setDetalhesFornecedorId(null);
           }}
           fornecedorId={detalhesFornecedorId}
         />
       )}
     </div>
-  )
+  );
 }
 
 export default function PageFornecedores() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
         </div>
-        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
-      </div>
-    }>
+      }
+    >
       <PageFornecedoresContent />
     </Suspense>
-  )
+  );
 }

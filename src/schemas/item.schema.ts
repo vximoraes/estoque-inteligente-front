@@ -1,13 +1,11 @@
 import { z } from 'zod';
 
-export const componenteSchema = z.object({
+export const itemSchema = z.object({
   nome: z
     .string()
     .min(1, 'O campo nome é obrigatório')
     .max(100, 'O nome deve ter no máximo 100 caracteres'),
-  categoria: z
-    .string()
-    .min(1, 'A categoria é obrigatória'),
+  categoria: z.string().min(1, 'A categoria é obrigatória'),
   estoqueMinimo: z
     .number()
     .min(0, 'O estoque mínimo deve ser maior ou igual a 0')
@@ -20,13 +18,11 @@ export const componenteSchema = z.object({
     .optional(),
 });
 
-export type ComponenteFormData = z.infer<typeof componenteSchema>;
+export type ItemFormData = z.infer<typeof itemSchema>;
 
+export const itemUpdateSchema = itemSchema.partial();
 
-export const componenteUpdateSchema = componenteSchema.partial();
-
-export type ComponenteUpdateFormData = z.infer<typeof componenteUpdateSchema>;
-
+export type ItemUpdateFormData = z.infer<typeof itemUpdateSchema>;
 
 export const categoriaSchema = z.object({
   nome: z
@@ -36,7 +32,6 @@ export const categoriaSchema = z.object({
 });
 
 export type CategoriaFormData = z.infer<typeof categoriaSchema>;
-
 
 export const localizacaoSchema = z.object({
   nome: z

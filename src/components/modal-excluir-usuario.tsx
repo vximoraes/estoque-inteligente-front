@@ -18,7 +18,7 @@ export default function ModalExcluirUsuario({
   onClose,
   usuarioId,
   usuarioNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirUsuarioProps) {
   const queryClient = useQueryClient();
 
@@ -28,7 +28,7 @@ export default function ModalExcluirUsuario({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['usuarios']
+        queryKey: ['usuarios'],
       });
 
       onSuccess?.();
@@ -92,7 +92,7 @@ export default function ModalExcluirUsuario({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -120,7 +120,14 @@ export default function ModalExcluirUsuario({
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o usuário <span data-test="modal-excluir-nome-usuario" className="font-semibold">{usuarioNome}</span>?
+                Tem certeza que deseja excluir o usuário{' '}
+                <span
+                  data-test="modal-excluir-nome-usuario"
+                  className="font-semibold"
+                >
+                  {usuarioNome}
+                </span>
+                ?
               </p>
             </div>
           </div>
@@ -128,7 +135,9 @@ export default function ModalExcluirUsuario({
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível excluir o usuário</div>
+              <div className="font-medium mb-1">
+                Não foi possível excluir o usuário
+              </div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||

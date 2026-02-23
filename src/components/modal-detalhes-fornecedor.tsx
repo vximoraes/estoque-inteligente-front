@@ -1,110 +1,114 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { X, ExternalLink, Copy, Check } from 'lucide-react'
-import { get } from '@/lib/fetchData'
-import { Fornecedor } from '@/types/fornecedores'
+'use client';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X, ExternalLink, Copy, Check } from 'lucide-react';
+import { get } from '@/lib/fetchData';
+import { Fornecedor } from '@/types/fornecedores';
 
 interface FornecedorApiResponse {
   data: Fornecedor;
 }
 
 interface ModalDetalhesFornecedorProps {
-  isOpen: boolean
-  onClose: () => void
-  fornecedorId: string
+  isOpen: boolean;
+  onClose: () => void;
+  fornecedorId: string;
 }
 
 export default function ModalDetalhesFornecedor({
   isOpen,
   onClose,
-  fornecedorId
+  fornecedorId,
 }: ModalDetalhesFornecedorProps) {
-  const [fornecedor, setFornecedor] = useState<Fornecedor | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [fornecedor, setFornecedor] = useState<Fornecedor | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && fornecedorId) {
-      loadFornecedor()
+      loadFornecedor();
     }
-  }, [isOpen, fornecedorId])
+  }, [isOpen, fornecedorId]);
 
   const loadFornecedor = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await get<FornecedorApiResponse>(`/fornecedores/${fornecedorId}`)
-      setFornecedor(response.data)
+      const response = await get<FornecedorApiResponse>(
+        `/fornecedores/${fornecedorId}`,
+      );
+      setFornecedor(response.data);
     } catch (err: any) {
-      console.error('Erro ao carregar fornecedor:', err)
-      setError(err?.response?.data?.message || 'Erro ao carregar dados do fornecedor')
+      console.error('Erro ao carregar fornecedor:', err);
+      setError(
+        err?.response?.data?.message || 'Erro ao carregar dados do fornecedor',
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen, onClose])
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   const handleClose = () => {
-    setFornecedor(null)
-    setError(null)
-    setCopiedField(null)
-    onClose()
-  }
+    setFornecedor(null);
+    setError(null);
+    setCopiedField(null);
+    onClose();
+  };
 
   const handleCopy = async (text: string, field: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedField(field)
-      setTimeout(() => setCopiedField(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
-      console.error('Erro ao copiar:', err)
+      console.error('Erro ao copiar:', err);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose()
+      handleClose();
     }
-  }
+  };
 
   const modalContent = (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -133,7 +137,9 @@ export default function ModalDetalhesFornecedor({
               </p>
             )}
             {isLoading ? (
-              <p className="text-lg font-semibold text-blue-600">Carregando...</p>
+              <p className="text-lg font-semibold text-blue-600">
+                Carregando...
+              </p>
             ) : fornecedor?.url ? (
               <a
                 href={fornecedor.url}
@@ -146,18 +152,21 @@ export default function ModalDetalhesFornecedor({
                 <ExternalLink size={18} className="flex-shrink-0" />
               </a>
             ) : (
-              <p className="text-lg font-semibold text-gray-400">Sem URL cadastrada</p>
+              <p className="text-lg font-semibold text-gray-400">
+                Sem URL cadastrada
+              </p>
             )}
           </div>
         </div>
 
         {/* Conteúdo */}
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
-
           {/* Mensagem de erro */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível carregar o fornecedor</div>
+              <div className="font-medium mb-1">
+                Não foi possível carregar o fornecedor
+              </div>
               <div className="text-red-500">{error}</div>
             </div>
           )}
@@ -179,7 +188,10 @@ export default function ModalDetalhesFornecedor({
                     Contato
                   </label>
                   <div className="flex items-center gap-2">
-                    <p className="text-base text-gray-900 truncate flex-1" title={fornecedor.contato}>
+                    <p
+                      className="text-base text-gray-900 truncate flex-1"
+                      title={fornecedor.contato}
+                    >
                       {fornecedor.contato}
                     </p>
                     <button
@@ -187,7 +199,11 @@ export default function ModalDetalhesFornecedor({
                       className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar contato"
                     >
-                      {copiedField === 'contato' ? <Check size={16} /> : <Copy size={16} />}
+                      {copiedField === 'contato' ? (
+                        <Check size={16} />
+                      ) : (
+                        <Copy size={16} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -202,13 +218,16 @@ export default function ModalDetalhesFornecedor({
                         Criado em
                       </label>
                       <p className="text-base text-gray-600">
-                        {new Date(fornecedor.createdAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {new Date(fornecedor.createdAt).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
                       </p>
                     </div>
                   )}
@@ -218,13 +237,16 @@ export default function ModalDetalhesFornecedor({
                         Atualizado em
                       </label>
                       <p className="text-base text-gray-600">
-                        {new Date(fornecedor.updatedAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {new Date(fornecedor.updatedAt).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
                       </p>
                     </div>
                   )}
@@ -235,9 +257,9 @@ export default function ModalDetalhesFornecedor({
         </div>
       </div>
     </div>
-  )
+  );
 
   return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
-    : null
+    : null;
 }

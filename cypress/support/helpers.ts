@@ -1,4 +1,6 @@
-export const generateUniqueComponentName = (prefix = 'Componente Teste'): string => {
+export const generateUniqueComponentName = (
+  prefix = 'Componente Teste',
+): string => {
   return `${prefix} ${Date.now()}`;
 };
 
@@ -6,7 +8,10 @@ export const waitForElementToDisappear = (selector: string, timeout = 5000) => {
   cy.get(selector, { timeout }).should('not.exist');
 };
 
-export const verifyToastMessage = (message: string | RegExp, timeout = 5000) => {
+export const verifyToastMessage = (
+  message: string | RegExp,
+  timeout = 5000,
+) => {
   cy.contains(message, { timeout }).should('be.visible');
 };
 
@@ -17,33 +22,35 @@ export const fillComponenteForm = (dados: {
   descricao?: string;
 }) => {
   cy.get('input[name="nome"]').clear().type(dados.nome);
-  
+
   if (dados.categoria) {
     cy.get('select[name="categoria"]').select(dados.categoria);
   }
-  
+
   if (dados.estoqueMinimo !== undefined) {
-    cy.get('input[name="estoque_minimo"]').clear().type(dados.estoqueMinimo.toString());
+    cy.get('input[name="estoque_minimo"]')
+      .clear()
+      .type(dados.estoqueMinimo.toString());
   }
-  
+
   if (dados.descricao) {
     cy.get('textarea[name="descricao"]').clear().type(dados.descricao);
   }
 };
 
-export const openComponenteMenu = (index: number) => {
-  cy.getByData(`componente-card-${index}`).within(() => {
+export const openItemMenu = (index: number) => {
+  cy.getByData(`item-card-${index}`).within(() => {
     cy.get('button').first().click();
   });
 };
 
-export const openEntradaModal = (componenteIndex: number) => {
-  openComponenteMenu(componenteIndex);
+export const openEntradaModal = (itemIndex: number) => {
+  openItemMenu(itemIndex);
   cy.contains('Entrada').click();
 };
 
-export const openSaidaModal = (componenteIndex: number) => {
-  openComponenteMenu(componenteIndex);
+export const openSaidaModal = (itemIndex: number) => {
+  openItemMenu(itemIndex);
   cy.contains('Saída').click();
 };
 
@@ -63,10 +70,10 @@ export const registrarSaida = (localizacaoId: string, quantidade: number) => {
   });
 };
 
-export const excluirComponente = (componenteIndex: number) => {
-  openComponenteMenu(componenteIndex);
+export const excluirComponente = (itemIndex: number) => {
+  openItemMenu(itemIndex);
   cy.contains('Excluir').click();
-  
+
   cy.get('[role="dialog"]').within(() => {
     cy.contains('button', /excluir|deletar|confirmar/i).click();
   });
@@ -77,26 +84,29 @@ export const aplicarFiltros = (filtros: {
   status?: string;
 }) => {
   cy.contains('button', 'Filtros').click();
-  
+
   cy.get('[role="dialog"]').within(() => {
     if (filtros.categoria) {
-      cy.contains('Categoria').parent().find('select').select(filtros.categoria);
+      cy.contains('Categoria')
+        .parent()
+        .find('select')
+        .select(filtros.categoria);
     }
-    
+
     if (filtros.status) {
       cy.contains('Status').parent().find('select').select(filtros.status);
     }
-    
+
     cy.contains('button', 'Aplicar Filtros').click();
   });
 };
 
 export const limparPesquisa = () => {
-  cy.get('input[placeholder*="Pesquisar componente"]').clear();
+  cy.get('input[placeholder*="Pesquisar item"]').clear();
 };
 
 export const pesquisarComponente = (nome: string) => {
-  cy.get('input[placeholder*="Pesquisar componente"]').clear().type(nome);
+  cy.get('input[placeholder*="Pesquisar item"]').clear().type(nome);
 };
 
 export const irParaProximaPagina = () => {
@@ -114,9 +124,9 @@ export const verificarCardComponente = (
     categoria?: string;
     quantidade?: number;
     status?: string;
-  }
+  },
 ) => {
-  cy.getByData(`componente-card-${index}`).within(() => {
+  cy.getByData(`item-card-${index}`).within(() => {
     if (dados.nome) {
       cy.contains(dados.nome).should('be.visible');
     }
@@ -133,56 +143,61 @@ export const verificarCardComponente = (
 };
 
 export const waitForAPIRequests = (aliases: string[], timeout = 10000) => {
-  aliases.forEach(alias => {
+  aliases.forEach((alias) => {
     cy.wait(alias, { timeout });
   });
 };
 
-export const limparComponenteTeste = (componenteId: string) => {
+export const limparComponenteTeste = (itemId: string) => {
   const apiUrl = Cypress.env('API_URL');
-  
+
   cy.request({
     method: 'PATCH',
-    url: `${apiUrl}/componentes/${componenteId}/inativar`,
+    url: `${apiUrl}/itens/${itemId}/inativar`,
     headers: {
-      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`,
     },
-    failOnStatusCode: false
+    failOnStatusCode: false,
   }).then(() => {
-    cy.log(`Componente ${componenteId} removido`);
+    cy.log(`Componente ${itemId} removido`);
   });
 };
 
 export const verificarEstatisticas = () => {
-  const stats = ['Total de Componentes', 'Em Estoque', 'Baixo Estoque', 'Indisponível'];
-  
-  stats.forEach(stat => {
+  const stats = [
+    'Total de Componentes',
+    'Em Estoque',
+    'Baixo Estoque',
+    'Indisponível',
+  ];
+
+  stats.forEach((stat) => {
     cy.contains(stat).should('be.visible');
   });
 };
 
 export const setupComponentesIntercepts = () => {
   const apiUrl = Cypress.env('API_URL');
-  
-  cy.intercept('GET', `${apiUrl}/componentes*`).as('getComponentes');
-  cy.intercept('GET', `${apiUrl}/componentes/*`).as('getComponenteById');
-  cy.intercept('POST', `${apiUrl}/componentes`).as('createComponente');
-  cy.intercept('PUT', `${apiUrl}/componentes/*`).as('updateComponente');
-  cy.intercept('PATCH', `${apiUrl}/componentes/*`).as('patchComponente');
-  cy.intercept('PATCH', `${apiUrl}/componentes/*/inativar`).as('deleteComponente');
+
+  cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
+  cy.intercept('GET', `${apiUrl}/itens/*`).as('getComponenteById');
+  cy.intercept('POST', `${apiUrl}/itens`).as('createComponente');
+  cy.intercept('PUT', `${apiUrl}/itens/*`).as('updateComponente');
+  cy.intercept('PATCH', `${apiUrl}/itens/*`).as('patchComponente');
+  cy.intercept('PATCH', `${apiUrl}/itens/*/inativar`).as('deleteComponente');
   cy.intercept('GET', `${apiUrl}/categorias*`).as('getCategorias');
   cy.intercept('GET', `${apiUrl}/localizacoes*`).as('getLocalizacoes');
   cy.intercept('POST', `${apiUrl}/movimentacoes`).as('createMovimentacao');
-  cy.intercept('GET', `${apiUrl}/estoques/componente/*`).as('getEstoquesComponente');
+  cy.intercept('GET', `${apiUrl}/estoques/item/*`).as('getEstoquesComponente');
 };
 
 export const loginAndNavigateToComponentes = () => {
   const frontendUrl = Cypress.env('FRONTEND_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
-  
+
   cy.visit(frontendUrl);
   cy.login(email, senha);
-  cy.visit(`${frontendUrl}/componentes`);
+  cy.visit(`${frontendUrl}/itens`);
   cy.wait('@getComponentes', { timeout: 10000 });
 };

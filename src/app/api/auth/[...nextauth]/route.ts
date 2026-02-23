@@ -1,31 +1,35 @@
-import NextAuth, { AuthOptions, User } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import type { JWT } from "next-auth/jwt";
+import NextAuth, { AuthOptions, User } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import type { JWT } from 'next-auth/jwt';
 
 function parseTimeToMs(timeString: string): number {
   const units: { [key: string]: number } = {
-    's': 1000,           
-    'm': 60 * 1000,      
-    'h': 60 * 60 * 1000, 
-    'd': 24 * 60 * 60 * 1000 
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
   };
 
   const match = timeString.match(/^(\d+)([smhd])$/);
   if (!match) {
-    console.warn(`Formato de tempo inválido: ${timeString}, usando padrão de 1 hora`);
-    return 60 * 60 * 1000; 
+    console.warn(
+      `Formato de tempo inválido: ${timeString}, usando padrão de 1 hora`,
+    );
+    return 60 * 60 * 1000;
   }
 
   const [, value, unit] = match;
   return parseInt(value) * units[unit];
 }
 
-const ACCESS_TOKEN_EXPIRATION = process.env.JWT_ACCESS_TOKEN_EXPIRATION || "1h";
+const ACCESS_TOKEN_EXPIRATION = process.env.JWT_ACCESS_TOKEN_EXPIRATION || '1h';
 const ACCESS_TOKEN_EXPIRATION_MS = parseTimeToMs(ACCESS_TOKEN_EXPIRATION);
 
 const REFRESH_BUFFER_MS = Math.max(2000, ACCESS_TOKEN_EXPIRATION_MS * 0.1);
 
-console.log(`[NextAuth Config] Token expira em: ${ACCESS_TOKEN_EXPIRATION} (${ACCESS_TOKEN_EXPIRATION_MS}ms)`);
+console.log(
+  `[NextAuth Config] Token expira em: ${ACCESS_TOKEN_EXPIRATION} (${ACCESS_TOKEN_EXPIRATION_MS}ms)`,
+);
 console.log(`[NextAuth Config] Buffer de renovação: ${REFRESH_BUFFER_MS}ms`);
 
 interface LoginResponse {
@@ -74,27 +78,27 @@ interface RefreshResponse {
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
-    
-    console.log("Tentando renovar token...");
-    
+
+    console.log('Tentando renovar token...');
+
     const response = await fetch(`${apiUrl}/refresh`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.refreshToken}`
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token.refreshToken}`,
       },
       body: JSON.stringify({ accesstoken: token.accessToken }),
     });
 
     if (!response.ok) {
-      console.error("Falha ao renovar token, status:", response.status);
-      throw new Error("Falha ao renovar token");
+      console.error('Falha ao renovar token, status:', response.status);
+      throw new Error('Falha ao renovar token');
     }
 
-    const json = await response.json() as RefreshResponse;
+    const json = (await response.json()) as RefreshResponse;
     const userData = json.data.user;
 
-    console.log("Token renovado com sucesso");
+    console.log('Token renovado com sucesso');
 
     return {
       ...token,
@@ -110,10 +114,10 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       fotoPerfil: userData.fotoPerfil ?? token.fotoPerfil,
     };
   } catch (err) {
-    console.error("Erro ao renovar token:", err);
-    return { 
-      ...token, 
-      error: "RefreshAccessTokenError" as const 
+    console.error('Erro ao renovar token:', err);
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError' as const,
     };
   }
 }
@@ -121,33 +125,33 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        senha: { label: "Senha", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        senha: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.senha) {
-          throw new Error("Email e senha são obrigatórios");
+          throw new Error('Email e senha são obrigatórios');
         }
 
         try {
           const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
           const response = await fetch(`${apiUrl}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               email: credentials.email,
-              senha: credentials.senha
-            })
+              senha: credentials.senha,
+            }),
           });
 
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData?.message || "Erro ao fazer login");
+            throw new Error(errorData?.message || 'Erro ao fazer login');
           }
 
-          const json = await response.json() as LoginResponse;
+          const json = (await response.json()) as LoginResponse;
           const { data } = json;
 
           if (data?.user) {
@@ -167,17 +171,21 @@ export const authOptions: AuthOptions = {
 
           return null;
         } catch (error) {
-          console.error("Erro no login:", error);
-          throw new Error(error instanceof Error ? error.message : "Erro ao fazer login");
+          console.error('Erro no login:', error);
+          throw new Error(
+            error instanceof Error ? error.message : 'Erro ao fazer login',
+          );
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         const expiresAt = Date.now() + ACCESS_TOKEN_EXPIRATION_MS;
-        console.log(`[JWT Callback] Novo login - Token expira em: ${new Date(expiresAt).toLocaleString()}`);
+        console.log(
+          `[JWT Callback] Novo login - Token expira em: ${new Date(expiresAt).toLocaleString()}`,
+        );
         return {
           ...token,
           id: user.id,
@@ -193,7 +201,7 @@ export const authOptions: AuthOptions = {
         };
       }
 
-      if (trigger === "update" && session) {
+      if (trigger === 'update' && session) {
         return { ...token, ...session };
       }
 
@@ -202,13 +210,17 @@ export const authOptions: AuthOptions = {
       const timeUntilExpiry = expiresAt - now;
       const shouldRefresh = timeUntilExpiry < REFRESH_BUFFER_MS;
 
-      console.log(`[JWT Callback] Verificando token - Tempo até expirar: ${Math.floor(timeUntilExpiry / 1000)}s, Deve renovar: ${shouldRefresh}`);
+      console.log(
+        `[JWT Callback] Verificando token - Tempo até expirar: ${Math.floor(timeUntilExpiry / 1000)}s, Deve renovar: ${shouldRefresh}`,
+      );
 
       if (!shouldRefresh) {
         return token;
       }
 
-      console.log("[JWT Callback] Token próximo de expirar ou expirado, iniciando renovação automática...");
+      console.log(
+        '[JWT Callback] Token próximo de expirar ou expirado, iniciando renovação automática...',
+      );
       return await refreshAccessToken(token);
     },
 
@@ -228,19 +240,19 @@ export const authOptions: AuthOptions = {
         };
       }
 
-      if (token?.error === "RefreshAccessTokenError") {
-        session.error = "RefreshAccessTokenError";
+      if (token?.error === 'RefreshAccessTokenError') {
+        session.error = 'RefreshAccessTokenError';
       }
 
       return session;
-    }
+    },
   },
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: '/login',
+    error: '/login',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60,
   },
   cookies: {
@@ -250,9 +262,9 @@ export const authOptions: AuthOptions = {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
     // ,
     // callbackUrl: {
     //   name: `next-auth.callback-url`,
@@ -262,16 +274,15 @@ export const authOptions: AuthOptions = {
     //     secure: process.env.NODE_ENV === 'production'
     //   }
     // }
-    ,
     csrfToken: {
       name: `next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

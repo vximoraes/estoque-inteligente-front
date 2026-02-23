@@ -46,7 +46,7 @@ const defaultStatusOptions = [
   { value: '', label: 'Todos os status' },
   { value: 'Em Estoque', label: 'Em Estoque' },
   { value: 'Baixo Estoque', label: 'Baixo Estoque' },
-  { value: 'Indisponível', label: 'Indisponível' }
+  { value: 'Indisponível', label: 'Indisponível' },
 ];
 
 export default function ModalFiltros({
@@ -56,7 +56,7 @@ export default function ModalFiltros({
   statusFilter,
   onFiltersChange,
   statusOptions = defaultStatusOptions,
-  showCategoria = true
+  showCategoria = true,
 }: ModalFiltrosProps) {
   const [selectedCategoria, setSelectedCategoria] = useState(categoriaFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
@@ -70,11 +70,13 @@ export default function ModalFiltros({
     isLoading: isLoadingCategorias,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      return await get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
+      return await get<CategoriasApiResponse>(
+        `/categorias?limit=20&page=${pageParam}`,
+      );
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -139,12 +141,12 @@ export default function ModalFiltros({
     if (!observerTarget.current || !categoriaDropdownOpen) return;
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 1.0 }
+      { threshold: 1.0 },
     );
 
     observer.observe(observerTarget.current);
@@ -181,37 +183,41 @@ export default function ModalFiltros({
     onClose();
   };
 
-  const categorias = categoriasData?.pages ? categoriasData.pages.flatMap(page => page.data.docs) : [];
+  const categorias = categoriasData?.pages
+    ? categoriasData.pages.flatMap((page) => page.data.docs)
+    : [];
   const categoriaOptions = [
     { value: '', label: 'Todas as categorias' },
-    ...categorias.map(cat => ({ value: cat._id, label: cat.nome }))
+    ...categorias.map((cat) => ({ value: cat._id, label: cat.nome })),
   ];
 
-  const filteredCategorias = categoriaOptions.filter(cat => 
-    cat.label.toLowerCase().includes(categoriaSearch.toLowerCase())
+  const filteredCategorias = categoriaOptions.filter((cat) =>
+    cat.label.toLowerCase().includes(categoriaSearch.toLowerCase()),
   );
 
   const getSelectedCategoriaLabel = () => {
-    const selected = categoriaOptions.find(opt => opt.value === selectedCategoria);
+    const selected = categoriaOptions.find(
+      (opt) => opt.value === selectedCategoria,
+    );
     return selected?.label || 'Todas as categorias';
   };
 
   const getSelectedStatusLabel = () => {
-    const selected = statusOptions.find(opt => opt.value === selectedStatus);
+    const selected = statusOptions.find((opt) => opt.value === selectedStatus);
     return selected?.label || 'Todos os status';
   };
 
   const modalContent = (
-    <div 
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4" 
-      style={{ 
+    <div
+      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+      style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-filtros-backdrop"
     >
-      <div 
+      <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         data-test="modal-filtros-content"
@@ -232,86 +238,102 @@ export default function ModalFiltros({
         <div className="px-6 pb-6 space-y-6">
           {/* Filtro por Categoria - Condicional */}
           {showCategoria && (
-            <div className="space-y-2 pt-4" data-test="filtro-categoria-container">
-            <label className="block text-base font-medium text-gray-700">
-              Categoria
-            </label>
-            <div className="relative" data-dropdown>
-              <button
-                onClick={() => {
-                  const isOpening = !categoriaDropdownOpen;
-                  setCategoriaDropdownOpen(isOpening);
-                  setStatusDropdownOpen(false);
-                  if (isOpening) {
-                    setCategoriaSearch('');
-                  }
-                }}
-                disabled={isLoadingCategorias}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                data-test="filtro-categoria-dropdown"
-              >
-                <span className={selectedCategoria ? 'text-gray-900' : 'text-gray-500'}>
-                  {isLoadingCategorias ? 'Carregando...' : getSelectedCategoriaLabel()}
-                </span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${categoriaDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {categoriaDropdownOpen && !isLoadingCategorias && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-80 overflow-hidden">
-                  {/* Campo de busca dentro do dropdown */}
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <input
-                      type="text"
-                      placeholder="Buscar categoria..."
-                      value={categoriaSearch}
-                      onChange={(e) => {
-                        setCategoriaSearch(e.target.value);
-                      }}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      onClick={(e) => e.stopPropagation()}
-                      data-test="filtro-categoria-search-input"
-                    />
+            <div
+              className="space-y-2 pt-4"
+              data-test="filtro-categoria-container"
+            >
+              <label className="block text-base font-medium text-gray-700">
+                Categoria
+              </label>
+              <div className="relative" data-dropdown>
+                <button
+                  onClick={() => {
+                    const isOpening = !categoriaDropdownOpen;
+                    setCategoriaDropdownOpen(isOpening);
+                    setStatusDropdownOpen(false);
+                    if (isOpening) {
+                      setCategoriaSearch('');
+                    }
+                  }}
+                  disabled={isLoadingCategorias}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  data-test="filtro-categoria-dropdown"
+                >
+                  <span
+                    className={
+                      selectedCategoria ? 'text-gray-900' : 'text-gray-500'
+                    }
+                  >
+                    {isLoadingCategorias
+                      ? 'Carregando...'
+                      : getSelectedCategoriaLabel()}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform ${categoriaDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {categoriaDropdownOpen && !isLoadingCategorias && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-80 overflow-hidden">
+                    {/* Campo de busca dentro do dropdown */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <input
+                        type="text"
+                        placeholder="Buscar categoria..."
+                        value={categoriaSearch}
+                        onChange={(e) => {
+                          setCategoriaSearch(e.target.value);
+                        }}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onClick={(e) => e.stopPropagation()}
+                        data-test="filtro-categoria-search-input"
+                      />
+                    </div>
+
+                    {/* Lista de categorias com scroll */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {filteredCategorias.length > 0 ? (
+                        <>
+                          {filteredCategorias.map((option) => (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setSelectedCategoria(option.value);
+                                setCategoriaDropdownOpen(false);
+                                setCategoriaSearch('');
+                              }}
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                                selectedCategoria === option.value
+                                  ? 'bg-blue-50 text-blue-600'
+                                  : 'text-gray-900'
+                              } cursor-pointer`}
+                              data-test={`filtro-categoria-option-${option.value || 'todas'}`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                          {/* Infinite scroll trigger */}
+                          <div ref={observerTarget} className="h-1" />
+                          {/* Loading indicator */}
+                          {isFetchingNextPage && (
+                            <div className="flex justify-center py-4">
+                              <PulseLoader color="#306FCC" size={8} />
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div
+                          className="px-4 py-8 text-center text-gray-500 text-sm"
+                          data-test="filtro-categoria-no-results"
+                        >
+                          Nenhuma categoria encontrada para "{categoriaSearch}"
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  
-                  {/* Lista de categorias com scroll */}
-                  <div className="max-h-60 overflow-y-auto">
-                    {filteredCategorias.length > 0 ? (
-                      <>
-                        {filteredCategorias.map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSelectedCategoria(option.value);
-                              setCategoriaDropdownOpen(false);
-                              setCategoriaSearch('');
-                            }}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                              selectedCategoria === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
-                            } cursor-pointer`}
-                            data-test={`filtro-categoria-option-${option.value || 'todas'}`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                        {/* Infinite scroll trigger */}
-                        <div ref={observerTarget} className="h-1" />
-                        {/* Loading indicator */}
-                        {isFetchingNextPage && (
-                          <div className="flex justify-center py-4">
-                            <PulseLoader color="#306FCC" size={8} />
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="px-4 py-8 text-center text-gray-500 text-sm" data-test="filtro-categoria-no-results">
-                        Nenhuma categoria encontrada para "{categoriaSearch}"
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
           )}
 
           {/* Filtro por Status */}
@@ -328,12 +350,16 @@ export default function ModalFiltros({
                 className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
                 data-test="filtro-status-dropdown"
               >
-                <span className={selectedStatus ? 'text-gray-900' : 'text-gray-500'}>
+                <span
+                  className={selectedStatus ? 'text-gray-900' : 'text-gray-500'}
+                >
                   {getSelectedStatusLabel()}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${statusDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${statusDropdownOpen ? 'rotate-180' : ''}`}
+                />
               </button>
-              
+
               {statusDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50">
                   {statusOptions.map((option) => (
@@ -344,7 +370,9 @@ export default function ModalFiltros({
                         setStatusDropdownOpen(false);
                       }}
                       className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                        selectedStatus === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                        selectedStatus === option.value
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-900'
                       } cursor-pointer`}
                       data-test={`filtro-status-option-${option.value.toLowerCase().replace(/\s+/g, '-') || 'todos'}`}
                     >
@@ -382,7 +410,7 @@ export default function ModalFiltros({
     </div>
   );
 
-  return typeof window !== 'undefined' 
+  return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
     : null;
 }

@@ -1,18 +1,31 @@
-"use client"
-import ComponenteEletronico from "@/components/componente-eletronico";
-import StatCard from "@/components/stat-card";
-import Cabecalho from "@/components/cabecalho";
-import ModalLocalizacoes from "@/components/modal-localizacoes";
-import ModalFiltros from "@/components/modal-filtros";
-import ModalEntradaComponente from "@/components/modal-entrada-componente";
-import ModalSaidaComponente from "@/components/modal-saida-componente";
-import ModalExcluirComponente from "@/components/modal-excluir-componente";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+'use client';
+import ItemEstoque from '@/components/item-estoque';
+import StatCard from '@/components/stat-card';
+import Cabecalho from '@/components/cabecalho';
+import ModalLocalizacoes from '@/components/modal-localizacoes';
+import ModalFiltros from '@/components/modal-filtros';
+import ModalEntradaItem from '@/components/modal-entrada-item';
+import ModalSaidaItem from '@/components/modal-saida-item';
+import ModalExcluirItem from '@/components/modal-excluir-item';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { ApiResponse, EstoqueApiResponse } from '@/types/itens';
+import {
+  Search,
+  Filter,
+  Plus,
+  Package,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,27 +38,31 @@ interface CategoriasApiResponse {
   };
 }
 
-function ComponentesPageContent() {
+function ItensPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
-  const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
+  const [entradaItemId, setEntradaItemId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
-  const [saidaComponenteId, setSaidaComponenteId] = useState<string | null>(null);
+  const [saidaItemId, setSaidaItemId] = useState<string | null>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
-  const [excluirComponenteId, setExcluirComponenteId] = useState<string | null>(null);
+  const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
-  const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
 
-  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
-  const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
+  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
+    defaultValue: '',
+  });
+  const [statusFilter, setStatusFilter] = useQueryState('status', {
+    defaultValue: '',
+  });
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -68,46 +85,56 @@ function ComponentesPageContent() {
     return () => window.removeEventListener('resize', updateItemsPerPage);
   }, []);
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
-    queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter, currentPage, itemsPerPage],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('nome', searchTerm);
-      if (categoriaFilter) params.append('categoria', categoriaFilter);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('limit', itemsPerPage.toString());
-      params.append('page', currentPage.toString());
+  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>(
+    {
+      queryKey: [
+        'itens',
+        searchTerm,
+        categoriaFilter,
+        statusFilter,
+        currentPage,
+        itemsPerPage,
+      ],
+      queryFn: async () => {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('nome', searchTerm);
+        if (categoriaFilter) params.append('categoria', categoriaFilter);
+        if (statusFilter) params.append('status', statusFilter);
+        params.append('limit', itemsPerPage.toString());
+        params.append('page', currentPage.toString());
 
-      const queryString = params.toString();
-      const url = `/componentes${queryString ? `?${queryString}` : ''}`;
+        const queryString = params.toString();
+        const url = `/itens${queryString ? `?${queryString}` : ''}`;
 
-      return await get<ApiResponse>(url);
+        return await get<ApiResponse>(url);
+      },
+      refetchOnMount: 'always',
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
     },
-    refetchOnMount: 'always',
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  );
 
-  // Query para buscar estoques de um componente específico
-  const { data: estoquesData, isLoading: isLoadingEstoques } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', selectedComponenteId],
-    queryFn: async () => {
-      return await get<EstoqueApiResponse>(
-        `/estoques/componente/${selectedComponenteId}`
-      );
-    },
-    enabled: !!selectedComponenteId,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  // Query para buscar estoques de um item específico
+  const { data: estoquesData, isLoading: isLoadingEstoques } =
+    useQuery<EstoqueApiResponse>({
+      queryKey: ['estoques', selectedItemId],
+      queryFn: async () => {
+        return await get<EstoqueApiResponse>(
+          `/estoques/item/${selectedItemId}`,
+        );
+      },
+      enabled: !!selectedItemId,
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    });
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -125,11 +152,11 @@ function ComponentesPageContent() {
 
   useEffect(() => {
     const success = searchParams.get('success');
-    const componenteId = searchParams.get('id');
-    const imagem = searchParams.get('imagem')
+    const itemId = searchParams.get('id');
+    const imagem = searchParams.get('imagem');
 
     if (success === 'created') {
-      toast.success('Componente criado com sucesso!', {
+      toast.success('Item criado com sucesso!', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -138,13 +165,12 @@ function ComponentesPageContent() {
         draggable: false,
         transition: Slide,
       });
-      router.replace('/componentes');
+      router.replace('/itens');
     } else if (success === 'updated') {
-      if (componenteId) {
-        setUpdatingComponenteId(componenteId);
-
+      if (itemId) {
+        setUpdatingItemId(itemId);
       }
-      toast.success('Componente atualizado com sucesso!', {
+      toast.success('Item atualizado com sucesso!', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -154,27 +180,27 @@ function ComponentesPageContent() {
         transition: Slide,
       });
       refetch();
-      router.replace('/componentes');
+      router.replace('/itens');
     }
   }, [searchParams, router, refetch]);
 
   const handleEdit = (id: string) => {
-    router.push(`/componentes/editar/${id}`);
+    router.push(`/itens/editar/${id}`);
   };
 
   const handleDelete = (id: string) => {
-    setExcluirComponenteId(id);
+    setExcluirItemId(id);
     setIsExcluirModalOpen(true);
   };
 
-  const handleComponenteClick = (id: string) => {
-    setSelectedComponenteId(id);
+  const handleItemClick = (id: string) => {
+    setSelectedItemId(id);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedComponenteId(null);
+    setSelectedItemId(null);
   };
 
   const handleOpenFiltrosModal = () => {
@@ -191,23 +217,23 @@ function ComponentesPageContent() {
   };
 
   const handleEntrada = (id: string) => {
-    setEntradaComponenteId(id);
+    setEntradaItemId(id);
     setIsEntradaModalOpen(true);
   };
 
   const handleSaida = (id: string) => {
-    setSaidaComponenteId(id);
+    setSaidaItemId(id);
     setIsSaidaModalOpen(true);
   };
 
   const handleCloseEntradaModal = () => {
     setIsEntradaModalOpen(false);
-    setEntradaComponenteId(null);
+    setEntradaItemId(null);
   };
 
   const handleEntradaSuccess = () => {
-    if (entradaComponenteId) {
-      setUpdatingComponenteId(entradaComponenteId);
+    if (entradaItemId) {
+      setUpdatingItemId(entradaItemId);
     }
     toast.success('Entrada registrada com sucesso!', {
       position: 'bottom-right',
@@ -223,12 +249,12 @@ function ComponentesPageContent() {
 
   const handleCloseSaidaModal = () => {
     setIsSaidaModalOpen(false);
-    setSaidaComponenteId(null);
+    setSaidaItemId(null);
   };
 
   const handleSaidaSuccess = () => {
-    if (saidaComponenteId) {
-      setUpdatingComponenteId(saidaComponenteId);
+    if (saidaItemId) {
+      setUpdatingItemId(saidaItemId);
     }
     toast.success('Saída registrada com sucesso!', {
       position: 'bottom-right',
@@ -244,16 +270,16 @@ function ComponentesPageContent() {
 
   const handleCloseExcluirModal = () => {
     setIsExcluirModalOpen(false);
-    setExcluirComponenteId(null);
+    setExcluirItemId(null);
   };
 
   const handleExcluirSuccess = async () => {
     setIsRefetchingAfterDelete(true);
 
-    const isLastComponentOnPage = componentes.length === 1;
-    const shouldGoToPreviousPage = isLastComponentOnPage && currentPage > 1;
+    const isLastItemOnPage = itens.length === 1;
+    const shouldGoToPreviousPage = isLastItemOnPage && currentPage > 1;
 
-    toast.success('Componente excluído com sucesso!', {
+    toast.success('Item excluído com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
       hideProgressBar: false,
@@ -264,7 +290,7 @@ function ComponentesPageContent() {
     });
 
     if (shouldGoToPreviousPage) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage((prev) => prev - 1);
     }
 
     router.refresh();
@@ -273,20 +299,20 @@ function ComponentesPageContent() {
   };
 
   const handleAdicionarClick = () => {
-    router.push('/componentes/adicionar');
+    router.push('/itens/adicionar');
   };
 
   useEffect(() => {
-    if (!isFetching && updatingComponenteId) {
-      setUpdatingComponenteId(null);
+    if (!isFetching && updatingItemId) {
+      setUpdatingItemId(null);
     }
-  }, [isFetching, updatingComponenteId]);
+  }, [isFetching, updatingItemId]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, categoriaFilter, statusFilter, itemsPerPage]);
 
-  const componentes = data?.data?.docs || [];
+  const itens = data?.data?.docs || [];
   const paginationInfo = data?.data || {
     totalDocs: 0,
     limit: 0,
@@ -296,18 +322,21 @@ function ComponentesPageContent() {
     hasPrevPage: false,
     hasNextPage: false,
     prevPage: null,
-    nextPage: null
+    nextPage: null,
   };
 
   // Calcular estatísticas
-  const totalComponentes = componentes.length;
-  const emEstoque = componentes.filter(c => c.status === 'Em Estoque').length;
-  const baixoEstoque = componentes.filter(c => c.status === 'Baixo Estoque').length;
-  const indisponiveis = componentes.filter(c => c.status === 'Indisponível').length;
-  // console.log(totalComponentes)
+  const totalItens = itens.length;
+  const emEstoque = itens.filter((c) => c.status === 'Em Estoque').length;
+  const baixoEstoque = itens.filter((c) => c.status === 'Baixo Estoque').length;
+  const indisponiveis = itens.filter((c) => c.status === 'Indisponível').length;
+  // console.log(totalItens)
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="componentes-page">
-      <Cabecalho pagina="Componentes" />
+    <div
+      className="w-full h-screen flex flex-col overflow-x-hidden"
+      data-test="itens-page"
+    >
+      <Cabecalho pagina="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
@@ -320,7 +349,9 @@ function ComponentesPageContent() {
             >
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-gray-700">Estatísticas</span>
+                <span className="font-semibold text-gray-700">
+                  Estatísticas
+                </span>
               </div>
               {isStatsOpen ? (
                 <ChevronUp className="w-5 h-5 text-gray-600" />
@@ -330,56 +361,62 @@ function ComponentesPageContent() {
             </button>
 
             {/* Cards - Sempre visível no desktop, colapsável no mobile */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
-            <StatCard
-              title="Total de"
-              subtitle="componentes"
-              value={totalComponentes}
-              icon={Package}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
-              data-test="stat-total-componentes"
-              hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
-            />
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+              data-test="stats-grid"
+            >
+              <StatCard
+                title="Total de"
+                subtitle="itens"
+                value={totalItens}
+                icon={Package}
+                iconColor="text-blue-600"
+                iconBgColor="bg-blue-100"
+                data-test="stat-total-itens"
+                hoverTitle={`Total de itens cadastrados: ${totalItens}`}
+              />
 
-            <StatCard
-              title="Em estoque"
-              value={emEstoque}
-              icon={CheckCircle}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-              data-test="stat-em-estoque"
-              hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
-            />
+              <StatCard
+                title="Em estoque"
+                value={emEstoque}
+                icon={CheckCircle}
+                iconColor="text-green-600"
+                iconBgColor="bg-green-100"
+                data-test="stat-em-estoque"
+                hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
+              />
 
-            <StatCard
-              title="Baixo estoque"
-              value={baixoEstoque}
-              icon={AlertTriangle}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
-              data-test="stat-baixo-estoque"
-              hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
-            />
+              <StatCard
+                title="Baixo estoque"
+                value={baixoEstoque}
+                icon={AlertTriangle}
+                iconColor="text-yellow-600"
+                iconBgColor="bg-yellow-100"
+                data-test="stat-baixo-estoque"
+                hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
+              />
 
-            <StatCard
-              title="Indisponível"
-              value={indisponiveis}
-              icon={XCircle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-              data-test="stat-indisponiveis"
-              hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
-            />
+              <StatCard
+                title="Indisponível"
+                value={indisponiveis}
+                icon={XCircle}
+                iconColor="text-red-600"
+                iconBgColor="bg-red-100"
+                data-test="stat-indisponiveis"
+                hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
+              />
+            </div>
           </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+          <div
+            className="flex flex-col sm:flex-row gap-4 mb-6"
+            data-test="search-actions-bar"
+          >
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 type="text"
-                placeholder="Pesquisar componentes..."
+                placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -411,9 +448,16 @@ function ComponentesPageContent() {
             <div className="mb-4" data-test="applied-filters">
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="applied-filter-categoria">
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    data-test="applied-filter-categoria"
+                  >
                     <span className="font-medium">Categoria:</span>
-                    <span data-test="applied-filter-categoria-nome">{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
+                    <span data-test="applied-filter-categoria-nome">
+                      {categoriasData?.data?.docs?.find(
+                        (cat: any) => cat._id === categoriaFilter,
+                      )?.nome || 'Carregando...'}
+                    </span>
                     <button
                       onClick={() => setCategoriaFilter('')}
                       className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -425,9 +469,14 @@ function ComponentesPageContent() {
                   </div>
                 )}
                 {statusFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="applied-filter-status">
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    data-test="applied-filter-status"
+                  >
                     <span className="font-medium">Status:</span>
-                    <span data-test="applied-filter-status-nome">{statusFilter}</span>
+                    <span data-test="applied-filter-status-nome">
+                      {statusFilter}
+                    </span>
                     <button
                       onClick={() => setStatusFilter('')}
                       className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -448,41 +497,49 @@ function ComponentesPageContent() {
               data-test="error-message"
               title={`Erro completo: ${error.message}`}
             >
-              Erro ao carregar componentes: {error.message}
+              Erro ao carregar itens: {error.message}
             </div>
           )}
 
           {isLoading || isRefetchingAfterDelete ? (
-            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div
+              className="flex flex-col items-center justify-center py-12"
+              data-test="loading-spinner"
+            >
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando itens...
+              </p>
             </div>
-          ) : componentes.length > 0 ? (
+          ) : itens.length > 0 ? (
             <div
               className="grid gap-4 w-full"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))' }}
-              data-test="componentes-grid"
+              style={{
+                gridTemplateColumns:
+                  'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
+              }}
+              data-test="itens-grid"
             >
-              {componentes.map((componente, index) => (
-                <ComponenteEletronico
-                  key={componente._id}
-                  id={componente._id}
-                  nome={componente.nome}
-                  categoria={componente.categoria.nome}
-                  quantidade={componente.quantidade}
-                  estoqueMinimo={componente.estoque_minimo}
-                  status={componente.status}
-                  imagem={componente.imagem}
+              {itens.map((item, index) => (
+                <ItemEstoque
+                  key={item._id}
+                  id={item._id}
+                  nome={item.nome}
+                  categoria={item.categoria.nome}
+                  quantidade={item.quantidade}
+                  estoqueMinimo={item.estoque_minimo}
+                  status={item.status}
+                  imagem={item.imagem}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onClick={handleComponenteClick}
+                  onClick={handleItemClick}
                   onEntrada={handleEntrada}
                   onSaida={handleSaida}
-                  isLoading={updatingComponenteId === componente._id && isFetching}
-                  data-test={`componente-card-${index}`}
+                  isLoading={updatingItemId === item._id && isFetching}
+                  data-test={`item-card-${index}`}
                 />
               ))}
             </div>
@@ -490,19 +547,24 @@ function ComponentesPageContent() {
             <div className="text-center py-8" data-test="empty-state">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">
-                {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+                {searchTerm
+                  ? 'Nenhum item encontrado para sua pesquisa.'
+                  : 'Não há itens cadastrados...'}
               </p>
             </div>
           )}
         </div>
 
         {/* Controles de Paginação */}
-        {componentes.length > 0 && paginationInfo.totalPages > 1 && (
-          <div className="bg-white py-4 px-6 flex justify-center items-center shrink-0" data-test="pagination-controls">
+        {itens.length > 0 && paginationInfo.totalPages > 1 && (
+          <div
+            className="bg-white py-4 px-6 flex justify-center items-center shrink-0"
+            data-test="pagination-controls"
+          >
             <div className="flex items-center gap-1">
               {/* Botão Anterior */}
               <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={!paginationInfo.hasPrevPage || isFetching}
                 className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="prev-page-button"
@@ -566,10 +628,11 @@ function ComponentesPageContent() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={isFetching}
-                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${isActive
-                        ? 'bg-blue-600 text-white font-medium'
-                        : 'hover:bg-gray-100 text-gray-700'
-                        } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
+                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-600 text-white font-medium'
+                          : 'hover:bg-gray-100 text-gray-700'
+                      } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
                       data-test={`page-${pageNum}-button`}
                     >
                       {pageNum}
@@ -580,7 +643,7 @@ function ComponentesPageContent() {
 
               {/* Botão Próxima */}
               <button
-                onClick={() => setCurrentPage(prev => prev + 1)}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={!paginationInfo.hasNextPage || isFetching}
                 className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="next-page-button"
@@ -594,21 +657,27 @@ function ComponentesPageContent() {
       </div>
 
       {/* Modal de Localizações */}
-      {selectedComponenteId && (
+      {selectedItemId && (
         <ModalLocalizacoes
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          componenteId={selectedComponenteId}
-          componenteNome={componentes.find(c => c._id === selectedComponenteId)?.nome || ''}
-          componenteDescricao={componentes.find(c => c._id === selectedComponenteId)?.descricao}
+          itemId={selectedItemId}
+          itemNome={itens.find((c) => c._id === selectedItemId)?.nome || ''}
+          itemDescricao={itens.find((c) => c._id === selectedItemId)?.descricao}
           estoques={estoquesData?.data?.docs || []}
           isLoading={isLoadingEstoques}
           totalQuantidade={
-            estoquesData?.data?.docs?.filter(estoque =>
-              estoque.quantidade != null &&
-              !isNaN(Number(estoque.quantidade)) &&
-              Number(estoque.quantidade) > 0
-            ).reduce((total, estoque) => total + Number(estoque.quantidade), 0) || 0
+            estoquesData?.data?.docs
+              ?.filter(
+                (estoque) =>
+                  estoque.quantidade != null &&
+                  !isNaN(Number(estoque.quantidade)) &&
+                  Number(estoque.quantidade) > 0,
+              )
+              .reduce(
+                (total, estoque) => total + Number(estoque.quantidade),
+                0,
+              ) || 0
           }
         />
       )}
@@ -622,35 +691,35 @@ function ComponentesPageContent() {
         onFiltersChange={handleFiltersChange}
       />
 
-      {/* Modal de Entrada de Componente */}
-      {entradaComponenteId && (
-        <ModalEntradaComponente
+      {/* Modal de Entrada de Item */}
+      {entradaItemId && (
+        <ModalEntradaItem
           isOpen={isEntradaModalOpen}
           onClose={handleCloseEntradaModal}
-          componenteId={entradaComponenteId}
-          componenteNome={componentes.find(c => c._id === entradaComponenteId)?.nome || ''}
+          itemId={entradaItemId}
+          itemNome={itens.find((c) => c._id === entradaItemId)?.nome || ''}
           onSuccess={handleEntradaSuccess}
         />
       )}
 
-      {/* Modal de Saída de Componente */}
-      {saidaComponenteId && (
-        <ModalSaidaComponente
+      {/* Modal de Saída de Item */}
+      {saidaItemId && (
+        <ModalSaidaItem
           isOpen={isSaidaModalOpen}
           onClose={handleCloseSaidaModal}
-          componenteId={saidaComponenteId}
-          componenteNome={componentes.find(c => c._id === saidaComponenteId)?.nome || ''}
+          itemId={saidaItemId}
+          itemNome={itens.find((c) => c._id === saidaItemId)?.nome || ''}
           onSuccess={handleSaidaSuccess}
         />
       )}
 
-      {/* Modal de Excluir Componente */}
-      {excluirComponenteId && (
-        <ModalExcluirComponente
+      {/* Modal de Excluir Item */}
+      {excluirItemId && (
+        <ModalExcluirItem
           isOpen={isExcluirModalOpen}
           onClose={handleCloseExcluirModal}
-          componenteId={excluirComponenteId}
-          componenteNome={componentes.find(c => c._id === excluirComponenteId)?.nome || ''}
+          itemId={excluirItemId}
+          itemNome={itens.find((c) => c._id === excluirItemId)?.nome || ''}
           onSuccess={handleExcluirSuccess}
         />
       )}
@@ -668,18 +737,20 @@ function ComponentesPageContent() {
   );
 }
 
-export default function ComponentesPage() {
+export default function ItensPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
         </div>
-        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
-      </div>
-    }>
-      <ComponentesPageContent />
+      }
+    >
+      <ItensPageContent />
     </Suspense>
   );
 }
