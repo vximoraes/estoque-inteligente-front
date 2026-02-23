@@ -1,21 +1,20 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { X, Copy, Check } from 'lucide-react'
-import { get } from '@/lib/fetchData'
-import { Orcamento } from '@/types/orcamentos'
-import { Button } from '@/components/ui/button'
+'use client';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+import { get } from '@/lib/fetchData';
+import { Orcamento } from '@/types/orcamentos';
 
 interface OrcamentoApiResponse {
   data: Orcamento;
 }
 
 interface ModalDetalhesOrcamentoProps {
-  isOpen: boolean
-  onClose: () => void
-  orcamentoId: string
-  orcamentoNome?: string
-  orcamentoDescricao?: string
+  isOpen: boolean;
+  onClose: () => void;
+  orcamentoId: string;
+  orcamentoNome?: string;
+  orcamentoDescricao?: string;
 }
 
 export default function ModalDetalhesOrcamento({
@@ -23,93 +22,97 @@ export default function ModalDetalhesOrcamento({
   onClose,
   orcamentoId,
   orcamentoNome,
-  orcamentoDescricao
+  orcamentoDescricao,
 }: ModalDetalhesOrcamentoProps) {
-  const [orcamento, setOrcamento] = useState<Orcamento | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [orcamento, setOrcamento] = useState<Orcamento | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && orcamentoId) {
-      loadOrcamento()
+      loadOrcamento();
     }
-  }, [isOpen, orcamentoId])
+  }, [isOpen, orcamentoId]);
 
   const loadOrcamento = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await get<OrcamentoApiResponse>(`/orcamentos/${orcamentoId}`)
-      setOrcamento(response.data)
+      const response = await get<OrcamentoApiResponse>(
+        `/orcamentos/${orcamentoId}`,
+      );
+      setOrcamento(response.data);
     } catch (err: any) {
-      console.error('Erro ao carregar orçamento:', err)
-      setError(err?.response?.data?.message || 'Erro ao carregar dados do orçamento')
+      console.error('Erro ao carregar orçamento:', err);
+      setError(
+        err?.response?.data?.message || 'Erro ao carregar dados do orçamento',
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen, onClose])
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   const handleClose = () => {
-    setOrcamento(null)
-    setError(null)
-    setCopiedField(null)
-    onClose()
-  }
+    setOrcamento(null);
+    setError(null);
+    setCopiedField(null);
+    onClose();
+  };
 
   const handleCopy = async (text: string, field: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedField(field)
-      setTimeout(() => setCopiedField(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
-      console.error('Erro ao copiar:', err)
+      console.error('Erro ao copiar:', err);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose()
+      handleClose();
     }
-  }
+  };
 
   const modalContent = (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-detalhes-orcamento"
@@ -131,36 +134,53 @@ export default function ModalDetalhesOrcamento({
           </button>
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
-              <h2 className="text-xl font-semibold text-gray-900 break-words" data-test="modal-detalhes-header">
+              <h2
+                className="text-xl font-semibold text-gray-900 break-words"
+                data-test="modal-detalhes-header"
+              >
                 {orcamentoNome || orcamento?.nome || 'Detalhes do Orçamento'}
               </h2>
             </div>
             {(orcamentoDescricao || orcamento?.descricao) && (
               <div className="max-h-[120px] overflow-y-auto mb-3">
-                <p className="text-sm text-gray-600 break-words text-center max-w-full" data-test="modal-detalhes-descricao">
+                <p
+                  className="text-sm text-gray-600 break-words text-center max-w-full"
+                  data-test="modal-detalhes-descricao"
+                >
                   {orcamentoDescricao || orcamento?.descricao}
                 </p>
               </div>
             )}
-            <p className="text-xl font-semibold text-blue-600" data-test="modal-detalhes-total">
-              {isLoading ? 'Carregando...' : orcamento ? `R$ ${orcamento.total.toFixed(2)}` : '-'}
+            <p
+              className="text-xl font-semibold text-blue-600"
+              data-test="modal-detalhes-total"
+            >
+              {isLoading
+                ? 'Carregando...'
+                : orcamento
+                  ? `R$ ${orcamento.total.toFixed(2)}`
+                  : '-'}
             </p>
           </div>
         </div>
 
         {/* Conteúdo */}
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
-
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível carregar o orçamento</div>
+              <div className="font-medium mb-1">
+                Não foi possível carregar o orçamento
+              </div>
               <div className="text-red-500">{error}</div>
             </div>
           )}
 
           {/* Loading */}
           {isLoading ? (
-            <div className="flex justify-center py-8" data-test="loading-spinner">
+            <div
+              className="flex justify-center py-8"
+              data-test="loading-spinner"
+            >
               <div className="relative w-8 h-8">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -174,21 +194,38 @@ export default function ModalDetalhesOrcamento({
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
                     Componentes ({orcamento.itens.length})
                   </label>
-                  <div className="border rounded-lg overflow-x-auto" data-test="modal-detalhes-tabela">
+                  <div
+                    className="border rounded-lg overflow-x-auto"
+                    data-test="modal-detalhes-tabela"
+                  >
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 border-b">
                         <tr>
-                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[150px]">Nome</th>
-                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[60px]">Qtd</th>
-                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Valor Unit.</th>
-                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Subtotal</th>
+                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[150px]">
+                            Nome
+                          </th>
+                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[60px]">
+                            Qtd
+                          </th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">
+                            Valor Unit.
+                          </th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">
+                            Subtotal
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {orcamento.itens.map((comp, index) => (
-                          <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
+                          <tr
+                            key={index}
+                            className="border-b last:border-0 hover:bg-gray-50"
+                          >
                             <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
-                              <div className="text-sm font-semibold text-gray-900 truncate" title={comp.nome || '-'}>
+                              <div
+                                className="text-sm font-semibold text-gray-900 truncate"
+                                title={comp.nome || '-'}
+                              >
                                 {comp.nome || '-'}
                               </div>
                             </td>
@@ -199,7 +236,10 @@ export default function ModalDetalhesOrcamento({
                               R$ {comp.valor_unitario.toFixed(2)}
                             </td>
                             <td className="px-3 sm:px-4 py-2 text-right text-gray-900 font-medium min-w-[100px] whitespace-nowrap">
-                              R$ {(comp.quantidade * comp.valor_unitario).toFixed(2)}
+                              R${' '}
+                              {(comp.quantidade * comp.valor_unitario).toFixed(
+                                2,
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -217,14 +257,20 @@ export default function ModalDetalhesOrcamento({
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Criado em
                       </label>
-                      <p className="text-base text-gray-600" data-test="modal-detalhes-data-criacao">
-                        {new Date(orcamento.createdAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                      <p
+                        className="text-base text-gray-600"
+                        data-test="modal-detalhes-data-criacao"
+                      >
+                        {new Date(orcamento.createdAt).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
                       </p>
                     </div>
                   )}
@@ -233,14 +279,20 @@ export default function ModalDetalhesOrcamento({
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Atualizado em
                       </label>
-                      <p className="text-base text-gray-600" data-test="modal-detalhes-data-atualizacao">
-                        {new Date(orcamento.updatedAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                      <p
+                        className="text-base text-gray-600"
+                        data-test="modal-detalhes-data-atualizacao"
+                      >
+                        {new Date(orcamento.updatedAt).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
                       </p>
                     </div>
                   )}
@@ -251,9 +303,9 @@ export default function ModalDetalhesOrcamento({
         </div>
       </div>
     </div>
-  )
+  );
 
   return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
-    : null
+    : null;
 }

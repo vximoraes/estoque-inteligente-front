@@ -12,7 +12,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/login`,
-      body: { email, senha }
+      body: { email, senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
       authToken = response.body.data.user.accesstoken;
@@ -20,7 +20,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.request({
         method: 'GET',
         url: `${apiUrl}/itens?limit=1`,
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: { Authorization: `Bearer ${authToken}` },
       }).then((compResponse) => {
         expect(compResponse.status).to.eq(200);
         if (compResponse.body.data.docs.length > 0) {
@@ -31,7 +31,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.request({
         method: 'GET',
         url: `${apiUrl}/categorias?limit=1`,
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: { Authorization: `Bearer ${authToken}` },
       }).then((catResponse) => {
         expect(catResponse.status).to.eq(200);
         if (catResponse.body.data.docs.length > 0) {
@@ -46,8 +46,14 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     cy.intercept('GET', '**/categorias*').as('getCategorias');
 
     cy.visit(`${frontendUrl}/login`);
-    cy.get('[data-test="email-input"]').should('be.visible').clear().type(email);
-    cy.get('[data-test="senha-input"]').should('be.visible').clear().type(senha);
+    cy.get('[data-test="email-input"]')
+      .should('be.visible')
+      .clear()
+      .type(email);
+    cy.get('[data-test="senha-input"]')
+      .should('be.visible')
+      .clear()
+      .type(senha);
     cy.get('[data-test="botao-entrar"]').click();
 
     cy.url({ timeout: 30000 }).should('include', '/itens');
@@ -66,8 +72,10 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.get('[data-test="item-card-0"]').within(() => {
         cy.get('[data-test="component-name"]').should('not.be.empty');
         cy.get('[data-test="component-category"]').should('exist');
-        cy.get('[data-test="status-badge"]').should('exist')
-          .invoke('text').should('match', /Em Estoque|Baixo Estoque|Indisponível/);
+        cy.get('[data-test="status-badge"]')
+          .should('exist')
+          .invoke('text')
+          .should('match', /Em Estoque|Baixo Estoque|Indisponível/);
         cy.get('[data-test="quantity"]').should('contain.text', 'Qtd:');
         cy.get('[data-test="edit-button"]').should('exist');
         cy.get('[data-test="delete-button"]').should('exist');
@@ -97,11 +105,17 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
 
     it('exibe mensagem quando não encontra resultados', () => {
       cy.intercept('GET', '**/itens*').as('searchRequest');
-      cy.get('[data-test="search-input"]').clear().type('XYZABC123456NAOEXISTE');
+      cy.get('[data-test="search-input"]')
+        .clear()
+        .type('XYZABC123456NAOEXISTE');
       cy.wait('@searchRequest');
       cy.wait(500);
-      cy.get('[data-test="empty-state"]', { timeout: 15000 }).should('be.visible');
-      cy.contains('Nenhum item encontrado para sua pesquisa.').should('be.visible');
+      cy.get('[data-test="empty-state"]', { timeout: 15000 }).should(
+        'be.visible',
+      );
+      cy.contains('Nenhum item encontrado para sua pesquisa.').should(
+        'be.visible',
+      );
     });
 
     it('restaura listagem ao limpar busca', () => {
@@ -130,7 +144,9 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
-      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should('be.visible');
+      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should(
+        'be.visible',
+      );
       cy.get('[data-test="applied-filters"]').should('contain', 'Em Estoque');
     });
 
@@ -141,7 +157,10 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
-      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should('contain', 'Baixo Estoque');
+      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should(
+        'contain',
+        'Baixo Estoque',
+      );
     });
 
     it('aplica filtro de status Indisponível', () => {
@@ -152,7 +171,10 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
-      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should('contain', 'Indisponível');
+      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should(
+        'contain',
+        'Indisponível',
+      );
     });
 
     it('remove filtro ao clicar no X', () => {
@@ -181,7 +203,10 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.intercept('GET', '**/itens*').as('filterCategoria');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterCategoria');
-      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should('contain', 'Categoria');
+      cy.get('[data-test="applied-filters"]', { timeout: 10000 }).should(
+        'contain',
+        'Categoria',
+      );
     });
 
     it('limpa filtros pelo modal', () => {

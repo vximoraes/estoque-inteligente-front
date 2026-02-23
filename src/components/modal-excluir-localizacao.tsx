@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import { useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { patch } from '@/lib/fetchData'
-import { toast } from 'react-toastify'
-import { Button } from '@/components/ui/button'
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { patch } from '@/lib/fetchData';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 
 interface ModalExcluirLocalizacaoProps {
-  isOpen: boolean
-  onClose: () => void
-  localizacaoId: string
-  localizacaoNome: string
-  onSuccess?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  localizacaoId: string;
+  localizacaoNome: string;
+  onSuccess?: () => void;
 }
 
 export default function ModalExcluirLocalizacao({
@@ -21,45 +21,45 @@ export default function ModalExcluirLocalizacao({
   onClose,
   localizacaoId,
   localizacaoNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirLocalizacaoProps) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleClose()
+        handleClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen])
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
 
   const inativarLocalizacaoMutation = useMutation({
     mutationFn: async () => {
-      return await patch(`/localizacoes/${localizacaoId}/inativar`)
+      return await patch(`/localizacoes/${localizacaoId}/inativar`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['localizacoes'] })
-      queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] })
+      queryClient.invalidateQueries({ queryKey: ['localizacoes'] });
+      queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] });
       toast.success('Localização excluída com sucesso!', {
         position: 'top-right',
         autoClose: 3000,
@@ -67,12 +67,15 @@ export default function ModalExcluirLocalizacao({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      })
-      onClose()
-      if (onSuccess) onSuccess()
+      });
+      onClose();
+      if (onSuccess) onSuccess();
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Erro ao excluir localização'
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Erro ao excluir localização';
       toast.error(errorMessage, {
         position: 'top-right',
         autoClose: 4000,
@@ -80,34 +83,34 @@ export default function ModalExcluirLocalizacao({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      })
+      });
     },
-  })
+  });
 
   const handleClose = () => {
     if (!inativarLocalizacaoMutation.isPending) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose()
+      handleClose();
     }
-  }
+  };
 
   const handleConfirm = () => {
-    inativarLocalizacaoMutation.mutate()
-  }
+    inativarLocalizacaoMutation.mutate();
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const modalContent = (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -135,7 +138,10 @@ export default function ModalExcluirLocalizacao({
             </h2>
             <p className="text-gray-600">
               Tem certeza que deseja excluir a localização{' '}
-              <span className="font-semibold truncate inline-block max-w-[300px] align-bottom" title={localizacaoNome}>
+              <span
+                className="font-semibold truncate inline-block max-w-[300px] align-bottom"
+                title={localizacaoNome}
+              >
                 {localizacaoNome}
               </span>
               ?
@@ -144,9 +150,12 @@ export default function ModalExcluirLocalizacao({
 
           {inativarLocalizacaoMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Erro ao excluir localização</div>
+              <div className="font-medium mb-1">
+                Erro ao excluir localização
+              </div>
               <div className="text-red-500">
-                {(inativarLocalizacaoMutation.error as any)?.response?.data?.message ||
+                {(inativarLocalizacaoMutation.error as any)?.response?.data
+                  ?.message ||
                   (inativarLocalizacaoMutation.error as any)?.message ||
                   'Erro desconhecido'}
               </div>
@@ -169,14 +178,15 @@ export default function ModalExcluirLocalizacao({
               disabled={inativarLocalizacaoMutation.isPending}
               className="flex-1 cursor-pointer bg-red-600 hover:bg-red-700 text-white"
             >
-              {inativarLocalizacaoMutation.isPending ? 'Excluindo...' : 'Excluir'}
+              {inativarLocalizacaoMutation.isPending
+                ? 'Excluindo...'
+                : 'Excluir'}
             </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 
-  return createPortal(modalContent, document.body)
+  return createPortal(modalContent, document.body);
 }
-

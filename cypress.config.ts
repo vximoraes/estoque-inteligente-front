@@ -1,4 +1,4 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
@@ -13,6 +13,6 @@ export default defineConfig({
     responseTimeout: 10000,
     video: false,
     screenshotOnRunFailure: true,
-    downloadsFolder:"cypress/downloads",
+    downloadsFolder: 'cypress/downloads',
   },
 });

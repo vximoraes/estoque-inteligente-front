@@ -18,7 +18,7 @@ export default function ModalExcluirOrcamento({
   onClose,
   orcamentoId,
   orcamentoNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirOrcamentoProps) {
   const queryClient = useQueryClient();
 
@@ -28,7 +28,7 @@ export default function ModalExcluirOrcamento({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['orcamentos']
+        queryKey: ['orcamentos'],
       });
 
       onSuccess?.();
@@ -91,7 +91,7 @@ export default function ModalExcluirOrcamento({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-excluir"
@@ -115,19 +115,31 @@ export default function ModalExcluirOrcamento({
         {/* Conteúdo */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2" data-test="modal-excluir-titulo">
+            <h2
+              className="text-xl font-semibold text-gray-900 mb-2"
+              data-test="modal-excluir-titulo"
+            >
               Excluir orçamento
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o orçamento <span className="font-semibold" data-test="modal-excluir-nome-orcamento">{orcamentoNome}</span>?
+                Tem certeza que deseja excluir o orçamento{' '}
+                <span
+                  className="font-semibold"
+                  data-test="modal-excluir-nome-orcamento"
+                >
+                  {orcamentoNome}
+                </span>
+                ?
               </p>
             </div>
           </div>
 
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível excluir o orçamento</div>
+              <div className="font-medium mb-1">
+                Não foi possível excluir o orçamento
+              </div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||

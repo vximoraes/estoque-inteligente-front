@@ -1,28 +1,37 @@
-"use client"
-import StatCard from "@/components/stat-card";
-import Cabecalho from "@/components/cabecalho";
-import ModalExportarRelatorio from "@/components/modal-exportar-relatorio";
-import ModalFiltrosOrcamentos from "@/components/modal-filtros-orcamentos";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+'use client';
+import StatCard from '@/components/stat-card';
+import Cabecalho from '@/components/cabecalho';
+import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
+import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
-import { Search, FileText, DollarSign, TrendingUp, TrendingDown, Package, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  FileText,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
 import { generateOrcamentosPDF } from '@/utils/pdfGenerator';
 import { generateOrcamentosCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
-import { useSession } from "@/hooks/use-session";
+import { useSession } from '@/hooks/use-session';
 
 function RelatorioOrcamentosPageContent() {
   const router = useRouter();
@@ -45,7 +54,7 @@ function RelatorioOrcamentosPageContent() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery<OrcamentoApiResponse>({
     queryKey: ['orcamentos-relatorio', searchTerm],
     queryFn: async ({ pageParam }) => {
@@ -80,7 +89,7 @@ function RelatorioOrcamentosPageContent() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (observerTarget.current) {
@@ -104,26 +113,41 @@ function RelatorioOrcamentosPageContent() {
         return false;
       }
 
-      const matchSearch = !searchTerm || 
+      const matchSearch =
+        !searchTerm ||
         orcamento.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         orcamento._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         orcamento.descricao?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       // Filtro por valor mínimo
-      const matchValorMin = !valorMinFilter || (orcamento.total >= parseFloat(valorMinFilter));
-      
+      const matchValorMin =
+        !valorMinFilter || orcamento.total >= parseFloat(valorMinFilter);
+
       // Filtro por valor máximo
-      const matchValorMax = !valorMaxFilter || (orcamento.total <= parseFloat(valorMaxFilter));
-      
+      const matchValorMax =
+        !valorMaxFilter || orcamento.total <= parseFloat(valorMaxFilter);
+
       // Filtro por data de início (adiciona T00:00:00 para garantir comparação no fuso local)
-      const matchDataInicio = !dataInicioFilter || 
-        (orcamento.createdAt && new Date(orcamento.createdAt) >= new Date(dataInicioFilter + 'T00:00:00'));
-      
+      const matchDataInicio =
+        !dataInicioFilter ||
+        (orcamento.createdAt &&
+          new Date(orcamento.createdAt) >=
+            new Date(dataInicioFilter + 'T00:00:00'));
+
       // Filtro por data de fim (adiciona T23:59:59 para incluir todo o dia)
-      const matchDataFim = !dataFimFilter || 
-        (orcamento.createdAt && new Date(orcamento.createdAt) <= new Date(dataFimFilter + 'T23:59:59'));
-      
-      return matchSearch && matchValorMin && matchValorMax && matchDataInicio && matchDataFim;
+      const matchDataFim =
+        !dataFimFilter ||
+        (orcamento.createdAt &&
+          new Date(orcamento.createdAt) <=
+            new Date(dataFimFilter + 'T23:59:59'));
+
+      return (
+        matchSearch &&
+        matchValorMin &&
+        matchValorMax &&
+        matchDataInicio &&
+        matchDataFim
+      );
     })
     .sort((a, b) => {
       // Ordenar alfabeticamente pelo nome do orçamento
@@ -134,11 +158,23 @@ function RelatorioOrcamentosPageContent() {
 
   // Calcular estatísticas baseadas nos orçamentos filtrados
   const totalOrcamentos = orcamentosFiltrados.length;
-  const valorTotal = orcamentosFiltrados.reduce((acc, orc) => acc + (orc.total || 0), 0);
+  const valorTotal = orcamentosFiltrados.reduce(
+    (acc, orc) => acc + (orc.total || 0),
+    0,
+  );
   const valorMedio = totalOrcamentos > 0 ? valorTotal / totalOrcamentos : 0;
-  const maiorOrcamento = totalOrcamentos > 0 ? Math.max(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
-  const menorOrcamento = totalOrcamentos > 0 ? Math.min(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
-  const totalItens = orcamentosFiltrados.reduce((acc, orc) => acc + (orc.itens?.length || 0), 0);
+  const maiorOrcamento =
+    totalOrcamentos > 0
+      ? Math.max(...orcamentosFiltrados.map((orc) => orc.total || 0))
+      : 0;
+  const menorOrcamento =
+    totalOrcamentos > 0
+      ? Math.min(...orcamentosFiltrados.map((orc) => orc.total || 0))
+      : 0;
+  const totalItens = orcamentosFiltrados.reduce(
+    (acc, orc) => acc + (orc.itens?.length || 0),
+    0,
+  );
 
   const handleOpenFiltrosModal = () => {
     setIsFiltrosModalOpen(true);
@@ -148,7 +184,12 @@ function RelatorioOrcamentosPageContent() {
     setIsFiltrosModalOpen(false);
   };
 
-  const handleFiltersChange = (valorMin: string, valorMax: string, dataInicio: string, dataFim: string) => {
+  const handleFiltersChange = (
+    valorMin: string,
+    valorMax: string,
+    dataInicio: string,
+    dataFim: string,
+  ) => {
     setValorMinFilter(valorMin);
     setValorMaxFilter(valorMax);
     setDataInicioFilter(dataInicio);
@@ -166,8 +207,8 @@ function RelatorioOrcamentosPageContent() {
   const handleExport = async (fileName: string, format: string) => {
     try {
       // Filtrar apenas os orçamentos selecionados
-      const orcamentosSelecionados = orcamentosFiltrados.filter(orcamento => 
-        selectedItems.has(orcamento._id)
+      const orcamentosSelecionados = orcamentosFiltrados.filter((orcamento) =>
+        selectedItems.has(orcamento._id),
       );
 
       if (format === 'PDF') {
@@ -177,18 +218,21 @@ function RelatorioOrcamentosPageContent() {
           fileName: fileName.trim(),
           title: 'RELATÓRIO DE ORÇAMENTOS',
           includeStats: true,
-          userName: user?.name || 'Usuário'
+          userName: user?.name || 'Usuário',
         });
 
-        toast.success(`PDF gerado com sucesso! ${orcamentosSelecionados.length} orçamento(s) exportado(s).`, {
-          position: 'bottom-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
+        toast.success(
+          `PDF gerado com sucesso! ${orcamentosSelecionados.length} orçamento(s) exportado(s).`,
+          {
+            position: 'bottom-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            transition: Slide,
+          },
+        );
 
         // Fechar modal após exportação
         handleCloseExportarModal();
@@ -200,15 +244,18 @@ function RelatorioOrcamentosPageContent() {
           includeStats: true,
         });
 
-        toast.success(`CSV gerado com sucesso! ${orcamentosSelecionados.length} orçamento(s) exportado(s).`, {
-          position: 'bottom-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
+        toast.success(
+          `CSV gerado com sucesso! ${orcamentosSelecionados.length} orçamento(s) exportado(s).`,
+          {
+            position: 'bottom-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            transition: Slide,
+          },
+        );
 
         // Fechar modal após exportação
         handleCloseExportarModal();
@@ -245,7 +292,7 @@ function RelatorioOrcamentosPageContent() {
       setSelectedItems(new Set());
     } else {
       // Selecionar todos os itens filtrados
-      const allIds = new Set(orcamentosFiltrados.map(orc => orc._id));
+      const allIds = new Set(orcamentosFiltrados.map((orc) => orc._id));
       setSelectedItems(allIds);
     }
   };
@@ -260,15 +307,18 @@ function RelatorioOrcamentosPageContent() {
     setSelectedItems(newSelected);
   };
 
-  const isAllSelected = orcamentosFiltrados.length > 0 && selectedItems.size === orcamentosFiltrados.length;
-  const isSomeSelected = selectedItems.size > 0 && selectedItems.size < orcamentosFiltrados.length;
+  const isAllSelected =
+    orcamentosFiltrados.length > 0 &&
+    selectedItems.size === orcamentosFiltrados.length;
+  const isSomeSelected =
+    selectedItems.size > 0 && selectedItems.size < orcamentosFiltrados.length;
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-orcamentos-page">
-      <Cabecalho 
-        pagina="Relatórios" 
-        acao="Orçamentos"
-      />
+    <div
+      className="w-full max-w-full h-screen flex flex-col overflow-hidden"
+      data-test="relatorio-orcamentos-page"
+    >
+      <Cabecalho pagina="Relatórios" acao="Orçamentos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Stats Cards - Colapsável no mobile */}
@@ -290,7 +340,10 @@ function RelatorioOrcamentosPageContent() {
           </button>
 
           {/* Cards - Sempre visível no desktop, colapsável no mobile */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+            data-test="stats-grid"
+          >
             <StatCard
               title="Total de"
               subtitle="orçamentos"
@@ -302,7 +355,7 @@ function RelatorioOrcamentosPageContent() {
               hoverTitle={`Total de orçamentos cadastrados: ${totalOrcamentos}`}
             />
 
-            <div 
+            <div
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
               data-test="stat-valor-total"
               title={`Soma de todos os orçamentos: R$ ${valorTotal.toFixed(2)}`}
@@ -312,15 +365,21 @@ function RelatorioOrcamentosPageContent() {
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Valor total</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Valor total
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    R$ {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    R${' '}
+                    {valorTotal.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div 
+            <div
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
               data-test="stat-maior-orcamento"
               title={`Maior valor de orçamento: R$ ${maiorOrcamento.toFixed(2)}`}
@@ -330,15 +389,21 @@ function RelatorioOrcamentosPageContent() {
                   <TrendingUp className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Maior orçamento</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Maior orçamento
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    R$ {maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    R${' '}
+                    {maiorOrcamento.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div 
+            <div
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
               data-test="stat-menor-orcamento"
               title={`Menor valor de orçamento: R$ ${menorOrcamento.toFixed(2)}`}
@@ -348,9 +413,15 @@ function RelatorioOrcamentosPageContent() {
                   <TrendingDown className="w-6 h-6 text-purple-600" />
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Menor orçamento</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Menor orçamento
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    R$ {menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    R${' '}
+                    {menorOrcamento.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               </div>
@@ -359,7 +430,10 @@ function RelatorioOrcamentosPageContent() {
         </div>
 
         {/* Barra de Pesquisa e Botões */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
+        <div
+          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          data-test="search-actions-bar"
+        >
           <div className="relative flex-1" data-test="search-container">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -390,7 +464,11 @@ function RelatorioOrcamentosPageContent() {
             style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
             data-test="exportar-button"
             onClick={handleOpenExportarModal}
-            title={selectedItems.size === 0 ? 'Selecione orçamentos para exportar' : `Exportar ${selectedItems.size} orçamento(s)`}
+            title={
+              selectedItems.size === 0
+                ? 'Selecione orçamentos para exportar'
+                : `Exportar ${selectedItems.size} orçamento(s)`
+            }
           >
             <img src="../gerar-pdf.svg" alt="" className="w-5" />
             Exportar
@@ -398,13 +476,28 @@ function RelatorioOrcamentosPageContent() {
         </div>
 
         {/* Filtros aplicados */}
-        {(valorMinFilter || valorMaxFilter || dataInicioFilter || dataFimFilter) && (
+        {(valorMinFilter ||
+          valorMaxFilter ||
+          dataInicioFilter ||
+          dataFimFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
-                              {valorMinFilter && (
-                <div data-test="filter-tag-valor-min" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+            <div
+              className="flex flex-wrap items-center gap-2"
+              data-test="filters-container"
+            >
+              {valorMinFilter && (
+                <div
+                  data-test="filter-tag-valor-min"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                >
                   <span className="font-medium">Valor mín:</span>
-                  <span>R$ {parseFloat(valorMinFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>
+                    R${' '}
+                    {parseFloat(valorMinFilter).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                   <button
                     onClick={() => setValorMinFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -416,9 +509,18 @@ function RelatorioOrcamentosPageContent() {
                 </div>
               )}
               {valorMaxFilter && (
-                <div data-test="filter-tag-valor-max" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div
+                  data-test="filter-tag-valor-max"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                >
                   <span className="font-medium">Valor máx:</span>
-                  <span>R$ {parseFloat(valorMaxFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>
+                    R${' '}
+                    {parseFloat(valorMaxFilter).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                   <button
                     onClick={() => setValorMaxFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -430,9 +532,16 @@ function RelatorioOrcamentosPageContent() {
                 </div>
               )}
               {dataInicioFilter && (
-                <div data-test="filter-tag-data-inicio" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div
+                  data-test="filter-tag-data-inicio"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                >
                   <span className="font-medium">De:</span>
-                  <span>{new Date(dataInicioFilter + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                  <span>
+                    {new Date(
+                      dataInicioFilter + 'T00:00:00',
+                    ).toLocaleDateString('pt-BR')}
+                  </span>
                   <button
                     onClick={() => setDataInicioFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -444,9 +553,16 @@ function RelatorioOrcamentosPageContent() {
                 </div>
               )}
               {dataFimFilter && (
-                <div data-test="filter-tag-data-fim" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div
+                  data-test="filter-tag-data-fim"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                >
                   <span className="font-medium">Até:</span>
-                  <span>{new Date(dataFimFilter + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                  <span>
+                    {new Date(dataFimFilter + 'T00:00:00').toLocaleDateString(
+                      'pt-BR',
+                    )}
+                  </span>
                   <button
                     onClick={() => setDataFimFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -474,46 +590,93 @@ function RelatorioOrcamentosPageContent() {
 
         {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center flex-1" data-test="loading-spinner">
-            <div className="relative w-12 h-12">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          {isLoading ? (
+            <div
+              className="flex flex-col items-center justify-center flex-1"
+              data-test="loading-spinner"
+            >
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando orçamentos...
+              </p>
             </div>
-            <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
-          </div>
-        ) : orcamentosFiltrados.length > 0 ? (
-          <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
-            <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-              <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
-                <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                  <TableRow className="bg-gray-50 border-b">
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={isAllSelected}
-                        ref={(input) => {
-                          if (input) {
-                            input.indeterminate = isSomeSelected;
+          ) : orcamentosFiltrados.length > 0 ? (
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
+                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
+                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
+                    <TableRow className="bg-gray-50 border-b">
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8"
+                        data-test="table-head-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={(input) => {
+                            if (input) {
+                              input.indeterminate = isSomeSelected;
+                            }
+                          }}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 cursor-pointer"
+                          title={
+                            isAllSelected
+                              ? 'Desmarcar todos'
+                              : 'Selecionar todos'
                           }
-                        }}
-                        onChange={handleSelectAll}
-                        className="w-4 h-4 cursor-pointer"
-                        title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
-                        data-test="checkbox-select-all"
-                      />
-                    </TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-nome">NOME</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-descricao">DESCRIÇÃO</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-itens">ITENS</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-valor-total">VALOR TOTAL</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-data">DATA</TableHead>
+                          data-test="checkbox-select-all"
+                        />
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-codigo"
+                      >
+                        CÓDIGO
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-nome"
+                      >
+                        NOME
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-descricao"
+                      >
+                        DESCRIÇÃO
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        data-test="table-head-itens"
+                      >
+                        ITENS
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        data-test="table-head-valor-total"
+                      >
+                        VALOR TOTAL
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        data-test="table-head-data"
+                      >
+                        DATA
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentosFiltrados.map((orcamento) => (
-                      <TableRow data-test="orcamento-row" key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow
+                        data-test="orcamento-row"
+                        key={orcamento._id}
+                        className="hover:bg-gray-50 border-b"
+                        style={{ height: '60px' }}
+                      >
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
@@ -523,30 +686,74 @@ function RelatorioOrcamentosPageContent() {
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3" data-test="orcamento-codigo">
-                          <span className="truncate block max-w-[200px]" title={orcamento._id}>
+                        <TableCell
+                          className="font-medium text-left px-8 py-3"
+                          data-test="orcamento-codigo"
+                        >
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={orcamento._id}
+                          >
                             {orcamento._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3" data-test="orcamento-nome">
-                          <span className="truncate block max-w-[200px] font-medium" title={orcamento.nome}>
+                        <TableCell
+                          className="text-left px-8 py-3"
+                          data-test="orcamento-nome"
+                        >
+                          <span
+                            className="truncate block max-w-[200px] font-medium"
+                            title={orcamento.nome}
+                          >
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3" data-test="orcamento-descricao">
-                          <span className="truncate block max-w-[200px]" title={orcamento.descricao || '-'}>
+                        <TableCell
+                          className="text-left px-8 py-3"
+                          data-test="orcamento-descricao"
+                        >
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={orcamento.descricao || '-'}
+                          >
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium" data-test="orcamento-itens">
+                        <TableCell
+                          className="text-center px-8 py-3 font-medium"
+                          data-test="orcamento-itens"
+                        >
                           {orcamento.itens?.length || 0}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap" data-test="orcamento-valor-total">
-                          R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <TableCell
+                          className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap"
+                          data-test="orcamento-valor-total"
+                        >
+                          R${' '}
+                          {orcamento.total.toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap" data-test="orcamento-data">
-                          <span className="truncate block max-w-[150px]" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
-                            {orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleDateString('pt-BR') : '-'}
+                        <TableCell
+                          className="text-center px-8 py-3 font-medium whitespace-nowrap"
+                          data-test="orcamento-data"
+                        >
+                          <span
+                            className="truncate block max-w-[150px]"
+                            title={
+                              orcamento.createdAt
+                                ? new Date(orcamento.createdAt).toLocaleString(
+                                    'pt-BR',
+                                  )
+                                : '-'
+                            }
+                          >
+                            {orcamento.createdAt
+                              ? new Date(
+                                  orcamento.createdAt,
+                                ).toLocaleDateString('pt-BR')
+                              : '-'}
                           </span>
                         </TableCell>
                       </TableRow>
@@ -555,21 +762,33 @@ function RelatorioOrcamentosPageContent() {
                 </table>
 
                 {/* Observer target for infinite scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                >
                   {isFetchingNextPage && (
-                    <PulseLoader color="#3b82f6" size={5} speedMultiplier={0.8} />
+                    <PulseLoader
+                      color="#3b82f6"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
                   )}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+            <div
+              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
+              data-test="empty-state"
+            >
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <FileText className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {searchTerm ? 'Nenhum orçamento encontrado para sua pesquisa.' : 'Não há orçamentos cadastrados...'}
+                  {searchTerm
+                    ? 'Nenhum orçamento encontrado para sua pesquisa.'
+                    : 'Não há orçamentos cadastrados...'}
                 </p>
               </div>
             </div>
@@ -596,20 +815,22 @@ function RelatorioOrcamentosPageContent() {
         onExport={handleExport}
       />
     </div>
-  );  
+  );
 }
 
 export default function RelatorioOrcamentosPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
         </div>
-        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
-      </div>
-    }>
+      }
+    >
       <RelatorioOrcamentosPageContent />
     </Suspense>
   );

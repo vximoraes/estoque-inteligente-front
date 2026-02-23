@@ -1,7 +1,13 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ["/login", "/cadastro", "/ativar-conta", "/esqueci-senha", "/redefinir-senha"];
+const PUBLIC_ROUTES = [
+  '/login',
+  '/cadastro',
+  '/ativar-conta',
+  '/esqueci-senha',
+  '/redefinir-senha',
+];
 
 export default withAuth(
   function middleware(req) {
@@ -9,10 +15,12 @@ export default withAuth(
     const isAuth = !!token;
     const pathname = req.nextUrl.pathname;
 
-    const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+    const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+      pathname.startsWith(route),
+    );
 
     if (isPublicRoute && isAuth) {
-      return NextResponse.redirect(new URL("/itens", req.url));
+      return NextResponse.redirect(new URL('/itens', req.url));
     }
 
     if (!isPublicRoute && !isAuth) {
@@ -22,7 +30,7 @@ export default withAuth(
       }
 
       return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
+        new URL(`/login?from=${encodeURIComponent(from)}`, req.url),
       );
     }
   },
@@ -30,11 +38,11 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
-  }
+  },
 );
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)).*)',
   ],
 };

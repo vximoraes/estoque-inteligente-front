@@ -17,15 +17,23 @@ export const generateItensCSV = ({
 
   // ==================== CABEÇALHO ====================
   lines.push('RELATÓRIO DE ITENS');
-  lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
+  lines.push(
+    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+  );
   lines.push('');
 
   // ==================== ESTATÍSTICAS ====================
   if (includeStats && estoques.length > 0) {
-    const totalItens = new Set(estoques.map(e => e.item._id)).size;
-    const emEstoque = estoques.filter(e => e.item.status === 'Em Estoque').length;
-    const baixoEstoque = estoques.filter(e => e.item.status === 'Baixo Estoque').length;
-    const indisponiveis = estoques.filter(e => e.item.status === 'Indisponível').length;
+    const totalItens = new Set(estoques.map((e) => e.item._id)).size;
+    const emEstoque = estoques.filter(
+      (e) => e.item.status === 'Em Estoque',
+    ).length;
+    const baixoEstoque = estoques.filter(
+      (e) => e.item.status === 'Baixo Estoque',
+    ).length;
+    const indisponiveis = estoques.filter(
+      (e) => e.item.status === 'Indisponível',
+    ).length;
     const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
     lines.push('RESUMO ESTATÍSTICO');
@@ -39,7 +47,7 @@ export const generateItensCSV = ({
 
   // ==================== TABELA DE COMPONENTES ====================
   lines.push('ITENS SELECIONADOS');
-  
+
   // Cabeçalho da tabela
   const headers = [
     'CÓDIGO',
@@ -51,7 +59,7 @@ export const generateItensCSV = ({
     'STATUS',
     'LOCALIZAÇÃO',
     'DATA CRIAÇÃO',
-    'ÚLTIMA ATUALIZAÇÃO'
+    'ÚLTIMA ATUALIZAÇÃO',
   ];
   lines.push(headers.join(','));
 
@@ -60,37 +68,39 @@ export const generateItensCSV = ({
     const row = [
       // Código completo
       `"${estoque.item._id}"`,
-      
+
       // Nome do produto (escapar vírgulas e aspas)
       `"${escapeCSV(estoque.item.nome)}"`,
-      
+
       // Descrição
       `"${escapeCSV(estoque.item.descricao || '-')}"`,
-      
+
       // Categoria (se for string, usar diretamente, se for objeto, pegar o ID)
-      `"${typeof estoque.item.categoria === 'string' 
-        ? estoque.item.categoria 
-        : estoque.item.categoria}"`,
-      
+      `"${
+        typeof estoque.item.categoria === 'string'
+          ? estoque.item.categoria
+          : estoque.item.categoria
+      }"`,
+
       // Quantidade
       estoque.quantidade.toString(),
-      
+
       // Estoque mínimo
       estoque.item.estoque_minimo.toString(),
-      
+
       // Status
       `"${estoque.item.status}"`,
-      
+
       // Localização
       `"${escapeCSV(estoque.localizacao.nome)}"`,
-      
+
       // Data de criação
       `"${formatDate(estoque.createdAt)}"`,
-      
+
       // Data de atualização
-      `"${formatDate(estoque.updatedAt)}"`
+      `"${formatDate(estoque.updatedAt)}"`,
     ];
-    
+
     lines.push(row.join(','));
   });
 
@@ -101,15 +111,17 @@ export const generateItensCSV = ({
 
   // Converter para CSV e fazer download
   const csvContent = lines.join('\n');
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['\uFEFF' + csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
     const hoje = new Date();
     const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
     link.style.visibility = 'hidden';
@@ -123,13 +135,13 @@ export const generateItensCSV = ({
 // Função auxiliar para escapar caracteres especiais no CSV
 const escapeCSV = (text: string): string => {
   if (!text) return '';
-  
+
   // Substituir aspas duplas por aspas duplas escapadas
   let escaped = text.replace(/"/g, '""');
-  
+
   // Remover quebras de linha
   escaped = escaped.replace(/\n/g, ' ').replace(/\r/g, '');
-  
+
   return escaped;
 };
 
@@ -142,7 +154,7 @@ const formatDate = (dateString: string): string => {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch {
     return dateString;
@@ -167,7 +179,9 @@ export const generateOrcamentosCSV = ({
 
   // ==================== CABEÇALHO ====================
   lines.push('RELATÓRIO DE ORÇAMENTOS');
-  lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
+  lines.push(
+    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+  );
   lines.push('');
 
   // ==================== ESTATÍSTICAS ====================
@@ -175,23 +189,34 @@ export const generateOrcamentosCSV = ({
     const totalOrcamentos = orcamentos.length;
     const valorTotal = orcamentos.reduce((acc, orc) => acc + orc.total, 0);
     const valorMedio = valorTotal / totalOrcamentos;
-    const maiorOrcamento = Math.max(...orcamentos.map(orc => orc.total));
-    const menorOrcamento = Math.min(...orcamentos.map(orc => orc.total));
-    const totalItens = orcamentos.reduce((acc, orc) => acc + orc.itens.length, 0);
+    const maiorOrcamento = Math.max(...orcamentos.map((orc) => orc.total));
+    const menorOrcamento = Math.min(...orcamentos.map((orc) => orc.total));
+    const totalItens = orcamentos.reduce(
+      (acc, orc) => acc + orc.itens.length,
+      0,
+    );
 
     lines.push('RESUMO ESTATÍSTICO');
     lines.push(`Total de Orçamentos,${totalOrcamentos}`);
-    lines.push(`Valor Total,R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-    lines.push(`Valor Médio,R$ ${valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-    lines.push(`Maior Orçamento,R$ ${maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-    lines.push(`Menor Orçamento,R$ ${menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+    lines.push(
+      `Valor Total,R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    );
+    lines.push(
+      `Valor Médio,R$ ${valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    );
+    lines.push(
+      `Maior Orçamento,R$ ${maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    );
+    lines.push(
+      `Menor Orçamento,R$ ${menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    );
     lines.push(`Total de Itens,${totalItens}`);
     lines.push('');
   }
 
   // ==================== TABELA DE ORÇAMENTOS ====================
   lines.push('ORÇAMENTOS SELECIONADOS');
-  
+
   // Cabeçalho da tabela
   const headers = [
     'CÓDIGO',
@@ -200,7 +225,7 @@ export const generateOrcamentosCSV = ({
     'QTD ITENS',
     'VALOR TOTAL',
     'DATA CRIAÇÃO',
-    'ÚLTIMA ATUALIZAÇÃO'
+    'ÚLTIMA ATUALIZAÇÃO',
   ];
   lines.push(headers.join(','));
 
@@ -209,26 +234,26 @@ export const generateOrcamentosCSV = ({
     const row = [
       // Código completo
       `"${orcamento._id}"`,
-      
+
       // Nome do orçamento (escapar vírgulas e aspas)
       `"${escapeCSV(orcamento.nome)}"`,
-      
+
       // Descrição
       `"${escapeCSV(orcamento.descricao || '-')}"`,
-      
+
       // Quantidade de itens
       orcamento.itens.length.toString(),
-      
+
       // Valor total formatado
       `"R$ ${orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"`,
-      
+
       // Data de criação
       `"${orcamento.createdAt ? formatDate(orcamento.createdAt) : '-'}"`,
-      
+
       // Data de atualização
-      `"${orcamento.updatedAt ? formatDate(orcamento.updatedAt) : '-'}"`
+      `"${orcamento.updatedAt ? formatDate(orcamento.updatedAt) : '-'}"`,
     ];
-    
+
     lines.push(row.join(','));
   });
 
@@ -239,15 +264,17 @@ export const generateOrcamentosCSV = ({
 
   // Converter para CSV e fazer download
   const csvContent = lines.join('\n');
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['\uFEFF' + csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
     const hoje = new Date();
     const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
     link.style.visibility = 'hidden';
@@ -273,15 +300,19 @@ export const generateMovimentacoesCSV = ({
 }: MovimentacaoCSVGeneratorOptions) => {
   const lines: string[] = [];
 
- // Cabeçalho
+  // Cabeçalho
   lines.push('RELATÓRIO DE MOVIMENTAÇÕES');
-  lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
+  lines.push(
+    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+  );
   lines.push('');
 
   // Estatísticas simples
   if (includeStats && movimentacoes.length > 0) {
-    const entradas = movimentacoes.filter(m => m.tipo === 'Entrada').length;
-    const saidas = movimentacoes.filter(m => m.tipo === 'Saída' || m.tipo === 'Saida').length;
+    const entradas = movimentacoes.filter((m) => m.tipo === 'Entrada').length;
+    const saidas = movimentacoes.filter(
+      (m) => m.tipo === 'Saída' || m.tipo === 'Saida',
+    ).length;
     const total = movimentacoes.length;
 
     lines.push('RESUMO ESTATÍSTICO');
@@ -291,9 +322,16 @@ export const generateMovimentacoesCSV = ({
     lines.push('');
   }
 
-    // Tabela
+  // Tabela
   lines.push('MOVIMENTAÇÕES SELECIONADAS');
-  const headers = ['CÓDIGO', 'TIPO', 'PRODUTO', 'QUANTIDADE', 'LOCALIZAÇÃO', 'DATA'];
+  const headers = [
+    'CÓDIGO',
+    'TIPO',
+    'PRODUTO',
+    'QUANTIDADE',
+    'LOCALIZAÇÃO',
+    'DATA',
+  ];
   lines.push(headers.join(','));
 
   movimentacoes.forEach((mov) => {
@@ -310,7 +348,7 @@ export const generateMovimentacoesCSV = ({
       `"${produto}"`,
       quantidade,
       `"${local}"`,
-      `"${data}"`
+      `"${data}"`,
     ];
 
     lines.push(row.join(','));
@@ -322,7 +360,9 @@ export const generateMovimentacoesCSV = ({
   lines.push('Estoque Inteligente - Sistema de Gerenciamento');
 
   const csvContent = lines.join('\n');
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['\uFEFF' + csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
   const link = document.createElement('a');
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);

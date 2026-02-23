@@ -11,21 +11,21 @@ describe('Componentes - Exclusão', () => {
       method: 'POST',
       url: `${apiUrl}/login`,
       body: { email, senha },
-      timeout: 30000
+      timeout: 30000,
     }).then((loginResponse) => {
       const token = loginResponse.body.data.user.accesstoken;
 
-        cy.request({
-          method: 'GET',
-          url: `${apiUrl}/categorias?limit=1`,
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 30000
-        }).then((categoriasResponse) => {
+      cy.request({
+        method: 'GET',
+        url: `${apiUrl}/categorias?limit=1`,
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000,
+      }).then((categoriasResponse) => {
         const categorias = categoriasResponse.body?.data?.docs || [];
-        
+
         if (categorias.length > 0) {
           const nomeComponente = `Componente Para Exclusão ${Date.now()}`;
-          
+
           cy.request({
             method: 'POST',
             url: `${apiUrl}/itens`,
@@ -34,9 +34,9 @@ describe('Componentes - Exclusão', () => {
               nome: nomeComponente,
               categoria: categorias[0]._id,
               estoque_minimo: '5',
-              descricao: 'Este item será excluído nos testes'
+              descricao: 'Este item será excluído nos testes',
             },
-            timeout: 30000
+            timeout: 30000,
           }).then((createResponse) => {
             itemTesteId = createResponse.body?.data?._id;
             cy.log(`Componente de teste criado: ${itemTesteId}`);
@@ -50,7 +50,7 @@ describe('Componentes - Exclusão', () => {
     cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
     cy.intercept('PATCH', `${apiUrl}/itens/*/inativar`).as('deleteComponente');
     cy.intercept('GET', `${apiUrl}/estoques*`).as('getEstoques');
-    
+
     cy.login(email, senha);
     cy.visit(`${frontendUrl}/itens`);
     cy.wait('@getComponentes', { timeout: 30000 });
@@ -84,7 +84,10 @@ describe('Componentes - Exclusão', () => {
           });
 
           cy.getByData('modal-excluir').within(() => {
-            cy.getByData('modal-excluir-nome-item').should('contain', item.nome);
+            cy.getByData('modal-excluir-nome-item').should(
+              'contain',
+              item.nome,
+            );
           });
         }
       });
@@ -119,7 +122,10 @@ describe('Componentes - Exclusão', () => {
           cy.getByData('modal-excluir').within(() => {
             cy.getByData('modal-excluir-confirmar')
               .should('have.css', 'background-color')
-              .and('match', /rgb\(2[012]\d, 3[0-9], 3[0-9]\)|rgb\(239, 68, 68\)|rgb\(248, 113, 113\)/);
+              .and(
+                'match',
+                /rgb\(2[012]\d, 3[0-9], 3[0-9]\)|rgb\(239, 68, 68\)|rgb\(248, 113, 113\)/,
+              );
           });
         }
       });
@@ -153,21 +159,27 @@ describe('Componentes - Exclusão', () => {
 
       cy.wait('@getComponentes');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         if ($body.text().includes('Para Exclusão')) {
-          cy.contains('Para Exclusão').parents('[data-test^="item-card-"]').within(() => {
-            cy.getByData('delete-button').click();
-          });
+          cy.contains('Para Exclusão')
+            .parents('[data-test^="item-card-"]')
+            .within(() => {
+              cy.getByData('delete-button').click();
+            });
 
           cy.getByData('modal-excluir').within(() => {
             cy.getByData('modal-excluir-confirmar').click();
           });
 
-          cy.wait('@deleteComponente', { timeout: 30000 }).then((interception) => {
-            expect(interception.response?.statusCode).to.be.oneOf([200, 204]);
-          });
+          cy.wait('@deleteComponente', { timeout: 30000 }).then(
+            (interception) => {
+              expect(interception.response?.statusCode).to.be.oneOf([200, 204]);
+            },
+          );
 
-          cy.contains(/excluído|removido|deletado.*sucesso/i, { timeout: 5000 }).should('be.visible');
+          cy.contains(/excluído|removido|deletado.*sucesso/i, {
+            timeout: 5000,
+          }).should('be.visible');
 
           itemTesteId = '';
         }
@@ -194,7 +206,7 @@ describe('Componentes - Exclusão', () => {
           cy.wait('@getComponentes', { timeout: 30000 });
 
           cy.wait(1000);
-          cy.get('body').then($body => {
+          cy.get('body').then(($body) => {
             const textoAtual = $body.text();
             cy.log(`Verificando se ${itemNome} foi removido da listagem`);
           });
@@ -217,13 +229,15 @@ describe('Componentes - Exclusão', () => {
           });
 
           cy.wait('@deleteComponente', { timeout: 30000 });
-          cy.wait('@getComponentes', { timeout: 30000 }).then((novaInterception) => {
-            const statsDepois = novaInterception.response?.body?.stats;
+          cy.wait('@getComponentes', { timeout: 30000 }).then(
+            (novaInterception) => {
+              const statsDepois = novaInterception.response?.body?.stats;
 
-            if (statsAntes && statsDepois) {
-              expect(statsDepois.total).to.be.lessThan(statsAntes.total);
-            }
-          });
+              if (statsAntes && statsDepois) {
+                expect(statsDepois.total).to.be.lessThan(statsAntes.total);
+              }
+            },
+          );
         }
       });
     });
@@ -343,7 +357,7 @@ describe('Componentes - Exclusão', () => {
         url: `${apiUrl}/login`,
         body: { email, senha },
         timeout: 30000,
-        failOnStatusCode: false
+        failOnStatusCode: false,
       }).then((loginResponse) => {
         if (loginResponse.body?.data?.user?.accesstoken) {
           const token = loginResponse.body.data.user.accesstoken;
@@ -352,10 +366,10 @@ describe('Componentes - Exclusão', () => {
             method: 'PATCH',
             url: `${apiUrl}/itens/${itemTesteId}/inativar`,
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
             timeout: 30000,
-            failOnStatusCode: false
+            failOnStatusCode: false,
           }).then(() => {
             cy.log(`Componente de teste ${itemTesteId} removido na limpeza`);
           });

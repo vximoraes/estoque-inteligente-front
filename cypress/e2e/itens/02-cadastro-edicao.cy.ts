@@ -62,9 +62,11 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.get('#nome').type(nomeGrande);
 
-      cy.get('#nome').invoke('val').then((val) => {
-        expect(val?.toString().length).to.be.lte(100);
-      });
+      cy.get('#nome')
+        .invoke('val')
+        .then((val) => {
+          expect(val?.toString().length).to.be.lte(100);
+        });
     });
 
     it('Deve validar limite de caracteres da Descrição (máx 200)', () => {
@@ -72,9 +74,11 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.get('#descricao').type(descricaoGrande.substring(0, 200));
 
-      cy.get('#descricao').invoke('val').then((val) => {
-        expect(val?.toString().length).to.be.lte(200);
-      });
+      cy.get('#descricao')
+        .invoke('val')
+        .then((val) => {
+          expect(val?.toString().length).to.be.lte(200);
+        });
     });
 
     it('Deve validar Estoque Mínimo entre 0 e 999.999.999', () => {
@@ -87,7 +91,7 @@ describe('Componentes - Cadastro e Edição', () => {
     it('Deve exibir contadores de caracteres', () => {
       cy.get('#nome').type('Teste');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         const texto = $body.text();
         cy.log('Contador pode estar presente no formulário');
       });
@@ -100,7 +104,10 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.get('[data-categoria-dropdown] button').first().click();
       cy.get('[data-categoria-dropdown]').within(() => {
-        cy.get('button').not('[data-categoria-dropdown] > button').first().click();
+        cy.get('button')
+          .not('[data-categoria-dropdown] > button')
+          .first()
+          .click();
       });
 
       cy.get('#estoqueMinimo').clear().type('10');
@@ -122,8 +129,11 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve permitir criar categoria durante cadastro de item', () => {
-      cy.get('body').then($body => {
-        if ($body.text().includes('Nova Categoria') || $body.text().includes('Criar Categoria')) {
+      cy.get('body').then(($body) => {
+        if (
+          $body.text().includes('Nova Categoria') ||
+          $body.text().includes('Criar Categoria')
+        ) {
           cy.log('Funcionalidade de criar categoria disponível');
         }
       });
@@ -132,23 +142,28 @@ describe('Componentes - Cadastro e Edição', () => {
     it('Deve validar nome único (não permitir duplicata)', () => {
       // Busca um item existente via API
       const apiUrl = Cypress.env('API_URL');
-      
+
       cy.request({
         method: 'GET',
         url: `${apiUrl}/itens?limit=1`,
-        headers: { Authorization: `Bearer ${window.localStorage.getItem('token')}` },
-        failOnStatusCode: false
+        headers: {
+          Authorization: `Bearer ${window.localStorage.getItem('token')}`,
+        },
+        failOnStatusCode: false,
       }).then((response) => {
         if (response.body?.data?.docs?.length > 0) {
           const nomeExistente = response.body.data.docs[0].nome;
 
           cy.get('#nome').type(nomeExistente);
-          
+
           cy.get('[data-categoria-dropdown] button').first().click();
           cy.get('[data-categoria-dropdown]').within(() => {
-            cy.get('button').not('[data-categoria-dropdown] > button').first().click();
+            cy.get('button')
+              .not('[data-categoria-dropdown] > button')
+              .first()
+              .click();
           });
-          
+
           cy.get('#estoqueMinimo').clear().type('5');
 
           cy.contains('button', 'Salvar').click();
@@ -193,7 +208,10 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.wait('@getCategorias');
 
       cy.get('#nome').should('have.value', primeiroItem.nome);
-      cy.get('#estoqueMinimo').should('have.value', primeiroItem.estoque_minimo.toString());
+      cy.get('#estoqueMinimo').should(
+        'have.value',
+        primeiroItem.estoque_minimo.toString(),
+      );
 
       if (primeiroItem.descricao) {
         cy.get('#descricao').should('have.value', primeiroItem.descricao);
@@ -247,13 +265,19 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
       cy.wait('@getCategorias');
 
-      cy.get('body').then($body => {
-        if ($body.text().includes('Imagem') || $body.find('input[type="file"]').length > 0) {
+      cy.get('body').then(($body) => {
+        if (
+          $body.text().includes('Imagem') ||
+          $body.find('input[type="file"]').length > 0
+        ) {
           cy.log('Campo de imagem presente no formulário de edição');
 
           if (primeiroItem.imagem) {
-            cy.get('body').then($btn => {
-              if ($btn.text().includes('Remover') || $btn.find('[data-testid*="remove"]').length > 0) {
+            cy.get('body').then(($btn) => {
+              if (
+                $btn.text().includes('Remover') ||
+                $btn.find('[data-testid*="remove"]').length > 0
+              ) {
                 cy.log('Botão de remover imagem encontrado');
               }
             });
@@ -282,7 +306,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.visit(`${frontendUrl}/itens/adicionar`);
       cy.wait('@getCategorias');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         if ($body.find('input[type="file"]').length > 0) {
           cy.log('Campo de upload de imagem encontrado');
 
@@ -295,7 +319,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.visit(`${frontendUrl}/itens/adicionar`);
       cy.wait('@getCategorias');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         if ($body.find('input[type="file"]').length > 0) {
           const fileName = 'test-image.png';
 
@@ -316,7 +340,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/login`,
-        body: { email, senha }
+        body: { email, senha },
       }).then((loginResponse) => {
         const token = loginResponse.body.data.user.accesstoken;
 
@@ -324,9 +348,9 @@ describe('Componentes - Cadastro e Edição', () => {
           method: 'PATCH',
           url: `${apiUrl}/itens/${itemIdCriado}/inativar`,
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          failOnStatusCode: false
+          failOnStatusCode: false,
         }).then(() => {
           cy.log(`Componente de teste ${itemIdCriado} removido`);
         });

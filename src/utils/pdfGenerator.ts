@@ -7,7 +7,7 @@ interface PDFGeneratorOptions {
   fileName?: string;
   title?: string;
   includeStats?: boolean;
-  userName?:string;
+  userName?: string;
 }
 
 export const generateItensPDF = async ({
@@ -15,7 +15,7 @@ export const generateItensPDF = async ({
   fileName = 'relatorio-itens',
   title = 'RELATÓRIO DE ITENS',
   includeStats = true,
-  userName = "Javascript"
+  userName = 'Javascript',
 }: PDFGeneratorOptions) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -47,14 +47,11 @@ export const generateItensPDF = async ({
     `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
     pageWidth / 2,
     yPosition,
-    { align: 'center' }
+    { align: 'center' },
   );
-    doc.text(
-    `Gerado por: ${userName}`,
-    pageWidth / 2,
-    yPosition + 6,
-    { align: 'center' }
-  );
+  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
+    align: 'center',
+  });
   doc.setTextColor(0, 0, 0);
   yPosition += 10;
 
@@ -65,10 +62,16 @@ export const generateItensPDF = async ({
 
   // ==================== ESTATÍSTICAS ====================
   if (includeStats) {
-    const totalItens = new Set(estoques.map(e => e.item._id)).size;
-    const emEstoque = estoques.filter(e => e.item.status === 'Em Estoque').length;
-    const baixoEstoque = estoques.filter(e => e.item.status === 'Baixo Estoque').length;
-    const indisponiveis = estoques.filter(e => e.item.status === 'Indisponível').length;
+    const totalItens = new Set(estoques.map((e) => e.item._id)).size;
+    const emEstoque = estoques.filter(
+      (e) => e.item.status === 'Em Estoque',
+    ).length;
+    const baixoEstoque = estoques.filter(
+      (e) => e.item.status === 'Baixo Estoque',
+    ).length;
+    const indisponiveis = estoques.filter(
+      (e) => e.item.status === 'Indisponível',
+    ).length;
     const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
     doc.setFontSize(12);
@@ -156,9 +159,10 @@ export const generateItensPDF = async ({
     xPos += colWidths.codigo;
 
     // Produto (nome do item - truncado se necessário)
-    const nomeProduto = estoque.item.nome.length > 40
-      ? estoque.item.nome.substring(0, 37) + '...'
-      : estoque.item.nome;
+    const nomeProduto =
+      estoque.item.nome.length > 40
+        ? estoque.item.nome.substring(0, 37) + '...'
+        : estoque.item.nome;
     doc.text(nomeProduto, xPos, yPosition);
     xPos += colWidths.produto;
 
@@ -180,9 +184,10 @@ export const generateItensPDF = async ({
     xPos += colWidths.status;
 
     // Localização
-    const localizacao = estoque.localizacao.nome.length > 25
-      ? estoque.localizacao.nome.substring(0, 22) + '...'
-      : estoque.localizacao.nome;
+    const localizacao =
+      estoque.localizacao.nome.length > 25
+        ? estoque.localizacao.nome.substring(0, 22) + '...'
+        : estoque.localizacao.nome;
     doc.text(localizacao, xPos, yPosition);
 
     yPosition += 10;
@@ -202,13 +207,13 @@ export const generateItensPDF = async ({
       `Página ${pageNumber} de ${totalPages}`,
       pageWidth / 2,
       pageHeight - 10,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.text(
       'Estoque Inteligente - Sistema de Gerenciamento',
       pageWidth / 2,
       pageHeight - 6,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.setTextColor(0, 0, 0);
   };
@@ -244,7 +249,7 @@ export const generateOrcamentosPDF = async ({
   fileName = 'relatorio-orcamentos',
   title = 'RELATÓRIO DE ORÇAMENTOS',
   includeStats = true,
-  userName = "Javascript"
+  userName = 'Javascript',
 }: OrcamentoPDFGeneratorOptions) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -276,14 +281,11 @@ export const generateOrcamentosPDF = async ({
     `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
     pageWidth / 2,
     yPosition,
-    { align: 'center' }
+    { align: 'center' },
   );
-  doc.text(
-    `Gerado por: ${userName}`,
-    pageWidth / 2,
-    yPosition + 6,
-    { align: 'center' }
-  );
+  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
+    align: 'center',
+  });
   doc.setTextColor(0, 0, 0);
   yPosition += 10;
 
@@ -297,9 +299,12 @@ export const generateOrcamentosPDF = async ({
     const totalOrcamentos = orcamentos.length;
     const valorTotal = orcamentos.reduce((acc, orc) => acc + orc.total, 0);
     const valorMedio = valorTotal / totalOrcamentos;
-    const maiorOrcamento = Math.max(...orcamentos.map(orc => orc.total));
-    const menorOrcamento = Math.min(...orcamentos.map(orc => orc.total));
-    const totalItens = orcamentos.reduce((acc, orc) => acc + orc.itens.length, 0);
+    const maiorOrcamento = Math.max(...orcamentos.map((orc) => orc.total));
+    const menorOrcamento = Math.min(...orcamentos.map((orc) => orc.total));
+    const totalItens = orcamentos.reduce(
+      (acc, orc) => acc + orc.itens.length,
+      0,
+    );
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -387,9 +392,10 @@ export const generateOrcamentosPDF = async ({
     xPos += colWidths.codigo;
 
     // Nome do orçamento (truncado se necessário)
-    const nomeOrcamento = orcamento.nome.length > 35
-      ? orcamento.nome.substring(0, 32) + '...'
-      : orcamento.nome;
+    const nomeOrcamento =
+      orcamento.nome.length > 35
+        ? orcamento.nome.substring(0, 32) + '...'
+        : orcamento.nome;
     doc.text(nomeOrcamento, xPos, yPosition);
     xPos += colWidths.nome;
 
@@ -402,7 +408,7 @@ export const generateOrcamentosPDF = async ({
     doc.text(
       `R$ ${orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       xPos,
-      yPosition
+      yPosition,
     );
     doc.setTextColor(0, 0, 0); // Resetar cor
     xPos += colWidths.valor;
@@ -430,13 +436,13 @@ export const generateOrcamentosPDF = async ({
       `Página ${pageNumber} de ${totalPages}`,
       pageWidth / 2,
       pageHeight - 10,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.text(
       'Estoque Inteligente - Sistema de Gerenciamento',
       pageWidth / 2,
       pageHeight - 6,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.setTextColor(0, 0, 0);
   };
@@ -481,7 +487,7 @@ export const generateMovimentacoesPDF = async ({
   fileName = 'relatorio-movimentacoes',
   title = 'RELATÓRIO DE MOVIMENTAÇÕES',
   includeStats = true,
-  userName = 'Administrador'
+  userName = 'Administrador',
 }: MovimentacoesPDFOptions) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -513,14 +519,11 @@ export const generateMovimentacoesPDF = async ({
     `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
     pageWidth / 2,
     yPosition,
-    { align: 'center' }
+    { align: 'center' },
   );
-  doc.text(
-    `Gerado por: ${userName}`,
-    pageWidth / 2,
-    yPosition + 6,
-    { align: 'center' }
-  );
+  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
+    align: 'center',
+  });
   doc.setTextColor(0, 0, 0);
   yPosition += 10;
 
@@ -532,8 +535,14 @@ export const generateMovimentacoesPDF = async ({
   // ==================== ESTATÍSTICAS ====================
   if (includeStats) {
     const totalMovimentacoes = movimentacoes.length;
-    const entradas = movimentacoes.filter(m => String(m.tipo).toLowerCase().includes('entrada')).length;
-    const saidas = movimentacoes.filter(m => String(m.tipo).toLowerCase().includes('saída') || String(m.tipo).toLowerCase().includes('saida')).length;
+    const entradas = movimentacoes.filter((m) =>
+      String(m.tipo).toLowerCase().includes('entrada'),
+    ).length;
+    const saidas = movimentacoes.filter(
+      (m) =>
+        String(m.tipo).toLowerCase().includes('saída') ||
+        String(m.tipo).toLowerCase().includes('saida'),
+    ).length;
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -622,9 +631,10 @@ export const generateMovimentacoesPDF = async ({
 
     // Produto (nome do item - truncado se necessário)
     const nomeProduto = mov.item?.nome || '-';
-    const produtoTrunc = nomeProduto.length > 30
-      ? nomeProduto.substring(0, 27) + '...'
-      : nomeProduto;
+    const produtoTrunc =
+      nomeProduto.length > 30
+        ? nomeProduto.substring(0, 27) + '...'
+        : nomeProduto;
     doc.text(produtoTrunc, xPos, yPosition);
     xPos += colWidths.produto;
 
@@ -636,8 +646,12 @@ export const generateMovimentacoesPDF = async ({
     const tipoRaw = String(mov.tipo ?? '').toLowerCase();
     const isEntrada = tipoRaw.includes('entrada');
     const isSaida = tipoRaw.includes('saída') || tipoRaw.includes('saida');
-    const tipoFormatado = isEntrada ? 'Entrada' : isSaida ? 'Saída' : (mov.tipo || '-');
-    
+    const tipoFormatado = isEntrada
+      ? 'Entrada'
+      : isSaida
+        ? 'Saída'
+        : mov.tipo || '-';
+
     if (isEntrada) {
       doc.setTextColor(0, 128, 0); // Verde
     } else if (isSaida) {
@@ -649,16 +663,21 @@ export const generateMovimentacoesPDF = async ({
 
     // Localização
     const localizacao = mov.localizacao?.nome || '-';
-    const locTrunc = localizacao.length > 25
-      ? localizacao.substring(0, 22) + '...'
-      : localizacao;
+    const locTrunc =
+      localizacao.length > 25
+        ? localizacao.substring(0, 22) + '...'
+        : localizacao;
     doc.text(locTrunc, xPos, yPosition);
     xPos += colWidths.localizacao;
 
     // Data/Hora
-    const dataStr = mov.data_hora 
-      ? new Date(mov.data_hora).toLocaleDateString('pt-BR') + ' ' + 
-        new Date(mov.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const dataStr = mov.data_hora
+      ? new Date(mov.data_hora).toLocaleDateString('pt-BR') +
+        ' ' +
+        new Date(mov.data_hora).toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
       : '-';
     doc.text(dataStr, xPos, yPosition);
 
@@ -679,13 +698,13 @@ export const generateMovimentacoesPDF = async ({
       `Página ${pageNumber} de ${totalPages}`,
       pageWidth / 2,
       pageHeight - 10,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.text(
       'Estoque Inteligente - Sistema de Gerenciamento',
       pageWidth / 2,
       pageHeight - 6,
-      { align: 'center' }
+      { align: 'center' },
     );
     doc.setTextColor(0, 0, 0);
   };

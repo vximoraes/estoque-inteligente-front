@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -28,11 +28,25 @@ export default function ModalExportarRelatorio({
   };
 
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center z-50" data-test="modal-exportar-overlay">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4" data-test="modal-exportar-content">
+    <div
+      className="fixed inset-0 bg-[rgba(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center z-50"
+      data-test="modal-exportar-overlay"
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
+        data-test="modal-exportar-content"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b" data-test="modal-exportar-header">
-          <h2 className="text-xl font-semibold text-gray-800" data-test="modal-exportar-title">Exportar Relatório</h2>
+        <div
+          className="flex items-center justify-between p-6 border-b"
+          data-test="modal-exportar-header"
+        >
+          <h2
+            className="text-xl font-semibold text-gray-800"
+            data-test="modal-exportar-title"
+          >
+            Exportar Relatório
+          </h2>
           <button
             onClick={onClose}
             className="top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
@@ -47,7 +61,11 @@ export default function ModalExportarRelatorio({
         <div className="p-6 space-y-4" data-test="modal-exportar-body">
           {/* Nome do arquivo */}
           <div data-test="filename-field">
-            <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-2" data-test="filename-label">
+            <label
+              htmlFor="fileName"
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-test="filename-label"
+            >
               Nome do arquivo
             </label>
             <Input
@@ -63,11 +81,17 @@ export default function ModalExportarRelatorio({
 
           {/* Formato */}
           <div data-test="format-field">
-            <label className="block text-sm font-medium text-gray-700 mb-2" data-test="format-label">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-test="format-label"
+            >
               Formato
             </label>
             <div className="space-y-2" data-test="format-options">
-              <label className="flex items-center space-x-3 cursor-pointer" data-test="format-option-pdf">
+              <label
+                className="flex items-center space-x-3 cursor-pointer"
+                data-test="format-option-pdf"
+              >
                 <input
                   type="radio"
                   name="format"
@@ -79,7 +103,10 @@ export default function ModalExportarRelatorio({
                 />
                 <span className="text-gray-700">.pdf</span>
               </label>
-              <label className="flex items-center space-x-3 cursor-pointer" data-test="format-option-csv">
+              <label
+                className="flex items-center space-x-3 cursor-pointer"
+                data-test="format-option-csv"
+              >
                 <input
                   type="radio"
                   name="format"
@@ -96,7 +123,10 @@ export default function ModalExportarRelatorio({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-lg" data-test="modal-exportar-footer">
+        <div
+          className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-lg"
+          data-test="modal-exportar-footer"
+        >
           <Button
             variant="outline"
             onClick={onClose}
@@ -110,7 +140,7 @@ export default function ModalExportarRelatorio({
             disabled={!fileName.trim()}
             className={`text-white transition-all ${
               fileName.trim()
-                ? 'hover:opacity-90 cursor-pointer' 
+                ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
             }`}
             style={fileName.trim() ? { backgroundColor: '#306FCC' } : {}}

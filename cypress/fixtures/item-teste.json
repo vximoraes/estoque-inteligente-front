@@ -22,10 +22,6 @@
     "quantidade": 10
   },
   "filtros": {
-    "status": [
-      "Em Estoque",
-      "Baixo Estoque",
-      "Indisponível"
-    ]
+    "status": ["Em Estoque", "Baixo Estoque", "Indisponível"]
   }
 }

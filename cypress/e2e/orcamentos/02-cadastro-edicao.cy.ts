@@ -13,7 +13,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/login`,
-      body: { email, senha }
+      body: { email, senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
       authToken = response.body.data.user.accesstoken;
@@ -21,7 +21,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.request({
         method: 'GET',
         url: `${apiUrl}/itens?limit=5`,
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: { Authorization: `Bearer ${authToken}` },
       }).then((compResponse) => {
         expect(compResponse.status).to.eq(200);
         itensTeste = compResponse.body.data.docs || [];
@@ -30,7 +30,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.request({
         method: 'GET',
         url: `${apiUrl}/fornecedores?limit=5`,
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: { Authorization: `Bearer ${authToken}` },
       }).then((fornResponse) => {
         expect(fornResponse.status).to.eq(200);
         fornecedoresTeste = fornResponse.body.data.docs || [];
@@ -68,7 +68,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
     it('Deve exibir todos os campos obrigatórios do formulário', () => {
       cy.contains('Nome').should('be.visible');
-      cy.getByData("botao-adicionar-item").should('be.visible');
+      cy.getByData('botao-adicionar-item').should('be.visible');
       cy.contains('button', 'Salvar').should('be.visible');
     });
 
@@ -84,9 +84,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.get('#nome').type(nomeGrande);
 
-      cy.get('#nome').invoke('val').then((val) => {
-        expect(val?.toString().length).to.be.lte(100);
-      });
+      cy.get('#nome')
+        .invoke('val')
+        .then((val) => {
+          expect(val?.toString().length).to.be.lte(100);
+        });
     });
 
     it('Deve validar limite de caracteres da Descrição (máx 200)', () => {
@@ -94,15 +96,17 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.get('#descricao').type(descricaoGrande.substring(0, 200));
 
-      cy.get('#descricao').invoke('val').then((val) => {
-        expect(val?.toString().length).to.be.lte(200);
-      });
+      cy.get('#descricao')
+        .invoke('val')
+        .then((val) => {
+          expect(val?.toString().length).to.be.lte(200);
+        });
     });
 
     it('Deve exibir contadores de caracteres', () => {
       cy.get('#nome').type('Teste');
 
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         const texto = $body.text();
         cy.log('Contador pode estar presente no formulário');
       });
@@ -130,10 +134,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
 
-      cy.getByData("modal-selecionar-itens").should('be.visible');
-      cy.getByData("modal-selecionar-itens").within(() => {
+      cy.getByData('modal-selecionar-itens').should('be.visible');
+      cy.getByData('modal-selecionar-itens').within(() => {
         cy.contains(/selecionar itens|adicionar itens/i).should('be.visible');
       });
     });
@@ -144,10 +148,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("modal-search-input").should('be.visible');
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('modal-search-input').should('be.visible');
       });
     });
 
@@ -157,12 +161,15 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("itens-grid").should('be.visible');
-        cy.get('[data-test^="item-selecao-card-"]').should('have.length.at.least', 1);
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('itens-grid').should('be.visible');
+        cy.get('[data-test^="item-selecao-card-"]').should(
+          'have.length.at.least',
+          1,
+        );
       });
     });
 
@@ -172,14 +179,14 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("item-selecao-card-1").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('item-selecao-card-1').click();
 
-        cy.getByData("contador-selecionados").should('contain', '2');
+        cy.getByData('contador-selecionados').should('contain', '2');
       });
     });
 
@@ -189,12 +196,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("item-selecao-card-0")
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('item-selecao-card-0')
           .find('[data-test="check-icon"], svg, .check-icon')
           .should('exist');
       });
@@ -206,16 +213,16 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
-      cy.getByData("tabela-itens-orcamento").should('be.visible');
-      cy.getByData("tabela-itens-orcamento").within(() => {
+      cy.getByData('tabela-itens-orcamento').should('be.visible');
+      cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').should('have.length.at.least', 1);
       });
     });
@@ -226,12 +233,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
+      cy.getByData('modal-selecionar-itens').within(() => {
         cy.intercept('GET', '**/itens*').as('searchComponentes');
-        cy.getByData("modal-search-input").type(itensTeste[0].nome);
+        cy.getByData('modal-search-input').type(itensTeste[0].nome);
         cy.wait('@searchComponentes');
         cy.contains(itensTeste[0].nome).should('be.visible');
       });
@@ -246,42 +253,48 @@ describe('Orçamentos - Cadastro e Edição', () => {
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
     });
 
     it('Deve exibir dropdown de fornecedor para cada item', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").should('exist');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').should('exist');
+          });
       });
     });
 
     it('Dropdown deve abrir ao clicar no campo', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").should('be.visible');
+      cy.getByData('dropdown-fornecedores').should('be.visible');
     });
 
     it('Dropdown deve ter campo de pesquisa', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
-        cy.getByData("dropdown-search-input").should('be.visible');
+      cy.getByData('dropdown-fornecedores').within(() => {
+        cy.getByData('dropdown-search-input').should('be.visible');
       });
     });
 
@@ -291,15 +304,17 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
+      cy.getByData('dropdown-fornecedores').within(() => {
         cy.intercept('GET', '**/fornecedores*').as('searchFornecedores');
-        cy.getByData("dropdown-search-input").type(fornecedoresTeste[0].nome);
+        cy.getByData('dropdown-search-input').type(fornecedoresTeste[0].nome);
         cy.wait('@searchFornecedores');
         cy.contains(fornecedoresTeste[0].nome).should('be.visible');
       });
@@ -311,32 +326,38 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
+      cy.getByData('dropdown-fornecedores').within(() => {
         cy.get('[data-test^="fornecedor-option-"]').first().click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").should('not.be.empty');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').should('not.be.empty');
+          });
       });
     });
 
     it('Dropdown deve ter scroll infinito para mais fornecedores', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
-        cy.getByData("fornecedores-list").scrollTo('bottom');
+      cy.getByData('dropdown-fornecedores').within(() => {
+        cy.getByData('fornecedores-list').scrollTo('bottom');
         cy.wait(1000);
         cy.log('Scroll infinito pode carregar mais fornecedores');
       });
@@ -351,105 +372,139 @@ describe('Orçamentos - Cadastro e Edição', () => {
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
     });
 
     it('Campo de quantidade deve ter valor inicial 1', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").should('have.value', '1');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade').should('have.value', '1');
+          });
       });
     });
 
     it('Deve ter botões + e - para incrementar/decrementar', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-incrementar").should('exist');
-          cy.getByData("botao-decrementar").should('exist');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-incrementar').should('exist');
+            cy.getByData('botao-decrementar').should('exist');
+          });
       });
     });
 
     it('Botão + deve incrementar quantidade', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-incrementar").click();
-          cy.getByData("input-quantidade").should('have.value', '2');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-incrementar').click();
+            cy.getByData('input-quantidade').should('have.value', '2');
+          });
       });
     });
 
     it('Botão - deve decrementar quantidade', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-incrementar").click();
-          cy.getByData("botao-decrementar").click();
-          cy.getByData("input-quantidade").should('have.value', '1');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-incrementar').click();
+            cy.getByData('botao-decrementar').click();
+            cy.getByData('input-quantidade').should('have.value', '1');
+          });
       });
     });
 
     it('Botão - deve estar desabilitado quando quantidade = 1', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-decrementar").should('be.disabled');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-decrementar').should('be.disabled');
+          });
       });
     });
 
     it('Deve respeitar limite mínimo de 1', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").clear({ force: true }).type('0', { force: true });
-          cy.getByData("input-quantidade").blur();
-          cy.wait(500);
-          cy.getByData("input-quantidade").invoke('val').then((val) => {
-            expect(parseInt(val as string)).to.be.gte(1);
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('0', { force: true });
+            cy.getByData('input-quantidade').blur();
+            cy.wait(500);
+            cy.getByData('input-quantidade')
+              .invoke('val')
+              .then((val) => {
+                expect(parseInt(val as string)).to.be.gte(1);
+              });
           });
-        });
       });
     });
 
     it('Deve respeitar limite máximo de 999.999.999', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").clear({ force: true }).type('999999', { force: true });
-          cy.getByData("input-quantidade").invoke('val').then((val) => {
-            const numVal = parseInt(val as string);
-            expect(numVal).to.be.gte(1);
-            cy.log(`Valor digitado: ${numVal}`);
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('999999', { force: true });
+            cy.getByData('input-quantidade')
+              .invoke('val')
+              .then((val) => {
+                const numVal = parseInt(val as string);
+                expect(numVal).to.be.gte(1);
+                cy.log(`Valor digitado: ${numVal}`);
+              });
           });
-        });
       });
     });
 
     it('Deve permitir digitação direta da quantidade', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").clear({ force: true }).type('50', { force: true });
-          cy.getByData("input-quantidade").invoke('val').then((val) => {
-            expect(val).to.match(/50/);
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('50', { force: true });
+            cy.getByData('input-quantidade')
+              .invoke('val')
+              .then((val) => {
+                expect(val).to.match(/50/);
+              });
           });
-        });
       });
     });
 
     it('Subtotal deve ser recalculado ao alterar quantidade', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-valor-unitario").clear({ force: true }).type('10', { force: true });
-          cy.getByData("input-quantidade").clear({ force: true }).type('5', { force: true });
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-valor-unitario')
+              .clear({ force: true })
+              .type('10', { force: true });
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('5', { force: true });
+          });
       });
       cy.wait(500);
-      cy.getByData("tabela-itens-orcamento").should('exist');
+      cy.getByData('tabela-itens-orcamento').should('exist');
       cy.log('Subtotal deve ser calculado automaticamente');
     });
   });
@@ -462,58 +517,82 @@ describe('Orçamentos - Cadastro e Edição', () => {
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
     });
 
     it('Campo deve aceitar valores decimais', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-valor-unitario").clear({ force: true }).type('10.50', { force: true });
-          cy.getByData("input-valor-unitario").invoke('val').then((val) => {
-            expect(val).to.match(/10[.,]?50?/);
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-valor-unitario')
+              .clear({ force: true })
+              .type('10.50', { force: true });
+            cy.getByData('input-valor-unitario')
+              .invoke('val')
+              .then((val) => {
+                expect(val).to.match(/10[.,]?50?/);
+              });
           });
-        });
       });
     });
 
     it('Deve aceitar valor mínimo 0', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-valor-unitario").clear({ force: true }).type('0', { force: true });
-          cy.getByData("input-valor-unitario").invoke('val').then((val) => {
-            expect(parseFloat(val as string)).to.be.gte(0);
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-valor-unitario')
+              .clear({ force: true })
+              .type('0', { force: true });
+            cy.getByData('input-valor-unitario')
+              .invoke('val')
+              .then((val) => {
+                expect(parseFloat(val as string)).to.be.gte(0);
+              });
           });
-        });
       });
     });
 
     it('Subtotal = quantidade × valor unitário', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").clear({ force: true }).type('3', { force: true });
-          cy.getByData("input-valor-unitario").clear({ force: true }).type('25.50', { force: true });
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('3', { force: true });
+            cy.getByData('input-valor-unitario')
+              .clear({ force: true })
+              .type('25.50', { force: true });
+          });
       });
       cy.wait(500);
-      cy.getByData("tabela-itens-orcamento").should('exist');
+      cy.getByData('tabela-itens-orcamento').should('exist');
       cy.log('Subtotal calculado: 3 x 25.50 = 76.50');
     });
 
     it('Total do orçamento deve ser atualizado automaticamente', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-quantidade").clear({ force: true }).type('2', { force: true });
-          cy.getByData("input-valor-unitario").clear({ force: true }).type('15', { force: true });
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-quantidade')
+              .clear({ force: true })
+              .type('2', { force: true });
+            cy.getByData('input-valor-unitario')
+              .clear({ force: true })
+              .type('15', { force: true });
+          });
       });
       cy.wait(500);
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         const text = $body.text();
         cy.log('Total calculado: 2 x 15 = 30');
       });
@@ -528,70 +607,82 @@ describe('Orçamentos - Cadastro e Edição', () => {
       }
 
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
     });
 
     it('Deve ter botão de remoção (lixeira) para cada item', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-remover-item").should('exist');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-remover-item').should('exist');
+          });
       });
     });
 
     it('Deve remover item ao clicar no botão', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
+      cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').should('have.length', 1);
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-remover-item").click();
-        });
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-remover-item').click();
+          });
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
+      cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').should('have.length', 0);
       });
     });
 
     it('Total deve ser recalculado após remover item', () => {
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-1").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-1').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').eq(0).within(() => {
-          cy.getByData("input-valor-unitario").clear().type('10');
-        });
-        cy.get('tbody tr').eq(1).within(() => {
-          cy.getByData("input-valor-unitario").clear().type('20');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .eq(0)
+          .within(() => {
+            cy.getByData('input-valor-unitario').clear().type('10');
+          });
+        cy.get('tbody tr')
+          .eq(1)
+          .within(() => {
+            cy.getByData('input-valor-unitario').clear().type('20');
+          });
       });
 
-      cy.getByData("total-orcamento").should('contain', '30');
+      cy.getByData('total-orcamento').should('contain', '30');
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-remover-item").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-remover-item').click();
+          });
       });
 
-      cy.getByData("total-orcamento").should('contain', '20');
+      cy.getByData('total-orcamento').should('contain', '20');
     });
 
     it('Deve exibir mensagem quando não há itens', () => {
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-remover-item").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-remover-item').click();
+          });
       });
 
       cy.contains(/nenhum item adicionado/i).should('be.visible');
@@ -626,12 +717,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
       cy.get('#nome').type(nomeOrcamento);
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
       cy.contains('button', 'Salvar').click();
@@ -648,34 +739,38 @@ describe('Orçamentos - Cadastro e Edição', () => {
       const nomeOrcamento = `Orçamento Teste ${Date.now()}`;
       cy.get('#nome').type(nomeOrcamento);
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
+      cy.getByData('dropdown-fornecedores').within(() => {
         cy.get('[data-test^="fornecedor-option-"]').first().click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-valor-unitario").clear().type('10');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-valor-unitario').clear().type('10');
+          });
       });
 
       cy.contains('button', 'Salvar').click();
 
       cy.wait(1000);
-      cy.get('body').then($body => {
+      cy.get('body').then(($body) => {
         if ($body.find('button:contains("Salvar")').length > 0) {
           cy.log('Botão Salvar ainda visível');
         } else {
@@ -694,28 +789,32 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.get('#nome').type(nomeOrcamento);
       cy.get('#descricao').type('Descrição do orçamento de teste');
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("select-fornecedor").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('select-fornecedor').click();
+          });
       });
 
-      cy.getByData("dropdown-fornecedores").within(() => {
+      cy.getByData('dropdown-fornecedores').within(() => {
         cy.get('[data-test^="fornecedor-option-"]').first().click();
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("input-valor-unitario").clear().type('25.50');
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('input-valor-unitario').clear().type('25.50');
+          });
       });
 
       cy.contains('button', 'Salvar').click();
@@ -749,10 +848,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
     it('Deve redirecionar para tela de edição ao clicar em Editar', () => {
       if (!primeiroOrcamento) return;
 
-      cy.getByData("orcamentos-table").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("editar-button").click();
-        });
+      cy.getByData('orcamentos-table').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('editar-button').click();
+          });
       });
 
       cy.url().should('include', `/orcamentos/editar/${primeiroOrcamento._id}`);
@@ -764,14 +865,17 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
 
       cy.get('#nome').should('have.value', primeiroOrcamento.nome);
-      
+
       if (primeiroOrcamento.descricao) {
         cy.get('#descricao').should('have.value', primeiroOrcamento.descricao);
       }
 
       if (primeiroOrcamento.itens && primeiroOrcamento.itens.length > 0) {
-        cy.getByData("tabela-itens-orcamento").within(() => {
-          cy.get('tbody tr').should('have.length', primeiroOrcamento.itens.length);
+        cy.getByData('tabela-itens-orcamento').within(() => {
+          cy.get('tbody tr').should(
+            'have.length',
+            primeiroOrcamento.itens.length,
+          );
         });
       }
     });
@@ -794,43 +898,50 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
+      cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').then(($rows) => {
           const qtdAnterior = $rows.length;
-          
+
           cy.wrap(qtdAnterior).as('qtdAnterior');
         });
       });
 
-      cy.getByData("botao-adicionar-item").click();
+      cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
-      cy.getByData("modal-selecionar-itens").within(() => {
-        cy.getByData("item-selecao-card-0").click();
-        cy.getByData("botao-confirmar-selecao").click();
+      cy.getByData('modal-selecionar-itens').within(() => {
+        cy.getByData('item-selecao-card-0').click();
+        cy.getByData('botao-confirmar-selecao').click();
       });
 
       cy.get('@qtdAnterior').then((qtdAnterior) => {
-        cy.getByData("tabela-itens-orcamento").within(() => {
+        cy.getByData('tabela-itens-orcamento').within(() => {
           cy.get('tbody tr').should('have.length.gte', Number(qtdAnterior));
         });
       });
     });
 
     it('Deve permitir remover itens existentes', () => {
-      if (!primeiroOrcamento || !primeiroOrcamento.itens || primeiroOrcamento.itens.length === 0) return;
+      if (
+        !primeiroOrcamento ||
+        !primeiroOrcamento.itens ||
+        primeiroOrcamento.itens.length === 0
+      )
+        return;
 
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
 
       const qtdAnterior = primeiroOrcamento.itens.length;
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
-        cy.get('tbody tr').first().within(() => {
-          cy.getByData("botao-remover-item").click();
-        });
+      cy.getByData('tabela-itens-orcamento').within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.getByData('botao-remover-item').click();
+          });
       });
 
-      cy.getByData("tabela-itens-orcamento").within(() => {
+      cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').should('have.length', qtdAnterior - 1);
       });
     });
@@ -861,7 +972,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     it('Deve redirecionar para listagem ao clicar em Cancelar no cadastro', () => {
       cy.visit(`${frontendUrl}/orcamentos/adicionar`);
 
-      cy.getByData("botao-cancelar").click();
+      cy.getByData('botao-cancelar').click();
 
       cy.url().should('include', '/orcamentos');
       cy.url().should('not.include', '/adicionar');
@@ -872,7 +983,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.get('#nome').type('Orçamento Cancelado');
 
-      cy.getByData("botao-cancelar").click();
+      cy.getByData('botao-cancelar').click();
 
       cy.url().should('include', '/orcamentos');
       cy.get('body').should('not.contain', 'Orçamento Cancelado');
@@ -888,7 +999,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/login`,
-        body: { email, senha }
+        body: { email, senha },
       }).then((loginResponse) => {
         const token = loginResponse.body.data.user.accesstoken;
 
@@ -896,9 +1007,9 @@ describe('Orçamentos - Cadastro e Edição', () => {
           method: 'PATCH',
           url: `${apiUrl}/orcamentos/${orcamentoIdCriado}/inativar`,
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          failOnStatusCode: false
+          failOnStatusCode: false,
         }).then(() => {
           cy.log(`Orçamento de teste ${orcamentoIdCriado} removido`);
         });

@@ -1,22 +1,22 @@
-"use client"
-import { useState, useRef, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { X, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { get } from '@/lib/fetchData'
-import { ApiResponse } from '@/types/itens'
-import { PulseLoader } from 'react-spinners'
-import ItemCardSimples from './item-card'
+'use client';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { get } from '@/lib/fetchData';
+import { ApiResponse } from '@/types/itens';
+import { PulseLoader } from 'react-spinners';
+import ItemCardSimples from './item-card';
 
 interface ModalSelecionarItemProps {
-  isOpen: boolean
-  onClose: () => void
-  onSelect?: (itemId: string, itemNome: string) => void
-  onSelectMultiple?: (itens: Array<{ id: string; nome: string }>) => void
-  selectedItemId?: string
-  multiSelect?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onSelect?: (itemId: string, itemNome: string) => void;
+  onSelectMultiple?: (itens: Array<{ id: string; nome: string }>) => void;
+  selectedItemId?: string;
+  multiSelect?: boolean;
 }
 
 export default function ModalSelecionarItem({
@@ -25,21 +25,27 @@ export default function ModalSelecionarItem({
   onSelect,
   onSelectMultiple,
   selectedItemId,
-  multiSelect = false
+  multiSelect = false,
 }: ModalSelecionarItemProps) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [tempSelectedId, setTempSelectedId] = useState<string | null>(selectedItemId || null)
-  const [tempSelectedNome, setTempSelectedNome] = useState<string>('')
-  const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(new Set())
-  const [tempSelectedItems, setTempSelectedComponents] = useState<Map<string, string>>(new Map())
-  const observerTarget = useRef<HTMLDivElement>(null)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [tempSelectedId, setTempSelectedId] = useState<string | null>(
+    selectedItemId || null,
+  );
+  const [tempSelectedNome, setTempSelectedNome] = useState<string>('');
+  const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [tempSelectedItems, setTempSelectedComponents] = useState<
+    Map<string, string>
+  >(new Map());
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data: itensData,
     isLoading,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['itens-modal', searchTerm],
     queryFn: async ({ pageParam = 1 }) => {
@@ -55,18 +61,18 @@ export default function ModalSelecionarItem({
     },
     initialPageParam: 1,
     enabled: isOpen,
-  })
+  });
 
   useEffect(() => {
     if (!observerTarget.current || !isOpen) return;
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(observerTarget.current);
@@ -76,12 +82,12 @@ export default function ModalSelecionarItem({
   useEffect(() => {
     if (isOpen) {
       if (multiSelect) {
-        setTempSelectedIds(new Set())
-        setTempSelectedComponents(new Map())
+        setTempSelectedIds(new Set());
+        setTempSelectedComponents(new Map());
       } else {
-        setTempSelectedId(selectedItemId || null)
+        setTempSelectedId(selectedItemId || null);
       }
-      setSearchTerm('')
+      setSearchTerm('');
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -90,7 +96,7 @@ export default function ModalSelecionarItem({
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, selectedItemId, multiSelect])
+  }, [isOpen, selectedItemId, multiSelect]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -108,61 +114,65 @@ export default function ModalSelecionarItem({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
-  const itensLista = itensData?.pages ? itensData.pages.flatMap(page => page.data.docs) : []
+  const itensLista = itensData?.pages
+    ? itensData.pages.flatMap((page) => page.data.docs)
+    : [];
 
   const handleCardClick = (id: string, nome: string) => {
     if (multiSelect) {
-      const newSelectedIds = new Set(tempSelectedIds)
-      const newSelectedComponents = new Map(tempSelectedItems)
-      
+      const newSelectedIds = new Set(tempSelectedIds);
+      const newSelectedComponents = new Map(tempSelectedItems);
+
       if (newSelectedIds.has(id)) {
-        newSelectedIds.delete(id)
-        newSelectedComponents.delete(id)
+        newSelectedIds.delete(id);
+        newSelectedComponents.delete(id);
       } else {
-        newSelectedIds.add(id)
-        newSelectedComponents.set(id, nome)
+        newSelectedIds.add(id);
+        newSelectedComponents.set(id, nome);
       }
-      
-      setTempSelectedIds(newSelectedIds)
-      setTempSelectedComponents(newSelectedComponents)
+
+      setTempSelectedIds(newSelectedIds);
+      setTempSelectedComponents(newSelectedComponents);
     } else {
-      setTempSelectedId(id)
-      setTempSelectedNome(nome)
+      setTempSelectedId(id);
+      setTempSelectedNome(nome);
     }
-  }
+  };
 
   const handleConfirmar = () => {
     if (multiSelect) {
       if (tempSelectedIds.size > 0 && onSelectMultiple) {
-        const itens = Array.from(tempSelectedItems.entries()).map(([id, nome]) => ({
-          id,
-          nome
-        }))
-        onSelectMultiple(itens)
-        onClose()
+        const itens = Array.from(tempSelectedItems.entries()).map(
+          ([id, nome]) => ({
+            id,
+            nome,
+          }),
+        );
+        onSelectMultiple(itens);
+        onClose();
       }
     } else {
       if (tempSelectedId && tempSelectedNome && onSelect) {
-        onSelect(tempSelectedId, tempSelectedNome)
-        onClose()
+        onSelect(tempSelectedId, tempSelectedNome);
+        onClose();
       }
     }
-  }
+  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   const modalContent = (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-selecionar-itens"
@@ -189,8 +199,12 @@ export default function ModalSelecionarItem({
               {multiSelect ? 'Selecionar Itens' : 'Selecionar Item'}
             </h2>
             {multiSelect && tempSelectedIds.size > 0 && (
-              <p className="text-sm text-gray-500 mt-1" data-test="contador-selecionados">
-                {tempSelectedIds.size} item{tempSelectedIds.size > 1 ? 's' : ''} selecionado{tempSelectedIds.size > 1 ? 's' : ''}
+              <p
+                className="text-sm text-gray-500 mt-1"
+                data-test="contador-selecionados"
+              >
+                {tempSelectedIds.size} item{tempSelectedIds.size > 1 ? 's' : ''}{' '}
+                selecionado{tempSelectedIds.size > 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -215,7 +229,10 @@ export default function ModalSelecionarItem({
               </div>
             ) : itensLista.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" data-test="itens-grid">
+                <div
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                  data-test="itens-grid"
+                >
                   {itensLista.map((item, idx) => (
                     <ItemCardSimples
                       key={item._id}
@@ -224,7 +241,11 @@ export default function ModalSelecionarItem({
                       categoria={item.categoria.nome}
                       imagem={item.imagem}
                       onClick={handleCardClick}
-                      isSelected={multiSelect ? tempSelectedIds.has(item._id) : tempSelectedId === item._id}
+                      isSelected={
+                        multiSelect
+                          ? tempSelectedIds.has(item._id)
+                          : tempSelectedId === item._id
+                      }
                       dataTestId={`item-selecao-card-${idx}`}
                     />
                   ))}
@@ -258,15 +279,16 @@ export default function ModalSelecionarItem({
             <Button
               type="button"
               onClick={handleConfirmar}
-              disabled={multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId}
+              disabled={
+                multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId
+              }
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="botao-confirmar-selecao"
             >
-              {multiSelect && tempSelectedIds.size > 0 
+              {multiSelect && tempSelectedIds.size > 0
                 ? `Adicionar ${tempSelectedIds.size} item${tempSelectedIds.size > 1 ? 's' : ''}`
-                : 'Confirmar'
-              }
+                : 'Confirmar'}
             </Button>
           </div>
         </div>
@@ -278,4 +300,3 @@ export default function ModalSelecionarItem({
     ? createPortal(modalContent, document.body)
     : null;
 }
-

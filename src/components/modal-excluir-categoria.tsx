@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import { useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { patch } from '@/lib/fetchData'
-import { toast } from 'react-toastify'
-import { Button } from '@/components/ui/button'
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { patch } from '@/lib/fetchData';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 
 interface ModalExcluirCategoriaProps {
-  isOpen: boolean
-  onClose: () => void
-  categoriaId: string
-  categoriaNome: string
-  onSuccess?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  categoriaId: string;
+  categoriaNome: string;
+  onSuccess?: () => void;
 }
 
 export default function ModalExcluirCategoria({
@@ -21,45 +21,45 @@ export default function ModalExcluirCategoria({
   onClose,
   categoriaId,
   categoriaNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirCategoriaProps) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleClose()
+        handleClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen])
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
 
   const inativarCategoriaMutation = useMutation({
     mutationFn: async () => {
-      return await patch(`/categorias/${categoriaId}/inativar`)
+      return await patch(`/categorias/${categoriaId}/inativar`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categorias'] })
-      queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] });
       toast.success('Categoria excluída com sucesso!', {
         position: 'top-right',
         autoClose: 3000,
@@ -67,12 +67,15 @@ export default function ModalExcluirCategoria({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      })
-      onClose()
-      if (onSuccess) onSuccess()
+      });
+      onClose();
+      if (onSuccess) onSuccess();
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Erro ao excluir categoria'
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Erro ao excluir categoria';
       toast.error(errorMessage, {
         position: 'top-right',
         autoClose: 4000,
@@ -80,34 +83,34 @@ export default function ModalExcluirCategoria({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      })
+      });
     },
-  })
+  });
 
   const handleClose = () => {
     if (!inativarCategoriaMutation.isPending) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose()
+      handleClose();
     }
-  }
+  };
 
   const handleConfirm = () => {
-    inativarCategoriaMutation.mutate()
-  }
+    inativarCategoriaMutation.mutate();
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const modalContent = (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
     >
@@ -135,7 +138,10 @@ export default function ModalExcluirCategoria({
             </h2>
             <p className="text-gray-600">
               Tem certeza que deseja excluir a categoria{' '}
-              <span className="font-semibold truncate inline-block max-w-[300px] align-bottom" title={categoriaNome}>
+              <span
+                className="font-semibold truncate inline-block max-w-[300px] align-bottom"
+                title={categoriaNome}
+              >
                 {categoriaNome}
               </span>
               ?
@@ -146,7 +152,8 @@ export default function ModalExcluirCategoria({
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
               <div className="font-medium mb-1">Erro ao excluir categoria</div>
               <div className="text-red-500">
-                {(inativarCategoriaMutation.error as any)?.response?.data?.message ||
+                {(inativarCategoriaMutation.error as any)?.response?.data
+                  ?.message ||
                   (inativarCategoriaMutation.error as any)?.message ||
                   'Erro desconhecido'}
               </div>
@@ -175,7 +182,7 @@ export default function ModalExcluirCategoria({
         </div>
       </div>
     </div>
-  )
+  );
 
-  return createPortal(modalContent, document.body)
+  return createPortal(modalContent, document.body);
 }

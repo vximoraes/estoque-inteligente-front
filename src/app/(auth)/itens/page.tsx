@@ -1,18 +1,31 @@
-"use client"
-import ItemEstoque from "@/components/item-estoque";
-import StatCard from "@/components/stat-card";
-import Cabecalho from "@/components/cabecalho";
-import ModalLocalizacoes from "@/components/modal-localizacoes";
-import ModalFiltros from "@/components/modal-filtros";
-import ModalEntradaItem from "@/components/modal-entrada-item";
-import ModalSaidaItem from "@/components/modal-saida-item";
-import ModalExcluirItem from "@/components/modal-excluir-item";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+'use client';
+import ItemEstoque from '@/components/item-estoque';
+import StatCard from '@/components/stat-card';
+import Cabecalho from '@/components/cabecalho';
+import ModalLocalizacoes from '@/components/modal-localizacoes';
+import ModalFiltros from '@/components/modal-filtros';
+import ModalEntradaItem from '@/components/modal-entrada-item';
+import ModalSaidaItem from '@/components/modal-saida-item';
+import ModalExcluirItem from '@/components/modal-excluir-item';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ApiResponse, EstoqueApiResponse } from '@/types/itens';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Plus,
+  Package,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -44,8 +57,12 @@ function ItensPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
 
-  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
-  const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
+  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
+    defaultValue: '',
+  });
+  const [statusFilter, setStatusFilter] = useQueryState('status', {
+    defaultValue: '',
+  });
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -68,46 +85,56 @@ function ItensPageContent() {
     return () => window.removeEventListener('resize', updateItemsPerPage);
   }, []);
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
-    queryKey: ['itens', searchTerm, categoriaFilter, statusFilter, currentPage, itemsPerPage],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('nome', searchTerm);
-      if (categoriaFilter) params.append('categoria', categoriaFilter);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('limit', itemsPerPage.toString());
-      params.append('page', currentPage.toString());
+  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>(
+    {
+      queryKey: [
+        'itens',
+        searchTerm,
+        categoriaFilter,
+        statusFilter,
+        currentPage,
+        itemsPerPage,
+      ],
+      queryFn: async () => {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('nome', searchTerm);
+        if (categoriaFilter) params.append('categoria', categoriaFilter);
+        if (statusFilter) params.append('status', statusFilter);
+        params.append('limit', itemsPerPage.toString());
+        params.append('page', currentPage.toString());
 
-      const queryString = params.toString();
-      const url = `/itens${queryString ? `?${queryString}` : ''}`;
+        const queryString = params.toString();
+        const url = `/itens${queryString ? `?${queryString}` : ''}`;
 
-      return await get<ApiResponse>(url);
+        return await get<ApiResponse>(url);
+      },
+      refetchOnMount: 'always',
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
     },
-    refetchOnMount: 'always',
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  );
 
   // Query para buscar estoques de um item específico
-  const { data: estoquesData, isLoading: isLoadingEstoques } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', selectedItemId],
-    queryFn: async () => {
-      return await get<EstoqueApiResponse>(
-        `/estoques/item/${selectedItemId}`
-      );
-    },
-    enabled: !!selectedItemId,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  const { data: estoquesData, isLoading: isLoadingEstoques } =
+    useQuery<EstoqueApiResponse>({
+      queryKey: ['estoques', selectedItemId],
+      queryFn: async () => {
+        return await get<EstoqueApiResponse>(
+          `/estoques/item/${selectedItemId}`,
+        );
+      },
+      enabled: !!selectedItemId,
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    });
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -126,7 +153,7 @@ function ItensPageContent() {
   useEffect(() => {
     const success = searchParams.get('success');
     const itemId = searchParams.get('id');
-    const imagem = searchParams.get('imagem')
+    const imagem = searchParams.get('imagem');
 
     if (success === 'created') {
       toast.success('Item criado com sucesso!', {
@@ -142,7 +169,6 @@ function ItensPageContent() {
     } else if (success === 'updated') {
       if (itemId) {
         setUpdatingItemId(itemId);
-
       }
       toast.success('Item atualizado com sucesso!', {
         position: 'bottom-right',
@@ -264,7 +290,7 @@ function ItensPageContent() {
     });
 
     if (shouldGoToPreviousPage) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage((prev) => prev - 1);
     }
 
     router.refresh();
@@ -296,17 +322,20 @@ function ItensPageContent() {
     hasPrevPage: false,
     hasNextPage: false,
     prevPage: null,
-    nextPage: null
+    nextPage: null,
   };
 
   // Calcular estatísticas
   const totalItens = itens.length;
-  const emEstoque = itens.filter(c => c.status === 'Em Estoque').length;
-  const baixoEstoque = itens.filter(c => c.status === 'Baixo Estoque').length;
-  const indisponiveis = itens.filter(c => c.status === 'Indisponível').length;
+  const emEstoque = itens.filter((c) => c.status === 'Em Estoque').length;
+  const baixoEstoque = itens.filter((c) => c.status === 'Baixo Estoque').length;
+  const indisponiveis = itens.filter((c) => c.status === 'Indisponível').length;
   // console.log(totalItens)
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="itens-page">
+    <div
+      className="w-full h-screen flex flex-col overflow-x-hidden"
+      data-test="itens-page"
+    >
       <Cabecalho pagina="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
@@ -320,7 +349,9 @@ function ItensPageContent() {
             >
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-gray-700">Estatísticas</span>
+                <span className="font-semibold text-gray-700">
+                  Estatísticas
+                </span>
               </div>
               {isStatsOpen ? (
                 <ChevronUp className="w-5 h-5 text-gray-600" />
@@ -330,51 +361,57 @@ function ItensPageContent() {
             </button>
 
             {/* Cards - Sempre visível no desktop, colapsável no mobile */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
-            <StatCard
-              title="Total de"
-              subtitle="itens"
-              value={totalItens}
-              icon={Package}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
-              data-test="stat-total-itens"
-              hoverTitle={`Total de itens cadastrados: ${totalItens}`}
-            />
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+              data-test="stats-grid"
+            >
+              <StatCard
+                title="Total de"
+                subtitle="itens"
+                value={totalItens}
+                icon={Package}
+                iconColor="text-blue-600"
+                iconBgColor="bg-blue-100"
+                data-test="stat-total-itens"
+                hoverTitle={`Total de itens cadastrados: ${totalItens}`}
+              />
 
-            <StatCard
-              title="Em estoque"
-              value={emEstoque}
-              icon={CheckCircle}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-              data-test="stat-em-estoque"
-              hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
-            />
+              <StatCard
+                title="Em estoque"
+                value={emEstoque}
+                icon={CheckCircle}
+                iconColor="text-green-600"
+                iconBgColor="bg-green-100"
+                data-test="stat-em-estoque"
+                hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
+              />
 
-            <StatCard
-              title="Baixo estoque"
-              value={baixoEstoque}
-              icon={AlertTriangle}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
-              data-test="stat-baixo-estoque"
-              hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
-            />
+              <StatCard
+                title="Baixo estoque"
+                value={baixoEstoque}
+                icon={AlertTriangle}
+                iconColor="text-yellow-600"
+                iconBgColor="bg-yellow-100"
+                data-test="stat-baixo-estoque"
+                hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
+              />
 
-            <StatCard
-              title="Indisponível"
-              value={indisponiveis}
-              icon={XCircle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-              data-test="stat-indisponiveis"
-              hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
-            />
+              <StatCard
+                title="Indisponível"
+                value={indisponiveis}
+                icon={XCircle}
+                iconColor="text-red-600"
+                iconBgColor="bg-red-100"
+                data-test="stat-indisponiveis"
+                hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
+              />
+            </div>
           </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+          <div
+            className="flex flex-col sm:flex-row gap-4 mb-6"
+            data-test="search-actions-bar"
+          >
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -411,9 +448,16 @@ function ItensPageContent() {
             <div className="mb-4" data-test="applied-filters">
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="applied-filter-categoria">
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    data-test="applied-filter-categoria"
+                  >
                     <span className="font-medium">Categoria:</span>
-                    <span data-test="applied-filter-categoria-nome">{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
+                    <span data-test="applied-filter-categoria-nome">
+                      {categoriasData?.data?.docs?.find(
+                        (cat: any) => cat._id === categoriaFilter,
+                      )?.nome || 'Carregando...'}
+                    </span>
                     <button
                       onClick={() => setCategoriaFilter('')}
                       className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -425,9 +469,14 @@ function ItensPageContent() {
                   </div>
                 )}
                 {statusFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="applied-filter-status">
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    data-test="applied-filter-status"
+                  >
                     <span className="font-medium">Status:</span>
-                    <span data-test="applied-filter-status-nome">{statusFilter}</span>
+                    <span data-test="applied-filter-status-nome">
+                      {statusFilter}
+                    </span>
                     <button
                       onClick={() => setStatusFilter('')}
                       className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -453,17 +502,25 @@ function ItensPageContent() {
           )}
 
           {isLoading || isRefetchingAfterDelete ? (
-            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div
+              className="flex flex-col items-center justify-center py-12"
+              data-test="loading-spinner"
+            >
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando itens...</p>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando itens...
+              </p>
             </div>
           ) : itens.length > 0 ? (
             <div
               className="grid gap-4 w-full"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))' }}
+              style={{
+                gridTemplateColumns:
+                  'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
+              }}
               data-test="itens-grid"
             >
               {itens.map((item, index) => (
@@ -490,7 +547,9 @@ function ItensPageContent() {
             <div className="text-center py-8" data-test="empty-state">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">
-                {searchTerm ? 'Nenhum item encontrado para sua pesquisa.' : 'Não há itens cadastrados...'}
+                {searchTerm
+                  ? 'Nenhum item encontrado para sua pesquisa.'
+                  : 'Não há itens cadastrados...'}
               </p>
             </div>
           )}
@@ -498,11 +557,14 @@ function ItensPageContent() {
 
         {/* Controles de Paginação */}
         {itens.length > 0 && paginationInfo.totalPages > 1 && (
-          <div className="bg-white py-4 px-6 flex justify-center items-center shrink-0" data-test="pagination-controls">
+          <div
+            className="bg-white py-4 px-6 flex justify-center items-center shrink-0"
+            data-test="pagination-controls"
+          >
             <div className="flex items-center gap-1">
               {/* Botão Anterior */}
               <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={!paginationInfo.hasPrevPage || isFetching}
                 className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="prev-page-button"
@@ -566,10 +628,11 @@ function ItensPageContent() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={isFetching}
-                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${isActive
-                        ? 'bg-blue-600 text-white font-medium'
-                        : 'hover:bg-gray-100 text-gray-700'
-                        } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
+                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-600 text-white font-medium'
+                          : 'hover:bg-gray-100 text-gray-700'
+                      } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
                       data-test={`page-${pageNum}-button`}
                     >
                       {pageNum}
@@ -580,7 +643,7 @@ function ItensPageContent() {
 
               {/* Botão Próxima */}
               <button
-                onClick={() => setCurrentPage(prev => prev + 1)}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={!paginationInfo.hasNextPage || isFetching}
                 className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="next-page-button"
@@ -599,16 +662,22 @@ function ItensPageContent() {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           itemId={selectedItemId}
-          itemNome={itens.find(c => c._id === selectedItemId)?.nome || ''}
-          itemDescricao={itens.find(c => c._id === selectedItemId)?.descricao}
+          itemNome={itens.find((c) => c._id === selectedItemId)?.nome || ''}
+          itemDescricao={itens.find((c) => c._id === selectedItemId)?.descricao}
           estoques={estoquesData?.data?.docs || []}
           isLoading={isLoadingEstoques}
           totalQuantidade={
-            estoquesData?.data?.docs?.filter(estoque =>
-              estoque.quantidade != null &&
-              !isNaN(Number(estoque.quantidade)) &&
-              Number(estoque.quantidade) > 0
-            ).reduce((total, estoque) => total + Number(estoque.quantidade), 0) || 0
+            estoquesData?.data?.docs
+              ?.filter(
+                (estoque) =>
+                  estoque.quantidade != null &&
+                  !isNaN(Number(estoque.quantidade)) &&
+                  Number(estoque.quantidade) > 0,
+              )
+              .reduce(
+                (total, estoque) => total + Number(estoque.quantidade),
+                0,
+              ) || 0
           }
         />
       )}
@@ -628,7 +697,7 @@ function ItensPageContent() {
           isOpen={isEntradaModalOpen}
           onClose={handleCloseEntradaModal}
           itemId={entradaItemId}
-          itemNome={itens.find(c => c._id === entradaItemId)?.nome || ''}
+          itemNome={itens.find((c) => c._id === entradaItemId)?.nome || ''}
           onSuccess={handleEntradaSuccess}
         />
       )}
@@ -639,7 +708,7 @@ function ItensPageContent() {
           isOpen={isSaidaModalOpen}
           onClose={handleCloseSaidaModal}
           itemId={saidaItemId}
-          itemNome={itens.find(c => c._id === saidaItemId)?.nome || ''}
+          itemNome={itens.find((c) => c._id === saidaItemId)?.nome || ''}
           onSuccess={handleSaidaSuccess}
         />
       )}
@@ -650,7 +719,7 @@ function ItensPageContent() {
           isOpen={isExcluirModalOpen}
           onClose={handleCloseExcluirModal}
           itemId={excluirItemId}
-          itemNome={itens.find(c => c._id === excluirItemId)?.nome || ''}
+          itemNome={itens.find((c) => c._id === excluirItemId)?.nome || ''}
           onSuccess={handleExcluirSuccess}
         />
       )}
@@ -670,15 +739,17 @@ function ItensPageContent() {
 
 export default function ItensPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
         </div>
-        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
-      </div>
-    }>
+      }
+    >
       <ItensPageContent />
     </Suspense>
   );

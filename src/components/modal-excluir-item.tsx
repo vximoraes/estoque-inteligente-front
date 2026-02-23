@@ -18,7 +18,7 @@ export default function ModalExcluirItem({
   onClose,
   itemId,
   itemNome,
-  onSuccess
+  onSuccess,
 }: ModalExcluirItemProps) {
   const queryClient = useQueryClient();
 
@@ -28,7 +28,7 @@ export default function ModalExcluirItem({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['itens']
+        queryKey: ['itens'],
       });
 
       onSuccess?.();
@@ -91,7 +91,7 @@ export default function ModalExcluirItem({
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-excluir-backdrop"
@@ -117,20 +117,38 @@ export default function ModalExcluirItem({
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6" data-test="modal-excluir-content">
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2" data-test="modal-excluir-titulo">
+            <h2
+              className="text-xl font-semibold text-gray-900 mb-2"
+              data-test="modal-excluir-titulo"
+            >
               Excluir item
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
-              <p className="text-gray-600 break-words" data-test="modal-excluir-mensagem">
-                Tem certeza que deseja excluir o item <span className="font-semibold" data-test="modal-excluir-nome-item">{itemNome}</span>?
+              <p
+                className="text-gray-600 break-words"
+                data-test="modal-excluir-mensagem"
+              >
+                Tem certeza que deseja excluir o item{' '}
+                <span
+                  className="font-semibold"
+                  data-test="modal-excluir-nome-item"
+                >
+                  {itemNome}
+                </span>
+                ?
               </p>
             </div>
           </div>
 
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600" data-test="modal-excluir-erro">
-              <div className="font-medium mb-1">Não foi possível excluir o item</div>
+            <div
+              className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+              data-test="modal-excluir-erro"
+            >
+              <div className="font-medium mb-1">
+                Não foi possível excluir o item
+              </div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||
@@ -141,7 +159,10 @@ export default function ModalExcluirItem({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg" data-test="modal-excluir-footer">
+        <div
+          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
+          data-test="modal-excluir-footer"
+        >
           <div className="flex gap-3">
             <Button
               variant="outline"

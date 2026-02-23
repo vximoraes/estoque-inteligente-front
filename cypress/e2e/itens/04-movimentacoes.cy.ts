@@ -8,8 +8,10 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
     cy.intercept('GET', `${apiUrl}/localizacoes*`).as('getLocalizacoes');
     cy.intercept('POST', `${apiUrl}/movimentacoes`).as('createMovimentacao');
-    cy.intercept('GET', `${apiUrl}/estoques/item/*`).as('getEstoquesComponente');
-    
+    cy.intercept('GET', `${apiUrl}/estoques/item/*`).as(
+      'getEstoquesComponente',
+    );
+
     cy.login(email, senha);
     cy.visit(`${frontendUrl}/itens`);
     cy.wait('@getComponentes');
@@ -42,8 +44,12 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
             cy.getByData('entrada-icon').click();
           });
 
-          cy.getByData('modal-entrada-localizacao-container').should('be.visible');
-          cy.getByData('modal-entrada-quantidade-container').should('be.visible');
+          cy.getByData('modal-entrada-localizacao-container').should(
+            'be.visible',
+          );
+          cy.getByData('modal-entrada-quantidade-container').should(
+            'be.visible',
+          );
         }
       });
     });
@@ -97,12 +103,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
+
               cy.getByData('modal-entrada-quantidade-input').clear().type('0');
               cy.getByData('modal-entrada-confirmar').click();
 
@@ -145,20 +152,27 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
+
               cy.getByData('modal-entrada-quantidade-input').clear().type('5');
 
               cy.getByData('modal-entrada-confirmar').click();
 
-              cy.wait('@createMovimentacao', { timeout: 10000 }).then((movInterception) => {
-                expect(movInterception.response?.statusCode).to.be.oneOf([200, 201]);
-                cy.contains(/entrada.*sucesso|registrada/i, { timeout: 5000 }).should('be.visible');
-              });
+              cy.wait('@createMovimentacao', { timeout: 10000 }).then(
+                (movInterception) => {
+                  expect(movInterception.response?.statusCode).to.be.oneOf([
+                    200, 201,
+                  ]);
+                  cy.contains(/entrada.*sucesso|registrada/i, {
+                    timeout: 5000,
+                  }).should('be.visible');
+                },
+              );
             }
           });
         }
@@ -179,13 +193,16 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
-              cy.getByData('modal-entrada-quantidade-input').clear().type(quantidadeEntrada.toString());
+
+              cy.getByData('modal-entrada-quantidade-input')
+                .clear()
+                .type(quantidadeEntrada.toString());
               cy.getByData('modal-entrada-confirmar').click();
 
               cy.wait('@createMovimentacao', { timeout: 10000 });
@@ -212,12 +229,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
+
               cy.getByData('modal-entrada-quantidade-input').clear().type('5');
               cy.getByData('modal-entrada-confirmar').click();
 
@@ -232,7 +250,9 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
       cy.wait('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
-        const itemIndisponivel = itens.find((c: any) => c.status === 'Indisponível');
+        const itemIndisponivel = itens.find(
+          (c: any) => c.status === 'Indisponível',
+        );
 
         if (itemIndisponivel) {
           const index = itens.indexOf(itemIndisponivel);
@@ -242,12 +262,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
+
               cy.getByData('modal-entrada-quantidade-input').clear().type('5');
               cy.getByData('modal-entrada-confirmar').click();
 
@@ -270,7 +291,9 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
-          const itemIndisponivel = itens.find((c: any) => c.status === 'Indisponível');
+          const itemIndisponivel = itens.find(
+            (c: any) => c.status === 'Indisponível',
+          );
           const index = itemIndisponivel ? itens.indexOf(itemIndisponivel) : 0;
 
           cy.getByData(`item-card-${index}`).within(() => {
@@ -278,23 +301,28 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
           });
 
           cy.wait('@getLocalizacoes').then((locInterception) => {
-            const localizacoes = locInterception.response?.body?.data?.docs || [];
+            const localizacoes =
+              locInterception.response?.body?.data?.docs || [];
 
             if (localizacoes.length > 0) {
               cy.getByData('modal-entrada-localizacao-dropdown').click();
               cy.get('[data-dropdown]').contains(localizacoes[0].nome).click();
-              
+
               cy.getByData('modal-entrada-quantidade-input').clear().type('10');
               cy.getByData('modal-entrada-confirmar').click();
 
               cy.wait('@createMovimentacao', { timeout: 10000 });
-              cy.wait('@getComponentes', { timeout: 10000 }).then((novaInterception) => {
-                const statsDepois = novaInterception.response?.body?.stats;
+              cy.wait('@getComponentes', { timeout: 10000 }).then(
+                (novaInterception) => {
+                  const statsDepois = novaInterception.response?.body?.stats;
 
-                if (statsAntes && statsDepois && itemIndisponivel) {
-                  expect(statsDepois.indisponiveis).to.be.lessThan(statsAntes.indisponiveis);
-                }
-              });
+                  if (statsAntes && statsDepois && itemIndisponivel) {
+                    expect(statsDepois.indisponiveis).to.be.lessThan(
+                      statsAntes.indisponiveis,
+                    );
+                  }
+                },
+              );
             }
           });
         }
@@ -366,15 +394,21 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               const estoque = estoques[0];
 
               cy.getByData('modal-saida-localizacao-dropdown').click();
-              cy.get('[data-dropdown]').contains(estoque.localizacao.nome).click();
+              cy.get('[data-dropdown]')
+                .contains(estoque.localizacao.nome)
+                .click();
 
               const quantidadeExcessiva = estoque.quantidade + 10;
-              cy.getByData('modal-saida-quantidade-input').clear().type(quantidadeExcessiva.toString());
+              cy.getByData('modal-saida-quantidade-input')
+                .clear()
+                .type(quantidadeExcessiva.toString());
 
               cy.getByData('modal-saida-confirmar').click();
 
               cy.wait(1000);
-              cy.contains(/insuficiente|disponível|estoque/i, { timeout: 5000 });
+              cy.contains(/insuficiente|disponível|estoque/i, {
+                timeout: 5000,
+              });
             }
           });
         }
@@ -401,18 +435,28 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               const estoque = estoques[0];
 
               cy.getByData('modal-saida-localizacao-dropdown').click();
-              cy.get('[data-dropdown]').contains(estoque.localizacao.nome).click();
+              cy.get('[data-dropdown]')
+                .contains(estoque.localizacao.nome)
+                .click();
 
               const quantidadeSaida = Math.min(2, estoque.quantidade);
-              cy.getByData('modal-saida-quantidade-input').clear().type(quantidadeSaida.toString());
+              cy.getByData('modal-saida-quantidade-input')
+                .clear()
+                .type(quantidadeSaida.toString());
 
               cy.getByData('modal-saida-confirmar').click();
 
-              cy.wait('@createMovimentacao', { timeout: 10000 }).then((movInterception) => {
-                expect(movInterception.response?.statusCode).to.be.oneOf([200, 201]);
+              cy.wait('@createMovimentacao', { timeout: 10000 }).then(
+                (movInterception) => {
+                  expect(movInterception.response?.statusCode).to.be.oneOf([
+                    200, 201,
+                  ]);
 
-                cy.contains(/saída.*sucesso|registrada/i, { timeout: 5000 }).should('be.visible');
-              });
+                  cy.contains(/saída.*sucesso|registrada/i, {
+                    timeout: 5000,
+                  }).should('be.visible');
+                },
+              );
             }
           });
         }
@@ -441,9 +485,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               const estoque = estoques[0];
 
               cy.getByData('modal-saida-localizacao-dropdown').click();
-              cy.get('[data-dropdown]').contains(estoque.localizacao.nome).click();
-              
-              cy.getByData('modal-saida-quantidade-input').clear().type(quantidadeSaida.toString());
+              cy.get('[data-dropdown]')
+                .contains(estoque.localizacao.nome)
+                .click();
+
+              cy.getByData('modal-saida-quantidade-input')
+                .clear()
+                .type(quantidadeSaida.toString());
               cy.getByData('modal-saida-confirmar').click();
 
               cy.wait('@createMovimentacao', { timeout: 10000 });
@@ -464,8 +512,9 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
       cy.wait('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
-        const itemEmEstoque = itens.find((c: any) =>
-          c.status === 'Em Estoque' && c.quantidade <= c.estoque_minimo + 5
+        const itemEmEstoque = itens.find(
+          (c: any) =>
+            c.status === 'Em Estoque' && c.quantidade <= c.estoque_minimo + 5,
         );
 
         if (itemEmEstoque) {
@@ -483,9 +532,13 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               const quantidadeSaida = Math.min(3, estoque.quantidade);
 
               cy.getByData('modal-saida-localizacao-dropdown').click();
-              cy.get('[data-dropdown]').contains(estoque.localizacao.nome).click();
-              
-              cy.getByData('modal-saida-quantidade-input').clear().type(quantidadeSaida.toString());
+              cy.get('[data-dropdown]')
+                .contains(estoque.localizacao.nome)
+                .click();
+
+              cy.getByData('modal-saida-quantidade-input')
+                .clear()
+                .type(quantidadeSaida.toString());
               cy.getByData('modal-saida-confirmar').click();
 
               cy.wait('@createMovimentacao', { timeout: 10000 });
@@ -518,15 +571,21 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
               const estoque = estoques[0];
 
               cy.getByData('modal-saida-localizacao-dropdown').click();
-              cy.get('[data-dropdown]').contains(estoque.localizacao.nome).click();
+              cy.get('[data-dropdown]')
+                .contains(estoque.localizacao.nome)
+                .click();
 
               const quantidadeExcessiva = estoque.quantidade + 100;
-              cy.getByData('modal-saida-quantidade-input').clear().type(quantidadeExcessiva.toString());
+              cy.getByData('modal-saida-quantidade-input')
+                .clear()
+                .type(quantidadeExcessiva.toString());
 
               cy.getByData('modal-saida-confirmar').click();
 
               cy.wait(1000);
-              cy.contains(/insuficiente|disponível|estoque|excede/i, { timeout: 5000 });
+              cy.contains(/insuficiente|disponível|estoque|excede/i, {
+                timeout: 5000,
+              });
             }
           });
         }

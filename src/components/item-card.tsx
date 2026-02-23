@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
@@ -20,7 +20,7 @@ export default function ItemCardSimples({
   imagem,
   onClick,
   isSelected = false,
-  dataTestId
+  dataTestId,
 }: ItemCardSimplesProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
@@ -41,18 +41,24 @@ export default function ItemCardSimples({
     <div
       onClick={() => onClick(id, nome)}
       className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
-        isSelected ? 'border-blue-500 bg-blue-50 selected' : 'border-gray-200 hover:border-blue-300'
+        isSelected
+          ? 'border-blue-500 bg-blue-50 selected'
+          : 'border-gray-200 hover:border-blue-300'
       }`}
       data-test={dataTestId}
     >
       <div className="flex flex-col items-center text-center gap-3">
         {/* Imagem do item */}
-        <div 
+        <div
           className={`w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
-            imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+            imagemComTimestamp
+              ? 'cursor-pointer hover:opacity-80 transition-opacity'
+              : ''
           }`}
           onClick={handleImageClick}
-          title={imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''}
+          title={
+            imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''
+          }
         >
           {imagemComTimestamp ? (
             <img
@@ -77,10 +83,7 @@ export default function ItemCardSimples({
         </div>
 
         {/* Categoria */}
-        <p
-          className="text-xs text-gray-500 truncate w-full"
-          title={categoria}
-        >
+        <p className="text-xs text-gray-500 truncate w-full" title={categoria}>
           {categoria}
         </p>
       </div>

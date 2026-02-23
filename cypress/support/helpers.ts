@@ -1,4 +1,6 @@
-export const generateUniqueComponentName = (prefix = 'Componente Teste'): string => {
+export const generateUniqueComponentName = (
+  prefix = 'Componente Teste',
+): string => {
   return `${prefix} ${Date.now()}`;
 };
 
@@ -6,7 +8,10 @@ export const waitForElementToDisappear = (selector: string, timeout = 5000) => {
   cy.get(selector, { timeout }).should('not.exist');
 };
 
-export const verifyToastMessage = (message: string | RegExp, timeout = 5000) => {
+export const verifyToastMessage = (
+  message: string | RegExp,
+  timeout = 5000,
+) => {
   cy.contains(message, { timeout }).should('be.visible');
 };
 
@@ -17,15 +22,17 @@ export const fillComponenteForm = (dados: {
   descricao?: string;
 }) => {
   cy.get('input[name="nome"]').clear().type(dados.nome);
-  
+
   if (dados.categoria) {
     cy.get('select[name="categoria"]').select(dados.categoria);
   }
-  
+
   if (dados.estoqueMinimo !== undefined) {
-    cy.get('input[name="estoque_minimo"]').clear().type(dados.estoqueMinimo.toString());
+    cy.get('input[name="estoque_minimo"]')
+      .clear()
+      .type(dados.estoqueMinimo.toString());
   }
-  
+
   if (dados.descricao) {
     cy.get('textarea[name="descricao"]').clear().type(dados.descricao);
   }
@@ -66,7 +73,7 @@ export const registrarSaida = (localizacaoId: string, quantidade: number) => {
 export const excluirComponente = (itemIndex: number) => {
   openItemMenu(itemIndex);
   cy.contains('Excluir').click();
-  
+
   cy.get('[role="dialog"]').within(() => {
     cy.contains('button', /excluir|deletar|confirmar/i).click();
   });
@@ -77,16 +84,19 @@ export const aplicarFiltros = (filtros: {
   status?: string;
 }) => {
   cy.contains('button', 'Filtros').click();
-  
+
   cy.get('[role="dialog"]').within(() => {
     if (filtros.categoria) {
-      cy.contains('Categoria').parent().find('select').select(filtros.categoria);
+      cy.contains('Categoria')
+        .parent()
+        .find('select')
+        .select(filtros.categoria);
     }
-    
+
     if (filtros.status) {
       cy.contains('Status').parent().find('select').select(filtros.status);
     }
-    
+
     cy.contains('button', 'Aplicar Filtros').click();
   });
 };
@@ -114,7 +124,7 @@ export const verificarCardComponente = (
     categoria?: string;
     quantidade?: number;
     status?: string;
-  }
+  },
 ) => {
   cy.getByData(`item-card-${index}`).within(() => {
     if (dados.nome) {
@@ -133,37 +143,42 @@ export const verificarCardComponente = (
 };
 
 export const waitForAPIRequests = (aliases: string[], timeout = 10000) => {
-  aliases.forEach(alias => {
+  aliases.forEach((alias) => {
     cy.wait(alias, { timeout });
   });
 };
 
 export const limparComponenteTeste = (itemId: string) => {
   const apiUrl = Cypress.env('API_URL');
-  
+
   cy.request({
     method: 'PATCH',
     url: `${apiUrl}/itens/${itemId}/inativar`,
     headers: {
-      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`,
     },
-    failOnStatusCode: false
+    failOnStatusCode: false,
   }).then(() => {
     cy.log(`Componente ${itemId} removido`);
   });
 };
 
 export const verificarEstatisticas = () => {
-  const stats = ['Total de Componentes', 'Em Estoque', 'Baixo Estoque', 'Indisponível'];
-  
-  stats.forEach(stat => {
+  const stats = [
+    'Total de Componentes',
+    'Em Estoque',
+    'Baixo Estoque',
+    'Indisponível',
+  ];
+
+  stats.forEach((stat) => {
     cy.contains(stat).should('be.visible');
   });
 };
 
 export const setupComponentesIntercepts = () => {
   const apiUrl = Cypress.env('API_URL');
-  
+
   cy.intercept('GET', `${apiUrl}/itens*`).as('getComponentes');
   cy.intercept('GET', `${apiUrl}/itens/*`).as('getComponenteById');
   cy.intercept('POST', `${apiUrl}/itens`).as('createComponente');
@@ -180,7 +195,7 @@ export const loginAndNavigateToComponentes = () => {
   const frontendUrl = Cypress.env('FRONTEND_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
-  
+
   cy.visit(frontendUrl);
   cy.login(email, senha);
   cy.visit(`${frontendUrl}/itens`);

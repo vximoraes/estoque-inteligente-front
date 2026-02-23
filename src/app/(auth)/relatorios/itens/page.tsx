@@ -1,27 +1,37 @@
-"use client"
-import StatCard from "@/components/stat-card";
-import Cabecalho from "@/components/cabecalho";
-import ModalFiltros from "@/components/modal-filtros";
-import ModalExportarRelatorio from "@/components/modal-exportar-relatorio";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+'use client';
+import StatCard from '@/components/stat-card';
+import Cabecalho from '@/components/cabecalho';
+import ModalFiltros from '@/components/modal-filtros';
+import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Package,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
 import { generateItensCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
-import { useSession } from "@/hooks/use-session";
+import { useSession } from '@/hooks/use-session';
 
 interface CategoriasApiResponse {
   data: {
@@ -30,7 +40,7 @@ interface CategoriasApiResponse {
 }
 
 function RelatorioItensPageContent() {
-  const {user} = useSession()
+  const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -47,7 +57,7 @@ function RelatorioItensPageContent() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteQuery<EstoqueApiResponse>({
     queryKey: ['estoques-relatorio', searchTerm, categoriaFilter, statusFilter],
     queryFn: async ({ pageParam }) => {
@@ -92,7 +102,7 @@ function RelatorioItensPageContent() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(observerTarget.current);
@@ -112,17 +122,19 @@ function RelatorioItensPageContent() {
         return false;
       }
 
-      const matchSearch = !searchTerm || 
+      const matchSearch =
+        !searchTerm ||
         estoque.item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         estoque.item._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        estoque.localizacao.nome?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchCategoria = !categoriaFilter || 
-        estoque.item.categoria === categoriaFilter;
-      
-      const matchStatus = !statusFilter || 
-        estoque.item.status === statusFilter;
-      
+        estoque.localizacao.nome
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+      const matchCategoria =
+        !categoriaFilter || estoque.item.categoria === categoriaFilter;
+
+      const matchStatus = !statusFilter || estoque.item.status === statusFilter;
+
       return matchSearch && matchCategoria && matchStatus;
     })
     .sort((a, b) => {
@@ -134,13 +146,17 @@ function RelatorioItensPageContent() {
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
   const totalItens = new Set(
-    estoquesFiltrados
-      .filter(e => e?.item?._id)
-      .map(e => e.item._id)
+    estoquesFiltrados.filter((e) => e?.item?._id).map((e) => e.item._id),
   ).size;
-  const emEstoque = estoquesFiltrados.filter(e => e?.item?.status === 'Em Estoque').length;
-  const baixoEstoque = estoquesFiltrados.filter(e => e?.item?.status === 'Baixo Estoque').length;
-  const indisponiveis = estoquesFiltrados.filter(e => e?.item?.status === 'Indisponível').length;
+  const emEstoque = estoquesFiltrados.filter(
+    (e) => e?.item?.status === 'Em Estoque',
+  ).length;
+  const baixoEstoque = estoquesFiltrados.filter(
+    (e) => e?.item?.status === 'Baixo Estoque',
+  ).length;
+  const indisponiveis = estoquesFiltrados.filter(
+    (e) => e?.item?.status === 'Indisponível',
+  ).length;
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -180,8 +196,8 @@ function RelatorioItensPageContent() {
   const handleExport = async (fileName: string, format: string) => {
     try {
       // Filtrar apenas os estoques selecionados
-      const estoquesSelecionados = estoquesFiltrados.filter(estoque => 
-        selectedItems.has(estoque._id)
+      const estoquesSelecionados = estoquesFiltrados.filter((estoque) =>
+        selectedItems.has(estoque._id),
       );
 
       if (format === 'PDF') {
@@ -191,18 +207,21 @@ function RelatorioItensPageContent() {
           fileName: fileName.trim(),
           title: 'RELATÓRIO DE ITENS',
           includeStats: true,
-          userName: user?.name
+          userName: user?.name,
         });
 
-        toast.success(`PDF gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`, {
-          position: 'bottom-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
+        toast.success(
+          `PDF gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`,
+          {
+            position: 'bottom-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            transition: Slide,
+          },
+        );
 
         // Fechar modal após exportação
         handleCloseExportarModal();
@@ -214,15 +233,18 @@ function RelatorioItensPageContent() {
           includeStats: true,
         });
 
-        toast.success(`CSV gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`, {
-          position: 'bottom-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
+        toast.success(
+          `CSV gerado com sucesso! ${estoquesSelecionados.length} item(ns) exportado(s).`,
+          {
+            position: 'bottom-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            transition: Slide,
+          },
+        );
 
         // Fechar modal após exportação
         handleCloseExportarModal();
@@ -259,7 +281,7 @@ function RelatorioItensPageContent() {
       setSelectedItems(new Set());
     } else {
       // Selecionar todos os itens filtrados
-      const allIds = new Set(estoquesFiltrados.map(e => e._id));
+      const allIds = new Set(estoquesFiltrados.map((e) => e._id));
       setSelectedItems(allIds);
     }
   };
@@ -274,15 +296,18 @@ function RelatorioItensPageContent() {
     setSelectedItems(newSelected);
   };
 
-  const isAllSelected = estoquesFiltrados.length > 0 && selectedItems.size === estoquesFiltrados.length;
-  const isSomeSelected = selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
+  const isAllSelected =
+    estoquesFiltrados.length > 0 &&
+    selectedItems.size === estoquesFiltrados.length;
+  const isSomeSelected =
+    selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-itens-page">
-      <Cabecalho 
-        pagina="Relatórios" 
-        acao="Componentes"
-      />
+    <div
+      className="w-full max-w-full h-screen flex flex-col overflow-hidden"
+      data-test="relatorio-itens-page"
+    >
+      <Cabecalho pagina="Relatórios" acao="Componentes" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Stats Cards - Colapsável no mobile */}
@@ -304,97 +329,117 @@ function RelatorioItensPageContent() {
           </button>
 
           {/* Cards - Sempre visível no desktop, colapsável no mobile */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
-          <StatCard
-            title="Total de"
-            subtitle="itens"
-            value={totalItens}
-            icon={Package}
-            iconColor="text-blue-600"
-            iconBgColor="bg-blue-100"
-            data-test="stat-total-itens"
-            hoverTitle={`Total de itens cadastrados: ${totalItens}`}
-          />
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+            data-test="stats-grid"
+          >
+            <StatCard
+              title="Total de"
+              subtitle="itens"
+              value={totalItens}
+              icon={Package}
+              iconColor="text-blue-600"
+              iconBgColor="bg-blue-100"
+              data-test="stat-total-itens"
+              hoverTitle={`Total de itens cadastrados: ${totalItens}`}
+            />
 
-          <StatCard
-            title="Em estoque"
-            value={emEstoque}
-            icon={CheckCircle}
-            iconColor="text-green-600"
-            iconBgColor="bg-green-100"
-            data-test="stat-em-estoque"
-            hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
-          />
+            <StatCard
+              title="Em estoque"
+              value={emEstoque}
+              icon={CheckCircle}
+              iconColor="text-green-600"
+              iconBgColor="bg-green-100"
+              data-test="stat-em-estoque"
+              hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
+            />
 
-          <StatCard
-            title="Baixo estoque"
-            value={baixoEstoque}
-            icon={AlertTriangle}
-            iconColor="text-yellow-600"
-            iconBgColor="bg-yellow-100"
-            data-test="stat-baixo-estoque"
-            hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
-          />
+            <StatCard
+              title="Baixo estoque"
+              value={baixoEstoque}
+              icon={AlertTriangle}
+              iconColor="text-yellow-600"
+              iconBgColor="bg-yellow-100"
+              data-test="stat-baixo-estoque"
+              hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
+            />
 
-          <StatCard
-            title="Indisponível"
-            value={indisponiveis}
-            icon={XCircle}
-            iconColor="text-red-600"
-            iconBgColor="bg-red-100"
-            data-test="stat-indisponiveis"
-            hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
-          />
-        </div>
+            <StatCard
+              title="Indisponível"
+              value={indisponiveis}
+              icon={XCircle}
+              iconColor="text-red-600"
+              iconBgColor="bg-red-100"
+              data-test="stat-indisponiveis"
+              hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
+            />
+          </div>
         </div>
 
         {/* Barra de Pesquisa e Botões */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
-            <div className="relative flex-1" data-test="search-container">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Pesquisar itens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-                data-test="search-input"
-              />
-            </div>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 cursor-pointer"
-              data-test="filtros-button"
-              onClick={handleOpenFiltrosModal}
-            >
-              <Filter className="w-4 h-4" />
-              Filtros
-            </Button>
-            <Button
-              disabled={selectedItems.size === 0}
-              className={`flex items-center gap-2 text-white transition-all ${
-                selectedItems.size > 0
-                  ? 'hover:opacity-90 cursor-pointer'
-                  : 'opacity-50 cursor-not-allowed bg-gray-400'
-              }`}
-              style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
-              data-test="exportar-button"
-              onClick={handleOpenExportarModal}
-              title={selectedItems.size === 0 ? 'Selecione itens para exportar' : `Exportar ${selectedItems.size} item(ns)`}
-            >
-              <img src="../gerar-pdf.svg" alt="" className="w-5" />
-              Exportar
-            </Button>
+        <div
+          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          data-test="search-actions-bar"
+        >
+          <div className="relative flex-1" data-test="search-container">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Pesquisar itens..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+              data-test="search-input"
+            />
           </div>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 cursor-pointer"
+            data-test="filtros-button"
+            onClick={handleOpenFiltrosModal}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          <Button
+            disabled={selectedItems.size === 0}
+            className={`flex items-center gap-2 text-white transition-all ${
+              selectedItems.size > 0
+                ? 'hover:opacity-90 cursor-pointer'
+                : 'opacity-50 cursor-not-allowed bg-gray-400'
+            }`}
+            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            data-test="exportar-button"
+            onClick={handleOpenExportarModal}
+            title={
+              selectedItems.size === 0
+                ? 'Selecione itens para exportar'
+                : `Exportar ${selectedItems.size} item(ns)`
+            }
+          >
+            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            Exportar
+          </Button>
+        </div>
 
         {/* Filtros aplicados */}
         {(categoriaFilter || statusFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
+            <div
+              className="flex flex-wrap items-center gap-2"
+              data-test="filters-container"
+            >
               {categoriaFilter && (
-                <div data-test="filter-tag-categoria" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div
+                  data-test="filter-tag-categoria"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                >
                   <span className="font-medium">Categoria:</span>
-                  <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
+                  <span>
+                    {categoriasData?.data?.docs?.find(
+                      (cat: any) => cat._id === categoriaFilter,
+                    )?.nome || 'Carregando...'}
+                  </span>
                   <button
                     onClick={() => setCategoriaFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -406,7 +451,10 @@ function RelatorioItensPageContent() {
                 </div>
               )}
               {statusFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="filter-tag-status">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  data-test="filter-tag-status"
+                >
                   <span className="font-medium">Status:</span>
                   <span>{statusFilter}</span>
                   <button
@@ -436,21 +484,26 @@ function RelatorioItensPageContent() {
 
         {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center flex-1">
-            <div className="relative w-12 h-12">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center flex-1">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando itens...
+              </p>
             </div>
-            <p className="mt-4 text-gray-600 font-medium">Carregando itens...</p>
-          </div>
-        ) : estoquesFiltrados.length > 0 ? (
-          <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
-            <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-              <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
+          ) : estoquesFiltrados.length > 0 ? (
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
+                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8"
+                        data-test="table-head-checkbox"
+                      >
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -461,20 +514,54 @@ function RelatorioItensPageContent() {
                           }}
                           onChange={handleSelectAll}
                           className="w-4 h-4 cursor-pointer"
-                          title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                          title={
+                            isAllSelected
+                              ? 'Desmarcar todos'
+                              : 'Selecionar todos'
+                          }
                           data-test="checkbox-select-all"
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-item">COMPONENTE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-quantidade">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-status">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-localizacao">LOCALIZAÇÃO</TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-codigo"
+                      >
+                        CÓDIGO
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-item"
+                      >
+                        COMPONENTE
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        data-test="table-head-quantidade"
+                      >
+                        QUANTIDADE
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        data-test="table-head-status"
+                      >
+                        STATUS
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        data-test="table-head-localizacao"
+                      >
+                        LOCALIZAÇÃO
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow data-test="item-row" key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow
+                        data-test="item-row"
+                        key={estoque._id}
+                        className="hover:bg-gray-50 border-b"
+                        style={{ height: '60px' }}
+                      >
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
@@ -484,28 +571,46 @@ function RelatorioItensPageContent() {
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3" data-test="item-codigo">
-                          <span className="truncate block max-w-[200px]" title={estoque.item._id}>
+                        <TableCell
+                          className="font-medium text-left px-8 py-3"
+                          data-test="item-codigo"
+                        >
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={estoque.item._id}
+                          >
                             {estoque.item._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3" data-test="item-nome">
-                          <span className="truncate block max-w-[200px]" title={estoque.item.nome}>
+                        <TableCell
+                          className="font-medium text-left px-8 py-3"
+                          data-test="item-nome"
+                        >
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={estoque.item.nome}
+                          >
                             {estoque.item.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium" data-test="item-quantidade">
+                        <TableCell
+                          className="text-center px-8 py-3 font-medium"
+                          data-test="item-quantidade"
+                        >
                           {estoque.quantidade}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 whitespace-nowrap">
-                          <div className="flex justify-center" data-test="item-status">
+                          <div
+                            className="flex justify-center"
+                            data-test="item-status"
+                          >
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
                                 estoque.item.status === 'Em Estoque'
                                   ? 'bg-green-100 text-green-800'
                                   : estoque.item.status === 'Baixo Estoque'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
                               }`}
                               title={estoque.item.status}
                             >
@@ -513,8 +618,14 @@ function RelatorioItensPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3 font-medium" data-test="item-localizacao">
-                          <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
+                        <TableCell
+                          className="text-left px-8 py-3 font-medium"
+                          data-test="item-localizacao"
+                        >
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={estoque.localizacao.nome}
+                          >
                             {estoque.localizacao.nome}
                           </span>
                         </TableCell>
@@ -524,21 +635,33 @@ function RelatorioItensPageContent() {
                 </table>
 
                 {/* Observer target for infinite scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                >
                   {isFetchingNextPage && (
-                    <PulseLoader color="#3b82f6" size={5} speedMultiplier={0.8} />
+                    <PulseLoader
+                      color="#3b82f6"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
                   )}
                 </div>
               </div>
             </div>
           ) : (
-          <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+            <div
+              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
+              data-test="empty-state"
+            >
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Package className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {searchTerm ? 'Nenhum item encontrado para sua pesquisa.' : 'Não há itens cadastrados...'}
+                  {searchTerm
+                    ? 'Nenhum item encontrado para sua pesquisa.'
+                    : 'Não há itens cadastrados...'}
                 </p>
               </div>
             </div>
@@ -568,15 +691,17 @@ function RelatorioItensPageContent() {
 
 export default function RelatorioItensPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
         </div>
-        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
-      </div>
-    }>
+      }
+    >
       <RelatorioItensPageContent />
     </Suspense>
   );

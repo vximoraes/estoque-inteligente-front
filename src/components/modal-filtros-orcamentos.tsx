@@ -10,7 +10,12 @@ interface ModalFiltrosOrcamentosProps {
   valorMaxFilter: string;
   dataInicioFilter: string;
   dataFimFilter: string;
-  onFiltersChange: (valorMin: string, valorMax: string, dataInicio: string, dataFim: string) => void;
+  onFiltersChange: (
+    valorMin: string,
+    valorMax: string,
+    dataInicio: string,
+    dataFim: string,
+  ) => void;
 }
 
 const periodoOptions = [
@@ -21,7 +26,7 @@ const periodoOptions = [
   { value: 'trimestre', label: 'Últimos 3 meses' },
   { value: 'semestre', label: 'Últimos 6 meses' },
   { value: 'ano', label: 'Último ano' },
-  { value: 'personalizado', label: 'Período personalizado' }
+  { value: 'personalizado', label: 'Período personalizado' },
 ];
 
 export default function ModalFiltrosOrcamentos({
@@ -31,7 +36,7 @@ export default function ModalFiltrosOrcamentos({
   valorMaxFilter,
   dataInicioFilter,
   dataFimFilter,
-  onFiltersChange
+  onFiltersChange,
 }: ModalFiltrosOrcamentosProps) {
   const [valorMin, setValorMin] = useState(valorMinFilter);
   const [valorMax, setValorMax] = useState(valorMaxFilter);
@@ -39,14 +44,15 @@ export default function ModalFiltrosOrcamentos({
   const [dataFim, setDataFim] = useState(dataFimFilter);
   const [periodoSelecionado, setPeriodoSelecionado] = useState('');
   const [periodoDropdownOpen, setPeriodoDropdownOpen] = useState(false);
-  const [mostrarDatasPersonalizadas, setMostrarDatasPersonalizadas] = useState(false);
+  const [mostrarDatasPersonalizadas, setMostrarDatasPersonalizadas] =
+    useState(false);
 
   useEffect(() => {
     setValorMin(valorMinFilter);
     setValorMax(valorMaxFilter);
     setDataInicio(dataInicioFilter);
     setDataFim(dataFimFilter);
-    
+
     // Sincronizar o período selecionado baseado nas datas
     // Se não há datas, resetar o período selecionado
     if (!dataInicioFilter && !dataFimFilter) {
@@ -56,7 +62,7 @@ export default function ModalFiltrosOrcamentos({
       // Se há datas definidas, verificar se corresponde a algum período predefinido
       const hoje = new Date();
       const hojeStr = hoje.toISOString().split('T')[0];
-      
+
       if (dataInicioFilter === hojeStr && dataFimFilter === hojeStr) {
         setPeriodoSelecionado('hoje');
       } else {
@@ -123,7 +129,7 @@ export default function ModalFiltrosOrcamentos({
   const calcularDatasPeriodo = (periodo: string) => {
     const hoje = new Date();
     let inicio = new Date();
-    
+
     switch (periodo) {
       case 'hoje':
         inicio = new Date(hoje);
@@ -157,7 +163,7 @@ export default function ModalFiltrosOrcamentos({
 
     return {
       inicio: formatLocalDate(inicio),
-      fim: formatLocalDate(hoje)
+      fim: formatLocalDate(hoje),
     };
   };
 
@@ -183,28 +189,36 @@ export default function ModalFiltrosOrcamentos({
 
   const handleApplyFilters = () => {
     const hoje = getDataMaxima(); // Data atual no formato YYYY-MM-DD
-    
+
     // Função para ajustar data futura para hoje
     const ajustarDataFutura = (data: string) => {
       if (!data) return data;
       return data > hoje ? hoje : data;
     };
-    
+
     // Se há um período predefinido selecionado (não personalizado), recalcular as datas
-    if (periodoSelecionado && periodoSelecionado !== 'personalizado' && periodoSelecionado !== '') {
+    if (
+      periodoSelecionado &&
+      periodoSelecionado !== 'personalizado' &&
+      periodoSelecionado !== ''
+    ) {
       const datas = calcularDatasPeriodo(periodoSelecionado);
       onFiltersChange(valorMin, valorMax, datas.inicio, datas.fim);
     } else {
       // Ajustar datas futuras para a data atual
-      let dataInicioAjustada = ajustarDataFutura(dataInicio);
+      const dataInicioAjustada = ajustarDataFutura(dataInicio);
       let dataFimAjustada = ajustarDataFutura(dataFim);
-      
+
       // Se ambas as datas estão preenchidas e a data final é menor que a inicial,
       // ajustar a data final para ser igual à data inicial
-      if (dataInicioAjustada && dataFimAjustada && dataFimAjustada < dataInicioAjustada) {
+      if (
+        dataInicioAjustada &&
+        dataFimAjustada &&
+        dataFimAjustada < dataInicioAjustada
+      ) {
         dataFimAjustada = dataInicioAjustada;
       }
-      
+
       onFiltersChange(valorMin, valorMax, dataInicioAjustada, dataFimAjustada);
     }
     handleCloseModal();
@@ -229,10 +243,10 @@ export default function ModalFiltrosOrcamentos({
   const formatarValorMoeda = (valor: string) => {
     // Remove tudo exceto números e vírgula/ponto
     let valorLimpo = valor.replace(/[^\d,.]/g, '');
-    
+
     // Substitui vírgula por ponto para consistência
     valorLimpo = valorLimpo.replace(',', '.');
-    
+
     return valorLimpo;
   };
 
@@ -247,7 +261,9 @@ export default function ModalFiltrosOrcamentos({
   };
 
   const getPeriodoLabel = () => {
-    const selected = periodoOptions.find(opt => opt.value === periodoSelecionado);
+    const selected = periodoOptions.find(
+      (opt) => opt.value === periodoSelecionado,
+    );
     return selected?.label || 'Todos os períodos';
   };
 
@@ -261,16 +277,16 @@ export default function ModalFiltrosOrcamentos({
   };
 
   const modalContent = (
-    <div 
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4" 
-      style={{ 
+    <div
+      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+      style={{
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={handleBackdropClick}
       data-test="modal-filtros-orcamentos-backdrop"
     >
-      <div 
+      <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         data-test="modal-filtros-orcamentos-content"
@@ -296,11 +312,16 @@ export default function ModalFiltrosOrcamentos({
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="valorMin" className="block text-sm text-gray-600 mb-1">
+                <label
+                  htmlFor="valorMin"
+                  className="block text-sm text-gray-600 mb-1"
+                >
                   Valor mínimo
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    R$
+                  </span>
                   <input
                     id="valorMin"
                     type="text"
@@ -313,11 +334,16 @@ export default function ModalFiltrosOrcamentos({
                 </div>
               </div>
               <div>
-                <label htmlFor="valorMax" className="block text-sm text-gray-600 mb-1">
+                <label
+                  htmlFor="valorMax"
+                  className="block text-sm text-gray-600 mb-1"
+                >
                   Valor máximo
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    R$
+                  </span>
                   <input
                     id="valorMax"
                     type="text"
@@ -343,12 +369,18 @@ export default function ModalFiltrosOrcamentos({
                 className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
                 data-test="filtro-periodo-dropdown"
               >
-                <span className={periodoSelecionado ? 'text-gray-900' : 'text-gray-500'}>
+                <span
+                  className={
+                    periodoSelecionado ? 'text-gray-900' : 'text-gray-500'
+                  }
+                >
                   {getPeriodoLabel()}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`}
+                />
               </button>
-              
+
               {periodoDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
                   {periodoOptions.map((option) => (
@@ -356,7 +388,9 @@ export default function ModalFiltrosOrcamentos({
                       key={option.value}
                       onClick={() => handlePeriodoChange(option.value)}
                       className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                        periodoSelecionado === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                        periodoSelecionado === option.value
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-900'
                       } cursor-pointer`}
                       data-test={`filtro-periodo-option-${option.value || 'todos'}`}
                     >
@@ -369,14 +403,21 @@ export default function ModalFiltrosOrcamentos({
           </div>
 
           {/* Datas personalizadas */}
-          {(mostrarDatasPersonalizadas || periodoSelecionado === 'personalizado') && (
-            <div className="space-y-2" data-test="filtro-datas-personalizadas-container">
+          {(mostrarDatasPersonalizadas ||
+            periodoSelecionado === 'personalizado') && (
+            <div
+              className="space-y-2"
+              data-test="filtro-datas-personalizadas-container"
+            >
               <label className="block text-base font-medium text-gray-700">
                 Selecione o período
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="dataInicio" className="block text-sm text-gray-600 mb-1">
+                  <label
+                    htmlFor="dataInicio"
+                    className="block text-sm text-gray-600 mb-1"
+                  >
                     Data inicial
                   </label>
                   <input
@@ -389,7 +430,10 @@ export default function ModalFiltrosOrcamentos({
                   />
                 </div>
                 <div>
-                  <label htmlFor="dataFim" className="block text-sm text-gray-600 mb-1">
+                  <label
+                    htmlFor="dataFim"
+                    className="block text-sm text-gray-600 mb-1"
+                  >
                     Data final
                   </label>
                   <input
@@ -431,7 +475,7 @@ export default function ModalFiltrosOrcamentos({
     </div>
   );
 
-  return typeof window !== 'undefined' 
+  return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
     : null;
 }

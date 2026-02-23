@@ -8,12 +8,12 @@ data:
   # =============================================================================
   # CONFIGURAÇÕES DO FRONTEND
   # =============================================================================
-  PORT: "3000"
-  NODE_ENV: "production"
-  DEBUGLOG: "false"
+  PORT: '3000'
+  NODE_ENV: 'production'
+  DEBUGLOG: 'false'
 
   # =============================================================================
   # URLs
   # =============================================================================
-  NEXT_PUBLIC_API_URL: "http://localhost:3010"
-  API_URL: "http://localhost:3010"
+  NEXT_PUBLIC_API_URL: 'http://localhost:3010'
+  API_URL: 'http://localhost:3010'

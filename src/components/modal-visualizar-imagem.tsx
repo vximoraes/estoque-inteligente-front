@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useEffect } from 'react';
 
 interface ModalVisualizarImagemProps {
@@ -12,7 +12,7 @@ export default function ModalVisualizarImagem({
   isOpen,
   onClose,
   imagemUrl,
-  nomeItem
+  nomeItem,
 }: ModalVisualizarImagemProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -49,9 +49,7 @@ export default function ModalVisualizarImagem({
       onClick={handleOverlayClick}
       data-test="modal-visualizar-imagem-overlay"
     >
-      <div
-        className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none"
-      >
+      <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
         {/* Imagem */}
         <img
           src={imagemUrl}
