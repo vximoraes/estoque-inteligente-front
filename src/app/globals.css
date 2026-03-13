@@ -136,6 +136,12 @@
   }
 }
 
+[data-test='search-actions-bar'] [data-slot='input'],
+[data-test='search-actions-bar'] [data-slot='button'] {
+  height: 2.5rem;
+  min-height: 2.5rem;
+}
+
 /* Estilos responsivos para Toastify */
 .Toastify__toast-container {
   width: 380px !important;
