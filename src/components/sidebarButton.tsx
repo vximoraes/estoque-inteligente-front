@@ -80,7 +80,7 @@ export default function SidebarButtonMenu({
       <>
         <SidebarMenuButton
           className={
-            'flex justify-center items-center h-[50px] w-20 cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg ' +
+            'flex justify-center items-center h-11 w-20 cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg ' +
             (isRouter
               ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
               : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')
@@ -93,7 +93,7 @@ export default function SidebarButtonMenu({
             src={isHover}
             alt={name}
             data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
-            className="w-6 h-6"
+            className="w-[18px] h-[18px]"
           />
         </SidebarMenuButton>
       </>
@@ -104,7 +104,7 @@ export default function SidebarButtonMenu({
     <>
       <SidebarMenuButton
         className={
-          'text-[17px] pl-5 h-[50px] w-[250px] itens cursor-pointer flex gap-3 items-center relative transition-all duration-300 ease-in-out group ' +
+          'text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] itens cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ' +
           (isRouter
             ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
             : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')
@@ -116,11 +116,11 @@ export default function SidebarButtonMenu({
           src={isHover}
           alt=""
           data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
-          className="w-[22px] h-[22px]"
+          className="w-[18px] h-[18px]"
         />
         <span
           className={
-            'text-[16px] font-medium ' + (isBlack ? isBlack : 'text-[#B4BAC5]')
+            'text-[14px] font-medium ' + (isBlack ? isBlack : 'text-[#B4BAC5]')
           }
           data-test={`${dataTest}-text` || 'sidebar-button-text'}
         >

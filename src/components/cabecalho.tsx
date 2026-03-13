@@ -244,7 +244,7 @@ export default function Cabecalho({
   }
 
   return (
-    <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
+    <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-12.5">
       <div className="flex items-center gap-[12px] md:gap-[20px]">
         {/*  menu */}
         <button
@@ -270,7 +270,7 @@ export default function Cabecalho({
           </button>
         )}
 
-        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">
+        <h1 className="text-[18px] md:text-[20px] font-bold text-[#1f2937]">
           {pagina}
           {acao && (
             <span className="text-[#6b7280] font-medium ml-2">• {acao}</span>

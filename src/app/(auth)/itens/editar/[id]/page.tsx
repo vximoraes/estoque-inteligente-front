@@ -488,7 +488,7 @@ export default function EditarItemPage() {
         <Cabecalho pagina="Itens" acao="Editar" />
         <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
           <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 <div>
                   <Skeleton className="h-5 w-20 mb-2" />
@@ -525,9 +525,9 @@ export default function EditarItemPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
-              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
-              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
+              <Skeleton className="h-[38px] w-20 sm:w-[120px]" />
+              <Skeleton className="h-[38px] w-20 sm:w-[120px]" />
             </div>
           </div>
         </div>
@@ -545,7 +545,7 @@ export default function EditarItemPage() {
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
@@ -573,7 +573,7 @@ export default function EditarItemPage() {
                       }
                     }}
                     maxLength={100}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                    className={`w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base ${errors.nome ? 'border-red-500!' : ''}`}
                   />
                   {errors.nome && (
                     <p className="text-red-500 text-xs sm:text-sm mt-1">
@@ -622,7 +622,7 @@ export default function EditarItemPage() {
                                 'Selecione uma categoria'}
                           </span>
                           <ChevronDown
-                            className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
+                            className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ml-2 ${
                               isCategoriaDropdownOpen ? 'rotate-180' : ''
                             }`}
                           />
@@ -727,7 +727,7 @@ export default function EditarItemPage() {
                       <Button
                         type="button"
                         onClick={() => setIsAddingCategoria(true)}
-                        className="text-white !h-[38px] !w-[38px] sm:!h-[46px] sm:!w-[46px] !p-0 flex items-center justify-center cursor-pointer hover:opacity-90 flex-shrink-0"
+                        className="text-white h-[38px]! w-[38px]! sm:h-[46px]! sm:w-[46px]! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
                         style={{ backgroundColor: '#306FCC' }}
                       >
                         <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -769,7 +769,7 @@ export default function EditarItemPage() {
                         setEstoqueMinimo(value);
                       }
                     }}
-                    className="w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base"
+                    className="w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base"
                   />
                 </div>
 
@@ -799,7 +799,7 @@ export default function EditarItemPage() {
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+                          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer"
                           aria-label="Remover imagem"
                         >
                           <X
@@ -864,18 +864,18 @@ export default function EditarItemPage() {
             </div>
 
             {/* Footer com botões */}
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={updateItemMutation.isPending}
               >

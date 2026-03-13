@@ -101,7 +101,7 @@ export const generateItensPDF = async ({
     yPosition += 10;
   }
 
-  // ==================== TABELA DE COMPONENTES ====================
+  // ==================== TABELA DE ITENS ====================
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('ITENS SELECIONADOS', margin, yPosition);

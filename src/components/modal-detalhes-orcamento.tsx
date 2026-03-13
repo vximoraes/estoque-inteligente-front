@@ -188,11 +188,11 @@ export default function ModalDetalhesOrcamento({
             </div>
           ) : orcamento ? (
             <div className="space-y-4 text-left">
-              {/* Componentes */}
+              {/* Itens */}
               {orcamento.itens && orcamento.itens.length > 0 && (
                 <div>
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
-                    Componentes ({orcamento.itens.length})
+                    Itens ({orcamento.itens.length})
                   </label>
                   <div
                     className="border rounded-lg overflow-x-auto"

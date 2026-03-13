@@ -38,7 +38,7 @@ export default function Card({
             : 'flex flex-row gap-4 p-4 min-h-[130px]'
         }
       >
-        <div className={isCompact ? '' : 'flex-shrink-0'}>
+        <div className={isCompact ? '' : 'shrink-0'}>
           <div
             className={
               'flex items-center justify-center w-16 h-16 rounded-full ' +
