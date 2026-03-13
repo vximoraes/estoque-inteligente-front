@@ -92,7 +92,7 @@ export default function ModalLocalizacoes({
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
               <h2
-                className="text-xl font-semibold text-gray-900 break-words"
+                className="text-xl font-semibold text-gray-900 wrap-break-words"
                 data-test="modal-localizacoes-titulo"
               >
                 {itemNome}
@@ -100,7 +100,7 @@ export default function ModalLocalizacoes({
             </div>
             {itemDescricao && (
               <p
-                className="text-sm text-gray-600 mb-3 break-words text-center max-w-full"
+                className="text-sm text-gray-600 mb-3 wrap-break-words text-center max-w-full"
                 data-test="modal-localizacoes-descricao"
               >
                 {itemDescricao}
@@ -154,8 +154,8 @@ export default function ModalLocalizacoes({
                 >
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2 min-w-0">
-                      <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                      <span className="text-base text-gray-600 flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span className="text-base text-gray-600 shrink-0">
                         Localização:
                       </span>
                       <span
@@ -167,8 +167,8 @@ export default function ModalLocalizacoes({
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Package className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                      <span className="text-base text-gray-600 flex-shrink-0">
+                      <Package className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span className="text-base text-gray-600 shrink-0">
                         Quantidade:
                       </span>
                       <span

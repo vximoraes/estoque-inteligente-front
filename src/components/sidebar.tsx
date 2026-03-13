@@ -70,7 +70,7 @@ function MobileMenuItem({
     <div className="w-full">
       <button
         onClick={handleClick}
-        className={`text-[16px] pl-[20px] h-[50px] w-full cursor-pointer flex gap-[12px] items-center rounded-lg transition-all duration-300 ${
+        className={`text-[16px] pl-5 h-[50px] w-full cursor-pointer flex gap-3 items-center rounded-lg transition-all duration-300 ${
           isActive
             ? 'bg-white text-black shadow-md'
             : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.08)]'
@@ -88,7 +88,7 @@ function MobileMenuItem({
         </span>
         {subItems && subItems.length > 0 && (
           <svg
-            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '!rotate-180' : ''} ${
+            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? 'rotate-180' : ''} ${
               isActive || isOpen ? 'opacity-100' : 'opacity-0'
             } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
             fill="none"
@@ -222,11 +222,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     <img
                       src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                       alt="Foto de perfil"
-                      className="w-[40px] h-[40px] rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover"
                       onError={handleImageError}
                     />
                   ) : (
-                    <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                       <User className="w-6 h-6 text-gray-500" />
                     </div>
                   )}
@@ -256,7 +256,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
               <SidebarMenu className="flex-1" data-test="sidebar-menu">
                 <SidebarMenuItem
-                  className="text-[#B4BAC5] items-center gap-[10px] flex flex-col"
+                  className="text-[#B4BAC5] items-center gap-2.5 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
                   <SidebarButtonMenu
@@ -331,7 +331,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 />
 
                 <SidebarMenuButton
-                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-[50px] w-full rounded-lg' : 'text-[17px] pl-[20px] h-[50px] w-full flex gap-[12px]'}`}
+                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-[50px] w-full rounded-lg' : 'text-[17px] pl-5 h-[50px] w-full flex gap-3}'}`}
                   onClick={() => {
                     handleLogout();
                     handleItemClick();
@@ -354,7 +354,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
       {/* Sidebar Mobile */}
       <div
-        className={`md:hidden fixed inset-0 z-[110] transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed inset-0 z-110 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         data-test="sidebar-container-mobile"
@@ -364,10 +364,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           <div className="relative p-5 pt-8 flex items-center justify-end">
             <button
               onClick={closeSidebar}
-              className="w-[40px] h-[40px] flex items-center justify-center rounded-lg hover:bg-gray-700 transition-all duration-200"
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-all duration-200"
               aria-label="Fechar menu"
             >
-              <X className="w-[24px] h-[24px] text-gray-400" strokeWidth={2} />
+              <X className="w-10 h-10 text-gray-400" strokeWidth={2} />
             </button>
           </div>
 
@@ -381,11 +381,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 <img
                   src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                   alt="Foto de perfil"
-                  className="w-[40px] h-[40px] rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover"
                   onError={handleImageError}
                 />
               ) : (
-                <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                   <User className="w-6 h-6 text-gray-500" />
                 </div>
               )}
@@ -479,10 +479,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleLogout();
                   handleItemClick();
                 }}
-                className="text-[16px] pl-[20px] h-[50px] w-full cursor-pointer flex gap-[12px] items-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+                className="text-[16px] pl-5 h-[50px] w-full cursor-pointer flex gap-3 items-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
                 data-test="sidebar-btn-sair-mobile"
               >
-                <img src="/sair.svg" alt="" className="w-[22px] h-[22px]" />
+                <img src="/sair.svg" alt="" className="w-5 h-5" />
                 <span className="text-[16px] font-medium text-[#B4BAC5]">
                   Sair
                 </span>
