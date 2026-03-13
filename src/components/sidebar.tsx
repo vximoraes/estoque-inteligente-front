@@ -12,7 +12,7 @@ import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
 import { signOut } from 'next-auth/react';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import { X, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from '@/hooks/use-session';
 import { usePermissions } from '@/hooks/use-permissions';
 
@@ -50,6 +50,7 @@ function MobileMenuItem({
   subItems,
 }: MobileMenuItemProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = () => {
@@ -116,7 +117,7 @@ function MobileMenuItem({
         >
           <div className="ml-[34px] pl-4 space-y-0.5 border-l border-[rgba(255,255,255,0.25)]">
             {subItems.map((item) => {
-              const isSubItemActive = window.location.pathname === item.route;
+              const isSubItemActive = pathname === item.route;
               return (
                 <button
                   key={item.route}
