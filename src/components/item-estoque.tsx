@@ -164,13 +164,13 @@ export default function ItemEstoque({
 
         {/* Botões de ação */}
         <div
-          className="flex items-center space-x-1 flex-shrink-0"
+          className="flex items-center space-x-1 shrink-0"
           style={{ minWidth: '80px' }}
           data-test="action-buttons"
         >
           <button
             onClick={handleEdit}
-            className="p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 flex-shrink-0 cursor-pointer"
+            className="p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 shrink-0 cursor-pointer"
             title={`Editar item: ${nome}`}
             data-test="edit-button"
           >
@@ -178,7 +178,7 @@ export default function ItemEstoque({
           </button>
           <button
             onClick={handleDelete}
-            className="p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 flex-shrink-0 cursor-pointer"
+            className="p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 shrink-0 cursor-pointer"
             title={`Excluir item: ${nome}`}
             data-test="delete-button"
           >
@@ -240,12 +240,12 @@ export default function ItemEstoque({
 
         {/* Ícones de entrada e saída alinhados com os botões de ação */}
         <div
-          className="flex items-center space-x-1 flex-shrink-0"
+          className="flex items-center space-x-1 shrink-0"
           style={{ minWidth: '80px' }}
           data-test="movement-icons"
         >
           <button
-            className="p-2 rounded-md flex-shrink-0 hover:bg-green-50 transition-colors duration-200 cursor-pointer"
+            className="p-2 rounded-md shrink-0 hover:bg-green-50 transition-colors duration-200 cursor-pointer"
             title={`Registrar entrada de ${nome}`}
             data-test="entrada-icon"
             onClick={handleEntrada}
@@ -256,7 +256,7 @@ export default function ItemEstoque({
             />
           </button>
           <button
-            className={`p-2 rounded-md flex-shrink-0 transition-colors duration-200 ${
+            className={`p-2 rounded-md shrink-0 transition-colors duration-200 ${
               quantidade === 0
                 ? 'opacity-40 cursor-not-allowed'
                 : 'hover:bg-red-50 cursor-pointer'

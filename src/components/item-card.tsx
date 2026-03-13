@@ -72,7 +72,7 @@ export default function ItemCardSimples({
         </div>
 
         {/* Nome do item */}
-        <div className="w-full min-h-[2.5rem] flex items-start">
+        <div className="w-full min-h-10 flex items-start">
           <h3
             className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 w-full"
             style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
