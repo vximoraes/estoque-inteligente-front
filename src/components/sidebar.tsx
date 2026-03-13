@@ -70,7 +70,7 @@ function MobileMenuItem({
     <div className="w-full">
       <button
         onClick={handleClick}
-        className={`text-[16px] pl-5 h-[50px] w-full cursor-pointer flex gap-3 items-center rounded-lg transition-all duration-300 ${
+        className={`text-[14px] pl-4 pr-3 py-1 h-10 w-full cursor-pointer flex gap-2 items-center rounded-lg transition-all duration-300 ${
           isActive
             ? 'bg-white text-black shadow-md'
             : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.08)]'
@@ -79,16 +79,16 @@ function MobileMenuItem({
         <img
           src={isActive ? iconHover : icon}
           alt={name}
-          className="w-[22px] h-[22px]"
+          className="w-[18px] h-[18px]"
         />
         <span
-          className={`text-[16px] font-medium flex-1 text-left ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+          className={`text-[14px] font-medium flex-1 text-left ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
         >
           {name}
         </span>
         {subItems && subItems.length > 0 && (
           <svg
-            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? 'rotate-180' : ''} ${
+            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180' : ''} ${
               isActive || isOpen ? 'opacity-100' : 'opacity-0'
             } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
             fill="none"
@@ -106,16 +106,22 @@ function MobileMenuItem({
       </button>
 
       {/* Sub-itens */}
-      {subItems && subItems.length > 0 && isOpen && (
-        <div className="transition-all duration-300 mt-0.5">
-          <div className="ml-[34px] space-y-1">
+      {subItems && subItems.length > 0 && (
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-out mt-0.5 ${
+            isOpen
+              ? 'max-h-[500px] opacity-100 translate-y-0'
+              : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
+          }`}
+        >
+          <div className="ml-[34px] pl-4 space-y-0.5 border-l border-[rgba(255,255,255,0.25)]">
             {subItems.map((item) => {
               const isSubItemActive = window.location.pathname === item.route;
               return (
                 <button
                   key={item.route}
                   onClick={() => handleSubItemClick(item.route)}
-                  className={`w-full text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
+                  className={`w-full text-left px-3 py-1 text-[13px] rounded-lg transition-all duration-200 cursor-pointer ${
                     isSubItemActive
                       ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
                       : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
@@ -256,7 +262,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
               <SidebarMenu className="flex-1" data-test="sidebar-menu">
                 <SidebarMenuItem
-                  className="text-[#B4BAC5] items-center gap-2.5 flex flex-col"
+                  className="text-[#B4BAC5] items-center gap-1.5 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
                   <SidebarButtonMenu
@@ -331,7 +337,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 />
 
                 <SidebarMenuButton
-                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-[50px] w-full rounded-lg' : 'text-[17px] pl-5 h-[50px] w-full flex gap-3}'}`}
+                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-11 w-full rounded-lg' : 'text-[15px] pl-4 h-10 w-full flex gap-2 items-center'} `}
                   onClick={() => {
                     handleLogout();
                     handleItemClick();
@@ -339,9 +345,9 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-btn-sair"
                   title={collapsed ? 'Sair' : undefined}
                 >
-                  <img src="/sair.svg" alt="" className="w-[22px] h-[22px]" />
+                  <img src="/sair.svg" alt="" className="w-[18px] h-[18px]" />
                   {!collapsed && (
-                    <span className="text-[16px] font-medium text-[#B4BAC5]">
+                    <span className="text-[14px] font-medium text-[#B4BAC5]">
                       Sair
                     </span>
                   )}
@@ -367,7 +373,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-all duration-200"
               aria-label="Fechar menu"
             >
-              <X className="w-10 h-10 text-gray-400" strokeWidth={2} />
+              <X className="w-5 h-5 text-gray-400" strokeWidth={2} />
             </button>
           </div>
 
@@ -410,7 +416,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
-            <div className="flex flex-col gap-2 flex-1 mb-6">
+            <div className="flex flex-col gap-1.5 flex-1 mb-6">
               <MobileMenuItem
                 icon="/itens.svg"
                 iconHover="/itens-hover.svg"
@@ -479,11 +485,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleLogout();
                   handleItemClick();
                 }}
-                className="text-[16px] pl-5 h-[50px] w-full cursor-pointer flex gap-3 items-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+                className="text-[14px] pl-4 h-10 w-full cursor-pointer flex gap-2 items-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
                 data-test="sidebar-btn-sair-mobile"
               >
-                <img src="/sair.svg" alt="" className="w-5 h-5" />
-                <span className="text-[16px] font-medium text-[#B4BAC5]">
+                <img src="/sair.svg" alt="" className="w-[18px] h-[18px]" />
+                <span className="text-[14px] font-medium text-[#B4BAC5]">
                   Sair
                 </span>
               </button>

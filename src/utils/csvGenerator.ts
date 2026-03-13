@@ -45,7 +45,7 @@ export const generateItensCSV = ({
     lines.push('');
   }
 
-  // ==================== TABELA DE COMPONENTES ====================
+  // ==================== TABELA DE ITENS ====================
   lines.push('ITENS SELECIONADOS');
 
   // Cabeçalho da tabela

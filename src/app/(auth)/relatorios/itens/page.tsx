@@ -307,7 +307,7 @@ function RelatorioItensPageContent() {
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
       data-test="relatorio-itens-page"
     >
-      <Cabecalho pagina="Relatórios" acao="Componentes" />
+      <Cabecalho pagina="Relatórios" acao="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Stats Cards - Colapsável no mobile */}

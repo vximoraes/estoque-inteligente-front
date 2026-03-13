@@ -63,7 +63,7 @@ export default function SidebarButtonWithSubmenu({
     return (
       <div className="w-full flex flex-col items-center">
         <SidebarMenuButton
-          className={`flex justify-center items-center h-[50px] w-[80px] cursor-pointer relative transition-all duration-300 ease-in-out rounded-lg ${
+          className={`flex justify-center items-center h-11 w-20 cursor-pointer relative transition-all duration-300 ease-in-out rounded-lg ${
             isActive
               ? 'bg-white hover:bg-[rgba(255,255,255,1)]! shadow-md'
               : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!'
@@ -72,7 +72,7 @@ export default function SidebarButtonWithSubmenu({
           data-test={dataTest || 'sidebar-menu-button'}
           title={name}
         >
-          <img src={isHover} alt={name} className="w-[24px] h-[24px]" />
+          <img src={isHover} alt={name} className="w-[18px] h-[18px]" />
         </SidebarMenuButton>
 
         {/* Submenu colapsado - mostra primeira letra */}
@@ -86,7 +86,7 @@ export default function SidebarButtonWithSubmenu({
               <button
                 key={item.route}
                 onClick={() => handleSubItemClick(item.route)}
-                className={`w-[50px] h-[50px] flex items-center justify-center text-[16px] font-medium rounded-lg transition-all duration-200 cursor-pointer ${
+                className={`w-[44px] h-[44px] flex items-center justify-center text-[14px] font-medium rounded-lg transition-all duration-200 cursor-pointer ${
                   path === item.route
                     ? 'bg-[rgba(255,255,255,0.12)] text-white'
                     : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
@@ -106,7 +106,7 @@ export default function SidebarButtonWithSubmenu({
   return (
     <>
       <SidebarMenuButton
-        className={`text-[17px] pl-[20px] h-[50px] w-[250px] cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group ${
+        className={`text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ${
           isActive
             ? 'bg-white hover:bg-[rgba(255,255,255,1)]! shadow-md'
             : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!'
@@ -114,40 +114,44 @@ export default function SidebarButtonWithSubmenu({
         onClick={handleToggle}
         data-test={dataTest || 'sidebar-menu-button'}
       >
-        <img src={isHover} alt="" className="w-[22px] h-[22px]" />
+        <img src={isHover} alt="" className="w-[18px] h-[18px]" />
         <span
-          className={`text-[16px] font-medium flex-1 ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+          className={`text-[14px] font-medium flex-1 ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
         >
           {name}
         </span>
         <ChevronDown
-          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '!rotate-180' : ''} ${
+          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180!' : ''} ${
             isActive || isOpen ? 'opacity-100' : 'opacity-0'
           } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
         />
       </SidebarMenuButton>
 
       {/* Sub-menu expandido */}
-      {isOpen && (
-        <div className="transition-all duration-300 mt-0.5 pr-4">
-          <div className="ml-[34px] space-y-1">
-            {subItems.map((item) => (
-              <button
-                key={item.route}
-                onClick={() => handleSubItemClick(item.route)}
-                className={`w-full text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
-                  path === item.route
-                    ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
-                    : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
-                }`}
-                data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
-              >
-                {item.name}
-              </button>
-            ))}
-          </div>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-out mt-0.5 pr-4 ${
+          isOpen
+            ? 'max-h-[500px] opacity-100 translate-y-0'
+            : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
+        }`}
+      >
+        <div className="ml-[34px] pl-4 space-y-0.5 border-l-2 border-[rgba(255,255,255,0.25)]">
+          {subItems.map((item) => (
+            <button
+              key={item.route}
+              onClick={() => handleSubItemClick(item.route)}
+              className={`w-full text-left px-3 py-1.5 text-[13px] rounded-lg transition-all duration-200 cursor-pointer ${
+                path === item.route
+                  ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
+                  : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+              }`}
+              data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
+            >
+              {item.name}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
     </>
   );
 }
