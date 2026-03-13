@@ -244,7 +244,7 @@ export default function Cabecalho({
   }
 
   return (
-    <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-6">
+    <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-5">
       <div className="flex items-center gap-[12px] md:gap-[20px]">
         {/*  menu */}
         <button
