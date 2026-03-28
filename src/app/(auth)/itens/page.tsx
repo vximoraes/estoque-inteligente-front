@@ -6,6 +6,7 @@ import ModalLocalizacoes from '@/components/modal-localizacoes';
 import ModalFiltros from '@/components/modal-filtros';
 import ModalEntradaItem from '@/components/modal-entrada-item';
 import ModalSaidaItem from '@/components/modal-saida-item';
+import ModalEmprestarItem from '@/components/modal-emprestar-item';
 import ModalExcluirItem from '@/components/modal-excluir-item';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +51,10 @@ function ItensPageContent() {
   const [entradaItemId, setEntradaItemId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   const [saidaItemId, setSaidaItemId] = useState<string | null>(null);
+  const [isEmprestimoModalOpen, setIsEmprestimoModalOpen] = useState(false);
+  const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(
+    null,
+  );
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
@@ -250,6 +255,32 @@ function ItensPageContent() {
   const handleCloseSaidaModal = () => {
     setIsSaidaModalOpen(false);
     setSaidaItemId(null);
+  };
+
+  const handleEmprestar = (id: string) => {
+    setEmprestimoItemId(id);
+    setIsEmprestimoModalOpen(true);
+  };
+
+  const handleCloseEmprestimoModal = () => {
+    setIsEmprestimoModalOpen(false);
+    setEmprestimoItemId(null);
+  };
+
+  const handleEmprestimoSuccess = () => {
+    if (emprestimoItemId) {
+      setUpdatingItemId(emprestimoItemId);
+    }
+    toast.success('Empréstimo registrado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    refetch();
   };
 
   const handleSaidaSuccess = () => {
@@ -538,6 +569,7 @@ function ItensPageContent() {
                   onClick={handleItemClick}
                   onEntrada={handleEntrada}
                   onSaida={handleSaida}
+                  onEmprestar={handleEmprestar}
                   isLoading={updatingItemId === item._id && isFetching}
                   data-test={`item-card-${index}`}
                 />
@@ -721,6 +753,17 @@ function ItensPageContent() {
           itemId={excluirItemId}
           itemNome={itens.find((c) => c._id === excluirItemId)?.nome || ''}
           onSuccess={handleExcluirSuccess}
+        />
+      )}
+
+      {/* Modal de Empréstimo */}
+      {emprestimoItemId && (
+        <ModalEmprestarItem
+          isOpen={isEmprestimoModalOpen}
+          onClose={handleCloseEmprestimoModal}
+          itemId={emprestimoItemId}
+          itemNome={itens.find((c) => c._id === emprestimoItemId)?.nome || ''}
+          onSuccess={handleEmprestimoSuccess}
         />
       )}
 

@@ -1,0 +1,337 @@
+'use client';
+
+import Cabecalho from '@/components/cabecalho';
+import ModalDevolverItem from '@/components/modal-devolver-item';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { get } from '@/lib/fetchData';
+import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
+import {
+  Search,
+  Handshake,
+  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import StatCard from '@/components/stat-card';
+import { PulseLoader } from 'react-spinners';
+
+function EmprestimosPageContent() {
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
+
+  const [selectedEmprestimo, setSelectedEmprestimo] = useState<Emprestimo | null>(
+    null,
+  );
+  const [isDevolverModalOpen, setIsDevolverModalOpen] = useState(false);
+
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery<EmprestimosApiResponse>({
+    queryKey: ['emprestimos', searchTerm, statusFilter],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limite', '20');
+
+      if (searchTerm) params.append('solicitante_nome', searchTerm);
+      if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
+      if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+
+      return await get<EmprestimosApiResponse>(`/emprestimos?${params.toString()}`);
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
+    refetchOnMount: 'always',
+  });
+
+  useEffect(() => {
+    if (!observerTarget.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const emprestimos = useMemo(
+    () => data?.pages.flatMap((page) => page.data.docs) || [],
+    [data],
+  );
+
+  const emprestimosFiltrados = useMemo(() => {
+    return emprestimos.filter((emp) => {
+      const termo = searchTerm.toLowerCase().trim();
+
+      const matchSearch =
+        !termo ||
+        emp.solicitante_nome.toLowerCase().includes(termo) ||
+        emp.item?.nome?.toLowerCase().includes(termo) ||
+        emp.localizacao?.nome?.toLowerCase().includes(termo);
+
+      const matchStatus = !statusFilter || emp.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [emprestimos, searchTerm, statusFilter]);
+
+  const total = emprestimosFiltrados.length;
+  const ativos = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
+  const atrasados = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
+  const devolvidos = emprestimosFiltrados.filter(
+    (e) => e.status === 'Devolvido',
+  ).length;
+
+  const handleOpenDevolver = (emprestimo: Emprestimo) => {
+    setSelectedEmprestimo(emprestimo);
+    setIsDevolverModalOpen(true);
+  };
+
+  const handleCloseDevolver = () => {
+    setSelectedEmprestimo(null);
+    setIsDevolverModalOpen(false);
+  };
+
+  const formatarDataPrevista = (data?: string | null) => {
+    if (!data) return 'Sem previsão';
+
+    const parsed = new Date(data);
+    if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
+
+    return parsed.toLocaleString('pt-BR');
+  };
+
+  return (
+    <div className="w-full h-screen flex flex-col overflow-hidden" data-test="emprestimos-page">
+      <Cabecalho pagina="Empréstimos" />
+
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+        <div className="shrink-0 mb-6">
+          <button
+            onClick={() => setIsStatsOpen(!isStatsOpen)}
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Handshake className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-gray-700">Estatísticas</span>
+            </div>
+            {isStatsOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 ${
+              isStatsOpen ? 'block mt-4' : 'hidden'
+            } xl:grid xl:mt-0`}
+          >
+            <StatCard
+              title="Total de"
+              subtitle="empréstimos"
+              value={total}
+              icon={Handshake}
+              iconColor="text-blue-600"
+              iconBgColor="bg-blue-100"
+            />
+            <StatCard
+              title="Ativos"
+              value={ativos}
+              icon={Handshake}
+              iconColor="text-green-600"
+              iconBgColor="bg-green-100"
+            />
+            <StatCard
+              title="Atrasados"
+              value={atrasados}
+              icon={AlertTriangle}
+              iconColor="text-red-600"
+              iconBgColor="bg-red-100"
+            />
+            <StatCard
+              title="Devolvidos"
+              value={devolvidos}
+              icon={CheckCircle}
+              iconColor="text-gray-700"
+              iconBgColor="bg-gray-100"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Pesquisar por item, solicitante ou localização..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 px-3 border border-gray-300 rounded-md bg-white"
+          >
+            <option value="">Todos os status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Atrasado">Atrasado</option>
+            <option value="Devolvido">Devolvido</option>
+          </select>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            Erro ao carregar empréstimos: {error.message}
+          </div>
+        )}
+
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center flex-1">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">Carregando empréstimos...</p>
+            </div>
+          ) : emprestimosFiltrados.length > 0 ? (
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
+                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
+                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
+                    <TableRow className="bg-gray-50 border-b">
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">Item</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">Solicitante</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">Qtd. Emprestada</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">Qtd. Aberta</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">Localização</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">Data Prevista</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">Status</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {emprestimosFiltrados.map((emp) => (
+                      <TableRow key={emp._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                        <TableCell className="font-medium text-left px-6 py-3">{emp.item?.nome || '-'}</TableCell>
+                        <TableCell className="text-left px-6 py-3">{emp.solicitante_nome}</TableCell>
+                        <TableCell className="text-center px-6 py-3">{emp.quantidade_emprestada}</TableCell>
+                        <TableCell className="text-center px-6 py-3">{emp.quantidade_aberta}</TableCell>
+                        <TableCell className="text-left px-6 py-3">{emp.localizacao?.nome || '-'}</TableCell>
+                        <TableCell className="text-center px-6 py-3 whitespace-nowrap">
+                          {formatarDataPrevista(emp.data_prevista_devolucao)}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-3">
+                          <span
+                            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
+                              emp.status === 'Ativo'
+                                ? 'bg-green-100 text-green-800'
+                                : emp.status === 'Atrasado'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {emp.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className={`cursor-pointer ${
+                              emp.quantidade_aberta <= 0
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                            }`}
+                            disabled={emp.quantidade_aberta <= 0}
+                            onClick={() => handleOpenDevolver(emp)}
+                          >
+                            Devolver
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+
+                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                  {isFetchingNextPage && <PulseLoader color="#3b82f6" size={5} />}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Handshake className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-lg">Nenhum empréstimo encontrado.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selectedEmprestimo && (
+        <ModalDevolverItem
+          isOpen={isDevolverModalOpen}
+          onClose={handleCloseDevolver}
+          emprestimoId={selectedEmprestimo._id}
+          itemNome={selectedEmprestimo.item?.nome || 'Item'}
+          quantidadeAberta={selectedEmprestimo.quantidade_aberta}
+          onSuccess={() => refetch()}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function EmprestimosPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+        </div>
+      }
+    >
+      <EmprestimosPageContent />
+    </Suspense>
+  );
+}

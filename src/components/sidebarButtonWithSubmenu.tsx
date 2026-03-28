@@ -104,7 +104,7 @@ export default function SidebarButtonWithSubmenu({
   }
 
   return (
-    <>
+    <div className="w-[250px]">
       <SidebarMenuButton
         className={`text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ${
           isActive
@@ -129,9 +129,9 @@ export default function SidebarButtonWithSubmenu({
 
       {/* Sub-menu expandido */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-out mt-0.5 pr-4 ${
+        className={`overflow-hidden transition-all duration-300 ease-out pr-4 ${
           isOpen
-            ? 'max-h-[500px] opacity-100 translate-y-0'
+            ? 'mt-0.5 max-h-[500px] opacity-100 translate-y-0'
             : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
         }`}
       >
@@ -152,6 +152,6 @@ export default function SidebarButtonWithSubmenu({
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -304,6 +304,16 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     collapsed={collapsed}
                   />
                   <SidebarButtonMenu
+                    src="/emprestimos.svg"
+                    srcHover="/emprestimos-hover.svg"
+                    name="Empréstimos"
+                    route="/emprestimos"
+                    data-test="sidebar-btn-emprestimos"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarButtonMenu
                     src="/fornecedores.svg"
                     srcHover="/fornecedores-hover.svg"
                     name="Fornecedores"
@@ -449,6 +459,16 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 name="Orçamentos"
                 route="/orcamentos"
                 isActive={path?.startsWith('/orcamentos')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
+              <MobileMenuItem
+                icon="/emprestimos.svg"
+                iconHover="/emprestimos-hover.svg"
+                name="Empréstimos"
+                route="/emprestimos"
+                isActive={path?.startsWith('/emprestimos')}
                 onClick={() => {
                   handleItemClick();
                 }}
