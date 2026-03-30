@@ -240,12 +240,12 @@ export default function ModalEmprestarItem({
     } = {};
 
     if (!localizacaoSelecionada) {
-      newErrors.localizacao = 'Selecione uma localização';
+      newErrors.localizacao = 'Selecionar localização';
     }
 
     const quantidadeNumber = Number(quantidade);
     if (!quantidade || !Number.isInteger(quantidadeNumber) || quantidadeNumber <= 0) {
-      newErrors.quantidade = 'Informe uma quantidade válida';
+      newErrors.quantidade = 'Quantidade deve ser maior que 0';
     } else if (localizacaoSelecionada && quantidadeNumber > quantidadeDisponivel) {
       newErrors.quantidade = `Quantidade maior que o disponível (${quantidadeDisponivel})`;
     }
@@ -286,29 +286,31 @@ export default function ModalEmprestarItem({
       onClick={(e) => e.target === e.currentTarget && onClose()}
       data-test="modal-emprestar-item"
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900">Emprestar Item</h2>
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             data-test="close-modal-button"
           >
             <X size={20} className="text-gray-500" />
           </button>
+          <div className="text-center pt-4 px-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-1">Emprestar Item</h2>
+          </div>
         </div>
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Item</label>
+            <label className="block text-base font-medium text-gray-700 mb-1">Item</label>
             <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
               {itemNome}
             </div>
           </div>
 
           <div data-dropdown>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Localização
+            <label className="block text-base font-medium text-gray-700 mb-1">
+              Localização <span className="text-red-500">*</span>
             </label>
             <button
               type="button"
@@ -318,7 +320,7 @@ export default function ModalEmprestarItem({
               <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
                 {localizacaoSelecionadaObj
                   ? `${localizacaoSelecionadaObj.nome} (${quantidadeDisponivel} disponíveis)`
-                  : 'Selecione uma localização'}
+                  : 'Selecionar localização'}
               </span>
               <ChevronDown
                 size={16}
@@ -328,13 +330,16 @@ export default function ModalEmprestarItem({
 
             {isDropdownOpen && (
               <div className="mt-2 border border-gray-200 rounded-lg bg-white shadow-lg max-h-48 overflow-y-auto">
-                <input
-                  type="text"
-                  value={localizacaoPesquisa}
-                  onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                  placeholder="Pesquisar localização..."
-                  className="w-full p-2 border-b border-gray-100 outline-none"
-                />
+                <div className="p-3 border-b border-gray-200 bg-gray-50">
+                  <input
+                    type="text"
+                    value={localizacaoPesquisa}
+                    onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                    placeholder="Pesquisar..."
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
 
                 {isLoadingLocalizacoes ? (
                   <div className="p-3 text-sm text-gray-500">Carregando...</div>
@@ -370,7 +375,9 @@ export default function ModalEmprestarItem({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+            <label className="block text-base font-medium text-gray-700 mb-1">
+              Quantidade <span className="text-red-500">*</span>
+            </label>
             <input
               type="number"
               min={1}
@@ -388,7 +395,9 @@ export default function ModalEmprestarItem({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Solicitante</label>
+            <label className="block text-base font-medium text-gray-700 mb-1">
+              Solicitante <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={solicitanteNome}
@@ -405,8 +414,8 @@ export default function ModalEmprestarItem({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Data prevista de devolução (opcional)
+            <label className="block text-base font-medium text-gray-700 mb-1">
+              Data prevista de devolução
             </label>
             <input
               type="datetime-local"
@@ -423,7 +432,7 @@ export default function ModalEmprestarItem({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+            <label className="block text-base font-medium text-gray-700 mb-1">Observações</label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
@@ -435,23 +444,25 @@ export default function ModalEmprestarItem({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-100">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="cursor-pointer"
-            disabled={emprestimoMutation.isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            className="text-white cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
-            disabled={emprestimoMutation.isPending}
-          >
-            {emprestimoMutation.isPending ? 'Registrando...' : 'Confirmar Empréstimo'}
-          </Button>
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 cursor-pointer"
+              disabled={emprestimoMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="flex-1 text-white cursor-pointer hover:opacity-90"
+              style={{ backgroundColor: '#306FCC' }}
+              disabled={emprestimoMutation.isPending}
+            >
+              {emprestimoMutation.isPending ? 'Registrando...' : 'Confirmar Empréstimo'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
