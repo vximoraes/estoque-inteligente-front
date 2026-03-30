@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   title: 'Estoque Inteligente',
   description: 'Sistema de gerenciamento inteligente de estoque',
   icons: {
-    icon: '/ei.png',
-    shortcut: '/ei.png',
-    apple: '/ei.png',
+    icon: '/estoque-inteligente-logo.png',
+    shortcut: '/estoque-inteligente-logo.png',
+    apple: '/estoque-inteligente-logo.png',
   },
 };
 

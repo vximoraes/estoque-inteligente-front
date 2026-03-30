@@ -47,7 +47,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <LogoEi></LogoEi>
+      <LogoEi logoSizeClassName="w-70" />
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 md:mb-10">
