@@ -129,7 +129,7 @@ export default function SidebarButtonWithSubmenu({
 
       {/* Sub-menu expandido */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-out pr-4 ${
+        className={`overflow-hidden transition-all duration-300 ease-out ${
           isOpen
             ? 'mt-0.5 max-h-[500px] opacity-100 translate-y-0'
             : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
