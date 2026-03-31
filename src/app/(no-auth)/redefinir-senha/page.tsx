@@ -8,7 +8,7 @@ import axios from 'axios';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Check, X } from 'lucide-react';
-import LogoEi from '@/components/logo-ei';
+import AuthLeftPanel from '@/components/auth-left-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -153,34 +153,37 @@ function RedefinirSenhaContent() {
 
   if (tokenValido === false) {
     return (
-      <div className="min-h-screen flex">
+      <>
         <ToastContainer />
-        <LogoEi />
-        <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4">
-              Token Inválido
-            </h2>
-            <p className="text-zinc-600 mb-6 text-sm md:text-base">
-              O link de recuperação de senha é inválido ou expirou.
-            </p>
-            <Button
-              onClick={() => router.push('/esqueci-senha')}
-              className="bg-[#306FCC] hover:bg-[#2557a7] text-sm md:text-base"
-            >
-              Solicitar Novo Link
-            </Button>
+        <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
+          <AuthLeftPanel />
+          <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">
+            <div className="w-full max-w-md text-center">
+              <h2 className="text-2xl md:text-3xl font-semibold mb-4">
+                Token Inválido
+              </h2>
+              <p className="text-zinc-600 mb-6 text-sm md:text-base">
+                O link de recuperação de senha é inválido ou expirou.
+              </p>
+              <Button
+                onClick={() => router.push('/esqueci-senha')}
+                className="bg-[#0f1419] hover:bg-[#1a2330] text-sm md:text-base"
+              >
+                Solicitar Novo Link
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex">
+    <>
       <ToastContainer />
-      <LogoEi />
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
+      <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
+        <AuthLeftPanel />
+        <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 md:mb-10">
             <h2 className="text-2xl md:text-3xl font-semibold mb-2">
@@ -302,7 +305,7 @@ function RedefinirSenhaContent() {
             <div className="mt-4 md:mt-6">
               <Button
                 type="submit"
-                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
+                className="p-3 md:p-5 w-full bg-[#0f1419] hover:bg-[#1a2330] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Redefinindo...' : 'Redefinir Senha'}
@@ -312,6 +315,7 @@ function RedefinirSenhaContent() {
         </div>
       </div>
     </div>
+  </>
   );
 }
 

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import LogoEi from '@/components/logo-ei';
+import AuthLeftPanel from '@/components/auth-left-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,10 +78,11 @@ export default function EsqueciSenhaPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <>
       <ToastContainer />
-      <LogoEi />
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
+      <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
+        <AuthLeftPanel />
+        <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-4 md:mb-4">
             <h2 className="text-2xl md:text-3xl font-semibold mb-2">
@@ -118,7 +119,7 @@ export default function EsqueciSenhaPage() {
               <div className="mt-4 md:mt-6">
                 <Button
                   type="submit"
-                  className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
+                  className="p-3 md:p-5 w-full bg-[#0f1419] hover:bg-[#1a2330] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Enviando...' : 'Enviar'}
@@ -166,5 +167,6 @@ export default function EsqueciSenhaPage() {
         </div>
       </div>
     </div>
+  </>
   );
 }
