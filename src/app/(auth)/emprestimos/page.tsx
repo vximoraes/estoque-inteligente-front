@@ -1,8 +1,10 @@
 'use client';
 
 import Cabecalho from '@/components/cabecalho';
+import ModalObservacoesEmprestimo from '@/components/modal-observacoes-emprestimo';
+import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
+import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
 import ModalDevolverItem from '@/components/modal-devolver-item';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   TableBody,
@@ -21,10 +23,17 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
+  Eye,
+  Pencil,
+  FileDown,
+  Trash2,
 } from 'lucide-react';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import StatCard from '@/components/stat-card';
 import { PulseLoader } from 'react-spinners';
+import { gerarPdfEmprestimo } from '@/utils/pdf-emprestimo';
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function EmprestimosPageContent() {
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -32,9 +41,16 @@ function EmprestimosPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isStatsOpen, setIsStatsOpen] = useState(false);
 
-  const [selectedEmprestimo, setSelectedEmprestimo] = useState<Emprestimo | null>(
-    null,
-  );
+  const [observacoesEmprestimo, setObservacoesEmprestimo] = useState<Emprestimo | null>(null);
+  const [isObservacoesModalOpen, setIsObservacoesModalOpen] = useState(false);
+
+  const [editarEmprestimo, setEditarEmprestimo] = useState<Emprestimo | null>(null);
+  const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
+
+  const [excluirEmprestimo, setExcluirEmprestimo] = useState<Emprestimo | null>(null);
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
+
+  const [devolverEmprestimo, setDevolverEmprestimo] = useState<Emprestimo | null>(null);
   const [isDevolverModalOpen, setIsDevolverModalOpen] = useState(false);
 
   const {
@@ -105,26 +121,12 @@ function EmprestimosPageContent() {
   const total = emprestimosFiltrados.length;
   const ativos = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
   const atrasados = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
-  const devolvidos = emprestimosFiltrados.filter(
-    (e) => e.status === 'Devolvido',
-  ).length;
-
-  const handleOpenDevolver = (emprestimo: Emprestimo) => {
-    setSelectedEmprestimo(emprestimo);
-    setIsDevolverModalOpen(true);
-  };
-
-  const handleCloseDevolver = () => {
-    setSelectedEmprestimo(null);
-    setIsDevolverModalOpen(false);
-  };
+  const devolvidos = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
 
   const formatarDataPrevista = (data?: string | null) => {
     if (!data) return 'Sem previsão';
-
     const parsed = new Date(data);
     if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
-
     return parsed.toLocaleString('pt-BR');
   };
 
@@ -154,35 +156,10 @@ function EmprestimosPageContent() {
               isStatsOpen ? 'block mt-4' : 'hidden'
             } xl:grid xl:mt-0`}
           >
-            <StatCard
-              title="Total de"
-              subtitle="empréstimos"
-              value={total}
-              icon={Handshake}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
-            />
-            <StatCard
-              title="Ativos"
-              value={ativos}
-              icon={Handshake}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-            />
-            <StatCard
-              title="Atrasados"
-              value={atrasados}
-              icon={AlertTriangle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-            />
-            <StatCard
-              title="Devolvidos"
-              value={devolvidos}
-              icon={CheckCircle}
-              iconColor="text-gray-700"
-              iconBgColor="bg-gray-100"
-            />
+            <StatCard title="Total de" subtitle="empréstimos" value={total} icon={Handshake} iconColor="text-blue-600" iconBgColor="bg-blue-100" />
+            <StatCard title="Ativos" value={ativos} icon={Handshake} iconColor="text-green-600" iconBgColor="bg-green-100" />
+            <StatCard title="Atrasados" value={atrasados} icon={AlertTriangle} iconColor="text-red-600" iconBgColor="bg-red-100" />
+            <StatCard title="Devolvidos" value={devolvidos} icon={CheckCircle} iconColor="text-gray-700" iconBgColor="bg-gray-100" />
           </div>
         </div>
 
@@ -228,17 +205,18 @@ function EmprestimosPageContent() {
           ) : emprestimosFiltrados.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">Item</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">Solicitante</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">Qtd. Emprestada</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">Qtd. Aberta</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">Localização</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">Data Prevista</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">Status</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">Ações</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">ITEM</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">SOLICITANTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. EMPRESTADA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. ABERTA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">DATA PREVISTA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">DEVOLVER</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-8">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
 
@@ -266,20 +244,62 @@ function EmprestimosPageContent() {
                             {emp.status}
                           </span>
                         </TableCell>
+                        <TableCell className="text-center px-8 py-3">
+                          <div className="flex items-center justify-center gap-1 sm:gap-2">
+                            {/* Eye — observações */}
+                            <button
+                              onClick={() => { setObservacoesEmprestimo(emp); setIsObservacoesModalOpen(true); }}
+                              className="p-1 sm:p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              title="Ver observações"
+                            >
+                              <Eye size={16} className="sm:w-5 sm:h-5" />
+                            </button>
+
+                            {/* Pencil — editar / devolver */}
+                            <button
+                              onClick={() => { setEditarEmprestimo(emp); setIsEditarModalOpen(true); }}
+                              className={`p-1 sm:p-2 rounded-md transition-colors duration-200 ${
+                                emp.quantidade_aberta <= 0
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'
+                              }`}
+                              title={emp.quantidade_aberta <= 0 ? 'Empréstimo já devolvido' : 'Editar empréstimo'}
+                              disabled={emp.quantidade_aberta <= 0}
+                            >
+                              <Pencil size={16} className="sm:w-5 sm:h-5" />
+                            </button>
+
+                            {/* FileDown — gerar PDF */}
+                            <button
+                              onClick={() => gerarPdfEmprestimo(emp)}
+                              className="p-1 sm:p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              title="Baixar PDF do empréstimo"
+                            >
+                              <FileDown size={16} className="sm:w-5 sm:h-5" />
+                            </button>
+
+                            {/* Trash — excluir */}
+                            <button
+                              onClick={() => { setExcluirEmprestimo(emp); setIsExcluirModalOpen(true); }}
+                              className="p-1 sm:p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              title="Excluir empréstimo"
+                            >
+                              <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                            </button>
+                          </div>
+                        </TableCell>
                         <TableCell className="text-center px-6 py-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className={`cursor-pointer ${
-                              emp.quantidade_aberta <= 0
-                                ? 'opacity-50 cursor-not-allowed'
-                                : ''
-                            }`}
+                          <button
+                            onClick={() => { setDevolverEmprestimo(emp); setIsDevolverModalOpen(true); }}
                             disabled={emp.quantidade_aberta <= 0}
-                            onClick={() => handleOpenDevolver(emp)}
+                            className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
+                              emp.quantidade_aberta <= 0
+                                ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed'
+                                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer'
+                            }`}
                           >
                             Devolver
-                          </Button>
+                          </button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -304,16 +324,50 @@ function EmprestimosPageContent() {
         </div>
       </div>
 
-      {selectedEmprestimo && (
-        <ModalDevolverItem
-          isOpen={isDevolverModalOpen}
-          onClose={handleCloseDevolver}
-          emprestimoId={selectedEmprestimo._id}
-          itemNome={selectedEmprestimo.item?.nome || 'Item'}
-          quantidadeAberta={selectedEmprestimo.quantidade_aberta}
+      {/* Modal observações */}
+      {observacoesEmprestimo && (
+        <ModalObservacoesEmprestimo
+          isOpen={isObservacoesModalOpen}
+          onClose={() => { setIsObservacoesModalOpen(false); setObservacoesEmprestimo(null); }}
+          emprestimo={observacoesEmprestimo}
+        />
+      )}
+
+      {/* Modal editar / devolver */}
+      {editarEmprestimo && (
+        <ModalEditarEmprestimo
+          isOpen={isEditarModalOpen}
+          onClose={() => { setIsEditarModalOpen(false); setEditarEmprestimo(null); }}
+          emprestimo={editarEmprestimo}
           onSuccess={() => refetch()}
         />
       )}
+
+      {/* Modal devolução */}
+      {devolverEmprestimo && (
+        <ModalDevolverItem
+          isOpen={isDevolverModalOpen}
+          onClose={() => { setIsDevolverModalOpen(false); setDevolverEmprestimo(null); }}
+          emprestimoId={devolverEmprestimo._id}
+          itemNome={devolverEmprestimo.item?.nome || 'Item'}
+          quantidadeAberta={devolverEmprestimo.quantidade_aberta}
+          onSuccess={() => refetch()}
+        />
+      )}
+
+      {/* Modal excluir */}
+      {excluirEmprestimo && (
+        <ModalExcluirEmprestimo
+          isOpen={isExcluirModalOpen}
+          onClose={() => { setIsExcluirModalOpen(false); setExcluirEmprestimo(null); }}
+          emprestimoId={excluirEmprestimo._id}
+          itemNome={excluirEmprestimo.item?.nome || 'Item'}
+          solicitanteNome={excluirEmprestimo.solicitante_nome}
+          onSuccess={() => refetch()}
+        />
+      )}
+
+      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover draggable={false} transition={Slide} />
     </div>
   );
 }
