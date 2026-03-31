@@ -121,7 +121,7 @@ export default function SidebarButtonWithSubmenu({
           {name}
         </span>
         <ChevronDown
-          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180!' : ''} ${
+          className={`w-4 h-4 mr-1 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180!' : ''} ${
             isActive || isOpen ? 'opacity-100' : 'opacity-0'
           } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
         />
