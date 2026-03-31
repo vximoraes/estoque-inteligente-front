@@ -104,7 +104,7 @@ export default function SidebarButtonWithSubmenu({
   }
 
   return (
-    <>
+    <div className="w-[250px]">
       <SidebarMenuButton
         className={`text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ${
           isActive
@@ -121,7 +121,7 @@ export default function SidebarButtonWithSubmenu({
           {name}
         </span>
         <ChevronDown
-          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180!' : ''} ${
+          className={`w-4 h-4 mr-1 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180!' : ''} ${
             isActive || isOpen ? 'opacity-100' : 'opacity-0'
           } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
         />
@@ -129,9 +129,9 @@ export default function SidebarButtonWithSubmenu({
 
       {/* Sub-menu expandido */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-out mt-0.5 pr-4 ${
+        className={`overflow-hidden transition-all duration-300 ease-out ${
           isOpen
-            ? 'max-h-[500px] opacity-100 translate-y-0'
+            ? 'mt-0.5 max-h-[500px] opacity-100 translate-y-0'
             : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
         }`}
       >
@@ -152,6 +152,6 @@ export default function SidebarButtonWithSubmenu({
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

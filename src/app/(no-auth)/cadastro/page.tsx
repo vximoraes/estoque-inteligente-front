@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Check, X } from 'lucide-react';
-import LogoEi from '@/components/logo-ei';
+import AuthLeftPanel from '@/components/auth-left-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -123,9 +123,9 @@ export default function CadastroPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <LogoEi></LogoEi>
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
+    <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
+      <AuthLeftPanel />
+      <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">
         <div className="w-full max-w-md">
           <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-bold">
             Cadastre-se!
@@ -273,7 +273,7 @@ export default function CadastroPage() {
             <div className="mt-4 md:mt-6">
               <Button
                 type="submit"
-                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
+                className="p-3 md:p-5 w-full bg-[#0f1419] hover:bg-[#1a2330] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}

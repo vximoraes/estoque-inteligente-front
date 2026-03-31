@@ -14,6 +14,7 @@ type sidebarMenuButton = {
   path?: string;
   onItemClick?: () => void;
   collapsed?: boolean;
+  className?: string;
 };
 export default function SidebarButtonMenu({
   src,
@@ -24,6 +25,7 @@ export default function SidebarButtonMenu({
   path,
   onItemClick,
   collapsed = false,
+  className = '',
 }: sidebarMenuButton) {
   const isActivePath = path?.startsWith(
     '/' +
@@ -105,6 +107,8 @@ export default function SidebarButtonMenu({
       <SidebarMenuButton
         className={
           'text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] itens cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ' +
+          className +
+          ' ' +
           (isRouter
             ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
             : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')

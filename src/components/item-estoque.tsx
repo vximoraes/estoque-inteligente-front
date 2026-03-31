@@ -1,6 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { Edit, Trash2, PlusCircle, MinusCircle, Package } from 'lucide-react';
+import {
+  Edit,
+  Trash2,
+  PlusCircle,
+  MinusCircle,
+  Handshake,
+  Package,
+} from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
 
 interface ItemEstoqueProps {
@@ -16,6 +23,7 @@ interface ItemEstoqueProps {
   onClick?: (id: string) => void;
   onEntrada?: (id: string) => void;
   onSaida?: (id: string) => void;
+  onEmprestar?: (id: string) => void;
   isLoading?: boolean;
   'data-test'?: string;
 }
@@ -33,6 +41,7 @@ export default function ItemEstoque({
   onClick,
   onEntrada,
   onSaida,
+  onEmprestar,
   isLoading = false,
   'data-test': dataTest,
 }: ItemEstoqueProps) {
@@ -63,6 +72,13 @@ export default function ItemEstoque({
     e.stopPropagation();
     if (onSaida && id) {
       onSaida(id);
+    }
+  };
+
+  const handleEmprestar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEmprestar && id) {
+      onEmprestar(id);
     }
   };
 
@@ -238,12 +254,36 @@ export default function ItemEstoque({
           </span>
         </div>
 
-        {/* Ícones de entrada e saída alinhados com os botões de ação */}
+        {/* Ícones de entrada, saída e empréstimo */}
         <div
           className="flex items-center space-x-1 shrink-0"
-          style={{ minWidth: '80px' }}
+          style={{ minWidth: '120px' }}
           data-test="movement-icons"
         >
+          <button
+            className={`p-2 rounded-md shrink-0 transition-colors duration-200 ${
+              quantidade === 0
+                ? 'opacity-40 cursor-not-allowed'
+                : 'hover:bg-blue-50 cursor-pointer'
+            }`}
+            title={
+              quantidade === 0
+                ? `${nome} sem estoque disponível para empréstimo`
+                : `Registrar empréstimo de ${nome}`
+            }
+            data-test="emprestimo-icon"
+            onClick={quantidade === 0 ? undefined : handleEmprestar}
+            disabled={quantidade === 0}
+          >
+            <Handshake
+              size={20}
+              className={
+                quantidade === 0
+                  ? 'text-gray-400'
+                  : 'text-blue-600 hover:text-blue-700'
+              }
+            />
+          </button>
           <button
             className="p-2 rounded-md shrink-0 hover:bg-green-50 transition-colors duration-200 cursor-pointer"
             title={`Registrar entrada de ${nome}`}
