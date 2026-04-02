@@ -142,6 +142,11 @@ const escapeCSV = (text: string): string => {
   // Remover quebras de linha
   escaped = escaped.replace(/\n/g, ' ').replace(/\r/g, '');
 
+  // Prevenir injeção de fórmula
+  if (/^[=+\-@\t]/.test(escaped)) {
+    escaped = `'${escaped}`;
+  }
+
   return escaped;
 };
 

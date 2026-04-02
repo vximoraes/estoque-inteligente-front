@@ -271,15 +271,6 @@ function ItensPageContent() {
     if (emprestimoItemId) {
       setUpdatingItemId(emprestimoItemId);
     }
-    toast.success('Empréstimo registrado com sucesso!', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    });
     refetch();
   };
 
