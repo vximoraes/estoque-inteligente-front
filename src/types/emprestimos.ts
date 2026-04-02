@@ -24,6 +24,7 @@ export interface Emprestimo {
   quantidade_devolvida: number;
   quantidade_aberta: number;
   solicitante_nome: string;
+  solicitante_email?: string;
   data_saida: string;
   data_prevista_devolucao?: string | null;
   data_devolucao_total?: string | null;

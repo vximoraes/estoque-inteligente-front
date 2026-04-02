@@ -25,13 +25,11 @@ import {
   ChevronUp,
   Eye,
   Pencil,
-  FileDown,
   Trash2,
 } from 'lucide-react';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import StatCard from '@/components/stat-card';
 import { PulseLoader } from 'react-spinners';
-import { gerarPdfEmprestimo } from '@/utils/pdf-emprestimo';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -210,6 +208,7 @@ function EmprestimosPageContent() {
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 text-left px-6">ITEM</TableHead>
                       <TableHead className="font-semibold text-gray-700 text-left px-6">SOLICITANTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">E-MAIL</TableHead>
                       <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. EMPRESTADA</TableHead>
                       <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. ABERTA</TableHead>
                       <TableHead className="font-semibold text-gray-700 text-left px-6">LOCALIZAÇÃO</TableHead>
@@ -225,6 +224,7 @@ function EmprestimosPageContent() {
                       <TableRow key={emp._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="font-medium text-left px-6 py-3">{emp.item?.nome || '-'}</TableCell>
                         <TableCell className="text-left px-6 py-3">{emp.solicitante_nome}</TableCell>
+                        <TableCell className="text-left px-6 py-3">{emp.solicitante_email || '-'}</TableCell>
                         <TableCell className="text-center px-6 py-3">{emp.quantidade_emprestada}</TableCell>
                         <TableCell className="text-center px-6 py-3">{emp.quantidade_aberta}</TableCell>
                         <TableCell className="text-left px-6 py-3">{emp.localizacao?.nome || '-'}</TableCell>
@@ -267,15 +267,6 @@ function EmprestimosPageContent() {
                               disabled={emp.quantidade_aberta <= 0}
                             >
                               <Pencil size={16} className="sm:w-5 sm:h-5" />
-                            </button>
-
-                            {/* FileDown — gerar PDF */}
-                            <button
-                              onClick={() => gerarPdfEmprestimo(emp)}
-                              className="p-1 sm:p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Baixar PDF do empréstimo"
-                            >
-                              <FileDown size={16} className="sm:w-5 sm:h-5" />
                             </button>
 
                             {/* Trash — excluir */}

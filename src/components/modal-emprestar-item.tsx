@@ -43,6 +43,7 @@ interface EmprestimoRequest {
   localizacao: string;
   quantidade_emprestada: number;
   solicitante_nome: string;
+  solicitante_email?: string;
   data_prevista_devolucao?: string;
   observacoes_emprestimo?: string;
 }
@@ -67,6 +68,7 @@ export default function ModalEmprestarItem({
 
   const [quantidade, setQuantidade] = useState('');
   const [solicitanteNome, setSolicitanteNome] = useState('');
+  const [solicitanteEmail, setSolicitanteEmail] = useState('');
   const [dataPrevista, setDataPrevista] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState('');
@@ -75,6 +77,7 @@ export default function ModalEmprestarItem({
   const [errors, setErrors] = useState<{
     quantidade?: string;
     solicitanteNome?: string;
+    solicitanteEmail?: string;
     dataPrevista?: string;
     localizacao?: string;
   }>({});
@@ -221,6 +224,7 @@ export default function ModalEmprestarItem({
     if (!isOpen) return;
     setQuantidade('');
     setSolicitanteNome('');
+    setSolicitanteEmail('');
     setDataPrevista('');
     setObservacoes('');
     setLocalizacaoSelecionada('');
@@ -235,6 +239,7 @@ export default function ModalEmprestarItem({
     const newErrors: {
       quantidade?: string;
       solicitanteNome?: string;
+      solicitanteEmail?: string;
       dataPrevista?: string;
       localizacao?: string;
     } = {};
@@ -252,6 +257,13 @@ export default function ModalEmprestarItem({
 
     if (!solicitanteNome || solicitanteNome.trim().length < 3) {
       newErrors.solicitanteNome = 'Informe o solicitante (mín. 3 caracteres)';
+    }
+
+    if (solicitanteEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(solicitanteEmail.trim())) {
+        newErrors.solicitanteEmail = 'E-mail inválido';
+      }
     }
 
     if (dataPrevista) {
@@ -273,6 +285,7 @@ export default function ModalEmprestarItem({
       localizacao: localizacaoSelecionada,
       quantidade_emprestada: Number(quantidade),
       solicitante_nome: solicitanteNome.trim(),
+      solicitante_email: solicitanteEmail.trim() || undefined,
       data_prevista_devolucao: dataPrevista
         ? new Date(dataPrevista).toISOString()
         : undefined,
@@ -410,6 +423,25 @@ export default function ModalEmprestarItem({
             />
             {errors.solicitanteNome && (
               <p className="mt-1 text-sm text-red-600">{errors.solicitanteNome}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-gray-700 mb-1">
+              E-mail do solicitante
+            </label>
+            <input
+              type="email"
+              value={solicitanteEmail}
+              onChange={(e) => {
+                setSolicitanteEmail(e.target.value);
+                setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="E-mail da pessoa solicitante (opcional)"
+            />
+            {errors.solicitanteEmail && (
+              <p className="mt-1 text-sm text-red-600">{errors.solicitanteEmail}</p>
             )}
           </div>
 
