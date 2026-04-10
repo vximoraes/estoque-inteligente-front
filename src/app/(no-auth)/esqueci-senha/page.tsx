@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuthLeftPanel from '@/components/auth-left-panel';
@@ -29,12 +28,18 @@ export default function EsqueciSenhaPage() {
 
   const onSubmit = async (data: EsqueciSenhaFormData) => {
     try {
-      const response = await axios.post(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/recover`,
-        { email: data.email },
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email }),
+        },
       );
+      const responseData = await res.json();
+      if (!res.ok) throw responseData;
 
-      if (response.data.error === false) {
+      if (responseData.error === false) {
         setEmailUsuario(data.email);
         setEmailEnviado(true);
         toast.success('E-mail de recuperação enviado com sucesso!', {
@@ -48,8 +53,8 @@ export default function EsqueciSenhaPage() {
         });
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
+      if (!(error instanceof Error)) {
+        const errorData = error as { message?: string };
 
         toast.error(
           errorData.message || 'Erro ao solicitar recuperação de senha.',

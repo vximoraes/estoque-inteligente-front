@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -90,14 +89,18 @@ function AtivarContaContent() {
     }
 
     try {
-      const response = await axios.post(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/ativar-conta?token=${token}`,
         {
-          senha: data.senha,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senha: data.senha }),
         },
       );
+      const responseData = await res.json();
+      if (!res.ok) throw responseData;
 
-      if (response.data.error === false) {
+      if (responseData.error === false) {
         toast.success(
           'Conta ativada com sucesso! Redirecionando para o login...',
           {
@@ -116,8 +119,8 @@ function AtivarContaContent() {
         }, 2000);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
+      if (!(error instanceof Error)) {
+        const errorData = error as { message?: string };
 
         toast.error(
           errorData.message || 'Ocorreu um erro ao ativar sua conta.',

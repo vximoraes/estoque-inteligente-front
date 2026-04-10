@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -56,16 +55,22 @@ export default function CadastroPage() {
 
   const onSubmit = async (data: CadastroFormData) => {
     try {
-      const response = await axios.post(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/signup`,
         {
-          nome: data.nome,
-          email: data.email,
-          senha: data.senha,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: data.nome,
+            email: data.email,
+            senha: data.senha,
+          }),
         },
       );
+      const responseData = await res.json();
+      if (!res.ok) throw responseData;
 
-      if (response.data.error === false) {
+      if (responseData.error === false) {
         toast.success(
           'Conta criada com sucesso! Redirecionando para o login...',
           {
@@ -84,8 +89,8 @@ export default function CadastroPage() {
         }, 2000);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
+      if (!(error instanceof Error)) {
+        const errorData = error as { message?: string; errors?: Array<{ path: string; message: string }> };
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((err: { path: string; message: string }) => {
