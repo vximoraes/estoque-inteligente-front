@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
@@ -101,6 +101,61 @@ function EmprestimosPageContent() {
     [data],
   );
 
+  const { data: globalStats } = useQuery<{
+    total: number;
+    ativos: number;
+    atrasados: number;
+    devolvidos: number;
+  }>({
+    queryKey: ['emprestimos-global-stats', searchTerm, statusFilter],
+    queryFn: async () => {
+      const limit = 500;
+      let page = 1;
+      let hasNextPage = true;
+      const docs: Emprestimo[] = [];
+
+      while (hasNextPage) {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('limite', String(limit));
+
+        if (searchTerm) params.append('solicitante_nome', searchTerm);
+        if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
+        if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+
+        const response = await get<EmprestimosApiResponse>(
+          `/emprestimos?${params.toString()}`,
+        );
+
+        docs.push(...(response?.data?.docs || []));
+        hasNextPage = !!response?.data?.hasNextPage;
+        page = response?.data?.nextPage || page + 1;
+      }
+
+      const filtrados = docs.filter((emp) => {
+        const termo = searchTerm.toLowerCase().trim();
+
+        const matchSearch =
+          !termo ||
+          emp.solicitante_nome.toLowerCase().includes(termo) ||
+          emp.item?.nome?.toLowerCase().includes(termo) ||
+          emp.localizacao?.nome?.toLowerCase().includes(termo);
+
+        const matchStatus = !statusFilter || emp.status === statusFilter;
+        return matchSearch && matchStatus;
+      });
+
+      return {
+        total: filtrados.length,
+        ativos: filtrados.filter((e) => e.status === 'Ativo').length,
+        atrasados: filtrados.filter((e) => e.status === 'Atrasado').length,
+        devolvidos: filtrados.filter((e) => e.status === 'Devolvido').length,
+      };
+    },
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+
   const emprestimosFiltrados = useMemo(() => {
     return emprestimos.filter((emp) => {
       const termo = searchTerm.toLowerCase().trim();
@@ -116,10 +171,15 @@ function EmprestimosPageContent() {
     });
   }, [emprestimos, searchTerm, statusFilter]);
 
-  const total = emprestimosFiltrados.length;
-  const ativos = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
-  const atrasados = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
-  const devolvidos = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
+  const totalLocal = emprestimosFiltrados.length;
+  const ativosLocal = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
+  const atrasadosLocal = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
+  const devolvidosLocal = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
+
+  const total = globalStats?.total ?? totalLocal;
+  const ativos = globalStats?.ativos ?? ativosLocal;
+  const atrasados = globalStats?.atrasados ?? atrasadosLocal;
+  const devolvidos = globalStats?.devolvidos ?? devolvidosLocal;
 
   const formatarDataPrevista = (data?: string | null) => {
     if (!data) return 'Sem previsão';

@@ -24,6 +24,17 @@ export default function ItemCardSimples({
 }: ItemCardSimplesProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
+  const categoriaFormatada = React.useMemo(() => {
+    if (!categoria) return '';
+
+    return categoria
+      .toLocaleLowerCase('pt-BR')
+      .split(' ')
+      .filter(Boolean)
+      .map((palavra) => palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1))
+      .join(' ');
+  }, [categoria]);
+
   const imagemComTimestamp = React.useMemo(() => {
     if (!imagem) return undefined;
     const separator = imagem.includes('?') ? '&' : '?';
@@ -83,8 +94,8 @@ export default function ItemCardSimples({
         </div>
 
         {/* Categoria */}
-        <p className="text-xs text-gray-500 truncate w-full" title={categoria}>
-          {categoria}
+        <p className="text-xs text-gray-500 truncate w-full" title={categoriaFormatada}>
+          {categoriaFormatada}
         </p>
       </div>
 

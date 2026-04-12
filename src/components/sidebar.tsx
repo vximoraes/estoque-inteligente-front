@@ -71,27 +71,31 @@ function MobileMenuItem({
     <div className="w-full">
       <button
         onClick={handleClick}
-        className={`text-[14px] pl-4 pr-3 py-1 h-10 w-full cursor-pointer flex gap-2 items-center rounded-lg transition-all duration-300 ${
+        className={`text-[13px] pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-sm transition-colors duration-150 ${
           isActive
-            ? 'bg-white text-black shadow-md'
-            : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.08)]'
+            ? 'bg-ei-sidebar-surface text-ei-sidebar-text-strong'
+            : 'text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
         }`}
       >
         <img
-          src={isActive ? iconHover : icon}
+          src={icon}
           alt={name}
-          className="w-[18px] h-[18px]"
+          className="w-[18px] h-[18px] shrink-0"
         />
         <span
-          className={`text-[14px] font-medium flex-1 text-left ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+          className={`text-[13px] tracking-wide flex-1 text-left ${isActive ? 'font-semibold' : 'font-medium'}`}
         >
           {name}
         </span>
         {subItems && subItems.length > 0 && (
           <svg
-            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '-rotate-180' : ''} ${
-              isActive || isOpen ? 'opacity-100' : 'opacity-0'
-            } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+            className={`w-3.5 h-3.5 mr-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'} ${
+              isActive || isOpen ? 'opacity-95' : 'opacity-80'
+            } ${
+              isActive || isOpen
+                ? 'text-ei-sidebar-chevron'
+                : 'text-ei-sidebar-text'
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -109,29 +113,30 @@ function MobileMenuItem({
       {/* Sub-itens */}
       {subItems && subItems.length > 0 && (
         <div
-          className={`overflow-hidden transition-all duration-500 ease-out mt-0.5 ${
-            isOpen
-              ? 'max-h-[500px] opacity-100 translate-y-0'
-              : 'max-h-0 opacity-0 -translate-y-1 pointer-events-none'
+          className={`grid transition-all duration-200 ease-out ${
+            isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
           }`}
         >
-          <div className="ml-[34px] pl-4 space-y-0.5 border-l border-[rgba(255,255,255,0.25)]">
-            {subItems.map((item) => {
-              const isSubItemActive = pathname === item.route;
-              return (
-                <button
-                  key={item.route}
-                  onClick={() => handleSubItemClick(item.route)}
-                  className={`w-full text-left px-3 py-1 text-[13px] rounded-lg transition-all duration-200 cursor-pointer ${
-                    isSubItemActive
-                      ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
-                      : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
-                  }`}
-                >
-                  {item.name}
-                </button>
-              );
-            })}
+          <div className="overflow-hidden">
+            <div className="pt-0.5 pb-1 flex flex-col gap-0.5">
+              {subItems.map((item) => {
+                const isSubItemActive = pathname === item.route;
+                return (
+                  <button
+                    key={item.route}
+                    onClick={() => handleSubItemClick(item.route)}
+                    className={`w-full h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-sm transition-colors duration-150 cursor-pointer ${
+                      isSubItemActive
+                        ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium'
+                        : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
+                    }`}
+                  >
+                    <span className="w-[18px] h-[18px] shrink-0" aria-hidden="true" />
+                    <span className="text-[13px] tracking-wide">{item.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -214,40 +219,40 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
             className={`h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
           >
             <SidebarContent
-              className={`bg-[#0f1419] h-auto relative overflow-y-auto transition-all duration-300 flex flex-col ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
+              className={`bg-ei-sidebar-bg h-auto relative overflow-y-auto transition-all duration-300 flex flex-col ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
               data-test="sidebar-content"
             >
               {/* Seção de Perfil no Topo */}
               <div
-                className={`mt-8 mb-6 transition-all duration-300 ${collapsed ? 'px-2' : 'px-4'}`}
+                className={`mt-6 mb-4 transition-all duration-300 ${collapsed ? 'px-3' : 'px-4'}`}
               >
                 <button
                   onClick={handleProfileClick}
-                  className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer ${collapsed ? 'justify-center' : ''}`}
+                  className={`flex items-center gap-3 p-2 rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer ${collapsed ? 'w-fit mx-auto justify-center' : 'w-full'}`}
                 >
                   {user?.fotoPerfil && !imageError ? (
                     <img
                       src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                       alt="Foto de perfil"
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-9 h-9 rounded-full object-cover shrink-0"
                       onError={handleImageError}
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="w-6 h-6 text-gray-500" />
+                    <div className="w-9 h-9 rounded-full bg-ei-sidebar-avatar-bg flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-ei-sidebar-text-soft" />
                     </div>
                   )}
 
                   {!collapsed && (
                     <div className="flex-1 min-w-0 text-left">
                       <p
-                        className="text-white text-sm font-medium truncate"
+                        className="text-ei-sidebar-text-strong text-[13px] font-medium tracking-wide truncate"
                         title={user?.name}
                       >
                         {user?.name}
                       </p>
                       <p
-                        className="text-[#B4BAC5] text-xs truncate"
+                        className="text-ei-sidebar-text-soft text-[11px] truncate"
                         title={user?.email}
                       >
                         {user?.email}
@@ -255,15 +260,15 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     </div>
                   )}
                 </button>
-                <hr
-                  className={`border-[#2d3748] mt-4 transition-all duration-300`}
+                <div
+                  className={`border-b border-ei-sidebar-divider mt-4 transition-all duration-300`}
                   data-test="sidebar-divider"
                 />
               </div>
 
               <SidebarMenu className="flex-1" data-test="sidebar-menu">
                 <SidebarMenuItem
-                  className="text-[#B4BAC5] items-center gap-1.5 flex flex-col"
+                  className="items-center gap-0.5 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
                   <SidebarButtonMenu
@@ -340,15 +345,15 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
               {/* Botão de Sair ao Final */}
               <div
-                className={`mt-auto mb-6 transition-all duration-300 ${collapsed ? 'px-2' : 'px-4'}`}
+                className={`mt-auto mb-6 transition-all duration-300 ${collapsed ? 'px-3' : 'px-4'}`}
               >
-                <hr
-                  className={`border-[#2d3748] mb-4 transition-all duration-300`}
+                <div
+                  className={`border-b border-ei-sidebar-divider mb-6 transition-all duration-300`}
                   data-test="sidebar-divider-bottom"
                 />
 
                 <SidebarMenuButton
-                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-11 w-full rounded-lg' : 'text-[15px] pl-4 h-10 w-full flex gap-2 items-center'} `}
+                  className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-sm' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-sm'}`}
                   onClick={() => {
                     handleLogout();
                     handleItemClick();
@@ -356,9 +361,9 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-btn-sair"
                   title={collapsed ? 'Sair' : undefined}
                 >
-                  <img src="/sair.svg" alt="" className="w-[18px] h-[18px]" />
+                  <img src="/sair.svg" alt="" className="w-[18px] h-[18px] shrink-0" />
                   {!collapsed && (
-                    <span className="text-[14px] font-medium text-[#B4BAC5]">
+                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
                       Sair
                     </span>
                   )}
@@ -376,58 +381,57 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
         }`}
         data-test="sidebar-container-mobile"
       >
-        <div className="bg-[#0f1419] h-full w-full overflow-y-auto flex flex-col">
+        <div className="bg-ei-sidebar-bg h-full w-full overflow-y-auto flex flex-col">
           {/* Header com botão fechar */}
-          <div className="relative p-5 pt-8 flex items-center justify-end">
+          <div className="relative px-5 pt-6 pb-2 flex items-center justify-end">
             <button
               onClick={closeSidebar}
-              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-all duration-200"
+              className="w-9 h-9 flex items-center justify-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150"
               aria-label="Fechar menu"
             >
-              <X className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              <X className="w-4 h-4 text-ei-sidebar-text-soft" strokeWidth={1.5} />
             </button>
           </div>
 
           {/* Seção de Perfil no Topo Mobile */}
-          <div className="px-5 mb-6">
+          <div className="px-5 mb-4">
             <button
               onClick={handleProfileClick}
-              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer"
+              className="w-full flex items-center gap-3 p-2 rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer"
             >
               {user?.fotoPerfil && !imageError ? (
                 <img
                   src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                   alt="Foto de perfil"
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-9 h-9 rounded-full object-cover shrink-0"
                   onError={handleImageError}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-500" />
+                <div className="w-9 h-9 rounded-full bg-ei-sidebar-avatar-bg flex items-center justify-center shrink-0">
+                  <User className="w-4 h-4 text-ei-sidebar-text-soft" />
                 </div>
               )}
-
               <div className="flex-1 min-w-0 text-left">
                 <p
-                  className="text-white text-sm font-medium truncate"
+                  className="text-ei-sidebar-text-strong text-[13px] font-medium tracking-wide truncate"
                   title={user?.name}
                 >
                   {user?.name}
                 </p>
                 <p
-                  className="text-[#B4BAC5] text-xs truncate"
+                  className="text-ei-sidebar-text-soft text-[11px] truncate"
                   title={user?.email}
                 >
                   {user?.email}
                 </p>
               </div>
             </button>
-            <hr className="mt-4 border-[#2d3748]" />
+            <div className="border-b border-ei-sidebar-divider mt-4" />
           </div>
 
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
-            <div className="flex flex-col gap-1.5 flex-1 mb-6">
+            <div className="flex flex-col gap-0.5 flex-1 mb-6">
               <MobileMenuItem
                 icon="/itens.svg"
                 iconHover="/itens-hover.svg"
@@ -499,18 +503,18 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
             {/* Botão de Sair Mobile */}
             <div className="mt-auto mb-6">
-              <hr className="mb-4 border-[#2d3748]" />
+              <div className="border-b border-ei-sidebar-divider mb-6" />
 
               <button
                 onClick={() => {
                   handleLogout();
                   handleItemClick();
                 }}
-                className="text-[14px] pl-4 h-10 w-full cursor-pointer flex gap-2 items-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+                className="pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 text-ei-sidebar-text-soft hover:text-ei-sidebar-text"
                 data-test="sidebar-btn-sair-mobile"
               >
-                <img src="/sair.svg" alt="" className="w-[18px] h-[18px]" />
-                <span className="text-[14px] font-medium text-[#B4BAC5]">
+                <img src="/sair.svg" alt="" className="w-[18px] h-[18px] shrink-0" />
+                <span className="text-[13px] font-medium tracking-wide">
                   Sair
                 </span>
               </button>

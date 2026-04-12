@@ -218,7 +218,7 @@ export default function ModalFiltros({
       data-test="modal-filtros-backdrop"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-lg border border-border shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         data-test="modal-filtros-content"
       >
@@ -226,7 +226,7 @@ export default function ModalFiltros({
         <div className="relative p-6 pb-0">
           <button
             onClick={handleCloseModal}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
             data-test="modal-filtros-close-button"
           >
@@ -242,7 +242,7 @@ export default function ModalFiltros({
               className="space-y-2 pt-4"
               data-test="filtro-categoria-container"
             >
-              <label className="block text-base font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-foreground tracking-tight">
                 Categoria
               </label>
               <div className="relative" data-dropdown>
@@ -256,12 +256,12 @@ export default function ModalFiltros({
                     }
                   }}
                   disabled={isLoadingCategorias}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   data-test="filtro-categoria-dropdown"
                 >
                   <span
                     className={
-                      selectedCategoria ? 'text-gray-900' : 'text-gray-500'
+                      selectedCategoria ? 'text-foreground' : 'text-muted-foreground'
                     }
                   >
                     {isLoadingCategorias
@@ -269,14 +269,14 @@ export default function ModalFiltros({
                       : getSelectedCategoriaLabel()}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-400 transition-transform ${categoriaDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-muted-foreground transition-transform ${categoriaDropdownOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
                 {categoriaDropdownOpen && !isLoadingCategorias && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-80 overflow-hidden">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-80 overflow-hidden">
                     {/* Campo de busca dentro do dropdown */}
-                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <div className="p-3 border-b border-border bg-muted/20">
                       <input
                         type="text"
                         placeholder="Buscar categoria..."
@@ -284,7 +284,7 @@ export default function ModalFiltros({
                         onChange={(e) => {
                           setCategoriaSearch(e.target.value);
                         }}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-9 px-3 text-sm border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                         onClick={(e) => e.stopPropagation()}
                         data-test="filtro-categoria-search-input"
                       />
@@ -304,8 +304,8 @@ export default function ModalFiltros({
                               }}
                               className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                                 selectedCategoria === option.value
-                                  ? 'bg-blue-50 text-blue-600'
-                                  : 'text-gray-900'
+                                  ? 'bg-[#306FCC]/10 text-[#306FCC]'
+                                  : 'text-foreground hover:bg-muted/40'
                               } cursor-pointer`}
                               data-test={`filtro-categoria-option-${option.value || 'todas'}`}
                             >
@@ -323,7 +323,7 @@ export default function ModalFiltros({
                         </>
                       ) : (
                         <div
-                          className="px-4 py-8 text-center text-gray-500 text-sm"
+                          className="px-4 py-8 text-center text-muted-foreground text-sm"
                           data-test="filtro-categoria-no-results"
                         >
                           Nenhuma categoria encontrada para "{categoriaSearch}"
@@ -338,7 +338,7 @@ export default function ModalFiltros({
 
           {/* Filtro por Status */}
           <div className="space-y-2 pb-4" data-test="filtro-status-container">
-            <label className="block text-base font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-foreground tracking-tight">
               Status
             </label>
             <div className="relative" data-dropdown>
@@ -347,21 +347,21 @@ export default function ModalFiltros({
                   setStatusDropdownOpen(!statusDropdownOpen);
                   setCategoriaDropdownOpen(false);
                 }}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
+                className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC] transition-colors cursor-pointer"
                 data-test="filtro-status-dropdown"
               >
                 <span
-                  className={selectedStatus ? 'text-gray-900' : 'text-gray-500'}
+                  className={selectedStatus ? 'text-foreground' : 'text-muted-foreground'}
                 >
                   {getSelectedStatusLabel()}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${statusDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-muted-foreground transition-transform ${statusDropdownOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {statusDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50">
                   {statusOptions.map((option) => (
                     <button
                       key={option.value}
@@ -369,10 +369,10 @@ export default function ModalFiltros({
                         setSelectedStatus(option.value);
                         setStatusDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                      className={`w-full text-left px-4 py-2 transition-colors ${
                         selectedStatus === option.value
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-900'
+                          ? 'bg-[#306FCC]/10 text-[#306FCC]'
+                          : 'text-foreground hover:bg-muted/40'
                       } cursor-pointer`}
                       data-test={`filtro-status-option-${option.value.toLowerCase().replace(/\s+/g, '-') || 'todos'}`}
                     >
@@ -386,19 +386,19 @@ export default function ModalFiltros({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
           <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={handleClearFilters}
-              className="flex-1 cursor-pointer"
+              className="flex-1 h-10 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
               data-test="limpar-filtros-button"
             >
               Limpar Filtros
             </Button>
             <Button
               onClick={handleApplyFilters}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="flex-1 h-10 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="aplicar-filtros-button"
             >

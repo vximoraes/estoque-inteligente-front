@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import {
   Search,
@@ -38,6 +38,12 @@ interface MovimentacoesApiResponse {
     hasNextPage: boolean;
     nextPage?: number;
   };
+}
+
+interface MovimentacoesGlobaisStats {
+  totalMov: number;
+  entradas: number;
+  saidas: number;
 }
 
 function RelatorioMovimentacoesPageContent() {
@@ -110,6 +116,82 @@ function RelatorioMovimentacoesPageContent() {
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
+  const { data: globalStats } = useQuery<MovimentacoesGlobaisStats>({
+    queryKey: ['movimentacoes-relatorio-global-stats', searchTerm, tipoFilter],
+    queryFn: async () => {
+      const limit = 500;
+      let page = 1;
+      let hasNextPage = true;
+      const docs: any[] = [];
+
+      while (hasNextPage) {
+        const params = new URLSearchParams();
+        params.append('limit', String(limit));
+        params.append('page', String(page));
+
+        if (tipoFilter) {
+          params.append('tipo', tipoFilter.toLowerCase());
+        }
+
+        const response = await get<MovimentacoesApiResponse>(
+          `/movimentacoes?${params.toString()}`,
+        );
+
+        docs.push(...(response?.data?.docs || []));
+        hasNextPage = !!response?.data?.hasNextPage;
+        page = response?.data?.nextPage || page + 1;
+      }
+
+      const normalizeStr = (str: string) => {
+        return String(str ?? '')
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+      };
+
+      const filtradas = docs.filter((mov) => {
+        const texto = searchTerm.toLowerCase();
+
+        const matchSearch =
+          !searchTerm ||
+          mov.item?._id?.toLowerCase().includes(texto) ||
+          mov.item?.nome?.toLowerCase().includes(texto) ||
+          mov.localizacao?.nome?.toLowerCase().includes(texto) ||
+          mov.tipo?.toLowerCase().includes(texto) ||
+          String(mov.quantidade).includes(searchTerm) ||
+          new Date(mov.data_hora)
+            .toLocaleString('pt-BR')
+            .toLowerCase()
+            .includes(texto);
+
+        const tipoMovNormalized = normalizeStr(mov.tipo);
+        const filterNormalized = normalizeStr(tipoFilter);
+
+        const matchTipo =
+          !filterNormalized ||
+          tipoMovNormalized === filterNormalized ||
+          tipoMovNormalized.includes(filterNormalized);
+
+        return matchSearch && matchTipo;
+      });
+
+      return {
+        totalMov: filtradas.length,
+        entradas: filtradas.filter((m) => normalizeStr(m.tipo) === 'entrada')
+          .length,
+        saidas: filtradas.filter((m) => normalizeStr(m.tipo) === 'saida').length,
+      };
+    },
+    staleTime: 30_000,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
   const normalizeStr = (str: string) => {
     return String(str ?? '')
       .toLowerCase()
@@ -148,13 +230,17 @@ function RelatorioMovimentacoesPageContent() {
       return new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime();
     });
 
-  const totalMov = movimentacoesFiltradas.length;
-  const entradas = movimentacoesFiltradas.filter(
+  const totalMovLocal = movimentacoesFiltradas.length;
+  const entradasLocal = movimentacoesFiltradas.filter(
     (m) => normalizeStr(m.tipo) === 'entrada',
   ).length;
-  const saidas = movimentacoesFiltradas.filter(
+  const saidasLocal = movimentacoesFiltradas.filter(
     (m) => normalizeStr(m.tipo) === 'saida',
   ).length;
+
+  const totalMov = globalStats?.totalMov ?? totalMovLocal;
+  const entradas = globalStats?.entradas ?? entradasLocal;
+  const saidas = globalStats?.saidas ?? saidasLocal;
 
   const handleSelectAll = () => {
     if (selectedItems.size === movimentacoesFiltradas.length) {

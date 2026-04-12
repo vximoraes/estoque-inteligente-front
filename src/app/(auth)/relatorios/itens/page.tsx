@@ -39,6 +39,13 @@ interface CategoriasApiResponse {
   };
 }
 
+interface ItensGlobaisStats {
+  totalItens: number;
+  emEstoque: number;
+  baixoEstoque: number;
+  indisponiveis: number;
+}
+
 function RelatorioItensPageContent() {
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
@@ -114,6 +121,83 @@ function RelatorioItensPageContent() {
 
   const todosEstoques = data?.pages.flatMap((page) => page.data.docs) || [];
 
+  const { data: globalStats } = useQuery<ItensGlobaisStats>({
+    queryKey: [
+      'estoques-relatorio-global-stats',
+      searchTerm,
+      categoriaFilter,
+      statusFilter,
+    ],
+    queryFn: async () => {
+      const limit = 500;
+      let page = 1;
+      let hasNextPage = true;
+      const docs: any[] = [];
+
+      while (hasNextPage) {
+        const params = new URLSearchParams();
+        params.append('limit', String(limit));
+        params.append('page', String(page));
+
+        if (categoriaFilter) {
+          params.append('categoria', categoriaFilter);
+        }
+        if (statusFilter) {
+          params.append('status', statusFilter);
+        }
+
+        const response = await get<EstoqueApiResponse>(`/estoques?${params.toString()}`);
+        const pageDocs = response?.data?.docs || [];
+        docs.push(...pageDocs);
+
+        hasNextPage = !!response?.data?.hasNextPage;
+        page = response?.data?.nextPage || page + 1;
+      }
+
+      const filtrados = docs.filter((estoque) => {
+        if (!estoque?.item || !estoque?.localizacao) {
+          return false;
+        }
+
+        const matchSearch =
+          !searchTerm ||
+          estoque.item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          estoque.item._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          estoque.localizacao.nome
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
+
+        const matchCategoria =
+          !categoriaFilter || estoque.item.categoria === categoriaFilter;
+
+        const matchStatus = !statusFilter || estoque.item.status === statusFilter;
+
+        return matchSearch && matchCategoria && matchStatus;
+      });
+
+      return {
+        totalItens: new Set(
+          filtrados.filter((e) => e?.item?._id).map((e) => e.item._id),
+        ).size,
+        emEstoque: filtrados.filter((e) => e?.item?.status === 'Em Estoque')
+          .length,
+        baixoEstoque: filtrados.filter(
+          (e) => e?.item?.status === 'Baixo Estoque',
+        ).length,
+        indisponiveis: filtrados.filter(
+          (e) => e?.item?.status === 'Indisponível',
+        ).length,
+      };
+    },
+    staleTime: 30_000,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
   // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
   const estoquesFiltrados = todosEstoques
     .filter((estoque) => {
@@ -148,15 +232,20 @@ function RelatorioItensPageContent() {
   const totalItens = new Set(
     estoquesFiltrados.filter((e) => e?.item?._id).map((e) => e.item._id),
   ).size;
-  const emEstoque = estoquesFiltrados.filter(
+  const emEstoqueLocal = estoquesFiltrados.filter(
     (e) => e?.item?.status === 'Em Estoque',
   ).length;
-  const baixoEstoque = estoquesFiltrados.filter(
+  const baixoEstoqueLocal = estoquesFiltrados.filter(
     (e) => e?.item?.status === 'Baixo Estoque',
   ).length;
-  const indisponiveis = estoquesFiltrados.filter(
+  const indisponiveisLocal = estoquesFiltrados.filter(
     (e) => e?.item?.status === 'Indisponível',
   ).length;
+
+  const totalItensGlobal = globalStats?.totalItens ?? totalItens;
+  const emEstoque = globalStats?.emEstoque ?? emEstoqueLocal;
+  const baixoEstoque = globalStats?.baixoEstoque ?? baixoEstoqueLocal;
+  const indisponiveis = globalStats?.indisponiveis ?? indisponiveisLocal;
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -336,12 +425,12 @@ function RelatorioItensPageContent() {
             <StatCard
               title="Total de"
               subtitle="itens"
-              value={totalItens}
+                value={totalItensGlobal}
               icon={Package}
               iconColor="text-blue-600"
               iconBgColor="bg-blue-100"
               data-test="stat-total-itens"
-              hoverTitle={`Total de itens cadastrados: ${totalItens}`}
+                hoverTitle={`Total de itens cadastrados: ${totalItensGlobal}`}
             />
 
             <StatCard

@@ -18,7 +18,8 @@ export default function StatCard({
   value,
   icon: Icon,
   iconColor,
-  iconBgColor,
+  /* iconBgColor kept for API compatibility */
+  iconBgColor: _iconBgColor,
   'data-test': dataTest,
   hoverTitle,
 }: StatCardProps) {
@@ -27,21 +28,22 @@ export default function StatCard({
 
   return (
     <div
-      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+      className="bg-card rounded-lg px-5 py-4 border border-border w-full h-full min-h-[100px] flex flex-col justify-between gap-3"
       data-test={dataTest}
       title={cardTitle}
     >
-      <div className="flex items-center w-full">
-        <div className={`p-2 ${iconBgColor} rounded-lg flex-shrink-0`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
-        </div>
-        <div className="ml-3 flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          {subtitle && (
-            <p className="text-sm font-medium text-gray-600">{subtitle}</p>
-          )}
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-        </div>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+        {title}
+        {subtitle ? ` ${subtitle}` : ''}
+      </p>
+      <div className="flex items-end justify-between">
+        <span
+          className="text-[2.4rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+          style={{ fontFamily: 'var(--font-sans)' }}
+        >
+          {value}
+        </span>
+        <Icon className={`w-5 h-5 mb-0.5 ${iconColor} opacity-55`} />
       </div>
     </div>
   );
