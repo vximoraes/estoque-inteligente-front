@@ -10,8 +10,7 @@ module.exports = {
     extend: {
       fontFamily: {
         heading: ['Barlow Condensed', 'sans-serif'],
-        poppins: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Overpass', 'sans-serif'],
       },
       screens: {
         '3xl': '1800px',
