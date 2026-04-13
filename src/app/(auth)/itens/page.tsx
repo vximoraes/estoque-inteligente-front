@@ -18,9 +18,6 @@ import {
   Filter,
   Plus,
   Package,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
   X,
   ChevronLeft,
   ChevronRight,
@@ -423,46 +420,30 @@ function ItensPageContent() {
 
             {/* Cards - Sempre visível no desktop, colapsável no mobile */}
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+              className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
               data-test="stats-grid"
             >
               <StatCard
-                title="Total de"
-                subtitle="itens"
+                title="Total de itens"
                 value={totalItens}
-                icon={Package}
-                iconColor="text-blue-600"
-                iconBgColor="bg-blue-100"
                 data-test="stat-total-itens"
                 hoverTitle={`Total de itens cadastrados: ${totalItens}`}
               />
-
               <StatCard
                 title="Em estoque"
                 value={emEstoque}
-                icon={CheckCircle}
-                iconColor="text-green-600"
-                iconBgColor="bg-green-100"
                 data-test="stat-em-estoque"
                 hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
               />
-
               <StatCard
                 title="Baixo estoque"
                 value={baixoEstoque}
-                icon={AlertTriangle}
-                iconColor="text-yellow-600"
-                iconBgColor="bg-yellow-100"
                 data-test="stat-baixo-estoque"
                 hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
               />
-
               <StatCard
                 title="Indisponível"
                 value={indisponiveis}
-                icon={XCircle}
-                iconColor="text-red-600"
-                iconBgColor="bg-red-100"
                 data-test="stat-indisponiveis"
                 hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
               />

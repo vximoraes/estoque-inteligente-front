@@ -157,7 +157,7 @@ function RedefinirSenhaContent() {
   if (tokenValido === false) {
     return (
       <>
-        <ToastContainer />
+        <ToastContainer position="bottom-right" />
         <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
           <AuthLeftPanel />
           <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">
@@ -183,7 +183,7 @@ function RedefinirSenhaContent() {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="bottom-right" />
       <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
         <AuthLeftPanel />
         <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">

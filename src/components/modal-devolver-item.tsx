@@ -53,7 +53,7 @@ export default function ModalDevolverItem({
         error?.message ||
         'Não foi possível registrar a devolução.';
       toast.error(mensagem, {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 5000,
       });
     },
@@ -104,39 +104,39 @@ export default function ModalDevolverItem({
       onClick={(e) => e.target === e.currentTarget && onClose()}
       data-test="modal-devolver-item"
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-muted-foreground" />
           </button>
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Devolver Item</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-1">Devolver Item</h2>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">Item</label>
-            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            <label className="block text-base font-medium text-foreground mb-1">Item</label>
+            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {itemNome}
             </div>
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
+            <label className="block text-base font-medium text-foreground mb-1">
               Quantidade em aberto
             </label>
-            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {quantidadeAberta}
             </div>
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
-              Quantidade devolvida <span className="text-red-500">*</span>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Quantidade devolvida <span className="text-destructive">*</span>
             </label>
             <input
               type="number"
@@ -147,28 +147,28 @@ export default function ModalDevolverItem({
                 setQuantidade(e.target.value);
                 setQuantidadeError('');
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Digite a quantidade"
             />
             {quantidadeError && (
-              <p className="mt-1 text-sm text-red-600">{quantidadeError}</p>
+              <p className="mt-1 text-sm text-destructive">{quantidadeError}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">Observações</label>
+            <label className="block text-base font-medium text-foreground mb-1">Observações</label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Observações opcionais"
             />
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
           <div className="flex gap-3">
             <Button
               variant="outline"

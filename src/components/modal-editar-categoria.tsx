@@ -85,7 +85,7 @@ export default function ModalEditarCategoria({
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] });
       toast.success('Categoria atualizada com sucesso!', {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -101,7 +101,7 @@ export default function ModalEditarCategoria({
         error?.message ||
         'Erro ao atualizar categoria';
       toast.error(errorMessage, {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -140,7 +140,7 @@ export default function ModalEditarCategoria({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-md w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botão de fechar */}
@@ -148,7 +148,7 @@ export default function ModalEditarCategoria({
           <button
             onClick={handleClose}
             disabled={updateCategoriaMutation.isPending}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             title="Fechar"
           >
             <X size={20} />
@@ -158,21 +158,21 @@ export default function ModalEditarCategoria({
         {/* Conteúdo do Modal */}
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
               Editar categoria
             </h2>
-            <p className="text-gray-600">Atualize o nome da categoria</p>
+            <p className="text-muted-foreground">Atualize o nome da categoria</p>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label
                 htmlFor="nome"
-                className="text-sm font-medium text-gray-900"
+                className="text-sm font-medium text-foreground"
               >
-                Nome da categoria <span className="text-red-500">*</span>
+                Nome da categoria <span className="text-destructive">*</span>
               </Label>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {nomeValue.length}/100
               </span>
             </div>
@@ -182,20 +182,20 @@ export default function ModalEditarCategoria({
               placeholder="Digite o nome da categoria"
               {...register('nome')}
               maxLength={100}
-              className={errors.nome ? 'border-red-500' : ''}
+              className={errors.nome ? 'border-destructive' : ''}
               disabled={isSubmitting || updateCategoriaMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
+              <p className="text-destructive text-sm mt-1">{errors.nome.message}</p>
             )}
           </div>
 
           {updateCategoriaMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">
                 Erro ao atualizar categoria
               </div>
-              <div className="text-red-500">
+              <div className="text-destructive/80">
                 {(updateCategoriaMutation.error as any)?.response?.data
                   ?.message ||
                   (updateCategoriaMutation.error as any)?.message ||

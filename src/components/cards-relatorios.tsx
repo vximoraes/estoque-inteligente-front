@@ -29,7 +29,7 @@ export default function Card({
   }, []);
 
   return (
-    <div className="bg-white rounded-lg w-full shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-300">
+    <div className="bg-card rounded-sm w-full border border-border overflow-hidden transition-colors hover:border-[#306FCC]/40">
       <div
         ref={cardRef}
         className={
@@ -49,16 +49,16 @@ export default function Card({
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-lg mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-gray-900">
+          <h2 className="font-semibold text-lg mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-foreground">
             {title}
           </h2>
-          <span className="text-gray-600 text-sm block overflow-hidden text-ellipsis line-clamp-2">
+          <span className="text-muted-foreground text-sm block overflow-hidden text-ellipsis line-clamp-2">
             {descricao}
           </span>
         </div>
       </div>
-      <hr className="border-gray-200" />
-      <div className="text-center p-3 text-blue-600 overflow-hidden">
+      <hr className="border-border" />
+      <div className="text-center p-3 text-[#306FCC] overflow-hidden">
         <Link
           href={url}
           className="inline-flex items-center group font-medium text-sm transition-all duration-300 hover:text-blue-700"

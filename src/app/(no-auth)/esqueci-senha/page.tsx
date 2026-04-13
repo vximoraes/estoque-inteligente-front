@@ -84,7 +84,7 @@ export default function EsqueciSenhaPage() {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="bottom-right" />
       <div className="grid min-h-screen w-full overflow-hidden bg-white md:grid-cols-2">
         <AuthLeftPanel />
         <div className="flex items-center justify-center p-6 md:p-10 lg:p-12">

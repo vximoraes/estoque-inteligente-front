@@ -19,8 +19,6 @@ import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
   Search,
   Handshake,
-  AlertTriangle,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -196,28 +194,26 @@ function EmprestimosPageContent() {
         <div className="shrink-0 mb-6">
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted transition-colors h-10 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Handshake className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">Estatísticas</span>
+              <Handshake className="w-5 h-5 text-[#306FCC]" />
+              <span className="font-semibold text-foreground">Estatísticas</span>
             </div>
             {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
             )}
           </button>
 
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 ${
-              isStatsOpen ? 'block mt-4' : 'hidden'
-            } xl:grid xl:mt-0`}
+            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
           >
-            <StatCard title="Total de" subtitle="empréstimos" value={total} icon={Handshake} iconColor="text-blue-600" iconBgColor="bg-blue-100" />
-            <StatCard title="Ativos" value={ativos} icon={Handshake} iconColor="text-green-600" iconBgColor="bg-green-100" />
-            <StatCard title="Atrasados" value={atrasados} icon={AlertTriangle} iconColor="text-red-600" iconBgColor="bg-red-100" />
-            <StatCard title="Devolvidos" value={devolvidos} icon={CheckCircle} iconColor="text-gray-700" iconBgColor="bg-gray-100" />
+            <StatCard title="Total de empréstimos" value={total} />
+            <StatCard title="Ativos" value={ativos} />
+            <StatCard title="Atrasados" value={atrasados} />
+            <StatCard title="Devolvidos" value={devolvidos} />
           </div>
         </div>
 

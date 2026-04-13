@@ -287,7 +287,7 @@ export default function ModalFiltrosOrcamentos({
       data-test="modal-filtros-orcamentos-backdrop"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         data-test="modal-filtros-orcamentos-content"
       >
@@ -295,7 +295,7 @@ export default function ModalFiltrosOrcamentos({
         <div className="relative p-6 pb-0">
           <button
             onClick={handleCloseModal}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
             data-test="modal-filtros-orcamentos-close-button"
           >
@@ -307,19 +307,19 @@ export default function ModalFiltrosOrcamentos({
         <div className="px-6 pb-6 space-y-6">
           {/* Filtro por Valor */}
           <div className="space-y-2 pt-4" data-test="filtro-valor-container">
-            <label className="block text-base font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-foreground tracking-tight">
               Faixa de valor
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label
                   htmlFor="valorMin"
-                  className="block text-sm text-gray-600 mb-1"
+                  className="block text-sm text-muted-foreground mb-1"
                 >
                   Valor mínimo
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     R$
                   </span>
                   <input
@@ -328,7 +328,7 @@ export default function ModalFiltrosOrcamentos({
                     value={valorMin}
                     onChange={handleValorMinChange}
                     placeholder="0,00"
-                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-9 pr-4 py-2 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                     data-test="filtro-valor-min-input"
                   />
                 </div>
@@ -336,12 +336,12 @@ export default function ModalFiltrosOrcamentos({
               <div>
                 <label
                   htmlFor="valorMax"
-                  className="block text-sm text-gray-600 mb-1"
+                  className="block text-sm text-muted-foreground mb-1"
                 >
                   Valor máximo
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     R$
                   </span>
                   <input
@@ -350,7 +350,7 @@ export default function ModalFiltrosOrcamentos({
                     value={valorMax}
                     onChange={handleValorMaxChange}
                     placeholder="0,00"
-                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-9 pr-4 py-2 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                     data-test="filtro-valor-max-input"
                   />
                 </div>
@@ -360,37 +360,37 @@ export default function ModalFiltrosOrcamentos({
 
           {/* Filtro por Período */}
           <div className="space-y-2" data-test="filtro-periodo-container">
-            <label className="block text-base font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-foreground tracking-tight">
               Período
             </label>
             <div className="relative" data-dropdown>
               <button
                 onClick={() => setPeriodoDropdownOpen(!periodoDropdownOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between px-4 py-3 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC] transition-colors cursor-pointer"
                 data-test="filtro-periodo-dropdown"
               >
                 <span
                   className={
-                    periodoSelecionado ? 'text-gray-900' : 'text-gray-500'
+                    periodoSelecionado ? 'text-foreground' : 'text-muted-foreground'
                   }
                 >
                   {getPeriodoLabel()}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-muted-foreground transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {periodoDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
                   {periodoOptions.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handlePeriodoChange(option.value)}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                      className={`w-full text-left px-4 py-2 transition-colors ${
                         periodoSelecionado === option.value
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-900'
+                          ? 'bg-[#306FCC]/10 text-[#306FCC]'
+                          : 'text-foreground hover:bg-muted/40'
                       } cursor-pointer`}
                       data-test={`filtro-periodo-option-${option.value || 'todos'}`}
                     >
@@ -409,14 +409,14 @@ export default function ModalFiltrosOrcamentos({
               className="space-y-2"
               data-test="filtro-datas-personalizadas-container"
             >
-              <label className="block text-base font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-foreground tracking-tight">
                 Selecione o período
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label
                     htmlFor="dataInicio"
-                    className="block text-sm text-gray-600 mb-1"
+                    className="block text-sm text-muted-foreground mb-1"
                   >
                     Data inicial
                   </label>
@@ -425,14 +425,14 @@ export default function ModalFiltrosOrcamentos({
                     type="date"
                     value={dataInicio}
                     onChange={(e) => setDataInicio(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                     data-test="filtro-data-inicio-input"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="dataFim"
-                    className="block text-sm text-gray-600 mb-1"
+                    className="block text-sm text-muted-foreground mb-1"
                   >
                     Data final
                   </label>
@@ -441,7 +441,7 @@ export default function ModalFiltrosOrcamentos({
                     type="date"
                     value={dataFim}
                     onChange={(e) => setDataFim(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                     data-test="filtro-data-fim-input"
                   />
                 </div>
@@ -451,12 +451,12 @@ export default function ModalFiltrosOrcamentos({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
           <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={handleClearFilters}
-              className="flex-1 cursor-pointer"
+              className="flex-1 h-10 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
               data-test="limpar-filtros-button"
             >
               Limpar Filtros

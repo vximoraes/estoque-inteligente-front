@@ -97,7 +97,7 @@ export default function ModalExcluirItem({
       data-test="modal-excluir-backdrop"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         data-test="modal-excluir"
@@ -106,7 +106,7 @@ export default function ModalExcluirItem({
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
             title="Fechar"
             data-test="modal-excluir-close"
           >
@@ -118,14 +118,14 @@ export default function ModalExcluirItem({
         <div className="px-6 pb-6 space-y-6" data-test="modal-excluir-content">
           <div className="text-center pt-4 px-8">
             <h2
-              className="text-xl font-semibold text-gray-900 mb-2"
+              className="text-xl font-semibold text-foreground mb-2"
               data-test="modal-excluir-titulo"
             >
               Excluir item
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p
-                className="text-gray-600 break-words"
+                className="text-muted-foreground break-words"
                 data-test="modal-excluir-mensagem"
               >
                 Tem certeza que deseja excluir o item{' '}
@@ -143,13 +143,13 @@ export default function ModalExcluirItem({
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div
-              className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+              className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive"
               data-test="modal-excluir-erro"
             >
               <div className="font-medium mb-1">
                 Não foi possível excluir o item
               </div>
-              <div className="text-red-500">
+              <div className="text-destructive/80">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||
                   'Erro desconhecido'}
@@ -160,7 +160,7 @@ export default function ModalExcluirItem({
 
         {/* Footer com ações */}
         <div
-          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
+          className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm"
           data-test="modal-excluir-footer"
         >
           <div className="flex gap-3">

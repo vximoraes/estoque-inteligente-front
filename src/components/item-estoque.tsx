@@ -126,17 +126,17 @@ export default function ItemEstoque({
 
   return (
     <div
-      className="bg-card rounded-lg border border-border p-4 hover:shadow-sm transition-all duration-200 w-full h-full min-h-40 min-w-0 flex flex-col cursor-pointer relative"
+      className="bg-card rounded-sm border border-border p-4 transition-colors w-full h-full min-h-40 min-w-0 flex flex-col cursor-pointer relative"
       data-test={dataTest || `item-${id}`}
       title={componentTitle}
       onClick={handleClick}
     >
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+        <div className="absolute inset-0 bg-card/90 rounded-sm flex items-center justify-center z-10">
           <div className="flex flex-col items-center">
             <div className="relative w-8 h-8">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
               <div
                 className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin"
                 style={{ borderColor: '#306FCC transparent transparent transparent' }}
@@ -158,7 +158,7 @@ export default function ItemEstoque({
         >
           {/* Image */}
           <div
-            className={`w-10 h-10 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-white/70 border border-white/80 ${
+            className={`w-10 h-10 rounded-sm flex items-center justify-center overflow-hidden shrink-0 bg-muted/40 border border-border/40 ${
               imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
             }`}
             data-test="component-icon"
@@ -180,14 +180,14 @@ export default function ItemEstoque({
           {/* Name + category */}
           <div className="flex-1 min-w-0 overflow-hidden" data-test="text-info">
             <h3
-              className="text-sm font-semibold text-foreground leading-tight truncate"
+              className="text-base font-semibold text-foreground leading-tight truncate"
               title={`${nome}`}
               data-test="component-name"
             >
               {nome}
             </h3>
             <p
-              className="text-[10px] tracking-[0.08em] text-muted-foreground truncate mt-0.5"
+              className="text-sm font-medium tracking-[0.03em] text-muted-foreground truncate mt-0.5"
               title={`${categoriaFormatada}`}
               data-test="component-category"
             >
@@ -199,7 +199,7 @@ export default function ItemEstoque({
         {/* Toggle button with animated MoreHorizontal → X crossfade */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsMenuOpen((v) => !v); }}
-          className="relative w-8 h-8 flex items-center justify-center shrink-0 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/60 transition-colors duration-150 cursor-pointer"
+          className="relative w-8 h-8 flex items-center justify-center shrink-0 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors duration-150 cursor-pointer"
           title={isMenuOpen ? 'Fechar ações' : 'Ações do item'}
           data-test="actions-menu-button"
         >
@@ -237,13 +237,13 @@ export default function ItemEstoque({
           >
         {/* Quantity */}
         <div
-          className="flex flex-col text-xs min-w-0 shrink-0"
+          className="flex flex-col text-sm min-w-0 shrink-0"
           data-test="quantity"
         >
           <span title={`Quantidade em estoque: ${quantidade} unidades`}>
             <span className="text-muted-foreground font-medium">Qtd</span>
             <span
-              className="font-semibold text-foreground ml-1 tabular-nums text-sm"
+              className="font-semibold text-foreground ml-1 tabular-nums text-base"
             >
               {quantidade}
             </span>
@@ -255,7 +255,7 @@ export default function ItemEstoque({
             >
               <span className="text-muted-foreground font-medium">Mín</span>
               <span
-                className="font-semibold text-muted-foreground ml-1 tabular-nums text-sm"
+                className="font-semibold text-foreground ml-1 tabular-nums text-base"
               >
                 {estoqueMinimo}
               </span>
@@ -273,7 +273,7 @@ export default function ItemEstoque({
             style={{ backgroundColor: STATUS_DOT[status] || 'oklch(0.6 0.1 255)' }}
           />
           <span
-            className="text-[10px] font-semibold uppercase tracking-[0.08em] truncate"
+            className="text-xs font-semibold uppercase tracking-[0.07em] truncate"
             title={`Status atual: ${status}`}
             data-test="status-badge"
             style={{ color: STATUS_TEXT[status] || 'var(--muted-foreground)' }}
@@ -288,7 +288,7 @@ export default function ItemEstoque({
           data-test="movement-icons"
         >
           <button
-            className="p-1.5 rounded hover:bg-white/60 transition-colors duration-150 cursor-pointer shrink-0"
+            className="p-1.5 rounded hover:bg-muted/40 transition-colors duration-150 cursor-pointer shrink-0"
             title={`Registrar entrada de ${nome}`}
             data-test="entrada-icon"
             onClick={handleEntrada}
@@ -299,7 +299,7 @@ export default function ItemEstoque({
             className={`p-1.5 rounded transition-colors duration-150 shrink-0 ${
               quantidade === 0
                 ? 'opacity-30 cursor-not-allowed'
-                : 'hover:bg-white/60 cursor-pointer'
+                : 'hover:bg-muted/40 cursor-pointer'
             }`}
             title={
               quantidade === 0
@@ -328,7 +328,7 @@ export default function ItemEstoque({
         >
           <button
             onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onEdit && id) onEdit(id); }}
-            className="flex-1 h-9 px-3 text-sm font-semibold text-foreground bg-card border border-border hover:bg-muted/45 rounded-md transition-colors duration-100 cursor-pointer"
+            className="flex-1 h-9 px-3 text-sm font-semibold text-foreground bg-card border border-border hover:bg-muted/45 rounded-sm transition-colors duration-100 cursor-pointer"
             data-test="edit-button"
           >
             Editar
@@ -336,7 +336,7 @@ export default function ItemEstoque({
           <button
             onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onEmprestar && id) onEmprestar(id); }}
             disabled={quantidade === 0}
-            className={`flex-1 h-9 px-3 text-sm font-semibold rounded-md border transition-colors duration-100 ${
+            className={`flex-1 h-9 px-3 text-sm font-semibold rounded-sm border transition-colors duration-100 ${
               quantidade === 0
                 ? 'opacity-45 cursor-not-allowed text-muted-foreground bg-muted/25 border-border'
                 : 'text-foreground bg-card border-border hover:bg-muted/45 cursor-pointer'
@@ -348,7 +348,7 @@ export default function ItemEstoque({
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onDelete && id) onDelete(id); }}
-            className="flex-1 h-9 px-3 text-sm font-semibold text-red-700 bg-red-50/70 border border-red-200 hover:bg-red-100/85 dark:text-red-300 dark:bg-red-950/25 dark:border-red-900/60 dark:hover:bg-red-950/45 rounded-md transition-colors duration-100 cursor-pointer"
+            className="flex-1 h-9 px-3 text-sm font-semibold text-destructive bg-destructive/10 border border-destructive/25 hover:bg-destructive/20 dark:border-destructive/40 dark:hover:bg-destructive/30 rounded-sm transition-colors duration-100 cursor-pointer"
             data-test="delete-button"
           >
             Excluir

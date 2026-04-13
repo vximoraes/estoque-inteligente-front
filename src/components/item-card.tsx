@@ -51,17 +51,17 @@ export default function ItemCardSimples({
   return (
     <div
       onClick={() => onClick(id, nome)}
-      className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
+      className={`bg-card rounded-sm border-2 p-4 transition-colors cursor-pointer ${
         isSelected
-          ? 'border-blue-500 bg-blue-50 selected'
-          : 'border-gray-200 hover:border-blue-300'
+          ? 'border-[#306FCC] bg-[#306FCC]/5 selected'
+          : 'border-border hover:border-[#306FCC]/40'
       }`}
       data-test={dataTestId}
     >
       <div className="flex flex-col items-center text-center gap-3">
         {/* Imagem do item */}
         <div
-          className={`w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
+          className={`w-16 h-16 bg-muted rounded-sm flex items-center justify-center overflow-hidden shrink-0 ${
             imagemComTimestamp
               ? 'cursor-pointer hover:opacity-80 transition-opacity'
               : ''
@@ -78,14 +78,14 @@ export default function ItemCardSimples({
               className="w-full h-full object-cover"
             />
           ) : (
-            <Package className="w-8 h-8 text-gray-600" />
+            <Package className="w-8 h-8 text-muted-foreground" />
           )}
         </div>
 
         {/* Nome do item */}
         <div className="w-full min-h-10 flex items-start">
           <h3
-            className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 w-full"
+            className="text-base font-semibold text-foreground leading-tight line-clamp-2 w-full"
             style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
             title={nome}
           >
@@ -94,7 +94,7 @@ export default function ItemCardSimples({
         </div>
 
         {/* Categoria */}
-        <p className="text-xs text-gray-500 truncate w-full" title={categoriaFormatada}>
+        <p className="text-sm text-muted-foreground truncate w-full" title={categoriaFormatada}>
           {categoriaFormatada}
         </p>
       </div>

@@ -554,10 +554,10 @@ export default function HomePage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
             <div className="relative w-12 h-12">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin" style={{ borderColor: 'var(--ei-accent) transparent transparent transparent' }}></div>
             </div>
-            <p className="mt-4 text-gray-600 font-medium">
+            <p className="mt-4 text-muted-foreground font-medium">
               Carregando perfil...
             </p>
           </div>
@@ -571,7 +571,7 @@ export default function HomePage() {
       <div className="w-full h-screen flex flex-col">
         <Cabecalho pagina="Perfil" />
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">Erro ao carregar dados do usuário</p>
+          <p className="text-muted-foreground">Erro ao carregar dados do usuário</p>
         </div>
       </div>
     );
@@ -588,12 +588,12 @@ export default function HomePage() {
           {/* Lado esquerdo - Avatar e Info */}
           <aside className="col-span-1 flex">
             <div
-              className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center w-full"
+              className="p-6 bg-card rounded-sm border border-border flex flex-col items-center justify-center w-full"
               data-test="perfil-info-section"
             >
               <div className="relative w-32 h-32 group">
                 <div
-                  className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center"
+                  className="w-32 h-32 rounded-full overflow-hidden bg-muted flex items-center justify-center"
                   data-test="perfil-avatar-container"
                 >
                   {imagemPreview ? (
@@ -609,14 +609,14 @@ export default function HomePage() {
                     />
                   ) : (
                     <User
-                      className="w-16 h-16 text-gray-500"
+                      className="w-16 h-16 text-muted-foreground"
                       data-test="perfil-avatar-placeholder"
                     />
                   )}
                 </div>
                 <button
                   onClick={() => setIsEditingFoto(true)}
-                  className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-lg"
+                  className="absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center text-white bg-ei-accent hover:bg-ei-accent-hover transition-colors cursor-pointer"
                   title="Editar foto"
                   data-test="edit-avatar-button"
                 >
@@ -624,104 +624,162 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div className="text-center mt-4 w-full px-2">
-                <h2
-                  className="text-xl font-semibold truncate w-full"
-                  title={userData.nome}
-                  data-test="perfil-nome"
+              {isEditing ? (
+                <form
+                  onSubmit={handleSaveEdit}
+                  className="w-full mt-4 px-2 space-y-3"
+                  data-test="inline-edit-perfil-form"
                 >
-                  {userData.nome}
-                </h2>
-                <p
-                  className="text-sm text-gray-500 mt-1 truncate w-full"
-                  title={userData.email}
-                  data-test="perfil-email"
-                >
-                  {userData.email}
-                </p>
-              </div>
+                  <div className="space-y-1">
+                    <label htmlFor="nome" className="text-xs text-muted-foreground">
+                      Nome
+                    </label>
+                    <input
+                      id="nome"
+                      type="text"
+                      value={editedNome}
+                      onChange={(e) => setEditedNome(e.target.value)}
+                      maxLength={100}
+                      className="w-full px-3 py-2 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      required
+                      disabled={isSaving}
+                      autoFocus
+                      data-test="input-nome"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate" title={userData?.email}>
+                    {userData?.email}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                      size="sm"
+                      className="flex-1 cursor-pointer"
+                      data-test="cancel-edit-perfil-button"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSaving}
+                      size="sm"
+                      className="flex-1 text-white cursor-pointer hover:opacity-90"
+                      style={{ backgroundColor: 'var(--ei-accent)' }}
+                      data-test="save-perfil-button"
+                    >
+                      {isSaving ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <div className="text-center mt-4 w-full px-2">
+                    <h2
+                      className="text-xl font-semibold truncate w-full"
+                      title={userData.nome}
+                      data-test="perfil-nome"
+                    >
+                      {userData.nome}
+                    </h2>
+                    <p
+                      className="text-sm text-muted-foreground mt-1 truncate w-full"
+                      title={userData.email}
+                      data-test="perfil-email"
+                    >
+                      {userData.email}
+                    </p>
+                  </div>
 
-              <button
-                onClick={handleOpenEdit}
-                className="mt-4 flex items-center gap-2 justify-center text-blue-600 hover:underline transition-all cursor-pointer"
-                data-test="edit-perfil-button"
-              >
-                <Pencil className="w-4 h-4" />
-                <span>Editar perfil</span>
-              </button>
+                  <button
+                    onClick={handleOpenEdit}
+                    className="mt-4 flex items-center gap-2 justify-center text-ei-accent hover:underline transition-all cursor-pointer"
+                    data-test="edit-perfil-button"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    <span>Editar perfil</span>
+                  </button>
+                </>
+              )}
             </div>
           </aside>
 
           {/* Estatísticas de uso */}
           <section className="col-span-1 lg:col-span-2 flex">
             <div
-              className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col w-full"
+              className="p-6 bg-card rounded-sm border border-border flex flex-col w-full"
               data-test="estatisticas-section"
             >
-              <h3 className="text-lg font-semibold mb-3">
+              <h3 className="text-lg font-semibold mb-3 tracking-wide">
                 Estatísticas de uso
               </h3>
-              <div className="w-full border-t border-gray-200 mb-4"></div>
+              <div className="w-full border-t border-border mb-4"></div>
 
               {isLoadingStats ? (
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center"
+                  className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1"
                   data-test="loading-estatisticas"
                 >
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="py-6 px-6 bg-gray-50 rounded-lg text-center animate-pulse"
+                      className="flex flex-col justify-center px-6 py-8 gap-3 animate-pulse"
                     >
-                      <div className="h-10 bg-gray-300 rounded w-20 mx-auto mb-3"></div>
-                      <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+                      <div className="h-3 bg-muted-foreground/20 rounded-sm w-24"></div>
+                      <div className="h-9 bg-muted-foreground/20 rounded-sm w-16"></div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
                   <div
-                    className="py-6 px-6 bg-gray-50 rounded-lg text-center"
+                    className="flex flex-col justify-center px-6 py-8 gap-1"
                     data-test="card-total-itens"
                   >
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
+                      Itens cadastrados
+                    </p>
                     <p
-                      className="text-4xl font-bold text-blue-600 truncate"
+                      className="text-5xl font-bold leading-none text-ei-accent"
                       title={stats.totalItens.toString()}
                       data-test="total-itens-value"
                     >
                       {stats.totalItens}
                     </p>
-                    <p className="text-sm text-gray-500 mt-3">
-                      Itens cadastrados
-                    </p>
                   </div>
 
                   <div
-                    className="py-6 px-6 bg-gray-50 rounded-lg text-center"
+                    className="flex flex-col justify-center px-6 py-8 gap-1"
                     data-test="card-total-movimentacoes"
                   >
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
+                      Movimentações
+                    </p>
                     <p
-                      className="text-4xl font-bold text-blue-600 truncate"
+                      className="text-5xl font-bold leading-none text-ei-accent"
                       title={stats.totalMovimentacoes.toString()}
                       data-test="total-movimentacoes-value"
                     >
                       {stats.totalMovimentacoes}
                     </p>
-                    <p className="text-sm text-gray-500 mt-3">Movimentações</p>
                   </div>
 
                   <div
-                    className="py-6 px-6 bg-gray-50 rounded-lg text-center"
+                    className="flex flex-col justify-center px-6 py-8 gap-1"
                     data-test="card-total-orcamentos"
                   >
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
+                      Orçamentos Criados
+                    </p>
                     <p
-                      className="text-4xl font-bold text-blue-600 truncate"
+                      className="text-5xl font-bold leading-none text-ei-accent"
                       title={stats.totalOrcamentos.toString()}
                       data-test="total-orcamentos-value"
                     >
                       {stats.totalOrcamentos}
                     </p>
-                    <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
                   </div>
                 </div>
               )}
@@ -731,15 +789,15 @@ export default function HomePage() {
           {/* Notificações */}
           <div className="col-span-1 lg:col-span-3 flex">
             <div
-              className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 w-full"
+              className="p-6 bg-card rounded-sm border border-border w-full"
               data-test="notificacoes-section"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">Notificações</h3>
+                  <h3 className="text-lg font-semibold tracking-wide">Notificações</h3>
                   {notificacoes.filter((n) => !n.visualizada).length > 0 && (
                     <span
-                      className="text-base text-blue-600 font-medium"
+                      className="text-base text-ei-accent font-medium"
                       data-test="notificacoes-nao-lidas-count"
                     >
                       ({notificacoes.filter((n) => !n.visualizada).length})
@@ -749,28 +807,28 @@ export default function HomePage() {
                 {notificacoes.filter((n) => !n.visualizada).length > 0 && (
                   <button
                     onClick={marcarTodasComoVisualizadas}
-                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                    className="text-sm text-ei-accent hover:text-ei-accent/80 hover:underline transition-colors cursor-pointer"
                     data-test="marcar-todas-lidas-button"
                   >
                     Marcar todas como lidas
                   </button>
                 )}
               </div>
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-border"></div>
 
               <div className="max-h-60 overflow-y-auto">
                 {isLoadingNotificacoes ? (
                   <div
-                    className="divide-y divide-gray-200 w-full"
+                    className="divide-y divide-border w-full"
                     data-test="loading-notificacoes"
                   >
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="px-3 py-3 animate-pulse">
                         <div className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0 mt-1.5"></div>
+                          <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full shrink-0 mt-1.5"></div>
                           <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                            <div className="h-4 bg-muted rounded-sm w-3/4"></div>
+                            <div className="h-3 bg-muted rounded-sm w-1/4"></div>
                           </div>
                         </div>
                       </div>
@@ -778,7 +836,7 @@ export default function HomePage() {
                   </div>
                 ) : notificacoes.length > 0 ? (
                   <div
-                    className="divide-y divide-gray-200 w-full"
+                    className="divide-y divide-border w-full"
                     data-test="notificacoes-list"
                   >
                     {notificacoes.map((notificacao) => {
@@ -792,13 +850,14 @@ export default function HomePage() {
                       return (
                         <div
                           key={notificacao._id}
-                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100 group`}
+                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-card' : 'bg-muted/30'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-muted/50 group`}
                           data-test={`notificacao-item-${notificacao._id}`}
                         >
                           <div className="flex items-start gap-2">
                             {!notificacao.visualizada && (
                               <div
-                                className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"
+                                className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                                style={{ backgroundColor: 'var(--ei-accent)' }}
                                 data-test="notificacao-nao-lida-indicator"
                               ></div>
                             )}
@@ -812,13 +871,13 @@ export default function HomePage() {
                               data-test="notificacao-marcar-lida-area"
                             >
                               <p
-                                className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`}
+                                className={`text-sm text-foreground ${notificacao.visualizada ? '' : 'font-medium'}`}
                                 data-test="notificacao-mensagem"
                               >
                                 {loadingMessage}
                                 {!isLoadingThis && (
                                   <span
-                                    className="text-sm text-gray-500 font-normal ml-2"
+                                    className="text-sm text-muted-foreground font-normal ml-2"
                                     data-test="notificacao-tempo-relativo"
                                   >
                                     -{' '}
@@ -832,11 +891,11 @@ export default function HomePage() {
                                 onClick={(e) =>
                                   excluirNotificacao(notificacao._id, e)
                                 }
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-md cursor-pointer"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded-sm cursor-pointer"
                                 title="Excluir notificação"
                                 data-test="notificacao-excluir-button"
                               >
-                                <X className="w-4 h-4 text-gray-500 hover:text-gray-700" />
+                                <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
                               </button>
                             )}
                           </div>
@@ -849,7 +908,7 @@ export default function HomePage() {
                         className="px-3 py-3 text-center"
                         data-test="loading-more-notificacoes"
                       >
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Carregando mais...
                         </p>
                       </div>
@@ -857,10 +916,13 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div
-                    className="flex items-center justify-center w-full h-60"
+                    className="flex flex-col items-center justify-center w-full py-12 gap-2"
                     data-test="no-notificacoes-message"
                   >
-                    <p className="text-sm text-gray-500">Nenhuma notificação</p>
+                    <p className="text-sm font-medium text-foreground">Tudo em dia</p>
+                    <p className="text-xs text-muted-foreground text-center max-w-60">
+                      Novas notificações sobre estoque e atividades aparecerão aqui.
+                    </p>
                   </div>
                 )}
               </div>
@@ -868,118 +930,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* painel de edição */}
-      {isEditing && (
-        <div
-          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-          style={{
-            zIndex: 99999,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-          onClick={() => setIsEditing(false)}
-          data-test="modal-edit-perfil"
-        >
-          <div
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Botão de fechar */}
-            <div className="relative p-6 pb-0">
-              <button
-                onClick={handleCancelEdit}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                title="Fechar"
-                data-test="modal-edit-perfil-close-button"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Conteúdo do Modal */}
-            <div className="px-6 pb-6 space-y-6">
-              <div className="text-center pt-4 px-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Editar perfil
-                </h2>
-              </div>
-
-              <form
-                onSubmit={handleSaveEdit}
-                id="edit-profile-form"
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label
-                      htmlFor="nome"
-                      className="block text-sm sm:text-base font-medium text-gray-700"
-                    >
-                      Nome <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-xs sm:text-sm text-gray-500">
-                      {editedNome.length}/100
-                    </span>
-                  </div>
-                  <input
-                    id="nome"
-                    type="text"
-                    value={editedNome}
-                    onChange={(e) => setEditedNome(e.target.value)}
-                    maxLength={100}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                    required
-                    disabled={isSaving}
-                    data-test="input-nome"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className="block text-sm sm:text-base font-medium text-gray-700"
-                  >
-                    E-mail
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={userData?.email || ''}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 border border-gray-300 rounded-md text-sm sm:text-base text-gray-500 cursor-not-allowed"
-                    disabled
-                    data-test="input-email"
-                  />
-                </div>
-              </form>
-            </div>
-
-            {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleCancelEdit}
-                  disabled={isSaving}
-                  className="flex-1 cursor-pointer"
-                  data-test="cancel-edit-perfil-button"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  form="edit-profile-form"
-                  disabled={isSaving}
-                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#306FCC' }}
-                  data-test="save-perfil-button"
-                >
-                  {isSaving ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal de edição de foto */}
       {isEditingFoto && (
@@ -993,14 +943,14 @@ export default function HomePage() {
           data-test="modal-edit-foto"
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
             <div className="relative p-6 pb-0">
               <button
                 onClick={handleCancelarEdicaoFoto}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                 title="Fechar"
                 data-test="modal-edit-foto-close-button"
               >
@@ -1011,7 +961,7 @@ export default function HomePage() {
             {/* Conteúdo do Modal */}
             <div className="px-6 pb-6 space-y-6">
               <div className="text-center pt-4 px-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                <h2 className="text-xl font-semibold text-foreground mb-2">
                   Editar foto do perfil
                 </h2>
               </div>
@@ -1019,7 +969,7 @@ export default function HomePage() {
               {/* Preview da foto */}
               <div className="flex justify-center">
                 <div
-                  className="w-40 h-40 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center"
+                  className="w-40 h-40 rounded-full overflow-hidden bg-muted flex items-center justify-center"
                   data-test="foto-preview-container"
                 >
                   {imagemPreview ? (
@@ -1035,7 +985,7 @@ export default function HomePage() {
                     />
                   ) : (
                     <User
-                      className="w-20 h-20 text-gray-500"
+                      className="w-20 h-20 text-muted-foreground"
                       data-test="foto-preview-placeholder"
                     />
                   )}
@@ -1049,21 +999,21 @@ export default function HomePage() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`relative border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                  className={`relative border-2 border-dashed rounded-sm p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
                     isDragging
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
+                      ? 'border-ei-accent bg-ei-accent/5'
+                      : 'border-border bg-muted/50 hover:bg-muted hover:border-muted-foreground/40'
                   }`}
                   data-test="foto-upload-area"
                 >
-                  <Camera className="w-8 h-8 text-gray-400 mb-2" />
+                  <Camera className="w-8 h-8 text-muted-foreground mb-2" />
                   <p className="text-center text-sm">
-                    <span className="font-semibold text-blue-600">
+                    <span className="font-semibold text-ei-accent">
                       Selecione uma nova foto
                     </span>{' '}
-                    <span className="text-gray-600">ou arraste aqui</span>
+                    <span className="text-muted-foreground">ou arraste aqui</span>
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     PNG, JPG ou JPEG até 5MB
                   </p>
                 </div>
@@ -1079,7 +1029,7 @@ export default function HomePage() {
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -1096,8 +1046,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleRemoverFoto}
                     disabled={deleteFotoMutation.isPending}
-                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
-                    style={{ backgroundColor: '#DC2626' }}
+                    className="flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
                     data-test="remove-foto-button"
                   >
                     {deleteFotoMutation.isPending
@@ -1110,7 +1059,7 @@ export default function HomePage() {
                     onClick={handleSalvarFoto}
                     disabled={uploadFotoMutation.isPending}
                     className="flex-1 text-white hover:opacity-90 cursor-pointer"
-                    style={{ backgroundColor: '#306FCC' }}
+                    style={{ backgroundColor: 'var(--ei-accent)' }}
                     data-test="save-foto-button"
                   >
                     {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar'}
@@ -1134,7 +1083,7 @@ export default function HomePage() {
           data-test="modal-confirm-remove-foto"
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
           >
@@ -1143,7 +1092,7 @@ export default function HomePage() {
               <button
                 onClick={() => setIsConfirmRemoveOpen(false)}
                 disabled={deleteFotoMutation.isPending}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Fechar"
                 data-test="modal-confirm-remove-foto-close-button"
               >
@@ -1154,11 +1103,11 @@ export default function HomePage() {
             {/* Conteúdo do Modal */}
             <div className="px-6 pb-6 space-y-6">
               <div className="text-center pt-4 px-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                <h2 className="text-xl font-semibold text-foreground mb-2">
                   Remover foto de perfil
                 </h2>
                 <div className="max-h-[120px] overflow-y-auto">
-                  <p className="text-gray-600 wrap-break-word">
+                  <p className="text-muted-foreground wrap-break-word">
                     Tem certeza que deseja remover sua foto de perfil? Esta ação
                     não pode ser desfeita.
                   </p>
@@ -1168,13 +1117,13 @@ export default function HomePage() {
               {/* Mensagem de erro da API */}
               {deleteFotoMutation.error && (
                 <div
-                  className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+                  className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive"
                   data-test="remove-foto-error-message"
                 >
                   <div className="font-medium mb-1">
                     Não foi possível remover a foto
                   </div>
-                  <div className="text-red-500">
+                  <div className="text-destructive/80">
                     {(deleteFotoMutation.error as any)?.response?.data
                       ?.message ||
                       (deleteFotoMutation.error as any)?.message ||
@@ -1185,7 +1134,7 @@ export default function HomePage() {
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -1199,8 +1148,7 @@ export default function HomePage() {
                 <Button
                   onClick={handleConfirmRemoverFoto}
                   disabled={deleteFotoMutation.isPending}
-                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#DC2626' }}
+                  className="flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
                   data-test="confirm-remove-foto-button"
                 >
                   {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover'}

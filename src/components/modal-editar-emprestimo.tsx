@@ -70,13 +70,13 @@ export default function ModalEditarEmprestimo({
     },
     onError: (error: any) => {
       const msg = error?.errors?.[0]?.message || error?.message || 'Erro ao atualizar empréstimo.';
-      toast.error(msg, { position: 'top-right', autoClose: 5000 });
+      toast.error(msg, { position: 'bottom-right', autoClose: 5000 });
     },
   });
 
   const handleSalvar = () => {
     if (solicitante.trim().length < 3) {
-      toast.error('Nome do solicitante deve ter no mínimo 3 caracteres.', { position: 'top-right', autoClose: 4000 });
+      toast.error('Nome do solicitante deve ter no mínimo 3 caracteres.', { position: 'bottom-right', autoClose: 4000 });
       return;
     }
     editarMutation.mutate();
@@ -93,41 +93,41 @@ export default function ModalEditarEmprestimo({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-muted-foreground" />
           </button>
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Editar Empréstimo</h2>
-            <p className="text-sm text-gray-500">{emprestimo.item?.nome || 'Item'}</p>
+            <h2 className="text-xl font-semibold text-foreground mb-1">Editar Empréstimo</h2>
+            <p className="text-sm text-muted-foreground">{emprestimo.item?.nome || 'Item'}</p>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
           {/* Solicitante */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Solicitante <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Solicitante <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
               value={solicitante}
               onChange={(e) => setSolicitante(e.target.value)}
               disabled={jaDevolvido}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 disabled:bg-muted disabled:text-muted-foreground"
             />
           </div>
 
           {/* Data prevista */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Data prevista de devolução
             </label>
             <input
@@ -135,13 +135,13 @@ export default function ModalEditarEmprestimo({
               value={dataPrevista}
               onChange={(e) => setDataPrevista(e.target.value)}
               disabled={jaDevolvido}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 disabled:bg-muted disabled:text-muted-foreground"
             />
           </div>
 
           {/* Observações do empréstimo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Observações do empréstimo
             </label>
             <textarea
@@ -150,7 +150,7 @@ export default function ModalEditarEmprestimo({
               rows={3}
               maxLength={500}
               disabled={jaDevolvido}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 disabled:bg-muted disabled:text-muted-foreground"
               placeholder="Observações opcionais"
             />
           </div>
@@ -168,7 +168,7 @@ export default function ModalEditarEmprestimo({
           )}
 
           {jaDevolvido && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
+            <div className="bg-muted/50 border border-border rounded-sm p-4 text-center text-sm text-muted-foreground">
               Este empréstimo foi totalmente devolvido e não pode ser editado.
             </div>
           )}

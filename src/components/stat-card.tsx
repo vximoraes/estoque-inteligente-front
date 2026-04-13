@@ -1,13 +1,10 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
   subtitle?: string;
-  value: number;
-  icon: LucideIcon;
-  iconColor: string;
-  iconBgColor: string;
+  value: number | string;
+  valueColor?: string;
   'data-test'?: string;
   hoverTitle?: string;
 }
@@ -16,10 +13,7 @@ export default function StatCard({
   title,
   subtitle,
   value,
-  icon: Icon,
-  iconColor,
-  /* iconBgColor kept for API compatibility */
-  iconBgColor: _iconBgColor,
+  valueColor,
   'data-test': dataTest,
   hoverTitle,
 }: StatCardProps) {
@@ -28,23 +22,20 @@ export default function StatCard({
 
   return (
     <div
-      className="bg-card rounded-lg px-5 py-4 border border-border w-full h-full min-h-[100px] flex flex-col justify-between gap-3"
+      className="flex flex-col gap-1.5 px-6 py-5 bg-card border border-border rounded-sm flex-1 min-w-[120px]"
       data-test={dataTest}
       title={cardTitle}
     >
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+      <span
+        className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+        style={valueColor ? { color: valueColor } : undefined}
+      >
+        {value}
+      </span>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
         {title}
         {subtitle ? ` ${subtitle}` : ''}
       </p>
-      <div className="flex items-end justify-between">
-        <span
-          className="text-[2.4rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
-          style={{ fontFamily: 'var(--font-sans)' }}
-        >
-          {value}
-        </span>
-        <Icon className={`w-5 h-5 mb-0.5 ${iconColor} opacity-55`} />
-      </div>
     </div>
   );
 }

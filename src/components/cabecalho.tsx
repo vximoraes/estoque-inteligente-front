@@ -249,35 +249,35 @@ export default function Cabecalho({
         {/*  menu */}
         <button
           onClick={handleMenuClick}
-          className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-md hover:bg-gray-100 transition-all duration-200"
+          className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-sm hover:bg-muted transition-colors"
           aria-label="Menu"
         >
-          <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
+          <Menu className="w-[24px] h-[24px] text-foreground" strokeWidth={2} />
         </button>
 
         {/* Botão de voltar */}
         {showBackButton && onBackClick && (
           <button
             onClick={onBackClick}
-            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-card border border-border hover:bg-muted transition-colors cursor-pointer"
             aria-label="Voltar"
             title="Voltar"
           >
             <ChevronLeft
-              className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700"
+              className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-foreground"
               strokeWidth={2}
             />
           </button>
         )}
 
-        <h1 className="text-[18px] md:text-[20px] font-bold text-[#1f2937]">
+        <h1 className="text-[18px] md:text-[20px] font-bold text-foreground">
           {pagina}
           {acao && (
-            <span className="text-muted-foreground font-semibold ml-2">/ {acao}</span>
+            <span className="text-muted-foreground font-semibold ml-2">&gt; {acao}</span>
           )}
         </h1>
         {descricao && (
-          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
+          <span className="text-[14px] md:text-[16px] text-muted-foreground font-medium hidden sm:inline">
             {descricao}
           </span>
         )}
@@ -298,7 +298,7 @@ export default function Cabecalho({
             />
             {notifications.some((n) => !n.visualizada) && (
               <span
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-card"
+                className="absolute -top-1 -right-1 bg-destructive text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-card"
                 data-test="contador-notificacoes"
               >
                 {notifications.filter((n) => !n.visualizada).length}
@@ -307,7 +307,7 @@ export default function Cabecalho({
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-card border border-border rounded-sm z-50 overflow-hidden">
               <div className="px-4 py-3 flex items-center justify-between border-b border-border gap-2 bg-muted/20">
                 <span className="font-semibold text-sm sm:text-base text-foreground tracking-tight">
                   Notificações

@@ -18,12 +18,10 @@ import { OrcamentoApiResponse } from '@/types/orcamentos';
 import {
   Search,
   FileText,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
   Filter,
   ChevronDown,
   ChevronUp,
+  X,
 } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -326,106 +324,48 @@ function RelatorioOrcamentosPageContent() {
           {/* Botão para mobile */}
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted/40 transition-colors h-10 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">Estatísticas</span>
+              <FileText className="w-5 h-5 text-[#306FCC]" />
+              <span className="font-semibold text-foreground">Estatísticas</span>
             </div>
             {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
             )}
           </button>
 
           {/* Cards - Sempre visível no desktop, colapsável no mobile */}
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
             data-test="stats-grid"
           >
             <StatCard
-              title="Total de"
-              subtitle="orçamentos"
+              title="Total de orçamentos"
               value={totalOrcamentos}
-              icon={FileText}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
               data-test="stat-total-orcamentos"
               hoverTitle={`Total de orçamentos cadastrados: ${totalOrcamentos}`}
             />
-
-            <div
-              className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+            <StatCard
+              title="Valor total"
+              value={`R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               data-test="stat-valor-total"
-              title={`Soma de todos os orçamentos: R$ ${valorTotal.toFixed(2)}`}
-            >
-              <div className="flex items-center w-full">
-                <div className="p-2 bg-green-100 rounded-lg shrink-0">
-                  <DollarSign className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    Valor total
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    R${' '}
-                    {valorTotal.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+              hoverTitle={`Soma de todos os orçamentos: R$ ${valorTotal.toFixed(2)}`}
+            />
+            <StatCard
+              title="Maior orçamento"
+              value={`R$ ${maiorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               data-test="stat-maior-orcamento"
-              title={`Maior valor de orçamento: R$ ${maiorOrcamento.toFixed(2)}`}
-            >
-              <div className="flex items-center w-full">
-                <div className="p-2 bg-orange-100 rounded-lg shrink-0">
-                  <TrendingUp className="w-6 h-6 text-orange-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    Maior orçamento
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    R${' '}
-                    {maiorOrcamento.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+              hoverTitle={`Maior valor de orçamento: R$ ${maiorOrcamento.toFixed(2)}`}
+            />
+            <StatCard
+              title="Menor orçamento"
+              value={`R$ ${menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               data-test="stat-menor-orcamento"
-              title={`Menor valor de orçamento: R$ ${menorOrcamento.toFixed(2)}`}
-            >
-              <div className="flex items-center w-full">
-                <div className="p-2 bg-purple-100 rounded-lg shrink-0">
-                  <TrendingDown className="w-6 h-6 text-purple-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    Menor orçamento
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    R${' '}
-                    {menorOrcamento.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
+              hoverTitle={`Menor valor de orçamento: R$ ${menorOrcamento.toFixed(2)}`}
+            />
           </div>
         </div>
 
@@ -435,7 +375,7 @@ function RelatorioOrcamentosPageContent() {
           data-test="search-actions-bar"
         >
           <div className="relative flex-1" data-test="search-container">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar orçamentos..."
@@ -488,7 +428,7 @@ function RelatorioOrcamentosPageContent() {
               {valorMinFilter && (
                 <div
                   data-test="filter-tag-valor-min"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                 >
                   <span className="font-medium">Valor mín:</span>
                   <span>
@@ -500,18 +440,18 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setValorMinFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de valor mínimo"
                     data-test="remove-valor-min-filter"
                   >
-                    <span className="text-xs">✕</span>
+                    <X size={12} />
                   </button>
                 </div>
               )}
               {valorMaxFilter && (
                 <div
                   data-test="filter-tag-valor-max"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                 >
                   <span className="font-medium">Valor máx:</span>
                   <span>
@@ -523,18 +463,18 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setValorMaxFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de valor máximo"
                     data-test="remove-valor-max-filter"
                   >
-                    <span className="text-xs">✕</span>
+                    <X size={12} />
                   </button>
                 </div>
               )}
               {dataInicioFilter && (
                 <div
                   data-test="filter-tag-data-inicio"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                 >
                   <span className="font-medium">De:</span>
                   <span>
@@ -544,18 +484,18 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setDataInicioFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de data inicial"
                     data-test="remove-data-inicio-filter"
                   >
-                    <span className="text-xs">✕</span>
+                    <X size={12} />
                   </button>
                 </div>
               )}
               {dataFimFilter && (
                 <div
                   data-test="filter-tag-data-fim"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                 >
                   <span className="font-medium">Até:</span>
                   <span>
@@ -565,11 +505,11 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setDataFimFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de data final"
                     data-test="remove-data-fim-filter"
                   >
-                    <span className="text-xs">✕</span>
+                    <X size={12} />
                   </button>
                 </div>
               )}
@@ -580,7 +520,7 @@ function RelatorioOrcamentosPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -596,21 +536,21 @@ function RelatorioOrcamentosPageContent() {
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando orçamentos...
               </p>
             </div>
           ) : orcamentosFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border border-border rounded-lg bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b border-border">
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center w-[50px] px-8"
                         data-test="table-head-checkbox"
                       >
                         <input
@@ -632,37 +572,37 @@ function RelatorioOrcamentosPageContent() {
                         />
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-codigo"
                       >
                         CÓDIGO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-nome"
                       >
                         NOME
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-descricao"
                       >
                         DESCRIÇÃO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-itens"
                       >
                         ITENS
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-valor-total"
                       >
                         VALOR TOTAL
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-data"
                       >
                         DATA
@@ -674,7 +614,7 @@ function RelatorioOrcamentosPageContent() {
                       <TableRow
                         data-test="orcamento-row"
                         key={orcamento._id}
-                        className="hover:bg-gray-50 border-b"
+                        className="hover:bg-muted/35 border-b border-border"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="text-center px-8 py-3 align-middle">
@@ -726,7 +666,7 @@ function RelatorioOrcamentosPageContent() {
                           {orcamento.itens?.length || 0}
                         </TableCell>
                         <TableCell
-                          className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap"
+                          className="text-center px-8 py-3 font-medium text-foreground whitespace-nowrap"
                           data-test="orcamento-valor-total"
                         >
                           R${' '}
@@ -778,14 +718,14 @@ function RelatorioOrcamentosPageContent() {
             </div>
           ) : (
             <div
-              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
+              className="text-center flex-1 flex items-center justify-center bg-card rounded-lg border border-border"
               data-test="empty-state"
             >
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-8 h-8 text-gray-400" />
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center mb-4">
+                  <FileText className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <p className="text-gray-500 text-lg">
+                <p className="text-muted-foreground text-base">
                   {searchTerm
                     ? 'Nenhum orçamento encontrado para sua pesquisa.'
                     : 'Não há orçamentos cadastrados...'}
@@ -824,10 +764,10 @@ export default function RelatorioOrcamentosPage() {
       fallback={
         <div className="w-full h-screen flex flex-col items-center justify-center">
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
           </div>
-          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+          <p className="mt-4 text-muted-foreground font-medium">Carregando...</p>
         </div>
       }
     >

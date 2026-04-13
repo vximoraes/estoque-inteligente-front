@@ -185,7 +185,7 @@ export default function ModalSaidaItem({
         console.log('mensagem final do toast:', errorMessage);
 
         toast.error(errorMessage, {
-          position: 'top-right',
+          position: 'bottom-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -194,7 +194,7 @@ export default function ModalSaidaItem({
         });
       } else {
         toast.error('Não foi possível registrar a saída.', {
-          position: 'top-right',
+          position: 'bottom-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -377,7 +377,7 @@ export default function ModalSaidaItem({
       data-test="modal-saida-backdrop"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         data-test="modal-saida"
@@ -386,7 +386,7 @@ export default function ModalSaidaItem({
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
             title="Fechar"
             data-test="modal-saida-close"
           >
@@ -399,7 +399,7 @@ export default function ModalSaidaItem({
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
               <h2
-                className="text-xl font-semibold text-gray-900 mb-1 break-words"
+                className="text-xl font-semibold text-foreground mb-1 break-words"
                 data-test="modal-saida-titulo"
               >
                 Registrar saída de {itemNome}
@@ -415,11 +415,11 @@ export default function ModalSaidaItem({
             <div className="flex justify-between items-center">
               <label
                 htmlFor="quantidade"
-                className="block text-base font-medium text-gray-700"
+                className="block text-base font-medium text-foreground"
               >
-                Quantidade <span className="text-red-500">*</span>
+                Quantidade <span className="text-destructive">*</span>
               </label>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {quantidade.length}/9
               </span>
             </div>
@@ -431,15 +431,15 @@ export default function ModalSaidaItem({
               value={quantidade}
               onChange={handleQuantidadeChange}
               maxLength={9}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.quantidade ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.quantidade ? 'border-destructive' : 'border-border'
               }`}
               disabled={saidaMutation.isPending}
               data-test="modal-saida-quantidade-input"
             />
             {errors.quantidade && (
               <p
-                className="text-red-500 text-sm mt-1"
+                className="text-destructive text-sm mt-1"
                 data-test="modal-saida-quantidade-erro"
               >
                 {errors.quantidade}
@@ -452,22 +452,22 @@ export default function ModalSaidaItem({
             className="space-y-2"
             data-test="modal-saida-localizacao-container"
           >
-            <label className="block text-base font-medium text-gray-700">
-              Localização <span className="text-red-500">*</span>
+            <label className="block text-base font-medium text-foreground">
+              Localização <span className="text-destructive">*</span>
             </label>
             <div className="relative" data-dropdown>
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                  errors.localizacao ? 'border-red-500' : 'border-gray-300'
+                className={`w-full flex items-center justify-between px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                  errors.localizacao ? 'border-destructive' : 'border-border'
                 }`}
                 disabled={isLoadingLocalizacoes || saidaMutation.isPending}
                 data-test="modal-saida-localizacao-dropdown"
               >
                 <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
                   <span
-                    className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}
+                    className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {isLoadingLocalizacoes
                       ? 'Carregando...'
@@ -478,8 +478,8 @@ export default function ModalSaidaItem({
                     <span
                       className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${
                         getQuantidadeDisponivel(localizacaoSelecionada) > 0
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                          ? 'bg-muted/50 text-foreground'
+                          : 'bg-muted/50 text-muted-foreground'
                       }`}
                     >
                       {getQuantidadeDisponivel(localizacaoSelecionada)}{' '}
@@ -488,7 +488,7 @@ export default function ModalSaidaItem({
                   )}
                 </div>
                 <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
+                  className={`w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ml-2 ${
                     isDropdownOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -496,15 +496,15 @@ export default function ModalSaidaItem({
 
               {/* Dropdown */}
               {isDropdownOpen && !isLoadingLocalizacoes && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
                   {/* Input de pesquisa */}
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
+                  <div className="p-3 border-b border-border bg-muted/50">
                     <input
                       type="text"
                       placeholder="Pesquisar..."
                       value={localizacaoPesquisa}
                       onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
@@ -520,9 +520,9 @@ export default function ModalSaidaItem({
                           return (
                             <div
                               key={localizacao._id}
-                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${
+                            className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
                                 localizacaoSelecionada === localizacao._id
-                                  ? 'bg-blue-50'
+                                  ? 'bg-[#306FCC]/5'
                                   : ''
                               }`}
                             >
@@ -533,8 +533,8 @@ export default function ModalSaidaItem({
                                 }
                                 className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
                                   localizacaoSelecionada === localizacao._id
-                                    ? 'text-blue-600 font-medium'
-                                    : 'text-gray-900'
+                                    ? 'text-[#306FCC] font-medium'
+                                    : 'text-foreground'
                                 }`}
                                 title={localizacao.nome}
                               >
@@ -544,8 +544,8 @@ export default function ModalSaidaItem({
                                 <span
                                   className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${
                                     qtdDisponivel > 0
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-500'
+                                      ? 'bg-muted/50 text-foreground'
+                                      : 'bg-muted/50 text-muted-foreground'
                                   }`}
                                 >
                                   {qtdDisponivel} disponível
@@ -559,7 +559,7 @@ export default function ModalSaidaItem({
                                     setLocalizacaoToEdit(localizacao);
                                     setIsEditarLocalizacaoModalOpen(true);
                                   }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                   title="Editar localização"
                                 >
                                   <Edit size={20} />
@@ -571,7 +571,7 @@ export default function ModalSaidaItem({
                                     setLocalizacaoToEdit(localizacao);
                                     setIsExcluirLocalizacaoModalOpen(true);
                                   }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                   title="Excluir localização"
                                 >
                                   <Trash2 size={20} />
@@ -590,7 +590,7 @@ export default function ModalSaidaItem({
                         )}
                       </>
                     ) : (
-                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                      <div className="px-4 py-8 text-center text-muted-foreground text-sm">
                         Nenhuma localização encontrada
                       </div>
                     )}
@@ -599,17 +599,17 @@ export default function ModalSaidaItem({
               )}
             </div>
             {errors.localizacao && (
-              <p className="text-red-500 text-sm mt-1">{errors.localizacao}</p>
+              <p className="text-destructive text-sm mt-1">{errors.localizacao}</p>
             )}
           </div>
 
           {/* Mensagem de erro da API */}
           {saidaMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">
                 Não foi possível registrar a saída
               </div>
-              <div className="text-red-500">
+              <div className="text-destructive/80">
                 {(saidaMutation.error as any)?.response?.data?.message ||
                   (saidaMutation.error as any)?.message ||
                   'Erro desconhecido'}
@@ -620,7 +620,7 @@ export default function ModalSaidaItem({
 
         {/* Footer com ações */}
         <div
-          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
+          className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm"
           data-test="modal-saida-footer"
         >
           <div className="flex gap-3">

@@ -51,23 +51,23 @@ export default function ModalObservacoesEmprestimo({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden"
+        className="bg-card rounded-sm border border-border max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative p-6 border-b border-gray-200 shrink-0">
+        <div className="relative p-6 border-b border-border shrink-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
           </button>
           <div className="text-center px-8">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-foreground">
               Observações do Empréstimo
             </h2>
-            <p className="text-sm text-gray-500 mt-1 font-medium">
+            <p className="text-sm text-muted-foreground mt-1 font-medium">
               {emprestimo.item?.nome || 'Item'}
             </p>
           </div>
@@ -78,20 +78,20 @@ export default function ModalObservacoesEmprestimo({
 
           {/* Observações do empréstimo */}
           <div>
-            <label className="text-lg font-semibold text-gray-900 block mb-2">
+            <label className="text-lg font-semibold text-foreground block mb-2">
               Observações do empréstimo
             </label>
-            <p className="text-base text-gray-900">
+            <p className="text-base text-foreground">
               {temObsEmprestimo ? emprestimo.observacoes_emprestimo : '-'}
             </p>
           </div>
 
           {/* Observações da devolução */}
           <div>
-            <label className="text-lg font-semibold text-gray-900 block mb-2">
+            <label className="text-lg font-semibold text-foreground block mb-2">
               Observações da devolução
             </label>
-            <p className="text-base text-gray-900">
+            <p className="text-base text-foreground">
               {temObsDevolucao ? emprestimo.observacoes_devolucao : '-'}
             </p>
           </div>

@@ -218,7 +218,7 @@ export default function ModalFiltros({
       data-test="modal-filtros-backdrop"
     >
       <div
-        className="bg-card rounded-lg border border-border shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
         data-test="modal-filtros-content"
       >
@@ -302,7 +302,7 @@ export default function ModalFiltros({
                                 setCategoriaDropdownOpen(false);
                                 setCategoriaSearch('');
                               }}
-                              className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                              className={`w-full text-left px-4 py-2 transition-colors ${
                                 selectedCategoria === option.value
                                   ? 'bg-[#306FCC]/10 text-[#306FCC]'
                                   : 'text-foreground hover:bg-muted/40'
