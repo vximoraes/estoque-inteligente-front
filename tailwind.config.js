@@ -9,6 +9,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        heading: ['Barlow Condensed', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         sans: ['Poppins', 'sans-serif'],
       },
