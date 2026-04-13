@@ -1,40 +1,52 @@
+const features = [
+  'Controle de entradas e saídas em tempo real',
+  'Insights fortes e precisos para decidir com IA',
+  'Relatórios detalhados e exportação de dados',
+];
+
 export default function AuthLeftPanel() {
   return (
-    <div className="relative hidden overflow-hidden md:my-6 md:ml-6 md:mr-0 md:flex md:min-h-[calc(100vh-3rem)] md:self-center md:rounded-[28px]">
-      {/* Imagem de fundo com zoom responsivo */}
+    <div className="relative hidden overflow-hidden md:my-6 md:ml-6 md:mr-0 md:flex md:min-h-[calc(100vh-3rem)] md:self-center md:rounded-2xl">
+      {/* Background image */}
       <img
         src="/aurora-gradient-1774906689788.png"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover scale-150"
-        style={{ transformOrigin: 'center center', filter: 'contrast(1.2) brightness(0.90) saturate(0.7)' }}
+        style={{ transformOrigin: 'center center', filter: 'contrast(1.1) brightness(0.75) saturate(0.55)' }}
       />
+      {/* Dark overlay for institutional weight */}
+      <div className="absolute inset-0 bg-[#0b0f14]/50" />
 
-      {/* Conteúdo */}
-      <div className="relative z-10 flex w-full flex-col items-center justify-center p-10 text-white gap-8">
-        {/* Tagline */}
-        <div className="space-y-3 text-center">
-          <p className="text-sm font-medium tracking-widest text-white/50">Powered by AI</p>
-          <h2 className="text-3xl font-semibold leading-tight text-white">
-            Gestão de estoque inteligente,<br />com decisões guiadas por IA.
-          </h2>
+      {/* Content */}
+      <div className="relative z-10 flex w-full flex-col items-center justify-center px-16 py-10 text-white">
+        {/* Main copy */}
+        <div className="flex w-full max-w-lg flex-col items-center gap-10 text-center">
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/40">
+              Powered by AI
+            </p>
+            <h2 className="text-[2rem] font-semibold leading-[1.2] text-white">
+              Gestão de estoque inteligente,<br />com decisões guiadas por IA.
+            </h2>
+          </div>
+
+          {/* Feature list — indexed rows, no bubbles */}
+          <div className="flex w-full flex-col border-t border-white/10">
+            {features.map((feature, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-center gap-5 border-b border-white/10 py-3.5"
+              >
+                <span className="w-6 shrink-0 text-right text-[10px] font-semibold tabular-nums tracking-widest text-white/30">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-[13px] font-medium text-white/60">{feature}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Feature cards */}
-        <div className="flex flex-col gap-2.5 w-fit">
-          <div className="group flex items-center gap-4 rounded-2xl bg-white/8 backdrop-blur-sm px-5 py-3 transition-all duration-300 hover:bg-white/15 cursor-default">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white transition-all duration-300 group-hover:bg-white group-hover:text-[#1d3a72]">1</span>
-            <span className="text-sm font-medium text-white/70 whitespace-nowrap transition-all duration-300 group-hover:text-white">Controle de entradas e saídas em tempo real</span>
-          </div>
-          <div className="group flex items-center gap-4 rounded-2xl bg-white/8 backdrop-blur-sm px-5 py-3 transition-all duration-300 hover:bg-white/15 cursor-default">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white transition-all duration-300 group-hover:bg-white group-hover:text-[#1d3a72]">2</span>
-            <span className="text-sm font-medium text-white/70 transition-all duration-300 group-hover:text-white">Insights e alertas gerados por inteligência artificial</span>
-          </div>
-          <div className="group flex items-center gap-4 rounded-2xl bg-white/8 backdrop-blur-sm px-5 py-3 transition-all duration-300 hover:bg-white/15 cursor-default">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white transition-all duration-300 group-hover:bg-white group-hover:text-[#1d3a72]">3</span>
-            <span className="text-sm font-medium text-white/70 transition-all duration-300 group-hover:text-white">Relatórios detalhados e exportação de dados</span>
-          </div>
-        </div>
       </div>
     </div>
   );
