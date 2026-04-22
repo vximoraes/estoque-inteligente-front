@@ -296,16 +296,13 @@ function PageUsuariosContent() {
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className={`inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap ${
-                                usuario.ativo
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}
-                              title={
-                                usuario.ativo
-                                  ? 'Usuário ativo'
-                                  : 'Aguardando ativação'
-                              }
+                              className="inline-flex items-center px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.07em] whitespace-nowrap"
+                              title={usuario.ativo ? 'Usuário ativo' : 'Aguardando ativação'}
+                              style={{
+                                color: usuario.ativo
+                                  ? 'oklch(0.55 0.16 145)'
+                                  : 'oklch(0.58 0.14 78)',
+                              }}
                             >
                               {usuario.ativo ? 'Ativo' : 'Aguardando ativação'}
                             </span>

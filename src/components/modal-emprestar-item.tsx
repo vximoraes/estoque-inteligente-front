@@ -92,7 +92,7 @@ export default function ModalEmprestarItem({
     queryKey: ['localizacoes-infinite', 'emprestimo'],
     queryFn: async ({ pageParam = 1 }) => {
       return await get<LocalizacoesApiResponse>(
-        `/localizacoes?limit=20&page=${pageParam}`,
+        `/localizacoes?limite=20&page=${pageParam}`,
       );
     },
     getNextPageParam: (lastPage) => {
@@ -133,7 +133,7 @@ export default function ModalEmprestarItem({
         error?.message ||
         'Não foi possível registrar o empréstimo.';
       toast.error(mensagem, {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 5000,
       });
     },
@@ -299,63 +299,63 @@ export default function ModalEmprestarItem({
       onClick={(e) => e.target === e.currentTarget && onClose()}
       data-test="modal-emprestar-item"
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
             data-test="close-modal-button"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-muted-foreground" />
           </button>
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Emprestar Item</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-1">Emprestar Item</h2>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">Item</label>
-            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            <label className="block text-base font-medium text-foreground mb-1">Item</label>
+            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {itemNome}
             </div>
           </div>
 
           <div data-dropdown>
-            <label className="block text-base font-medium text-gray-700 mb-1">
-              Localização <span className="text-red-500">*</span>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Localização <span className="text-destructive">*</span>
             </label>
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg text-left hover:border-gray-400 transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between px-3 py-2 border border-border rounded-sm text-left hover:border-[#306FCC]/40 transition-colors cursor-pointer"
             >
-              <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
+              <span className={localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}>
                 {localizacaoSelecionadaObj
                   ? `${localizacaoSelecionadaObj.nome} (${quantidadeDisponivel} disponíveis)`
                   : 'Selecionar localização'}
               </span>
               <ChevronDown
                 size={16}
-                className={`text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                className={`text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
             {isDropdownOpen && (
-              <div className="mt-2 border border-gray-200 rounded-lg bg-white shadow-lg max-h-48 overflow-y-auto">
-                <div className="p-3 border-b border-gray-200 bg-gray-50">
+              <div className="mt-2 border border-border rounded-sm bg-card max-h-48 overflow-y-auto">
+                <div className="p-3 border-b border-border bg-muted/50">
                   <input
                     type="text"
                     value={localizacaoPesquisa}
                     onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
                     placeholder="Pesquisar..."
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
 
                 {isLoadingLocalizacoes ? (
-                  <div className="p-3 text-sm text-gray-500">Carregando...</div>
+                  <div className="p-3 text-sm text-muted-foreground">Carregando...</div>
                 ) : localizacoesFiltradas.length > 0 ? (
                   localizacoesFiltradas.map((loc) => {
                     const estoque =
@@ -364,7 +364,7 @@ export default function ModalEmprestarItem({
                       <button
                         key={loc._id}
                         type="button"
-                        className="w-full p-2 text-left hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="w-full p-2 text-left hover:bg-muted/50 transition-colors cursor-pointer"
                         onClick={() => {
                           setLocalizacaoSelecionada(loc._id);
                           setIsDropdownOpen(false);
@@ -377,19 +377,19 @@ export default function ModalEmprestarItem({
                     );
                   })
                 ) : (
-                  <div className="p-3 text-sm text-gray-500">Nenhuma localização com estoque.</div>
+                  <div className="p-3 text-sm text-muted-foreground">Nenhuma localização com estoque.</div>
                 )}
                 <div ref={observerTarget} className="h-2" />
               </div>
             )}
             {errors.localizacao && (
-              <p className="mt-1 text-sm text-red-600">{errors.localizacao}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.localizacao}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
-              Quantidade <span className="text-red-500">*</span>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Quantidade <span className="text-destructive">*</span>
             </label>
             <input
               type="number"
@@ -399,17 +399,17 @@ export default function ModalEmprestarItem({
                 setQuantidade(e.target.value);
                 setErrors((prev) => ({ ...prev, quantidade: undefined }));
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Digite a quantidade"
             />
             {errors.quantidade && (
-              <p className="mt-1 text-sm text-red-600">{errors.quantidade}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.quantidade}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
-              Solicitante <span className="text-red-500">*</span>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Solicitante <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -418,16 +418,16 @@ export default function ModalEmprestarItem({
                 setSolicitanteNome(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Nome da pessoa solicitante"
             />
             {errors.solicitanteNome && (
-              <p className="mt-1 text-sm text-red-600">{errors.solicitanteNome}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.solicitanteNome}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
+            <label className="block text-base font-medium text-foreground mb-1">
               E-mail do solicitante
             </label>
             <input
@@ -437,16 +437,16 @@ export default function ModalEmprestarItem({
                 setSolicitanteEmail(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="E-mail da pessoa solicitante (opcional)"
             />
             {errors.solicitanteEmail && (
-              <p className="mt-1 text-sm text-red-600">{errors.solicitanteEmail}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.solicitanteEmail}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">
+            <label className="block text-base font-medium text-foreground mb-1">
               Data prevista de devolução
             </label>
             <input
@@ -456,19 +456,19 @@ export default function ModalEmprestarItem({
                 setDataPrevista(e.target.value);
                 setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
             />
             {errors.dataPrevista && (
-              <p className="mt-1 text-sm text-red-600">{errors.dataPrevista}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.dataPrevista}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-gray-700 mb-1">Observações</label>
+            <label className="block text-base font-medium text-foreground mb-1">Observações</label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               rows={3}
               placeholder="Observações opcionais"
               maxLength={500}
@@ -476,7 +476,7 @@ export default function ModalEmprestarItem({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
           <div className="flex gap-3">
             <Button
               variant="outline"

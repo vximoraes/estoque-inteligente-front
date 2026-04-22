@@ -36,7 +36,7 @@ export default function ModalExcluirEmprestimo({
     },
     onError: (error: any) => {
       const msg = error?.errors?.[0]?.message || error?.message || 'Erro ao excluir empréstimo.';
-      toast.error(msg, { position: 'top-right', autoClose: 5000 });
+      toast.error(msg, { position: 'bottom-right', autoClose: 5000 });
     },
   });
 
@@ -68,14 +68,14 @@ export default function ModalExcluirEmprestimo({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
@@ -85,11 +85,11 @@ export default function ModalExcluirEmprestimo({
         {/* Conteúdo */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
               Excluir empréstimo
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
-              <p className="text-gray-600 break-words">
+              <p className="text-muted-foreground break-words">
                 Tem certeza que deseja excluir o empréstimo de{' '}
                 <span className="font-semibold">{itemNome}</span> para{' '}
                 <span className="font-semibold">{solicitanteNome}</span>?
@@ -98,9 +98,9 @@ export default function ModalExcluirEmprestimo({
           </div>
 
           {excluirMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">Não foi possível excluir o empréstimo</div>
-              <div className="text-red-500">
+              <div className="text-destructive/80">
                 {(excluirMutation.error as any)?.message || 'Erro desconhecido'}
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function ModalExcluirEmprestimo({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
           <div className="flex gap-3">
             <Button
               variant="outline"

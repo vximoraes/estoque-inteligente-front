@@ -118,14 +118,14 @@ export default function ModalDetalhesOrcamento({
       data-test="modal-detalhes-orcamento"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative p-6 border-b border-gray-200 flex-shrink-0">
+        <div className="relative p-6 border-b border-border flex-shrink-0">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
             title="Fechar"
             aria-label="Fechar modal"
             data-test="modal-detalhes-close"
@@ -135,7 +135,7 @@ export default function ModalDetalhesOrcamento({
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
               <h2
-                className="text-xl font-semibold text-gray-900 break-words"
+                className="text-xl font-semibold text-foreground break-words"
                 data-test="modal-detalhes-header"
               >
                 {orcamentoNome || orcamento?.nome || 'Detalhes do Orçamento'}
@@ -144,7 +144,7 @@ export default function ModalDetalhesOrcamento({
             {(orcamentoDescricao || orcamento?.descricao) && (
               <div className="max-h-[120px] overflow-y-auto mb-3">
                 <p
-                  className="text-sm text-gray-600 break-words text-center max-w-full"
+                  className="text-sm text-muted-foreground break-words text-center max-w-full"
                   data-test="modal-detalhes-descricao"
                 >
                   {orcamentoDescricao || orcamento?.descricao}
@@ -152,7 +152,7 @@ export default function ModalDetalhesOrcamento({
               </div>
             )}
             <p
-              className="text-xl font-semibold text-blue-600"
+              className="text-xl font-semibold text-[#306FCC]"
               data-test="modal-detalhes-total"
             >
               {isLoading
@@ -167,11 +167,11 @@ export default function ModalDetalhesOrcamento({
         {/* Conteúdo */}
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">
                 Não foi possível carregar o orçamento
               </div>
-              <div className="text-red-500">{error}</div>
+              <div className="text-destructive/80">{error}</div>
             </div>
           )}
 
@@ -182,8 +182,8 @@ export default function ModalDetalhesOrcamento({
               data-test="loading-spinner"
             >
               <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
               </div>
             </div>
           ) : orcamento ? (
@@ -191,26 +191,26 @@ export default function ModalDetalhesOrcamento({
               {/* Itens */}
               {orcamento.itens && orcamento.itens.length > 0 && (
                 <div>
-                  <label className="text-lg font-semibold text-gray-900 block mb-2">
+                  <label className="text-lg font-semibold text-foreground block mb-2">
                     Itens ({orcamento.itens.length})
                   </label>
                   <div
-                    className="border rounded-lg overflow-x-auto"
+                    className="border border-border rounded-sm overflow-x-auto"
                     data-test="modal-detalhes-tabela"
                   >
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 border-b">
+                      <thead className="bg-muted/50 border-b">
                         <tr>
-                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[150px]">
+                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-foreground min-w-[150px]">
                             Nome
                           </th>
-                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[60px]">
+                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-foreground min-w-[60px]">
                             Qtd
                           </th>
-                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-foreground min-w-[100px]">
                             Valor Unit.
                           </th>
-                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-foreground min-w-[100px]">
                             Subtotal
                           </th>
                         </tr>
@@ -219,23 +219,23 @@ export default function ModalDetalhesOrcamento({
                         {orcamento.itens.map((comp, index) => (
                           <tr
                             key={index}
-                            className="border-b last:border-0 hover:bg-gray-50"
+                            className="border-b last:border-0 hover:bg-muted/50"
                           >
-                            <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
+                            <td className="px-3 sm:px-4 py-2 text-foreground min-w-[150px]">
                               <div
-                                className="text-sm font-semibold text-gray-900 truncate"
+                                className="text-sm font-semibold text-foreground truncate"
                                 title={comp.nome || '-'}
                               >
                                 {comp.nome || '-'}
                               </div>
                             </td>
-                            <td className="px-3 sm:px-4 py-2 text-center text-gray-900 min-w-[60px]">
+                            <td className="px-3 sm:px-4 py-2 text-center text-foreground min-w-[60px]">
                               {comp.quantidade}
                             </td>
-                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 min-w-[100px] whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 text-right text-foreground min-w-[100px] whitespace-nowrap">
                               R$ {comp.valor_unitario.toFixed(2)}
                             </td>
-                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 font-medium min-w-[100px] whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 text-right text-foreground font-medium min-w-[100px] whitespace-nowrap">
                               R${' '}
                               {(comp.quantidade * comp.valor_unitario).toFixed(
                                 2,
@@ -254,11 +254,11 @@ export default function ModalDetalhesOrcamento({
                 <div className="pt-4 border-t grid grid-cols-2 gap-4">
                   {orcamento.createdAt && (
                     <div>
-                      <label className="text-base font-medium text-gray-700 block mb-2">
+                      <label className="text-base font-medium text-muted-foreground block mb-2">
                         Criado em
                       </label>
                       <p
-                        className="text-base text-gray-600"
+                        className="text-base text-muted-foreground"
                         data-test="modal-detalhes-data-criacao"
                       >
                         {new Date(orcamento.createdAt).toLocaleDateString(
@@ -276,11 +276,11 @@ export default function ModalDetalhesOrcamento({
                   )}
                   {orcamento.updatedAt && (
                     <div>
-                      <label className="text-base font-medium text-gray-700 block mb-2">
+                      <label className="text-base font-medium text-muted-foreground block mb-2">
                         Atualizado em
                       </label>
                       <p
-                        className="text-base text-gray-600"
+                        className="text-base text-muted-foreground"
                         data-test="modal-detalhes-data-atualizacao"
                       >
                         {new Date(orcamento.updatedAt).toLocaleDateString(

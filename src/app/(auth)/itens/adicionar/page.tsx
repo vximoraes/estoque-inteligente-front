@@ -91,7 +91,7 @@ export default function AdicionarItemPage() {
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
       return await get<CategoriasApiResponse>(
-        `/categorias?limit=20&page=${pageParam}`,
+        `/categorias?limite=20&page=${pageParam}`,
       );
     },
     getNextPageParam: (lastPage) => {
@@ -390,7 +390,7 @@ export default function AdicionarItemPage() {
       <Cabecalho pagina="Itens" acao="Adicionar" />
 
       <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
-        <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
+        <div className="bg-card rounded-lg border border-border flex-1 flex flex-col overflow-hidden">
           <form
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col overflow-hidden"
@@ -403,7 +403,7 @@ export default function AdicionarItemPage() {
                   <div className="flex justify-between items-center mb-2">
                     <Label
                       htmlFor="nome"
-                      className="text-sm md:text-base font-medium text-gray-900"
+                      className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                     >
                       Nome <span className="text-red-500">*</span>
                     </Label>
@@ -435,7 +435,7 @@ export default function AdicionarItemPage() {
 
                 {/* Categoria com botão + */}
                 <div>
-                  <Label className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-2 block">
                     Categoria <span className="text-red-500">*</span>
                   </Label>
                   <div className="flex flex-col gap-1">
@@ -605,7 +605,7 @@ export default function AdicionarItemPage() {
                   <div className="flex justify-between items-center mb-2">
                     <Label
                       htmlFor="estoqueMinimo"
-                      className="text-sm md:text-base font-medium text-gray-900"
+                      className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                     >
                       Estoque mínimo
                     </Label>
@@ -632,7 +632,7 @@ export default function AdicionarItemPage() {
 
                 {/* Imagem */}
                 <div>
-                  <Label className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-2 block">
                     Imagem
                   </Label>
                   {imagemPreview ? (
@@ -698,7 +698,7 @@ export default function AdicionarItemPage() {
                 <div className="flex justify-between items-center mb-2">
                   <Label
                     htmlFor="descricao"
-                    className="text-sm md:text-base font-medium text-gray-900"
+                    className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Descrição
                   </Label>
@@ -712,26 +712,26 @@ export default function AdicionarItemPage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   maxLength={200}
-                  className="w-full flex-1 px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[120px]"
+                  className="w-full flex-1 px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring/50 resize-none min-h-[120px] bg-card"
                   data-test="textarea-descricao-item"
                 />
               </div>
             </div>
 
             {/* Footer com botões */}
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
+            <div className="flex justify-end gap-3 px-6 md:px-8 py-4 border-t border-border bg-card shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-20 sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
                 data-test="botao-cancelar"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-20 sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={createItemMutation.isPending}
                 data-test="botao-salvar"
@@ -760,7 +760,7 @@ export default function AdicionarItemPage() {
           }}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
@@ -792,7 +792,7 @@ export default function AdicionarItemPage() {
                 <div className="flex justify-between items-center">
                   <label
                     htmlFor="novaCategoria"
-                    className="block text-sm sm:text-base font-medium text-gray-700"
+                    className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Nome da Categoria <span className="text-red-500">*</span>
                   </label>
@@ -815,8 +815,8 @@ export default function AdicionarItemPage() {
                     }
                   }}
                   maxLength={100}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base ${
-                    errors.novaCategoria ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-card border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors text-sm sm:text-base ${
+                    errors.novaCategoria ? 'border-destructive' : 'border-border'
                   }`}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {

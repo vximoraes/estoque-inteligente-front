@@ -178,14 +178,14 @@ export default function ModalSelecionarItem({
       data-test="modal-selecionar-itens"
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border w-full max-w-5xl max-h-[80vh] flex flex-col overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
@@ -195,12 +195,12 @@ export default function ModalSelecionarItem({
         {/* Header e Barra de pesquisa */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">
+            <h2 className="text-xl font-semibold text-foreground mb-1">
               {multiSelect ? 'Selecionar Itens' : 'Selecionar Item'}
             </h2>
             {multiSelect && tempSelectedIds.size > 0 && (
               <p
-                className="text-sm text-gray-500 mt-1"
+                className="text-sm text-muted-foreground mt-1"
                 data-test="contador-selecionados"
               >
                 {tempSelectedIds.size} item{tempSelectedIds.size > 1 ? 's' : ''}{' '}
@@ -210,7 +210,7 @@ export default function ModalSelecionarItem({
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar itens..."
@@ -258,7 +258,7 @@ export default function ModalSelecionarItem({
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <p>Nenhum item encontrado</p>
               </div>
             )}
@@ -266,7 +266,7 @@ export default function ModalSelecionarItem({
         </div>
 
         {/* Footer com botões */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
           <div className="flex gap-3">
             <Button
               type="button"

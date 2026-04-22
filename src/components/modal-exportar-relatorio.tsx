@@ -33,23 +33,23 @@ export default function ModalExportarRelatorio({
       data-test="modal-exportar-overlay"
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
+        className="bg-card rounded-sm border border-border shadow-none w-full max-w-md mx-4"
         data-test="modal-exportar-content"
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between p-6 border-b"
+          className="flex items-center justify-between p-6 border-b border-border"
           data-test="modal-exportar-header"
         >
           <h2
-            className="text-xl font-semibold text-gray-800"
+            className="text-xl font-semibold text-foreground"
             data-test="modal-exportar-title"
           >
             Exportar Relatório
           </h2>
           <button
             onClick={onClose}
-            className="top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             aria-label="Fechar modal"
             data-test="modal-exportar-close-button"
           >
@@ -63,7 +63,7 @@ export default function ModalExportarRelatorio({
           <div data-test="filename-field">
             <label
               htmlFor="fileName"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
               data-test="filename-label"
             >
               Nome do arquivo
@@ -82,7 +82,7 @@ export default function ModalExportarRelatorio({
           {/* Formato */}
           <div data-test="format-field">
             <label
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
               data-test="format-label"
             >
               Formato
@@ -101,7 +101,7 @@ export default function ModalExportarRelatorio({
                   className="w-4 h-4 text-blue-600 cursor-pointer"
                   data-test="format-radio-pdf"
                 />
-                <span className="text-gray-700">.pdf</span>
+                <span className="text-foreground">.pdf</span>
               </label>
               <label
                 className="flex items-center space-x-3 cursor-pointer"
@@ -116,7 +116,7 @@ export default function ModalExportarRelatorio({
                   className="w-4 h-4 text-blue-600 cursor-pointer"
                   data-test="format-radio-csv"
                 />
-                <span className="text-gray-700">.csv</span>
+                <span className="text-foreground">.csv</span>
               </label>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function ModalExportarRelatorio({
 
         {/* Footer */}
         <div
-          className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-lg"
+          className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/20 rounded-b-lg"
           data-test="modal-exportar-footer"
         >
           <Button

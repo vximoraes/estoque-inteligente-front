@@ -113,31 +113,31 @@ export default function ModalDetalhesFornecedor({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative p-6 border-b border-gray-200 flex-shrink-0">
+        <div className="relative p-6 border-b border-border flex-shrink-0">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
             title="Fechar"
           >
             <X size={20} />
           </button>
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
-              <h2 className="text-xl font-semibold text-gray-900 break-words">
+              <h2 className="text-xl font-semibold text-foreground break-words">
                 {fornecedor?.nome || 'Detalhes do Fornecedor'}
               </h2>
             </div>
             {fornecedor?.descricao && (
-              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full">
+              <p className="text-sm text-muted-foreground mb-3 break-words text-center max-w-full">
                 {fornecedor.descricao}
               </p>
             )}
             {isLoading ? (
-              <p className="text-lg font-semibold text-blue-600">
+              <p className="text-lg font-semibold text-[#306FCC]">
                 Carregando...
               </p>
             ) : fornecedor?.url ? (
@@ -145,14 +145,14 @@ export default function ModalDetalhesFornecedor({
                 href={fornecedor.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline max-w-full"
+                className="inline-flex items-center gap-2 text-lg font-semibold text-[#306FCC] hover:text-[#306FCC]/80 hover:underline max-w-full"
                 title={fornecedor.url}
               >
                 <span className="truncate">{fornecedor.url}</span>
                 <ExternalLink size={18} className="flex-shrink-0" />
               </a>
             ) : (
-              <p className="text-lg font-semibold text-gray-400">
+              <p className="text-lg font-semibold text-muted-foreground">
                 Sem URL cadastrada
               </p>
             )}
@@ -163,11 +163,11 @@ export default function ModalDetalhesFornecedor({
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           {/* Mensagem de erro */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">
                 Não foi possível carregar o fornecedor
               </div>
-              <div className="text-red-500">{error}</div>
+              <div className="text-destructive/80">{error}</div>
             </div>
           )}
 
@@ -175,8 +175,8 @@ export default function ModalDetalhesFornecedor({
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
               </div>
             </div>
           ) : fornecedor ? (
@@ -184,19 +184,19 @@ export default function ModalDetalhesFornecedor({
               {/* Contato */}
               {fornecedor.contato && (
                 <div>
-                  <label className="text-lg font-semibold text-gray-900 block mb-2">
+                  <label className="text-lg font-semibold text-foreground block mb-2">
                     Contato
                   </label>
                   <div className="flex items-center gap-2">
                     <p
-                      className="text-base text-gray-900 truncate flex-1"
+                      className="text-base text-foreground truncate flex-1"
                       title={fornecedor.contato}
                     >
                       {fornecedor.contato}
                     </p>
                     <button
                       onClick={() => handleCopy(fornecedor.contato!, 'contato')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
+                      className="p-1.5 text-muted-foreground hover:bg-muted rounded-sm transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar contato"
                     >
                       {copiedField === 'contato' ? (
@@ -214,10 +214,10 @@ export default function ModalDetalhesFornecedor({
                 <div className="pt-4 border-t grid grid-cols-2 gap-4">
                   {fornecedor.createdAt && (
                     <div>
-                      <label className="text-base font-medium text-gray-700 block mb-2">
+                      <label className="text-base font-medium text-muted-foreground block mb-2">
                         Criado em
                       </label>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-muted-foreground">
                         {new Date(fornecedor.createdAt).toLocaleDateString(
                           'pt-BR',
                           {
@@ -233,10 +233,10 @@ export default function ModalDetalhesFornecedor({
                   )}
                   {fornecedor.updatedAt && (
                     <div>
-                      <label className="text-base font-medium text-gray-700 block mb-2">
+                      <label className="text-base font-medium text-muted-foreground block mb-2">
                         Atualizado em
                       </label>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-muted-foreground">
                         {new Date(fornecedor.updatedAt).toLocaleDateString(
                           'pt-BR',
                           {

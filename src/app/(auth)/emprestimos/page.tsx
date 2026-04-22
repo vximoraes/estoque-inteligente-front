@@ -13,14 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
   Search,
   Handshake,
-  AlertTriangle,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -101,6 +99,61 @@ function EmprestimosPageContent() {
     [data],
   );
 
+  const { data: globalStats } = useQuery<{
+    total: number;
+    ativos: number;
+    atrasados: number;
+    devolvidos: number;
+  }>({
+    queryKey: ['emprestimos-global-stats', searchTerm, statusFilter],
+    queryFn: async () => {
+      const limit = 500;
+      let page = 1;
+      let hasNextPage = true;
+      const docs: Emprestimo[] = [];
+
+      while (hasNextPage) {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('limite', String(limit));
+
+        if (searchTerm) params.append('solicitante_nome', searchTerm);
+        if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
+        if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+
+        const response = await get<EmprestimosApiResponse>(
+          `/emprestimos?${params.toString()}`,
+        );
+
+        docs.push(...(response?.data?.docs || []));
+        hasNextPage = !!response?.data?.hasNextPage;
+        page = response?.data?.nextPage || page + 1;
+      }
+
+      const filtrados = docs.filter((emp) => {
+        const termo = searchTerm.toLowerCase().trim();
+
+        const matchSearch =
+          !termo ||
+          emp.solicitante_nome.toLowerCase().includes(termo) ||
+          emp.item?.nome?.toLowerCase().includes(termo) ||
+          emp.localizacao?.nome?.toLowerCase().includes(termo);
+
+        const matchStatus = !statusFilter || emp.status === statusFilter;
+        return matchSearch && matchStatus;
+      });
+
+      return {
+        total: filtrados.length,
+        ativos: filtrados.filter((e) => e.status === 'Ativo').length,
+        atrasados: filtrados.filter((e) => e.status === 'Atrasado').length,
+        devolvidos: filtrados.filter((e) => e.status === 'Devolvido').length,
+      };
+    },
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+
   const emprestimosFiltrados = useMemo(() => {
     return emprestimos.filter((emp) => {
       const termo = searchTerm.toLowerCase().trim();
@@ -116,10 +169,15 @@ function EmprestimosPageContent() {
     });
   }, [emprestimos, searchTerm, statusFilter]);
 
-  const total = emprestimosFiltrados.length;
-  const ativos = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
-  const atrasados = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
-  const devolvidos = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
+  const totalLocal = emprestimosFiltrados.length;
+  const ativosLocal = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
+  const atrasadosLocal = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
+  const devolvidosLocal = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
+
+  const total = globalStats?.total ?? totalLocal;
+  const ativos = globalStats?.ativos ?? ativosLocal;
+  const atrasados = globalStats?.atrasados ?? atrasadosLocal;
+  const devolvidos = globalStats?.devolvidos ?? devolvidosLocal;
 
   const formatarDataPrevista = (data?: string | null) => {
     if (!data) return 'Sem previsão';
@@ -136,28 +194,26 @@ function EmprestimosPageContent() {
         <div className="shrink-0 mb-6">
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted transition-colors h-10 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Handshake className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">Estatísticas</span>
+              <Handshake className="w-5 h-5 text-[#306FCC]" />
+              <span className="font-semibold text-foreground">Estatísticas</span>
             </div>
             {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
             )}
           </button>
 
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 ${
-              isStatsOpen ? 'block mt-4' : 'hidden'
-            } xl:grid xl:mt-0`}
+            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
           >
-            <StatCard title="Total de" subtitle="empréstimos" value={total} icon={Handshake} iconColor="text-blue-600" iconBgColor="bg-blue-100" />
-            <StatCard title="Ativos" value={ativos} icon={Handshake} iconColor="text-green-600" iconBgColor="bg-green-100" />
-            <StatCard title="Atrasados" value={atrasados} icon={AlertTriangle} iconColor="text-red-600" iconBgColor="bg-red-100" />
-            <StatCard title="Devolvidos" value={devolvidos} icon={CheckCircle} iconColor="text-gray-700" iconBgColor="bg-gray-100" />
+            <StatCard title="Total de empréstimos" value={total} />
+            <StatCard title="Ativos" value={ativos} />
+            <StatCard title="Atrasados" value={atrasados} />
+            <StatCard title="Devolvidos" value={devolvidos} />
           </div>
         </div>
 

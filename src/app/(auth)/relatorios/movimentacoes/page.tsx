@@ -13,13 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import {
   Search,
   Filter,
-  ArrowDownUp,
-  ArrowUpDown,
   FileText,
   X,
   ChevronDown,
@@ -38,6 +36,12 @@ interface MovimentacoesApiResponse {
     hasNextPage: boolean;
     nextPage?: number;
   };
+}
+
+interface MovimentacoesGlobaisStats {
+  totalMov: number;
+  entradas: number;
+  saidas: number;
 }
 
 function RelatorioMovimentacoesPageContent() {
@@ -110,6 +114,82 @@ function RelatorioMovimentacoesPageContent() {
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
+  const { data: globalStats } = useQuery<MovimentacoesGlobaisStats>({
+    queryKey: ['movimentacoes-relatorio-global-stats', searchTerm, tipoFilter],
+    queryFn: async () => {
+      const limit = 500;
+      let page = 1;
+      let hasNextPage = true;
+      const docs: any[] = [];
+
+      while (hasNextPage) {
+        const params = new URLSearchParams();
+        params.append('limit', String(limit));
+        params.append('page', String(page));
+
+        if (tipoFilter) {
+          params.append('tipo', tipoFilter.toLowerCase());
+        }
+
+        const response = await get<MovimentacoesApiResponse>(
+          `/movimentacoes?${params.toString()}`,
+        );
+
+        docs.push(...(response?.data?.docs || []));
+        hasNextPage = !!response?.data?.hasNextPage;
+        page = response?.data?.nextPage || page + 1;
+      }
+
+      const normalizeStr = (str: string) => {
+        return String(str ?? '')
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+      };
+
+      const filtradas = docs.filter((mov) => {
+        const texto = searchTerm.toLowerCase();
+
+        const matchSearch =
+          !searchTerm ||
+          mov.item?._id?.toLowerCase().includes(texto) ||
+          mov.item?.nome?.toLowerCase().includes(texto) ||
+          mov.localizacao?.nome?.toLowerCase().includes(texto) ||
+          mov.tipo?.toLowerCase().includes(texto) ||
+          String(mov.quantidade).includes(searchTerm) ||
+          new Date(mov.data_hora)
+            .toLocaleString('pt-BR')
+            .toLowerCase()
+            .includes(texto);
+
+        const tipoMovNormalized = normalizeStr(mov.tipo);
+        const filterNormalized = normalizeStr(tipoFilter);
+
+        const matchTipo =
+          !filterNormalized ||
+          tipoMovNormalized === filterNormalized ||
+          tipoMovNormalized.includes(filterNormalized);
+
+        return matchSearch && matchTipo;
+      });
+
+      return {
+        totalMov: filtradas.length,
+        entradas: filtradas.filter((m) => normalizeStr(m.tipo) === 'entrada')
+          .length,
+        saidas: filtradas.filter((m) => normalizeStr(m.tipo) === 'saida').length,
+      };
+    },
+    staleTime: 30_000,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
   const normalizeStr = (str: string) => {
     return String(str ?? '')
       .toLowerCase()
@@ -148,13 +228,17 @@ function RelatorioMovimentacoesPageContent() {
       return new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime();
     });
 
-  const totalMov = movimentacoesFiltradas.length;
-  const entradas = movimentacoesFiltradas.filter(
+  const totalMovLocal = movimentacoesFiltradas.length;
+  const entradasLocal = movimentacoesFiltradas.filter(
     (m) => normalizeStr(m.tipo) === 'entrada',
   ).length;
-  const saidas = movimentacoesFiltradas.filter(
+  const saidasLocal = movimentacoesFiltradas.filter(
     (m) => normalizeStr(m.tipo) === 'saida',
   ).length;
+
+  const totalMov = globalStats?.totalMov ?? totalMovLocal;
+  const entradas = globalStats?.entradas ?? entradasLocal;
+  const saidas = globalStats?.saidas ?? saidasLocal;
 
   const handleSelectAll = () => {
     if (selectedItems.size === movimentacoesFiltradas.length) {
@@ -231,49 +315,37 @@ function RelatorioMovimentacoesPageContent() {
         <div className="shrink-0 mb-6">
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted/40 transition-colors h-10 cursor-pointer"
             data-test="toggle-stats-button"
           >
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">Estatísticas</span>
+              <FileText className="w-5 h-5 text-[#306FCC]" />
+              <span className="font-semibold text-foreground">Estatísticas</span>
             </div>
             {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
             )}
           </button>
 
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${
-              isStatsOpen ? 'block mt-4' : 'hidden'
-            } xl:grid xl:mt-0`}
+            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
             data-test="stats-grid"
           >
             <StatCard
-              title="Total de"
-              subtitle="movimentações"
+              title="Total de movimentações"
               value={totalMov}
-              icon={FileText}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
               data-test="stat-total-movimentacoes"
             />
             <StatCard
               title="Entradas"
               value={entradas}
-              icon={ArrowDownUp}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
               data-test="stat-entradas"
             />
             <StatCard
               title="Saídas"
               value={saidas}
-              icon={ArrowUpDown}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
               data-test="stat-saidas"
             />
           </div>
@@ -285,7 +357,7 @@ function RelatorioMovimentacoesPageContent() {
           data-test="search-actions-bar"
         >
           <div className="relative flex-1" data-test="search-container">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar movimentações..."
@@ -336,13 +408,13 @@ function RelatorioMovimentacoesPageContent() {
             >
               <div
                 data-test="filter-tag-tipo"
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
               >
                 <span className="font-medium">Tipo:</span>
                 <span>{tipoFilter}</span>
                 <button
                   onClick={() => setTipoFilter('')}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                  className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                   title="Remover filtro de tipo"
                   data-test="remove-tipo-filter"
                 >
@@ -356,7 +428,7 @@ function RelatorioMovimentacoesPageContent() {
         {/* Mensagem de erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded shrink-0"
             data-test="error-message"
           >
             Erro ao carregar movimentações: {error.message}
@@ -371,16 +443,16 @@ function RelatorioMovimentacoesPageContent() {
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando movimentações...
               </p>
             </div>
           ) : movimentacoesFiltradas.length > 0 ? (
             <div
-              className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col"
+              className="border border-border rounded-lg bg-card flex-1 overflow-hidden flex flex-col"
               data-test="movimentacoes-table-container"
             >
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
@@ -388,10 +460,10 @@ function RelatorioMovimentacoesPageContent() {
                   className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm"
                   data-test="movimentacoes-table"
                 >
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b border-border">
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center w-[50px] px-8"
                         data-test="table-head-checkbox"
                       >
                         <input
@@ -406,37 +478,37 @@ function RelatorioMovimentacoesPageContent() {
                         />
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-codigo"
                       >
                         CÓDIGO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-produto"
                       >
                         PRODUTO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-quantidade"
                       >
                         QUANTIDADE
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-tipo"
                       >
                         TIPO DE MOVIMENTAÇÃO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-localizacao"
                       >
                         LOCALIZAÇÃO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-data"
                       >
                         DATA/HORA
@@ -448,7 +520,7 @@ function RelatorioMovimentacoesPageContent() {
                     {movimentacoesFiltradas.map((mov) => (
                       <TableRow
                         key={mov._id}
-                        className="hover:bg-gray-50 border-b"
+                        className="hover:bg-muted/35 border-b border-border"
                         style={{ height: '60px' }}
                         data-test={`movimentacao-row-${mov._id}`}
                       >
@@ -512,22 +584,35 @@ function RelatorioMovimentacoesPageContent() {
                                 tipoRaw.includes('saída') ||
                                 tipoRaw.includes('saida');
 
-                              const classes = isEntrada
-                                ? 'bg-green-100 text-green-800'
-                                : isSaida
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-gray-100 text-gray-800';
-
                               const textoFormatado = isEntrada
                                 ? 'Entrada'
                                 : isSaida
                                   ? 'Saída'
                                   : String(mov.tipo ?? '').trim() || '-';
 
+                              const bgColor = isEntrada
+                                ? 'oklch(0.986 0.010 145)'
+                                : isSaida
+                                  ? 'oklch(0.986 0.010 25)'
+                                  : undefined;
+
+                              const textColor = isEntrada
+                                ? 'oklch(0.55 0.16 145)'
+                                : isSaida
+                                  ? 'oklch(0.58 0.18 25)'
+                                  : undefined;
+
+                              const dotColor = isEntrada
+                                ? 'oklch(0.65 0.18 145)'
+                                : isSaida
+                                  ? 'oklch(0.65 0.19 25)'
+                                  : undefined;
+
                               return (
                                 <span
-                                  className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${classes}`}
+                                  className="inline-flex items-center px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.07em] whitespace-nowrap"
                                   title={textoFormatado}
+                                  style={{ color: textColor }}
                                   data-test={`badge-tipo-${
                                     isEntrada
                                       ? 'entrada'
@@ -590,14 +675,14 @@ function RelatorioMovimentacoesPageContent() {
             </div>
           ) : (
             <div
-              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
+              className="text-center flex-1 flex items-center justify-center bg-card rounded-lg border border-border"
               data-test="empty-state"
             >
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-8 h-8 text-gray-400" />
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center mb-4">
+                  <FileText className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <p className="text-gray-500 text-lg">
+                <p className="text-muted-foreground text-base">
                   {searchTerm
                     ? 'Nenhuma movimentação encontrada para sua pesquisa.'
                     : 'Não há movimentações cadastradas...'}
@@ -651,10 +736,10 @@ export default function RelatorioMovimentacoesPage() {
           data-test="page-suspense-fallback"
         >
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
           </div>
-          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+          <p className="mt-4 text-muted-foreground font-medium">Carregando...</p>
         </div>
       }
     >

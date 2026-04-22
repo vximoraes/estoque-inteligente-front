@@ -18,9 +18,6 @@ import {
   Filter,
   Plus,
   Package,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
   X,
   ChevronLeft,
   ChevronRight,
@@ -37,6 +34,13 @@ interface CategoriasApiResponse {
   data: {
     docs: any[];
   };
+}
+
+interface ItensStats {
+  totalItens: number;
+  emEstoque: number;
+  baixoEstoque: number;
+  indisponiveis: number;
 }
 
 function ItensPageContent() {
@@ -60,7 +64,7 @@ function ItensPageContent() {
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
     defaultValue: '',
@@ -73,11 +77,11 @@ function ItensPageContent() {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width >= 2560) {
-        setItemsPerPage(24);
+        setItemsPerPage(15);
       } else if (width >= 1920) {
-        setItemsPerPage(18);
+        setItemsPerPage(15);
       } else if (width >= 1024) {
-        setItemsPerPage(12);
+        setItemsPerPage(15);
       } else if (width >= 768) {
         setItemsPerPage(9);
       } else {
@@ -105,7 +109,7 @@ function ItensPageContent() {
         if (searchTerm) params.append('nome', searchTerm);
         if (categoriaFilter) params.append('categoria', categoriaFilter);
         if (statusFilter) params.append('status', statusFilter);
-        params.append('limit', itemsPerPage.toString());
+        params.append('limite', itemsPerPage.toString());
         params.append('page', currentPage.toString());
 
         const queryString = params.toString();
@@ -113,7 +117,7 @@ function ItensPageContent() {
 
         return await get<ApiResponse>(url);
       },
-      refetchOnMount: 'always',
+      refetchOnMount: true,
       retry: (failureCount, error: any) => {
         if (error?.message?.includes('Falha na autenticação')) {
           return false;
@@ -122,6 +126,21 @@ function ItensPageContent() {
       },
     },
   );
+
+  const { data: globalStats } = useQuery<ItensStats>({
+    queryKey: ['itens-global-stats'],
+    queryFn: async () => {
+      const response = await get<{ data: ItensStats }>('/itens/stats');
+      return response.data;
+    },
+    staleTime: 30_000,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
 
   // Query para buscar estoques de um item específico
   const { data: estoquesData, isLoading: isLoadingEstoques } =
@@ -145,7 +164,7 @@ function ItensPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limit=9999');
+      return await get<CategoriasApiResponse>('/categorias?limite=9999');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -347,15 +366,15 @@ function ItensPageContent() {
     nextPage: null,
   };
 
-  // Calcular estatísticas
-  const totalItens = itens.length;
-  const emEstoque = itens.filter((c) => c.status === 'Em Estoque').length;
-  const baixoEstoque = itens.filter((c) => c.status === 'Baixo Estoque').length;
-  const indisponiveis = itens.filter((c) => c.status === 'Indisponível').length;
+  // Estatísticas globais (todos os itens do sistema, não só a página atual).
+  const totalItens = globalStats?.totalItens ?? 0;
+  const emEstoque = globalStats?.emEstoque ?? 0;
+  const baixoEstoque = globalStats?.baixoEstoque ?? 0;
+  const indisponiveis = globalStats?.indisponiveis ?? 0;
   // console.log(totalItens)
   return (
     <div
-      className="w-full h-screen flex flex-col overflow-x-hidden"
+      className="w-full h-screen flex flex-col overflow-x-hidden bg-white"
       data-test="itens-page"
     >
       <Cabecalho pagina="Itens" />
@@ -367,11 +386,11 @@ function ItensPageContent() {
             {/* Botão para mobile */}
             <button
               onClick={() => setIsStatsOpen(!isStatsOpen)}
-              className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+              className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted transition-colors h-10 cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-gray-700">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Estatísticas
                 </span>
               </div>
@@ -384,46 +403,30 @@ function ItensPageContent() {
 
             {/* Cards - Sempre visível no desktop, colapsável no mobile */}
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+              className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
               data-test="stats-grid"
             >
               <StatCard
-                title="Total de"
-                subtitle="itens"
+                title="Total de itens"
                 value={totalItens}
-                icon={Package}
-                iconColor="text-blue-600"
-                iconBgColor="bg-blue-100"
                 data-test="stat-total-itens"
                 hoverTitle={`Total de itens cadastrados: ${totalItens}`}
               />
-
               <StatCard
                 title="Em estoque"
                 value={emEstoque}
-                icon={CheckCircle}
-                iconColor="text-green-600"
-                iconBgColor="bg-green-100"
                 data-test="stat-em-estoque"
                 hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
               />
-
               <StatCard
                 title="Baixo estoque"
                 value={baixoEstoque}
-                icon={AlertTriangle}
-                iconColor="text-yellow-600"
-                iconBgColor="bg-yellow-100"
                 data-test="stat-baixo-estoque"
                 hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
               />
-
               <StatCard
                 title="Indisponível"
                 value={indisponiveis}
-                icon={XCircle}
-                iconColor="text-red-600"
-                iconBgColor="bg-red-100"
                 data-test="stat-indisponiveis"
                 hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
               />
@@ -431,23 +434,23 @@ function ItensPageContent() {
           </div>
 
           <div
-            className="flex flex-col sm:flex-row gap-4 mb-6"
+            className="flex flex-col sm:flex-row gap-3 mb-6"
             data-test="search-actions-bar"
           >
             <div className="relative flex-1" data-test="search-container">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="h-10 pl-11 pr-4 bg-card border-border/80 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
                 data-test="search-input"
               />
             </div>
             <Button
               variant="outline"
-              className="flex items-center gap-2 cursor-pointer"
+              className="h-10 px-4 flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
               data-test="filtros-button"
               onClick={handleOpenFiltrosModal}
             >
@@ -455,7 +458,7 @@ function ItensPageContent() {
               Filtros
             </Button>
             <Button
-              className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+              className="h-10 px-4 flex items-center gap-2 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="adicionar-button"
               onClick={handleAdicionarClick}
@@ -471,7 +474,7 @@ function ItensPageContent() {
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-card text-foreground rounded text-xs border border-border font-medium"
                     data-test="applied-filter-categoria"
                   >
                     <span className="font-medium">Categoria:</span>
@@ -492,7 +495,7 @@ function ItensPageContent() {
                 )}
                 {statusFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-card text-foreground rounded text-xs border border-border font-medium"
                     data-test="applied-filter-status"
                   >
                     <span className="font-medium">Status:</span>
@@ -567,13 +570,20 @@ function ItensPageContent() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8" data-test="empty-state">
-              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {searchTerm
-                  ? 'Nenhum item encontrado para sua pesquisa.'
-                  : 'Não há itens cadastrados...'}
-              </p>
+            <div className="flex flex-col items-center justify-center py-16 gap-4" data-test="empty-state">
+              <div className="w-12 h-12 rounded-full border-2 border-dashed border-border flex items-center justify-center">
+                <Package className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground mb-1">
+                  {searchTerm || categoriaFilter || statusFilter ? 'Nenhum resultado' : 'Nenhum item cadastrado'}
+                </p>
+                <p className="text-xs text-muted-foreground max-w-[32ch]">
+                  {searchTerm || categoriaFilter || statusFilter
+                    ? 'Tente ajustar sua pesquisa ou remover os filtros.'
+                    : 'Comece adicionando o primeiro item ao estoque.'}
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -651,11 +661,12 @@ function ItensPageContent() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={isFetching}
-                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                      className={`min-w-10 px-3 py-2 rounded transition-colors cursor-pointer text-sm ${
                         isActive
-                          ? 'bg-blue-600 text-white font-medium'
-                          : 'hover:bg-gray-100 text-gray-700'
+                          ? 'text-white font-semibold'
+                          : 'hover:bg-muted text-foreground'
                       } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
+                    style={isActive ? { backgroundColor: '#306FCC' } : undefined}
                       data-test={`page-${pageNum}-button`}
                     >
                       {pageNum}

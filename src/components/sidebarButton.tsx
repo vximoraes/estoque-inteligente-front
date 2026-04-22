@@ -1,11 +1,9 @@
 'use client';
 
 import { SidebarMenuButton } from '@/components/ui/sidebar';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
-type sidebarMenuButton = {
+type SidebarMenuButtonProps = {
   src: string;
   srcHover: string;
   name: string;
@@ -16,6 +14,7 @@ type sidebarMenuButton = {
   collapsed?: boolean;
   className?: string;
 };
+
 export default function SidebarButtonMenu({
   src,
   srcHover,
@@ -26,111 +25,64 @@ export default function SidebarButtonMenu({
   onItemClick,
   collapsed = false,
   className = '',
-}: sidebarMenuButton) {
-  const isActivePath = path?.startsWith(
-    '/' +
-      name
-        ?.toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, ''),
-  );
-  const [isHover, setIsHover] = useState<string>(isActivePath ? srcHover : src);
-  const [isRouter, setIsRouter] = useState<string>(
-    isActivePath ? 'bg-white' : '',
-  );
-  const [isBlack, setIsBlack] = useState<string>(
-    isActivePath ? 'text-[#000]' : '',
-  );
-  const [isActive, setIsActive] = useState<boolean>(isActivePath || false);
+}: SidebarMenuButtonProps) {
   const router = useRouter();
+  const slug = name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const isActive = !!path?.startsWith('/' + slug);
 
-  useEffect(() => {
-    const isActive = path?.startsWith(
-      '/' +
-        name
-          ?.toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, ''),
-    );
-
-    if (isActive) {
-      setIsHover(srcHover);
-      setIsRouter('bg-white');
-      setIsBlack('text-[#000]');
-      setIsActive(true);
-    } else {
-      setIsRouter('');
-      setIsHover(src);
-      setIsBlack('');
-      setIsActive(false);
-    }
-  }, [path, src, srcHover, name]);
-  function trocarPagina() {
+  function navigate() {
     router.push(route);
-    if (onItemClick) {
-      onItemClick();
-    }
-  }
-  function hoverButton(svg: string) {
-    if (!isRouter) {
-      setIsHover(svg);
-    }
+    onItemClick?.();
   }
 
   if (collapsed) {
     return (
-      <>
-        <SidebarMenuButton
-          className={
-            'flex justify-center items-center h-11 w-20 cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg ' +
-            (isRouter
-              ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
-              : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')
-          }
-          onClick={() => trocarPagina()}
-          data-test={dataTest || 'sidebar-menu-button'}
-          title={name}
-        >
-          <img
-            src={isHover}
-            alt={name}
-            data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
-            className="w-[18px] h-[18px]"
-          />
-        </SidebarMenuButton>
-      </>
+      <SidebarMenuButton
+        onClick={navigate}
+        className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-sm transition-colors duration-150 ${
+          isActive
+            ? 'bg-ei-sidebar-surface!'
+            : 'hover:bg-ei-sidebar-surface-hover!'
+        }`}
+        data-test={dataTest || 'sidebar-menu-button'}
+        title={name}
+      >
+        <img
+          src={src}
+          alt={name}
+          className="w-[18px] h-[18px]"
+          data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
+        />
+      </SidebarMenuButton>
     );
   }
 
   return (
-    <>
-      <SidebarMenuButton
-        className={
-          'text-[15px] pl-4 pr-3 py-1 h-10 w-[250px] itens cursor-pointer flex gap-2 items-center relative transition-all duration-300 ease-in-out group ' +
-          className +
-          ' ' +
-          (isRouter
-            ? isRouter + ' hover:bg-[rgba(255,255,255,1)]! shadow-md '
-            : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!')
-        }
-        onClick={() => trocarPagina()}
-        data-test={dataTest || 'sidebar-menu-button'}
+    <SidebarMenuButton
+      onClick={navigate}
+      className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-sm transition-colors duration-150 ${
+        isActive
+          ? 'bg-ei-sidebar-surface!'
+          : 'hover:bg-ei-sidebar-surface-hover!'
+      } ${className}`}
+      data-test={dataTest || 'sidebar-menu-button'}
+    >
+      <img
+        src={src}
+        alt=""
+        className="w-[18px] h-[18px] shrink-0"
+        data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
+      />
+      <span
+        className={`text-[13px] tracking-wide ${
+          isActive
+            ? 'text-ei-sidebar-text-strong font-semibold'
+            : 'text-ei-sidebar-text font-medium'
+        }`}
+        data-test={`${dataTest}-text` || 'sidebar-button-text'}
       >
-        <img
-          src={isHover}
-          alt=""
-          data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
-          className="w-[18px] h-[18px]"
-        />
-        <span
-          className={
-            'text-[14px] font-medium ' + (isBlack ? isBlack : 'text-[#B4BAC5]')
-          }
-          data-test={`${dataTest}-text` || 'sidebar-button-text'}
-        >
-          {name}
-        </span>
-      </SidebarMenuButton>
-    </>
+        {name}
+      </span>
+    </SidebarMenuButton>
   );
 }

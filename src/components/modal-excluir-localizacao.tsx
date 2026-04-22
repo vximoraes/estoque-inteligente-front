@@ -61,7 +61,7 @@ export default function ModalExcluirLocalizacao({
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] });
       queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] });
       toast.success('Localização excluída com sucesso!', {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -77,7 +77,7 @@ export default function ModalExcluirLocalizacao({
         error?.message ||
         'Erro ao excluir localização';
       toast.error(errorMessage, {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -115,7 +115,7 @@ export default function ModalExcluirLocalizacao({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-card rounded-sm border border-border max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botão de fechar */}
@@ -123,7 +123,7 @@ export default function ModalExcluirLocalizacao({
           <button
             onClick={handleClose}
             disabled={inativarLocalizacaoMutation.isPending}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             title="Fechar"
           >
             <X size={20} />
@@ -133,10 +133,10 @@ export default function ModalExcluirLocalizacao({
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
               Excluir localização
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Tem certeza que deseja excluir a localização{' '}
               <span
                 className="font-semibold truncate inline-block max-w-[300px] align-bottom"
@@ -149,11 +149,11 @@ export default function ModalExcluirLocalizacao({
           </div>
 
           {inativarLocalizacaoMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
               <div className="font-medium mb-1">
                 Erro ao excluir localização
               </div>
-              <div className="text-red-500">
+              <div className="text-destructive/80">
                 {(inativarLocalizacaoMutation.error as any)?.response?.data
                   ?.message ||
                   (inativarLocalizacaoMutation.error as any)?.message ||
@@ -176,7 +176,7 @@ export default function ModalExcluirLocalizacao({
               type="button"
               onClick={handleConfirm}
               disabled={inativarLocalizacaoMutation.isPending}
-              className="flex-1 cursor-pointer bg-red-600 hover:bg-red-700 text-white"
+              className="flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
             >
               {inativarLocalizacaoMutation.isPending
                 ? 'Excluindo...'
