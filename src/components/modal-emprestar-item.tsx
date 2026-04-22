@@ -92,7 +92,7 @@ export default function ModalEmprestarItem({
     queryKey: ['localizacoes-infinite', 'emprestimo'],
     queryFn: async ({ pageParam = 1 }) => {
       return await get<LocalizacoesApiResponse>(
-        `/localizacoes?limit=20&page=${pageParam}`,
+        `/localizacoes?limite=20&page=${pageParam}`,
       );
     },
     getNextPageParam: (lastPage) => {

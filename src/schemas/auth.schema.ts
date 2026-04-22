@@ -13,7 +13,11 @@ export const loginSchema = z.object({
   senha: z
     .string()
     .min(1, 'O campo senha é obrigatório')
-    .min(8, 'A senha deve ter pelo menos 8 caracteres'),
+    .min(8, 'A senha deve ter pelo menos 8 caracteres')
+    .regex(
+      senhaRegex,
+      'A senha deve conter pelo menos 1 letra, 1 número e 1 caractere especial',
+    ),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

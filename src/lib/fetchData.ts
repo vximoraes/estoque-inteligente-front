@@ -78,15 +78,7 @@ export async function fetchData<T>(
       if (typeof window !== 'undefined' && !isRedirecting && !isRetry) {
         console.log('Token expirado detectado, tentando renovar sessão...');
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        let newSession = await getSession();
-
-        if (newSession?.user?.accessToken === authToken) {
-          console.log('Tentativa 2 de renovação...');
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          newSession = await getSession();
-        }
+        const newSession = await getSession();
 
         if (
           newSession &&

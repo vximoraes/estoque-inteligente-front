@@ -59,8 +59,8 @@ export default function Cabecalho({
     queryFn: async () =>
       await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
     enabled: !!user?.id,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
     refetchInterval: sseConnected ? false : 15000,
   });
 

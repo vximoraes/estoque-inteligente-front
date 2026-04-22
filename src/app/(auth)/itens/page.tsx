@@ -64,7 +64,7 @@ function ItensPageContent() {
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
     defaultValue: '',
@@ -77,11 +77,11 @@ function ItensPageContent() {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width >= 2560) {
-        setItemsPerPage(24);
+        setItemsPerPage(15);
       } else if (width >= 1920) {
-        setItemsPerPage(18);
+        setItemsPerPage(15);
       } else if (width >= 1024) {
-        setItemsPerPage(12);
+        setItemsPerPage(15);
       } else if (width >= 768) {
         setItemsPerPage(9);
       } else {
@@ -109,7 +109,7 @@ function ItensPageContent() {
         if (searchTerm) params.append('nome', searchTerm);
         if (categoriaFilter) params.append('categoria', categoriaFilter);
         if (statusFilter) params.append('status', statusFilter);
-        params.append('limit', itemsPerPage.toString());
+        params.append('limite', itemsPerPage.toString());
         params.append('page', currentPage.toString());
 
         const queryString = params.toString();
@@ -117,7 +117,7 @@ function ItensPageContent() {
 
         return await get<ApiResponse>(url);
       },
-      refetchOnMount: 'always',
+      refetchOnMount: true,
       retry: (failureCount, error: any) => {
         if (error?.message?.includes('Falha na autenticação')) {
           return false;
@@ -130,25 +130,8 @@ function ItensPageContent() {
   const { data: globalStats } = useQuery<ItensStats>({
     queryKey: ['itens-global-stats'],
     queryFn: async () => {
-      const limit = 500;
-      let page = 1;
-      let totalPages = 1;
-      const allDocs: any[] = [];
-
-      do {
-        const response = await get<ApiResponse>(`/itens?limit=${limit}&page=${page}`);
-        const docs = response?.data?.docs || [];
-        allDocs.push(...docs);
-        totalPages = response?.data?.totalPages || 1;
-        page += 1;
-      } while (page <= totalPages);
-
-      return {
-        totalItens: allDocs.length,
-        emEstoque: allDocs.filter((item) => item.status === 'Em Estoque').length,
-        baixoEstoque: allDocs.filter((item) => item.status === 'Baixo Estoque').length,
-        indisponiveis: allDocs.filter((item) => item.status === 'Indisponível').length,
-      };
+      const response = await get<{ data: ItensStats }>('/itens/stats');
+      return response.data;
     },
     staleTime: 30_000,
     retry: (failureCount, error: any) => {
@@ -181,7 +164,7 @@ function ItensPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limit=9999');
+      return await get<CategoriasApiResponse>('/categorias?limite=9999');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {

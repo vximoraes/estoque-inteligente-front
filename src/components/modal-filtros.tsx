@@ -75,7 +75,7 @@ export default function ModalFiltros({
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
       return await get<CategoriasApiResponse>(
-        `/categorias?limit=20&page=${pageParam}`,
+        `/categorias?limite=20&page=${pageParam}`,
       );
     },
     getNextPageParam: (lastPage) => {

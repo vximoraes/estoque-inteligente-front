@@ -67,7 +67,7 @@ function RelatorioItensPageContent() {
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20');
+      params.append('limite', '20');
       params.append('page', page.toString());
 
       if (categoriaFilter) {
@@ -121,7 +121,6 @@ function RelatorioItensPageContent() {
   const { data: globalStats } = useQuery<ItensGlobaisStats>({
     queryKey: [
       'estoques-relatorio-global-stats',
-      searchTerm,
       categoriaFilter,
       statusFilter,
     ],
@@ -133,7 +132,7 @@ function RelatorioItensPageContent() {
 
       while (hasNextPage) {
         const params = new URLSearchParams();
-        params.append('limit', String(limit));
+        params.append('limite', String(limit));
         params.append('page', String(page));
 
         if (categoriaFilter) {
@@ -156,20 +155,12 @@ function RelatorioItensPageContent() {
           return false;
         }
 
-        const matchSearch =
-          !searchTerm ||
-          estoque.item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          estoque.item._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          estoque.localizacao.nome
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-
         const matchCategoria =
           !categoriaFilter || estoque.item.categoria === categoriaFilter;
 
         const matchStatus = !statusFilter || estoque.item.status === statusFilter;
 
-        return matchSearch && matchCategoria && matchStatus;
+        return matchCategoria && matchStatus;
       });
 
       return {
@@ -248,7 +239,7 @@ function RelatorioItensPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limit=9999');
+      return await get<CategoriasApiResponse>('/categorias?limite=9999');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
