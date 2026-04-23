@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import { X, Bot, MessageSquare, History, SquarePen } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useChatContext } from '@/contexts/ChatContext';
+import { useSession } from '@/hooks/use-session';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ConversasList } from './ConversasList';
@@ -16,19 +17,29 @@ import {
 } from '@/hooks/useChat';
 import type { ConversaResumo, Mensagem } from '@/types/chat';
 
+const SUGESTOES = [
+  'Itens abaixo do estoque mínimo',
+  'Empréstimos em atraso',
+  'Item com mais movimentações',
+  'Resumo do estoque atual',
+];
+
 export function ChatPanel() {
   const { fecharChat, conversaAtiva, selecionarConversa, isStreaming, setIsStreaming } =
     useChatContext();
   const queryClient = useQueryClient();
+  const { user } = useSession();
+  const firstName = user?.name?.split(' ')[0] ?? null;
 
   const [inputValue, setInputValue] = useState('');
   const [mensagensLocais, setMensagensLocais] = useState<Mensagem[]>([]);
-  const [pendingNewConversa, setPendingNewConversa] = useState(false);
+  const [pendingNewConversa, setPendingNewConversa] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isStreamingRef = useRef(false);
+  const loadedConversaIdRef = useRef<string | null>(null);
 
   const { data: conversasData, isLoading: loadingConversas } = useConversas();
   const { data: conversaCarregada } = useConversa(conversaAtiva?._id ?? null);
@@ -40,27 +51,23 @@ export function ChatPanel() {
   });
 
   useEffect(() => {
-    if (conversaCarregada && !isStreamingRef.current) {
-      setMensagensLocais(conversaCarregada.mensagens ?? []);
+    if (!conversaCarregada) return;
+    if (isStreamingRef.current) return;
+    // Só sincroniza quando navegar para uma conversa diferente da atual
+    if (loadedConversaIdRef.current === conversaCarregada._id) return;
+    loadedConversaIdRef.current = conversaCarregada._id;
+    const serverMsgs = conversaCarregada.mensagens ?? [];
+    if (serverMsgs.length > 0) {
+      setMensagensLocais(serverMsgs);
     }
   }, [conversaCarregada]);
-
-  useEffect(() => {
-    if (loadingConversas) return;
-    if (conversaAtiva) return;
-    const conversas = conversasData?.docs ?? [];
-    if (conversas.length > 0) {
-      selecionarConversa({ ...conversas[0], mensagens: [] });
-    } else {
-      setPendingNewConversa(true);
-    }
-  }, [loadingConversas, conversasData]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensagensLocais]);
 
   const handleSelectConversa = (resumo: ConversaResumo) => {
+    loadedConversaIdRef.current = null; // força re-sync ao navegar
     setPendingNewConversa(false);
     selecionarConversa({ ...resumo, mensagens: [] });
   };
@@ -80,11 +87,11 @@ export function ChatPanel() {
     }
   };
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isStreaming) return;
+  const handleSend = async (overrideContent?: string) => {
+    const content = (overrideContent ?? inputValue).trim();
+    if (!content || isStreaming) return;
     if (!conversaAtiva && !pendingNewConversa) return;
 
-    const content = inputValue.trim();
     setInputValue('');
 
     const userMsg: Mensagem = {
@@ -105,9 +112,9 @@ export function ChatPanel() {
     let targetId: string;
     try {
       if (pendingNewConversa || !conversaAtiva) {
-        setPendingNewConversa(false);
         const nova = await createConversa.mutateAsync(content);
         selecionarConversa({ ...nova, mensagens: [] });
+        setPendingNewConversa(false);
         targetId = nova._id;
       } else {
         targetId = conversaAtiva._id;
@@ -162,7 +169,7 @@ export function ChatPanel() {
       className="
         relative flex flex-col bg-background border border-border
         rounded overflow-hidden
-        w-[540px] h-[560px]
+        w-full sm:w-[540px] h-[55vh] sm:h-[560px]
         shadow-[0_8px_32px_-4px_rgba(0,0,0,0.18),0_2px_8px_-2px_rgba(0,0,0,0.12)]
       "
     >
@@ -244,10 +251,16 @@ export function ChatPanel() {
         {/* Messages area - full width */}
         <div className="flex flex-col flex-1 overflow-hidden">
           {loadingConversas ? (
-            <div className="flex flex-col flex-1 px-4 py-3">
-              <div className="bg-card border border-border rounded-lg px-4 py-3 max-w-[85%] flex flex-col gap-2">
-                <div className="h-2 rounded-full bg-muted animate-pulse w-40" />
-                <div className="h-2 rounded-full bg-muted animate-pulse w-28" />
+            <div className="flex flex-col items-center justify-center flex-1 gap-5 px-4 pb-4">
+              <div className="flex flex-col items-center gap-1">
+                <div className="h-2.5 rounded-full bg-muted animate-pulse w-16 mb-1" />
+                <div className="h-6 rounded bg-muted animate-pulse w-44" />
+              </div>
+              <div className="flex flex-col gap-2 w-full">
+                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
               </div>
             </div>
           ) : !conversaAtiva && !pendingNewConversa ? (
@@ -260,22 +273,44 @@ export function ChatPanel() {
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-4 py-3">
-                {mensagensLocais.length === 0 && (
-                  <ChatMessage
-                    mensagem={{
-                      role: 'assistant',
-                      content: 'Olá! No que posso te ajudar hoje?',
-                      timestamp: new Date().toISOString(),
-                    }}
-                  />
+                {mensagensLocais.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-5 px-2 pb-4">
+                    <div className="flex flex-col items-center gap-1 text-center">
+                      {firstName && (
+                        <p className="text-xs text-muted-foreground tracking-wide uppercase">
+                          {firstName}
+                        </p>
+                      )}
+                      <p className="font-sans text-2xl font-bold text-foreground leading-tight">
+                        Como posso ajudar?
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                      {SUGESTOES.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleSend(s)}
+                          className="
+                            w-full text-left px-3 py-2 text-sm rounded border border-border
+                            bg-muted/50 text-muted-foreground
+                            hover:bg-muted hover:text-foreground hover:border-[#306FCC]/40
+                            transition-colors cursor-pointer
+                          "
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  mensagensLocais.map((msg, i) => (
+                    <ChatMessage
+                      key={i}
+                      mensagem={msg}
+                      isStreaming={isStreaming && i === mensagensLocais.length - 1}
+                    />
+                  ))
                 )}
-                {mensagensLocais.map((msg, i) => (
-                  <ChatMessage
-                    key={i}
-                    mensagem={msg}
-                    isStreaming={isStreaming && i === mensagensLocais.length - 1}
-                  />
-                ))}
                 <div ref={messagesEndRef} />
               </div>
               <ChatInput

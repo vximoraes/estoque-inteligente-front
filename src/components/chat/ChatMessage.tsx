@@ -39,9 +39,9 @@ export function ChatMessage({ mensagem, isStreaming = false }: ChatMessageProps)
           <p className="whitespace-pre-wrap">{mensagem.content}</p>
         ) : isStreaming && !mensagem.content ? (
           <span className="flex items-center gap-1 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-[chat-dot-bounce_1.2s_ease-in-out_infinite] [animation-delay:-0.4s]" />
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-[chat-dot-bounce_1.2s_ease-in-out_infinite] [animation-delay:-0.2s]" />
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-[chat-dot-bounce_1.2s_ease-in-out_infinite]" />
+            <span className="rounded-full bg-muted-foreground animate-dot-pulse" style={{ width: '4px', height: '4px', minWidth: '4px', flexShrink: 0, animationDelay: '0s' }} />
+            <span className="rounded-full bg-muted-foreground animate-dot-pulse" style={{ width: '4px', height: '4px', minWidth: '4px', flexShrink: 0, animationDelay: '0.2s' }} />
+            <span className="rounded-full bg-muted-foreground animate-dot-pulse" style={{ width: '4px', height: '4px', minWidth: '4px', flexShrink: 0, animationDelay: '0.4s' }} />
           </span>
         ) : (
           <div

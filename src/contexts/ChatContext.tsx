@@ -26,7 +26,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
 
   const abrirChat = useCallback(() => setIsOpen(true), []);
-  const fecharChat = useCallback(() => setIsOpen(false), []);
+  const fecharChat = useCallback(() => {
+    setIsOpen(false);
+    setConversaAtiva(null);
+    setMensagensLocais([]);
+  }, []);
 
   const selecionarConversa = useCallback((conversa: Conversa | null) => {
     setConversaAtiva(conversa);
