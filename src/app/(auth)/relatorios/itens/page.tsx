@@ -239,7 +239,7 @@ function RelatorioItensPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=9999');
+      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {

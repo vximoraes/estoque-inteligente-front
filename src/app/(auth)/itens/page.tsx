@@ -46,7 +46,7 @@ interface ItensStats {
 function ItensPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
@@ -118,12 +118,6 @@ function ItensPageContent() {
         return await get<ApiResponse>(url);
       },
       refetchOnMount: true,
-      retry: (failureCount, error: any) => {
-        if (error?.message?.includes('Falha na autenticação')) {
-          return false;
-        }
-        return failureCount < 3;
-      },
     },
   );
 
@@ -134,12 +128,6 @@ function ItensPageContent() {
       return response.data;
     },
     staleTime: 30_000,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
   // Query para buscar estoques de um item específico
@@ -152,25 +140,13 @@ function ItensPageContent() {
         );
       },
       enabled: !!selectedItemId,
-      retry: (failureCount, error: any) => {
-        if (error?.message?.includes('Falha na autenticação')) {
-          return false;
-        }
-        return failureCount < 3;
-      },
     });
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=9999');
-    },
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
+      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
     },
   });
 
@@ -334,7 +310,6 @@ function ItensPageContent() {
       setCurrentPage((prev) => prev - 1);
     }
 
-    router.refresh();
     await refetch();
     setIsRefetchingAfterDelete(false);
   };

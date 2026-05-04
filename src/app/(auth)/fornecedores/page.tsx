@@ -11,20 +11,21 @@ import {
 } from '@/components/ui/table';
 import ModalExcluirFornecedor from '@/components/modal-excluir-fornecedor';
 import ModalDetalhesFornecedor from '@/components/modal-detalhes-fornecedor';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { FornecedorApiResponse } from '@/types/fornecedores';
-import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { Search, Plus, Edit, Trash2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PulseLoader } from 'react-spinners';
 
 function PageFornecedoresContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+  const [currentPage, setCurrentPage] = useState(1);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirFornecedorId, setExcluirFornecedorId] = useState<string | null>(
     null,
@@ -37,7 +38,6 @@ function PageFornecedoresContent() {
     string | null
   >(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -45,57 +45,26 @@ function PageFornecedoresContent() {
     isFetching,
     error,
     refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<FornecedorApiResponse>({
-    queryKey: ['fornecedores', searchTerm],
-    queryFn: async ({ pageParam }) => {
-      const page = (pageParam as number) || 1;
+  } = useQuery<FornecedorApiResponse>({
+    queryKey: ['fornecedores', searchTerm, currentPage],
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
-      params.append('limit', '20');
-      params.append('page', page.toString());
+      params.append('limite', '20');
+      params.append('page', currentPage.toString());
 
       const queryString = params.toString();
       const url = `/fornecedores${queryString ? `?${queryString}` : ''}`;
 
       return await get<FornecedorApiResponse>(url);
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     const success = searchParams.get('success');
@@ -166,7 +135,6 @@ function PageFornecedoresContent() {
       transition: Slide,
     });
 
-    router.refresh();
     await refetch();
     setIsRefetchingAfterDelete(false);
   };
@@ -176,7 +144,14 @@ function PageFornecedoresContent() {
     setIsDetalhesModalOpen(true);
   };
 
-  const fornecedores = data?.pages.flatMap((page) => page.data.docs) || [];
+  const fornecedores = data?.data?.docs || [];
+  const paginationInfo = data?.data || {
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+  };
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
@@ -339,21 +314,32 @@ function PageFornecedoresContent() {
                     ))}
                   </TableBody>
                 </table>
-
-                {/* Observer target for infinite scroll */}
-                <div
-                  ref={observerTarget}
-                  className="h-10 flex items-center justify-center"
-                >
-                  {isFetchingNextPage && (
-                    <PulseLoader
-                      color="#3b82f6"
-                      size={5}
-                      speedMultiplier={0.8}
-                    />
-                  )}
-                </div>
               </div>
+              {paginationInfo.totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
+                  <p className="text-sm text-gray-600">
+                    Página {paginationInfo.page} de {paginationInfo.totalPages}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={!paginationInfo.hasPrevPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Página anterior"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                      disabled={!paginationInfo.hasNextPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Próxima página"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">

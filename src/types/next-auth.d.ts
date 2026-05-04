@@ -1,4 +1,3 @@
-import 'next-auth';
 import { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
@@ -10,8 +9,6 @@ declare module 'next-auth' {
       accessToken: string;
       refreshToken: string;
       ativo: boolean;
-      // permissoes: string[];
-      // grupos: string[];
       fotoPerfil?: string;
     } & DefaultSession['user'];
     error?: 'RefreshAccessTokenError';
@@ -24,8 +21,6 @@ declare module 'next-auth' {
     accessToken?: string;
     refreshToken?: string;
     ativo?: boolean;
-    // permissoes?: string[];
-    // grupos?: string[];
     fotoPerfil?: string;
   }
 }
@@ -38,8 +33,6 @@ declare module 'next-auth/jwt' {
     accessToken: string;
     refreshToken: string;
     ativo: boolean;
-    // permissoes: string[];
-    // grupos: string[];
     fotoPerfil?: string;
     accessTokenExpires?: number;
     error?: 'RefreshAccessTokenError';

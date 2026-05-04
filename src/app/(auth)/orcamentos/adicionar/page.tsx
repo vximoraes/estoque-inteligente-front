@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import {
   useMutation,
   useQueryClient,
-  useInfiniteQuery,
+  useQuery,
 } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Plus, Minus, Trash2, ChevronDown } from 'lucide-react';
@@ -17,7 +17,6 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ItemOrcamento } from '@/types/orcamentos';
 import { FornecedorApiResponse } from '@/types/fornecedores';
-import { PulseLoader } from 'react-spinners';
 import ModalSelecionarItem from '@/components/modal-selecionar-item';
 
 export default function AdicionarOrcamentoPage() {
@@ -40,59 +39,24 @@ export default function AdicionarOrcamentoPage() {
     width: number;
   } | null>(null);
 
-  const observerTargetFornecedor = useRef<HTMLDivElement>(null);
   const fornecedorButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const {
     data: fornecedoresData,
     isLoading: isLoadingFornecedores,
-    fetchNextPage: fetchNextPageFornecedores,
-    hasNextPage: hasNextPageFornecedores,
-    isFetchingNextPage: isFetchingNextPageFornecedores,
-  } = useInfiniteQuery({
-    queryKey: ['fornecedores-infinite', fornecedorPesquisa],
-    queryFn: async ({ pageParam = 1 }) => {
+  } = useQuery({
+    queryKey: ['fornecedores', fornecedorPesquisa],
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (fornecedorPesquisa) params.append('nome', fornecedorPesquisa);
-      params.append('limit', '20');
-      params.append('page', pageParam.toString());
-
+      params.append('limite', '200');
+      params.append('page', '1');
       return await get<FornecedorApiResponse>(
         `/fornecedores?${params.toString()}`,
       );
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
     enabled: isFornecedorDropdownOpen !== null,
   });
-
-  useEffect(() => {
-    if (!observerTargetFornecedor.current || isFornecedorDropdownOpen === null)
-      return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasNextPageFornecedores &&
-          !isFetchingNextPageFornecedores
-        ) {
-          fetchNextPageFornecedores();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(observerTargetFornecedor.current);
-    return () => observer.disconnect();
-  }, [
-    isFornecedorDropdownOpen,
-    hasNextPageFornecedores,
-    isFetchingNextPageFornecedores,
-    fetchNextPageFornecedores,
-  ]);
 
   const createOrcamentoMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -252,9 +216,7 @@ export default function AdicionarOrcamentoPage() {
     router.push('/orcamentos');
   };
 
-  const fornecedoresLista = fornecedoresData?.pages
-    ? fornecedoresData.pages.flatMap((page) => page.data.docs)
-    : [];
+  const fornecedoresLista = fornecedoresData?.data?.docs ?? [];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -331,7 +293,7 @@ export default function AdicionarOrcamentoPage() {
                     }
                   }}
                   maxLength={100}
-                  className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                  className={`w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base ${errors.nome ? 'border-red-500!' : ''}`}
                 />
                 {errors.nome && (
                   <p className="text-red-500 text-xs sm:text-sm mt-1">
@@ -611,14 +573,14 @@ export default function AdicionarOrcamentoPage() {
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
                 data-test="botao-cancelar"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="min-w-20 sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={createOrcamentoMutation.isPending}
               >
@@ -678,7 +640,7 @@ export default function AdicionarOrcamentoPage() {
             <div className="overflow-y-auto" data-test="fornecedores-list">
               {isLoadingFornecedores ? (
                 <div className="flex justify-center py-4">
-                  <PulseLoader color="#306FCC" size={8} />
+                  <div className="relative w-6 h-6"><div className="absolute inset-0 rounded-full border-2 border-blue-100"></div><div className="absolute inset-0 rounded-full border-2 border-blue-500 border-r-transparent animate-spin"></div></div>
                 </div>
               ) : fornecedoresLista.length > 0 ? (
                 <>
@@ -699,12 +661,6 @@ export default function AdicionarOrcamentoPage() {
                       {fornecedor.nome}
                     </button>
                   ))}
-                  <div ref={observerTargetFornecedor} className="h-1" />
-                  {isFetchingNextPageFornecedores && (
-                    <div className="flex justify-center py-2">
-                      <PulseLoader color="#306FCC" size={6} />
-                    </div>
-                  )}
                 </>
               ) : (
                 <div className="px-4 py-6 text-center text-gray-500 text-sm">

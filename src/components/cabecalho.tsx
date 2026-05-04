@@ -245,26 +245,26 @@ export default function Cabecalho({
 
   return (
     <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-5">
-      <div className="flex items-center gap-[12px] md:gap-[20px]">
+      <div className="flex items-center gap-3 md:gap-5">
         {/*  menu */}
         <button
           onClick={handleMenuClick}
-          className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-sm hover:bg-muted transition-colors"
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-sm hover:bg-muted transition-colors"
           aria-label="Menu"
         >
-          <Menu className="w-[24px] h-[24px] text-foreground" strokeWidth={2} />
+          <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
         </button>
 
         {/* Botão de voltar */}
         {showBackButton && onBackClick && (
           <button
             onClick={onBackClick}
-            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-card border border-border hover:bg-muted transition-colors cursor-pointer"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-card border border-border hover:bg-muted transition-colors cursor-pointer"
             aria-label="Voltar"
             title="Voltar"
           >
             <ChevronLeft
-              className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-foreground"
+              className="w-5 h-5 md:w-6 md:h-6 text-foreground"
               strokeWidth={2}
             />
           </button>
@@ -283,12 +283,12 @@ export default function Cabecalho({
         )}
       </div>
 
-      <div className="flex items-center gap-[10px] md:gap-[14px]">
+      <div className="flex items-center gap-2.5 md:gap-3.5">
         {/* Notificações */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
-            className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full border border-transparent hover:border-border hover:bg-muted/45 transition-colors duration-200 cursor-pointer"
+            className="relative w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-border hover:bg-muted/45 transition-colors duration-200 cursor-pointer"
             aria-label="Notificações"
             data-test="botao-notificacoes"
           >

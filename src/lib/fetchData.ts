@@ -55,11 +55,7 @@ export async function fetchData<T>(
     response = await fetch(`${API_URL}${url}`, options);
   } catch (err) {
     console.error('Erro de conexão com a API:', err);
-    throw {
-      status: 0,
-      message: 'Erro de conexão com a API',
-      error: err,
-    } as FetchError;
+    throw new Error('Erro de conexão com a API');
   }
 
   let data: T | FetchError;
@@ -103,18 +99,11 @@ export async function fetchData<T>(
           window.location.href = '/login';
         });
 
-        throw {
-          status: response.status,
-          message: 'Sessão expirada. Redirecionando para login...',
-        } as FetchError;
+        throw new Error('Sessão expirada. Redirecionando para login...');
       }
     }
 
-    throw {
-      status: response.status,
-      message: (data as any)?.message || 'Erro na requisição',
-      ...data,
-    } as FetchError;
+    throw new Error((data as any)?.message || 'Erro na requisição');
   }
 
   return data as T;

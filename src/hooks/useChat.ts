@@ -118,7 +118,8 @@ export async function sendMessage(
         } else if (event.type === 'error') {
           callbacks.onError(event.message ?? 'Erro no assistente.');
         }
-      } catch {
+      } catch (err) {
+        console.error('Erro ao processar evento SSE:', err);
       }
     }
   }

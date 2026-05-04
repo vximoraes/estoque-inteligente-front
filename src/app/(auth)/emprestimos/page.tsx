@@ -13,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useQueryState } from 'nuqs';
 import { get } from '@/lib/fetchData';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
@@ -21,20 +22,21 @@ import {
   Handshake,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Pencil,
   Trash2,
 } from 'lucide-react';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import StatCard from '@/components/stat-card';
-import { PulseLoader } from 'react-spinners';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function EmprestimosPageContent() {
-  const observerTarget = useRef<HTMLDivElement>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const [observacoesEmprestimo, setObservacoesEmprestimo] = useState<Emprestimo | null>(null);
@@ -53,16 +55,12 @@ function EmprestimosPageContent() {
     data,
     isLoading,
     error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
     refetch,
-  } = useInfiniteQuery<EmprestimosApiResponse>({
-    queryKey: ['emprestimos', searchTerm, statusFilter],
-    queryFn: async ({ pageParam }) => {
-      const page = (pageParam as number) || 1;
+  } = useQuery<EmprestimosApiResponse>({
+    queryKey: ['emprestimos', searchTerm, statusFilter, currentPage],
+    queryFn: async () => {
       const params = new URLSearchParams();
-      params.append('page', page.toString());
+      params.append('page', currentPage.toString());
       params.append('limite', '20');
 
       if (searchTerm) params.append('solicitante_nome', searchTerm);
@@ -71,33 +69,15 @@ function EmprestimosPageContent() {
 
       return await get<EmprestimosApiResponse>(`/emprestimos?${params.toString()}`);
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
     refetchOnMount: 'always',
   });
 
   useEffect(() => {
-    if (!observerTarget.current) return;
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(observerTarget.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const emprestimos = useMemo(
-    () => data?.pages.flatMap((page) => page.data.docs) || [],
-    [data],
-  );
+  const emprestimos = data?.data?.docs || [];
+  const paginationInfo = data?.data;
 
   const { data: globalStats } = useQuery<{
     total: number;
@@ -154,25 +134,10 @@ function EmprestimosPageContent() {
     refetchOnWindowFocus: false,
   });
 
-  const emprestimosFiltrados = useMemo(() => {
-    return emprestimos.filter((emp) => {
-      const termo = searchTerm.toLowerCase().trim();
-
-      const matchSearch =
-        !termo ||
-        emp.solicitante_nome.toLowerCase().includes(termo) ||
-        emp.item?.nome?.toLowerCase().includes(termo) ||
-        emp.localizacao?.nome?.toLowerCase().includes(termo);
-
-      const matchStatus = !statusFilter || emp.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [emprestimos, searchTerm, statusFilter]);
-
-  const totalLocal = emprestimosFiltrados.length;
-  const ativosLocal = emprestimosFiltrados.filter((e) => e.status === 'Ativo').length;
-  const atrasadosLocal = emprestimosFiltrados.filter((e) => e.status === 'Atrasado').length;
-  const devolvidosLocal = emprestimosFiltrados.filter((e) => e.status === 'Devolvido').length;
+  const totalLocal = emprestimos.length;
+  const ativosLocal = emprestimos.filter((e) => e.status === 'Ativo').length;
+  const atrasadosLocal = emprestimos.filter((e) => e.status === 'Atrasado').length;
+  const devolvidosLocal = emprestimos.filter((e) => e.status === 'Devolvido').length;
 
   const total = globalStats?.total ?? totalLocal;
   const ativos = globalStats?.ativos ?? ativosLocal;
@@ -256,7 +221,7 @@ function EmprestimosPageContent() {
               </div>
               <p className="mt-4 text-gray-600 font-medium">Carregando empréstimos...</p>
             </div>
-          ) : emprestimosFiltrados.length > 0 ? (
+          ) : emprestimos.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
@@ -276,7 +241,7 @@ function EmprestimosPageContent() {
                   </TableHeader>
 
                   <TableBody>
-                    {emprestimosFiltrados.map((emp) => (
+                    {emprestimos.map((emp) => (
                       <TableRow key={emp._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="font-medium text-left px-6 py-3">{emp.item?.nome || '-'}</TableCell>
                         <TableCell className="text-left px-6 py-3">{emp.solicitante_nome}</TableCell>
@@ -352,11 +317,30 @@ function EmprestimosPageContent() {
                     ))}
                   </TableBody>
                 </table>
-
-                <div ref={observerTarget} className="h-10 flex items-center justify-center">
-                  {isFetchingNextPage && <PulseLoader color="#3b82f6" size={5} />}
-                </div>
               </div>
+              {paginationInfo && paginationInfo.totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 shrink-0">
+                  <span className="text-sm text-gray-500">
+                    Página {currentPage} de {paginationInfo.totalPages}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={!paginationInfo.hasPrevPage}
+                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(paginationInfo.totalPages, p + 1))}
+                      disabled={!paginationInfo.hasNextPage}
+                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
@@ -410,7 +394,13 @@ function EmprestimosPageContent() {
           emprestimoId={excluirEmprestimo._id}
           itemNome={excluirEmprestimo.item?.nome || 'Item'}
           solicitanteNome={excluirEmprestimo.solicitante_nome}
-          onSuccess={() => refetch()}
+          onSuccess={() => {
+            if (emprestimos.length === 1 && currentPage > 1) {
+              setCurrentPage((p) => p - 1);
+            } else {
+              refetch();
+            }
+          }}
         />
       )}
 

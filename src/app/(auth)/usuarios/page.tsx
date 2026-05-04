@@ -9,14 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
-import { Search, Plus, Trash2, Mail, Loader2, Eye } from 'lucide-react';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { Search, Plus, Trash2, Mail, Loader2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PulseLoader } from 'react-spinners';
 import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario';
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario';
 import ModalDetalhesUsuario from '@/components/modal-detalhes-usuario';
@@ -40,6 +40,7 @@ interface UsuarioApiResponse {
     limit: number;
     page: number;
     totalPages: number;
+    hasPrevPage: boolean;
     hasNextPage: boolean;
     nextPage: number | null;
   };
@@ -48,7 +49,8 @@ interface UsuarioApiResponse {
 function PageUsuariosContent() {
   const router = useRouter();
   const { user } = useSession();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+  const [currentPage, setCurrentPage] = useState(1);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null);
   const [excluirUsuarioNome, setExcluirUsuarioNome] = useState<string>('');
@@ -61,7 +63,6 @@ function PageUsuariosContent() {
   const [detalhesUsuarioId, setDetalhesUsuarioId] = useState<string | null>(
     null,
   );
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -69,57 +70,26 @@ function PageUsuariosContent() {
     isFetching,
     error,
     refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<UsuarioApiResponse>({
-    queryKey: ['usuarios', searchTerm],
-    queryFn: async ({ pageParam }) => {
-      const page = (pageParam as number) || 1;
+  } = useQuery<UsuarioApiResponse>({
+    queryKey: ['usuarios', searchTerm, currentPage],
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
       params.append('limite', '20');
-      params.append('page', page.toString());
+      params.append('page', currentPage.toString());
 
       const queryString = params.toString();
       const url = `/usuarios${queryString ? `?${queryString}` : ''}`;
 
       return await get<UsuarioApiResponse>(url);
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleCadastrarSuccess = async () => {
     setIsRefetchingAfterDelete(true);
@@ -136,6 +106,9 @@ function PageUsuariosContent() {
   const handleExcluirSuccess = async () => {
     setIsRefetchingAfterDelete(true);
 
+    const isLastItemOnPage = usuarios.length === 1;
+    const shouldGoToPreviousPage = isLastItemOnPage && currentPage > 1;
+
     toast.success('Usuário excluído com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
@@ -145,6 +118,10 @@ function PageUsuariosContent() {
       draggable: false,
       transition: Slide,
     });
+
+    if (shouldGoToPreviousPage) {
+      setCurrentPage((prev) => prev - 1);
+    }
 
     await refetch();
     setIsRefetchingAfterDelete(false);
@@ -186,9 +163,16 @@ function PageUsuariosContent() {
     setIsDetalhesModalOpen(true);
   };
 
-  const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
+  const usuarios = (data?.data?.docs || []).filter(
     (usuario) => usuario._id !== user?.id,
   );
+  const paginationInfo = data?.data || {
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+  };
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
@@ -357,19 +341,32 @@ function PageUsuariosContent() {
                     ))}
                   </TableBody>
                 </table>
-                <div
-                  ref={observerTarget}
-                  className="h-10 flex items-center justify-center"
-                >
-                  {isFetchingNextPage && (
-                    <PulseLoader
-                      color="#3b82f6"
-                      size={5}
-                      speedMultiplier={0.8}
-                    />
-                  )}
-                </div>
               </div>
+              {paginationInfo.totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
+                  <p className="text-sm text-gray-600">
+                    Página {paginationInfo.page} de {paginationInfo.totalPages}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={!paginationInfo.hasPrevPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Página anterior"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                      disabled={!paginationInfo.hasNextPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Próxima página"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div

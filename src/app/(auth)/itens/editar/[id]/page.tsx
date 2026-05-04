@@ -12,7 +12,6 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  useInfiniteQuery,
 } from '@tanstack/react-query';
 import { get, post, patch } from '@/lib/fetchData';
 import { getSession } from 'next-auth/react';
@@ -20,7 +19,6 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
-import { PulseLoader } from 'react-spinners';
 
 interface Categoria {
   _id: string;
@@ -89,7 +87,6 @@ export default function EditarItemPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [idItem, setIdItem] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [isEditarCategoriaModalOpen, setIsEditarCategoriaModalOpen] =
     useState(false);
@@ -110,20 +107,13 @@ export default function EditarItemPage() {
   const {
     data: categoriasData,
     isLoading: isLoadingCategorias,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['categorias-infinite'],
-    queryFn: async ({ pageParam = 1 }) => {
+  } = useQuery({
+    queryKey: ['categorias'],
+    queryFn: async () => {
       return await get<CategoriasApiResponse>(
-        `/categorias?limite=20&page=${pageParam}`,
+        `/categorias?limite=100&page=1`,
       );
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
   });
 
   useEffect(() => {
@@ -370,7 +360,7 @@ export default function EditarItemPage() {
       const file = files[0];
       if (file.type.startsWith('image/')) {
         setImagem(file);
-        setImagemParaDeletar(false); // Limpa a flag de deletar ao fazer drop de nova imagem
+        setImagemParaDeletar(false);
 
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -408,8 +398,6 @@ export default function EditarItemPage() {
     if (descricao.trim()) {
       itemData.descricao = descricao;
     }
-
-    // Não envia imagem no PATCH - gerenciada via endpoints POST /foto e DELETE /foto
 
     updateItemMutation.mutate(itemData);
   };
@@ -453,34 +441,13 @@ export default function EditarItemPage() {
     };
   }, []);
 
-  const categorias = categoriasData?.pages
-    ? categoriasData.pages.flatMap((page) => page.data.docs)
-    : [];
+  const categorias = categoriasData?.data?.docs ?? [];
   const categoriasFiltradas = categorias.filter((cat: Categoria) =>
     cat.nome.toLowerCase().includes(categoriaPesquisa.toLowerCase()),
   );
   const categoriaSelecionada = categorias.find(
     (cat: Categoria) => cat._id === categoriaId,
   );
-
-  useEffect(() => {
-    if (!observerTarget.current || !isCategoriaDropdownOpen) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 },
-    );
-
-    observer.observe(observerTarget.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isCategoriaDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoadingItem) {
     return (
@@ -705,14 +672,6 @@ export default function EditarItemPage() {
                                         </div>
                                       </div>
                                     ),
-                                  )}
-                                  {/* Infinite scroll trigger */}
-                                  <div ref={observerTarget} className="h-1" />
-                                  {/* Loading indicator */}
-                                  {isFetchingNextPage && (
-                                    <div className="flex justify-center py-4">
-                                      <PulseLoader color="#306FCC" size={8} />
-                                    </div>
                                   )}
                                 </>
                               ) : (

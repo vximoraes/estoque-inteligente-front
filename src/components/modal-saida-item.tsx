@@ -399,7 +399,7 @@ export default function ModalSaidaItem({
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
               <h2
-                className="text-xl font-semibold text-foreground mb-1 break-words"
+                className="text-xl font-semibold text-foreground mb-1 wrap-break-word"
                 data-test="modal-saida-titulo"
               >
                 Registrar saída de {itemNome}
@@ -476,7 +476,7 @@ export default function ModalSaidaItem({
                   </span>
                   {localizacaoSelecionada && (
                     <span
-                      className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${
+                      className={`text-sm px-1.5 sm:px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
                         getQuantidadeDisponivel(localizacaoSelecionada) > 0
                           ? 'bg-muted/50 text-foreground'
                           : 'bg-muted/50 text-muted-foreground'
@@ -488,7 +488,7 @@ export default function ModalSaidaItem({
                   )}
                 </div>
                 <ChevronDown
-                  className={`w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ml-2 ${
+                  className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
                     isDropdownOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -542,7 +542,7 @@ export default function ModalSaidaItem({
                                   {localizacao.nome}
                                 </span>
                                 <span
-                                  className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${
+                                  className={`text-sm px-2 py-0.5 rounded shrink-0 ${
                                     qtdDisponivel > 0
                                       ? 'bg-muted/50 text-foreground'
                                       : 'bg-muted/50 text-muted-foreground'
@@ -551,7 +551,7 @@ export default function ModalSaidaItem({
                                   {qtdDisponivel} disponível
                                 </span>
                               </button>
-                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                              <div className="flex items-center gap-1 shrink-0 ml-1">
                                 <button
                                   type="button"
                                   onClick={(e) => {

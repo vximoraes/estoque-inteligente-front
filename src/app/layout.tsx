@@ -26,12 +26,14 @@ export default function RootLayout({
       <body className="flex justify-center">
         <SessionProvider>
           <SidebarProvider>
-            <Header />
-            <main className="w-full max-w-full overflow-hidden">
-              <NuqsAdapter>
-                <QueryProvider>{children}</QueryProvider>
-              </NuqsAdapter>
-            </main>
+            <NuqsAdapter>
+              <QueryProvider>
+                <Header />
+                <main className="w-full max-w-full overflow-hidden">
+                  {children}
+                </main>
+              </QueryProvider>
+            </NuqsAdapter>
           </SidebarProvider>
         </SessionProvider>
       </body>

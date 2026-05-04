@@ -1,54 +1,26 @@
 import { useSession } from '@/hooks/use-session';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 
 export function usePermissions() {
   const { user } = useSession();
-  const [permissoes, setPermissoes] = useState<any[]>([]);
-  const [grupos, setGrupos] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadPermissions = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
+  const { data, isLoading } = useQuery({
+    queryKey: ['user-permissions', user?.id],
+    queryFn: async () => {
+      const response = await get<any>(`/usuarios/${user!.id}`);
+      return {
+        permissoes: response?.data?.permissoes || [],
+        grupos: response?.data?.grupos || [],
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 
-      try {
-        const storedPermissions = localStorage.getItem('user_permissions');
-        const storedGroups = localStorage.getItem('user_groups');
-
-        if (storedPermissions && storedGroups) {
-          setPermissoes(JSON.parse(storedPermissions));
-          setGrupos(JSON.parse(storedGroups));
-          setLoading(false);
-          return;
-        }
-
-        const response = await get<any>(`/usuarios/${user.id}`);
-        if (response?.data) {
-          const userPermissions = response.data.permissoes || [];
-          const userGroups = response.data.grupos || [];
-
-          setPermissoes(userPermissions);
-          setGrupos(userGroups);
-
-          localStorage.setItem(
-            'user_permissions',
-            JSON.stringify(userPermissions),
-          );
-          localStorage.setItem('user_groups', JSON.stringify(userGroups));
-        }
-      } catch (error) {
-        console.error('Erro ao carregar permissões:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPermissions();
-  }, [user?.id]);
+  const permissoes = data?.permissoes || [];
+  const grupos = data?.grupos || [];
 
   const hasPermission = (
     rota: string,
@@ -89,6 +61,6 @@ export function usePermissions() {
     canManageUsers,
     permissoes,
     grupos,
-    loading,
+    loading: isLoading,
   };
 }

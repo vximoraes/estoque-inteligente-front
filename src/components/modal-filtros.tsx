@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { PulseLoader } from 'react-spinners';
 
 interface Categoria {
   _id: string;
@@ -63,26 +62,18 @@ export default function ModalFiltros({
   const [categoriaDropdownOpen, setCategoriaDropdownOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoriaSearch, setCategoriaSearch] = useState('');
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data: categoriasData,
     isLoading: isLoadingCategorias,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['categorias-infinite'],
-    queryFn: async ({ pageParam = 1 }) => {
+  } = useQuery({
+    queryKey: ['categorias'],
+    queryFn: async () => {
       return await get<CategoriasApiResponse>(
-        `/categorias?limite=20&page=${pageParam}`,
+        `/categorias?limite=100&page=1`,
       );
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
-    enabled: isOpen,
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -137,25 +128,6 @@ export default function ModalFiltros({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!observerTarget.current || !categoriaDropdownOpen) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 },
-    );
-
-    observer.observe(observerTarget.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [categoriaDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -183,9 +155,7 @@ export default function ModalFiltros({
     onClose();
   };
 
-  const categorias = categoriasData?.pages
-    ? categoriasData.pages.flatMap((page) => page.data.docs)
-    : [];
+  const categorias = categoriasData?.data?.docs ?? [];
   const categoriaOptions = [
     { value: '', label: 'Todas as categorias' },
     ...categorias.map((cat) => ({ value: cat._id, label: cat.nome })),
@@ -312,14 +282,6 @@ export default function ModalFiltros({
                               {option.label}
                             </button>
                           ))}
-                          {/* Infinite scroll trigger */}
-                          <div ref={observerTarget} className="h-1" />
-                          {/* Loading indicator */}
-                          {isFetchingNextPage && (
-                            <div className="flex justify-center py-4">
-                              <PulseLoader color="#306FCC" size={8} />
-                            </div>
-                          )}
                         </>
                       ) : (
                         <div

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import ModalExcluirOrcamento from '@/components/modal-excluir-orcamento';
 import ModalDetalhesOrcamento from '@/components/modal-detalhes-orcamento';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
 import {
@@ -22,17 +22,20 @@ import {
   Eye,
   FileDown,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PulseLoader } from 'react-spinners';
 
 function PageOrcamentosContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+  const [currentPage, setCurrentPage] = useState(1);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(
     null,
@@ -48,7 +51,6 @@ function PageOrcamentosContent() {
   >(undefined);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -56,57 +58,26 @@ function PageOrcamentosContent() {
     isFetching,
     error,
     refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<OrcamentoApiResponse>({
-    queryKey: ['orcamentos', searchTerm],
-    queryFn: async ({ pageParam }) => {
-      const page = (pageParam as number) || 1;
+  } = useQuery<OrcamentoApiResponse>({
+    queryKey: ['orcamentos', searchTerm, currentPage],
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
-      params.append('limit', '20');
-      params.append('page', page.toString());
+      params.append('limite', '20');
+      params.append('page', currentPage.toString());
 
       const queryString = params.toString();
       const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;
 
       return await get<OrcamentoApiResponse>(url);
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     const success = searchParams.get('success');
@@ -164,7 +135,6 @@ function PageOrcamentosContent() {
       transition: Slide,
     });
 
-    router.refresh();
     await refetch();
     setIsRefetchingAfterDelete(false);
   };
@@ -300,7 +270,14 @@ function PageOrcamentosContent() {
     }
   };
 
-  const orcamentos = data?.pages.flatMap((page) => page.data.docs) || [];
+  const orcamentos = data?.data?.docs || [];
+  const paginationInfo = data?.data || {
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+  };
 
   return (
     <div
@@ -463,19 +440,32 @@ function PageOrcamentosContent() {
                   </TableBody>
                 </table>
 
-                <div
-                  ref={observerTarget}
-                  className="h-10 flex items-center justify-center"
-                >
-                  {isFetchingNextPage && (
-                    <PulseLoader
-                      color="#3b82f6"
-                      size={5}
-                      speedMultiplier={0.8}
-                    />
-                  )}
-                </div>
               </div>
+              {paginationInfo.totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
+                  <p className="text-sm text-gray-600">
+                    Página {paginationInfo.page} de {paginationInfo.totalPages}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={!paginationInfo.hasPrevPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Página anterior"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                      disabled={!paginationInfo.hasNextPage || isFetching}
+                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      aria-label="Próxima página"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div
