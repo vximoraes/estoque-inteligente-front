@@ -241,7 +241,6 @@ export default function Cabecalho({
   return (
     <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-5">
       <div className="flex items-center gap-3 md:gap-5">
-        {/*  menu */}
         <button
           onClick={handleMenuClick}
           className="md:hidden w-10 h-10 flex items-center justify-center rounded-sm hover:bg-muted transition-colors"
@@ -250,7 +249,6 @@ export default function Cabecalho({
           <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
         </button>
 
-        {/* Botão de voltar */}
         {showBackButton && onBackClick && (
           <button
             onClick={onBackClick}
@@ -279,7 +277,6 @@ export default function Cabecalho({
       </div>
 
       <div className="flex items-center gap-2.5 md:gap-3.5">
-        {/* Notificações */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
