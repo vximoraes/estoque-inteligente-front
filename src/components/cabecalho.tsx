@@ -212,12 +212,7 @@ export default function Cabecalho({
       }
     } else {
       try {
-        const naoVisualizadas = notifications.filter((n) => !n.visualizada);
-        await Promise.all(
-          naoVisualizadas.map((notif) =>
-            patch(`/notificacoes/${notif._id}/visualizar`, {}),
-          ),
-        );
+        await patch(`/notificacoes/visualizar-todas`, {});
         queryClient.invalidateQueries({
           queryKey: ['notificacoes-header', user?.id],
         });
