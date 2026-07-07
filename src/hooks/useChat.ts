@@ -30,7 +30,6 @@ export function useCreateConversa() {
       const res = await fetchData<{ data: ConversaResumo }>(
         '/ia/conversas',
         'POST',
-        null,
         mensagemInicial ? { mensagem_inicial: mensagemInicial } : undefined,
       );
       return res.data;
