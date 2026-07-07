@@ -9,7 +9,7 @@ import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { useState, useEffect, useCallback } from 'react';
 import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
-import { signOut } from 'next-auth/react';
+import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import { X, User } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -177,7 +177,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
     localStorage.removeItem('user_permissions');
     localStorage.removeItem('user_groups');
 
-    await signOut({ redirect: false });
+    await authClient.signOut({ fetchOptions: { credentials: 'include' } });
     window.location.href = '/login';
   };
 

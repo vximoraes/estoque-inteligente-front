@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, ToastContainer, Slide } from 'react-toastify';
@@ -11,12 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
 import { esqueciSenhaSchema, type EsqueciSenhaFormData } from '@/schemas';
 
 export default function EsqueciSenhaPage() {
   const [emailEnviado, setEmailEnviado] = useState(false);
   const [emailUsuario, setEmailUsuario] = useState('');
-  const router = useRouter();
 
   const {
     register,
@@ -27,59 +26,35 @@ export default function EsqueciSenhaPage() {
   });
 
   const onSubmit = async (data: EsqueciSenhaFormData) => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/recover`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: data.email }),
-        },
-      );
-      const responseData = await res.json();
-      if (!res.ok) throw responseData;
+    const { error } = await authClient.requestPasswordReset({
+      email: data.email,
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
 
-      if (responseData.error === false) {
-        setEmailUsuario(data.email);
-        setEmailEnviado(true);
-        toast.success('E-mail de recuperação enviado com sucesso!', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
-      }
-    } catch (error) {
-      if (!(error instanceof Error)) {
-        const errorData = error as { message?: string };
-
-        toast.error(
-          errorData.message || 'Erro ao solicitar recuperação de senha.',
-          {
-            position: 'bottom-right',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            transition: Slide,
-          },
-        );
-      } else {
-        toast.error('Ocorreu um erro inesperado. Tente novamente.', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
-      }
+    if (error) {
+      toast.error(error.message || 'Erro ao solicitar recuperação de senha.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      return;
     }
+
+    setEmailUsuario(data.email);
+    setEmailEnviado(true);
+    toast.success('E-mail de recuperação enviado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
   };
 
   return (
@@ -172,4 +147,3 @@ export default function EsqueciSenhaPage() {
     </>
   );
 }
-

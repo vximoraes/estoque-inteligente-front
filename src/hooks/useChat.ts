@@ -1,23 +1,12 @@
-import { getSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchData } from '@/lib/fetchData';
 import type { Conversa, ConversaResumo, PaginatedConversas } from '@/types/chat';
-
-async function getToken(): Promise<string | null> {
-  const session = await getSession();
-  return session?.user?.accessToken ?? null;
-}
 
 export function useConversas() {
   return useQuery<PaginatedConversas>({
     queryKey: ['conversas'],
     queryFn: async () => {
-      const token = await getToken();
-      const res = await fetchData<{ data: PaginatedConversas }>(
-        '/ia/conversas?limite=50',
-        'GET',
-        token,
-      );
+      const res = await fetchData<{ data: PaginatedConversas }>('/ia/conversas?limite=50');
       return res.data;
     },
   });
@@ -28,8 +17,7 @@ export function useConversa(id: string | null) {
     queryKey: ['conversa', id],
     enabled: !!id,
     queryFn: async () => {
-      const token = await getToken();
-      const res = await fetchData<{ data: Conversa }>(`/ia/conversas/${id}`, 'GET', token);
+      const res = await fetchData<{ data: Conversa }>(`/ia/conversas/${id}`);
       return res.data;
     },
   });
@@ -39,11 +27,10 @@ export function useCreateConversa() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (mensagemInicial?: string) => {
-      const token = await getToken();
       const res = await fetchData<{ data: ConversaResumo }>(
         '/ia/conversas',
         'POST',
-        token,
+        null,
         mensagemInicial ? { mensagem_inicial: mensagemInicial } : undefined,
       );
       return res.data;
@@ -56,8 +43,7 @@ export function useDeleteConversa() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const token = await getToken();
-      await fetchData(`/ia/conversas/${id}`, 'DELETE', token);
+      await fetchData(`/ia/conversas/${id}`, 'DELETE');
       return id;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversas'] }),
@@ -75,16 +61,12 @@ export async function sendMessage(
   content: string,
   callbacks: SendMessageCallbacks,
 ): Promise<void> {
-  const session = await getSession();
-  const token = session?.user?.accessToken;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const response = await fetch(`${apiUrl}/ia/conversas/${conversaId}/mensagens`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',  // cookie de sessão Better Auth
     body: JSON.stringify({ content }),
   });
 

@@ -1,16 +1,16 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { headers } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 export async function serverFetch<T>(path: string): Promise<T | null> {
-  const session = await getServerSession(authOptions);
-  const token = session?.user?.accessToken;
-  if (!token) return null;
+  if (!API_URL) return null;
 
   try {
+    const reqHeaders = await headers();
+    const cookie = reqHeaders.get('cookie') ?? '';
+
     const response = await fetch(`${API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { cookie },
       cache: 'no-store',
     });
     if (!response.ok) return null;

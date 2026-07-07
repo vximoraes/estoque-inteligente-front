@@ -12,7 +12,6 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { getSession, useSession as useNextAuthSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 
 interface UsuarioData {
@@ -57,7 +56,6 @@ interface NotificacoesApiResponse {
 
 export default function HomePage() {
   const { user } = useSession();
-  const { update: updateSession } = useNextAuthSession();
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [userData, setUserData] = useState<UsuarioData | null>(null);
@@ -109,14 +107,11 @@ export default function HomePage() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      const session = await getSession();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${user?.id}/foto`,
         {
           method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${session?.user?.accessToken}`,
-          },
+          credentials: 'include',
           body: formData,
         },
       );
@@ -128,10 +123,6 @@ export default function HomePage() {
         if (userData) {
           setUserData({ ...userData, fotoPerfil: data.data.fotoPerfil });
         }
-        await updateSession({
-          ...user,
-          fotoPerfil: data.data.fotoPerfil,
-        });
         window.dispatchEvent(new Event('userFotoUpdated'));
       }
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] });
@@ -155,14 +146,11 @@ export default function HomePage() {
 
   const deleteFotoMutation = useMutation({
     mutationFn: async () => {
-      const session = await getSession();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${user?.id}/foto`,
         {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${session?.user?.accessToken}`,
-          },
+          credentials: 'include',
         },
       );
       return await response.json();
@@ -172,10 +160,6 @@ export default function HomePage() {
       if (userData) {
         setUserData({ ...userData, fotoPerfil: undefined });
       }
-      await updateSession({
-        ...user,
-        fotoPerfil: undefined,
-      });
       window.dispatchEvent(new Event('userFotoUpdated'));
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] });
       toast.success('Foto removida com sucesso!', {
