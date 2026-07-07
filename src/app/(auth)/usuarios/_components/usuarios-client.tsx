@@ -12,7 +12,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Search, Plus, Trash2, Mail, Loader2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';

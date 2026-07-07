@@ -51,7 +51,7 @@ export default function SidebarButtonMenu({
           src={src}
           alt={name}
           className="w-[18px] h-[18px]"
-          data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
+          data-test={`${dataTest}-icon`}
         />
       </SidebarMenuButton>
     );
@@ -71,7 +71,7 @@ export default function SidebarButtonMenu({
         src={src}
         alt=""
         className="w-[18px] h-[18px] shrink-0"
-        data-test={`${dataTest}-icon` || 'sidebar-button-icon'}
+        data-test={`${dataTest}-icon`}
       />
       <span
         className={`text-[13px] tracking-wide ${
@@ -79,7 +79,7 @@ export default function SidebarButtonMenu({
             ? 'text-ei-sidebar-text-strong font-semibold'
             : 'text-ei-sidebar-text font-medium'
         }`}
-        data-test={`${dataTest}-text` || 'sidebar-button-text'}
+        data-test={`${dataTest}-text`}
       >
         {name}
       </span>

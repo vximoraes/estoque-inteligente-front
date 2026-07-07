@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-toastify';
-import { ToastContainer, Slide } from 'react-toastify';
+import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthLeftPanel from '@/components/auth-left-panel';
@@ -28,7 +27,7 @@ const passwordRequirements: PasswordRequirement[] = [
   { text: 'Um número', regex: /\d/ },
   {
     text: 'Um caractere especial (@, #, $, %, etc.)',
-    regex: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    regex: /[@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   },
 ];
 

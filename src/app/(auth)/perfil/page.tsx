@@ -389,13 +389,13 @@ export default function HomePage() {
 
     if (diferencaMinutos < 1) return 'Agora';
     if (diferencaMinutos < 60)
-      return `Há ${diferencaMinutos} minuto${diferencaMinutos > 1 ? 's' : ''}`;
+      {return `Há ${diferencaMinutos} minuto${diferencaMinutos > 1 ? 's' : ''}`;}
     if (diferencaHoras < 24)
-      return `Há ${diferencaHoras} hora${diferencaHoras > 1 ? 's' : ''}`;
+      {return `Há ${diferencaHoras} hora${diferencaHoras > 1 ? 's' : ''}`;}
     if (diferencaDias === 1) return 'Ontem';
     if (diferencaDias < 7) return `Há ${diferencaDias} dias`;
     if (diferencaDias < 30)
-      return `Há ${Math.floor(diferencaDias / 7)} semana${Math.floor(diferencaDias / 7) > 1 ? 's' : ''}`;
+      {return `Há ${Math.floor(diferencaDias / 7)} semana${Math.floor(diferencaDias / 7) > 1 ? 's' : ''}`;}
     return `Há ${Math.floor(diferencaDias / 30)} mês${Math.floor(diferencaDias / 30) > 1 ? 'es' : ''}`;
   }
 

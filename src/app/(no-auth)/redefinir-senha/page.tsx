@@ -27,7 +27,7 @@ const passwordRequirements: PasswordRequirement[] = [
   { text: 'Um número', regex: /\d/ },
   {
     text: 'Um caractere especial (@, #, $, %, etc.)',
-    regex: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    regex: /[@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   },
 ];
 

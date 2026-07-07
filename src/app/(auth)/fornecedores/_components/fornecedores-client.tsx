@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { FornecedorApiResponse } from '@/types/fornecedores';
 import { Search, Plus, Edit, Trash2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';

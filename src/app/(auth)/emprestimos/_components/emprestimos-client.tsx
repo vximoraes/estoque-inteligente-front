@@ -28,7 +28,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import StatCard from '@/components/stat-card';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

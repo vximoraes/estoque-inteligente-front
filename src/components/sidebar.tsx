@@ -1,11 +1,13 @@
 'use client';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { Sidebar } from '@/components/ui/sidebar';
-import { SidebarContent } from '@/components/ui/sidebar';
-import { SidebarMenu } from '@/components/ui/sidebar';
-import { SidebarMenuItem } from '@/components/ui/sidebar';
-import { SidebarMenuButton } from '@/components/ui/sidebar';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@/components/ui/sidebar';
 import { useState, useEffect, useCallback } from 'react';
 import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';

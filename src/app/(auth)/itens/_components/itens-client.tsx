@@ -24,7 +24,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer, toast, Slide } from 'react-toastify';

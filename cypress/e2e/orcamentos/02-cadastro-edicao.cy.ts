@@ -927,7 +927,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
         !primeiroOrcamento.itens ||
         primeiroOrcamento.itens.length === 0
       )
-        return;
+        {return;}
 
       cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
 
