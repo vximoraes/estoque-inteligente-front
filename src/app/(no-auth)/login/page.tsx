@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -30,18 +30,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const { error } = await authClient.signIn.email({
         email: data.email,
-        senha: data.senha,
-        redirect: false,
+        password: data.senha,
+        fetchOptions: { credentials: 'include' },
       });
 
-      if (result?.error) {
+      if (error) {
         setError('E-mail ou senha incorretos.');
-      } else if (result?.ok) {
+      } else {
         router.push('/itens');
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao fazer login. Tente novamente.');
     }
   };

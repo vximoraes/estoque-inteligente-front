@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PulseLoader } from 'react-spinners';
+import { authClient } from '@/lib/auth-client';
 import { redefinirSenhaSchema, type RedefinirSenhaFormData } from '@/schemas';
 
 interface PasswordRequirement {
@@ -83,57 +84,34 @@ function RedefinirSenhaContent() {
       return;
     }
 
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/redefinir-senha?token=${token}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ senha: data.senha }),
-        },
-      );
-      const responseData = await res.json();
-      if (!res.ok) throw responseData;
+    const { error } = await authClient.resetPassword({
+      newPassword: data.senha,
+      token,
+    });
 
-      if (responseData.error === false) {
-        toast.success(
-          'Senha redefinida com sucesso! Redirecionando para o login...',
-          {
-            position: 'bottom-right',
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            transition: Slide,
-          },
-        );
-        setTimeout(() => router.push('/login'), 2000);
-      }
-    } catch (error) {
-      if (!(error instanceof Error)) {
-        const errorData = error as { message?: string };
-        toast.error(errorData.message || 'Ocorreu um erro ao redefinir sua senha.', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
-      } else {
-        toast.error('Ocorreu um erro inesperado. Tente novamente.', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
-      }
+    if (error) {
+      toast.error(error.message || 'Ocorreu um erro ao redefinir sua senha.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      return;
     }
+
+    toast.success('Senha redefinida com sucesso! Redirecionando para o login...', {
+      position: 'bottom-right',
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    setTimeout(() => router.push('/login'), 2000);
   };
 
   if (tokenValido === null) {
@@ -298,4 +276,3 @@ export default function RedefinirSenhaPage() {
     </Suspense>
   );
 }
-
