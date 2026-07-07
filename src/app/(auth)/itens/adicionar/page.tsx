@@ -13,7 +13,6 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
-import { getSession } from 'next-auth/react';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
@@ -122,14 +121,11 @@ export default function AdicionarItemPage() {
       if (imagem) {
         const formData = new FormData();
         formData.append('file', imagem);
-        const session = await getSession();
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/itens/${itemId}/foto`,
           {
             method: 'POST',
-            headers: {
-              Authorization: `Bearer ${session?.user?.accessToken}`,
-            },
+            credentials: 'include',
             body: formData,
           },
         );

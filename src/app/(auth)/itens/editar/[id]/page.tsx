@@ -14,7 +14,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { get, post, patch } from '@/lib/fetchData';
-import { getSession } from 'next-auth/react';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
@@ -165,14 +164,11 @@ export default function EditarItemPage() {
   });
   const deleteItemImagem = useMutation({
     mutationFn: async (itemIdParam: string) => {
-      const session = await getSession();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/itens/${itemIdParam}/foto`,
         {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${session?.user?.accessToken}`,
-          },
+          credentials: 'include',
         },
       );
       return await response.json();
@@ -202,14 +198,11 @@ export default function EditarItemPage() {
       if (imagem) {
         const formData = new FormData();
         formData.append('file', imagem);
-        const session = await getSession();
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/itens/${itemIdParam}/foto`,
           {
             method: 'POST',
-            headers: {
-              Authorization: `Bearer ${session?.user?.accessToken}`,
-            },
+            credentials: 'include',
             body: formData,
           },
         );

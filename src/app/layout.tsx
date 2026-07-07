@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Header from '@/components/header/header';
 import { QueryProvider } from '@/providers/queryProvider';
-import { SessionProvider } from '@/providers/sessionProvider';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
@@ -24,18 +23,16 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="flex justify-center">
-        <SessionProvider>
-          <SidebarProvider>
-            <NuqsAdapter>
-              <QueryProvider>
-                <Header />
-                <main className="w-full max-w-full overflow-hidden">
-                  {children}
-                </main>
-              </QueryProvider>
-            </NuqsAdapter>
-          </SidebarProvider>
-        </SessionProvider>
+        <SidebarProvider>
+          <NuqsAdapter>
+            <QueryProvider>
+              <Header />
+              <main className="w-full max-w-full overflow-hidden">
+                {children}
+              </main>
+            </QueryProvider>
+          </NuqsAdapter>
+        </SidebarProvider>
       </body>
     </html>
   );

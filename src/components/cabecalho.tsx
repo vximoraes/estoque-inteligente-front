@@ -6,7 +6,6 @@ import { useSidebarContext } from '@/contexts/SidebarContext';
 import { Bell, Menu, ChevronLeft } from 'lucide-react';
 import { get, patch } from '@/lib/fetchData';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSession } from 'next-auth/react';
 
 type NotificationItem = {
   _id: string;
@@ -75,17 +74,8 @@ export default function Cabecalho({
     const maxReconnectAttempts = 5;
 
     const connectSSE = async () => {
-      const session = await getSession();
-      const token = session?.user?.accessToken;
-
-      if (!token) {
-        return;
-      }
-
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      if (!API_URL) {
-        return;
-      }
+      if (!API_URL) return;
 
       abortController = new AbortController();
 
@@ -93,10 +83,8 @@ export default function Cabecalho({
 
       try {
         const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'text/event-stream',
-          },
+          headers: { Accept: 'text/event-stream' },
+          credentials: 'include',
           signal: abortController.signal,
         });
 
