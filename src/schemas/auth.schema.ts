@@ -95,3 +95,26 @@ export const ativarContaSchema = z
   });
 
 export type AtivarContaFormData = z.infer<typeof ativarContaSchema>;
+
+export const alterarSenhaSchema = z
+  .object({
+    senhaAtual: z.string().min(1, 'O campo senha atual é obrigatório'),
+    senha: z
+      .string()
+      .min(8, 'A senha deve ter pelo menos 8 caracteres')
+      .regex(
+        senhaRegex,
+        'A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial',
+      ),
+    confirmarSenha: z.string().min(1, 'Por favor, confirme sua senha'),
+  })
+  .refine((data) => data.senha === data.confirmarSenha, {
+    message: 'As senhas não coincidem',
+    path: ['confirmarSenha'],
+  })
+  .refine((data) => data.senha !== data.senhaAtual, {
+    message: 'A nova senha deve ser diferente da senha atual',
+    path: ['senha'],
+  });
+
+export type AlterarSenhaFormData = z.infer<typeof alterarSenhaSchema>;

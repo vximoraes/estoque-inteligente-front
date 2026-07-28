@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Pencil, X, Camera, User } from 'lucide-react';
+import { X, Camera, User, Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Cabecalho from '@/components/cabecalho';
 import { useSession } from '@/hooks/use-session';
+import { authClient } from '@/lib/auth-client';
 import { get, patch } from '@/lib/fetchData';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,6 +16,23 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
+
+interface PasswordRequirement {
+  text: string;
+  regex: RegExp;
+}
+
+const passwordRequirements: PasswordRequirement[] = [
+  { text: 'Mínimo de 8 caracteres', regex: /.{8,}/ },
+  { text: 'Uma letra maiúscula', regex: /[A-Z]/ },
+  { text: 'Uma letra minúscula', regex: /[a-z]/ },
+  { text: 'Um número', regex: /\d/ },
+  {
+    text: 'Um caractere especial (@, #, $, %, etc.)',
+    regex: /[@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
+  },
+];
 
 interface UsuarioData {
   _id: string;
@@ -56,7 +76,6 @@ interface NotificacoesApiResponse {
 
 export default function HomePage() {
   const { user } = useSession();
-  const [isEditing, setIsEditing] = useState(false);
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [userData, setUserData] = useState<UsuarioData | null>(null);
   const [editedNome, setEditedNome] = useState('');
@@ -73,6 +92,9 @@ export default function HomePage() {
   const [novaFoto, setNovaFoto] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false);
+  const [showSenhaAtual, setShowSenhaAtual] = useState(false);
+  const [showSenhaNova, setShowSenhaNova] = useState(false);
+  const [showSenhaConfirmar, setShowSenhaConfirmar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -90,6 +112,7 @@ export default function HomePage() {
         setIsLoading(true);
         const response = await get<UsuarioApiResponse>(`/usuarios/${user.id}`);
         setUserData(response.data);
+        setEditedNome(response.data.nome);
         if (response.data.fotoPerfil) {
           setImagemPreview(response.data.fotoPerfil);
         }
@@ -179,6 +202,48 @@ export default function HomePage() {
       });
     },
   });
+
+  const {
+    register: registerSenha,
+    handleSubmit: handleSubmitSenha,
+    watch: watchSenha,
+    reset: resetSenhaForm,
+    formState: { errors: senhaErrors },
+  } = useForm<AlterarSenhaFormData>({
+    resolver: zodResolver(alterarSenhaSchema),
+  });
+
+  const novaSenhaDigitada = watchSenha('senha', '');
+
+  const alterarSenhaMutation = useMutation({
+    mutationFn: async (data: AlterarSenhaFormData) => {
+      const { error } = await authClient.changePassword({
+        currentPassword: data.senhaAtual,
+        newPassword: data.senha,
+        revokeOtherSessions: false,
+      });
+      if (error) throw new Error(error.message ?? 'Erro ao alterar senha');
+    },
+    onSuccess: () => {
+      toast.success('Senha alterada com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        transition: Slide,
+      });
+      resetSenhaForm();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao alterar senha', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        transition: Slide,
+      });
+    },
+  });
+
+  const onSubmitSenha = (data: AlterarSenhaFormData) => {
+    alterarSenhaMutation.mutate(data);
+  };
 
   useEffect(() => {
     async function fetchStats() {
@@ -484,18 +549,6 @@ export default function HomePage() {
     }
   };
 
-  const handleOpenEdit = () => {
-    if (userData) {
-      setEditedNome(userData.nome);
-    }
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedNome('');
-  };
-
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
@@ -506,7 +559,6 @@ export default function HomePage() {
         nome: editedNome,
       });
 
-      // Atualiza o estado local
       setUserData({ ...userData, nome: editedNome });
 
       toast.success('Perfil atualizado com sucesso!', {
@@ -514,8 +566,6 @@ export default function HomePage() {
         autoClose: 3000,
         transition: Slide,
       });
-      setIsEditing(false);
-      setEditedNome('');
     } catch (error) {
       console.error('Erro ao salvar:', error);
       toast.error('Erro ao atualizar perfil', {
@@ -568,16 +618,16 @@ export default function HomePage() {
 
       {/* Conteúdo principal */}
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch flex-1 overflow-y-auto">
-          {/* Lado esquerdo - Avatar e Info */}
-          <aside className="col-span-1 flex">
-            <div
-              className="p-6 bg-card rounded-sm border border-border flex flex-col items-center justify-center w-full"
-              data-test="perfil-info-section"
-            >
-              <div className="relative w-32 h-32 group">
+        <div className="flex flex-col gap-6 flex-1 overflow-y-auto pb-2">
+          {/* Card resumo da conta */}
+          <div
+            className="bg-card rounded-sm border border-border p-4 flex items-center justify-between gap-4"
+            data-test="perfil-conta-card"
+          >
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="relative w-14 h-14 group shrink-0">
                 <div
-                  className="w-32 h-32 rounded-full overflow-hidden bg-muted flex items-center justify-center"
+                  className="w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center"
                   data-test="perfil-avatar-container"
                 >
                   {imagemPreview ? (
@@ -593,109 +643,263 @@ export default function HomePage() {
                     />
                   ) : (
                     <User
-                      className="w-16 h-16 text-muted-foreground"
+                      className="w-7 h-7 text-muted-foreground"
                       data-test="perfil-avatar-placeholder"
                     />
                   )}
                 </div>
                 <button
                   onClick={() => setIsEditingFoto(true)}
-                  className="absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center text-white bg-ei-accent hover:bg-ei-accent-hover transition-colors cursor-pointer"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white bg-ei-accent hover:bg-ei-accent-hover transition-colors cursor-pointer"
                   title="Editar foto"
                   data-test="edit-avatar-button"
                 >
-                  <Camera className="w-5 h-5" />
+                  <Camera className="w-3.5 h-3.5" />
                 </button>
               </div>
-
-              {isEditing ? (
-                <form
-                  onSubmit={handleSaveEdit}
-                  className="w-full mt-4 px-2 space-y-3"
-                  data-test="inline-edit-perfil-form"
+              <div className="min-w-0">
+                <h2
+                  className="font-semibold text-foreground truncate"
+                  title={userData.nome}
+                  data-test="perfil-nome"
                 >
-                  <div className="space-y-1">
-                    <label htmlFor="nome" className="text-xs text-muted-foreground">
-                      Nome
-                    </label>
-                    <input
-                      id="nome"
-                      type="text"
-                      value={editedNome}
-                      onChange={(e) => setEditedNome(e.target.value)}
-                      maxLength={100}
-                      className="w-full px-3 py-2 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      required
-                      disabled={isSaving}
-                      autoFocus
-                      data-test="input-nome"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate" title={userData?.email}>
-                    {userData?.email}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={handleCancelEdit}
-                      disabled={isSaving}
-                      size="sm"
-                      className="flex-1 cursor-pointer"
-                      data-test="cancel-edit-perfil-button"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSaving}
-                      size="sm"
-                      className="flex-1 text-white cursor-pointer hover:opacity-90"
-                      style={{ backgroundColor: 'var(--ei-accent)' }}
-                      data-test="save-perfil-button"
-                    >
-                      {isSaving ? 'Salvando...' : 'Salvar'}
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <div className="text-center mt-4 w-full px-2">
-                    <h2
-                      className="text-xl font-semibold truncate w-full"
-                      title={userData.nome}
-                      data-test="perfil-nome"
-                    >
-                      {userData.nome}
-                    </h2>
-                    <p
-                      className="text-sm text-muted-foreground mt-1 truncate w-full"
-                      title={userData.email}
-                      data-test="perfil-email"
-                    >
-                      {userData.email}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleOpenEdit}
-                    className="mt-4 flex items-center gap-2 justify-center text-ei-accent hover:underline transition-all cursor-pointer"
-                    data-test="edit-perfil-button"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    <span>Editar perfil</span>
-                  </button>
-                </>
-              )}
+                  {userData.nome}
+                </h2>
+                <p
+                  className="text-sm text-muted-foreground truncate"
+                  title={userData.email}
+                  data-test="perfil-email"
+                >
+                  {userData.email}
+                </p>
+              </div>
             </div>
-          </aside>
+          </div>
+
+          {/* Card Informações pessoais */}
+          <div
+            className="p-6 bg-card rounded-sm border border-border"
+            data-test="perfil-info-section"
+          >
+            <h3 className="text-lg font-semibold mb-3 tracking-wide">
+              Informações pessoais
+            </h3>
+            <div className="w-full border-t border-border mb-4"></div>
+
+            <form
+              onSubmit={handleSaveEdit}
+              className="space-y-3"
+              data-test="form-editar-nome"
+            >
+              <div className="space-y-1 max-w-sm">
+                <label
+                  htmlFor="nome"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Nome completo
+                </label>
+                <input
+                  id="nome"
+                  type="text"
+                  value={editedNome}
+                  onChange={(e) => setEditedNome(e.target.value)}
+                  maxLength={100}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  required
+                  disabled={isSaving}
+                  data-test="input-nome"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={
+                  isSaving ||
+                  !editedNome.trim() ||
+                  editedNome.trim() === userData.nome
+                }
+                className="text-white cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: 'var(--ei-accent)' }}
+                data-test="save-perfil-button"
+              >
+                {isSaving ? 'Salvando...' : 'Salvar nome'}
+              </Button>
+            </form>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  E-mail
+                </p>
+                <p
+                  className="text-sm font-medium text-foreground mt-1 truncate"
+                  title={userData.email}
+                  data-test="perfil-email-readonly"
+                >
+                  {userData.email}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alteração de e-mail requer contato com administrador.
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Membro desde
+                </p>
+                <p
+                  className="text-sm font-medium text-foreground mt-1"
+                  data-test="perfil-membro-desde"
+                >
+                  {formatDate(userData.ativadoEm ?? userData.convidadoEm)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Último acesso: {formatDateTime(userData.ultimoAcesso)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Senha */}
+          <div
+            className="p-6 bg-card rounded-sm border border-border"
+            data-test="perfil-senha-section"
+          >
+            <h3 className="text-lg font-semibold mb-3 tracking-wide">Senha</h3>
+            <div className="w-full border-t border-border mb-4"></div>
+
+            <form
+              onSubmit={handleSubmitSenha(onSubmitSenha)}
+              className="space-y-4"
+              data-test="alterar-senha-form"
+            >
+              <div className="space-y-1 max-w-sm">
+                <label
+                  htmlFor="senhaAtual"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Senha atual
+                </label>
+                <div className="relative w-full">
+                  <input
+                    id="senhaAtual"
+                    type={showSenhaAtual ? 'text' : 'password'}
+                    className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={alterarSenhaMutation.isPending}
+                    autoComplete="current-password"
+                    data-test="input-senha-atual"
+                    {...registerSenha('senhaAtual')}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'}
+                    onClick={() => setShowSenhaAtual((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showSenhaAtual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {senhaErrors.senhaAtual && (
+                  <p className="text-xs text-destructive">{senhaErrors.senhaAtual.message}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+                <div className="space-y-1">
+                  <label
+                    htmlFor="senhaNova"
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  >
+                    Nova senha
+                  </label>
+                  <div className="relative w-full">
+                    <input
+                      id="senhaNova"
+                      type={showSenhaNova ? 'text' : 'password'}
+                      className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={alterarSenhaMutation.isPending}
+                      autoComplete="new-password"
+                      data-test="input-senha-nova"
+                      {...registerSenha('senha')}
+                    />
+                    <button
+                      type="button"
+                      aria-label={showSenhaNova ? 'Ocultar senha' : 'Mostrar senha'}
+                      onClick={() => setShowSenhaNova((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      {showSenhaNova ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {senhaErrors.senha && (
+                    <p className="text-xs text-destructive">{senhaErrors.senha.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label
+                    htmlFor="senhaConfirmar"
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  >
+                    Confirmar nova senha
+                  </label>
+                  <div className="relative w-full">
+                    <input
+                      id="senhaConfirmar"
+                      type={showSenhaConfirmar ? 'text' : 'password'}
+                      className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={alterarSenhaMutation.isPending}
+                      autoComplete="new-password"
+                      data-test="input-senha-confirmar"
+                      {...registerSenha('confirmarSenha')}
+                    />
+                    <button
+                      type="button"
+                      aria-label={showSenhaConfirmar ? 'Ocultar senha' : 'Mostrar senha'}
+                      onClick={() => setShowSenhaConfirmar((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      {showSenhaConfirmar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {senhaErrors.confirmarSenha && (
+                    <p className="text-xs text-destructive">{senhaErrors.confirmarSenha.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {novaSenhaDigitada && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-w-2xl">
+                  {passwordRequirements.map((req, i) => {
+                    const met = req.regex.test(novaSenhaDigitada);
+                    return (
+                      <div
+                        key={i}
+                        className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
+                      >
+                        <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`} />
+                        {req.text}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={alterarSenhaMutation.isPending}
+                className="text-white cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: 'var(--ei-accent)' }}
+                data-test="save-senha-button"
+              >
+                {alterarSenhaMutation.isPending ? 'Salvando...' : 'Alterar senha'}
+              </Button>
+            </form>
+          </div>
 
           {/* Estatísticas de uso */}
-          <section className="col-span-1 lg:col-span-2 flex">
-            <div
-              className="p-6 bg-card rounded-sm border border-border flex flex-col w-full"
-              data-test="estatisticas-section"
-            >
+          <div
+            className="p-6 bg-card rounded-sm border border-border flex flex-col w-full"
+            data-test="estatisticas-section"
+          >
               <h3 className="text-lg font-semibold mb-3 tracking-wide">
                 Estatísticas de uso
               </h3>
@@ -768,11 +972,9 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-          </section>
 
           {/* Notificações */}
-          <div className="col-span-1 lg:col-span-3 flex">
-            <div
+          <div
               className="p-6 bg-card rounded-sm border border-border w-full"
               data-test="notificacoes-section"
             >
@@ -911,7 +1113,6 @@ export default function HomePage() {
                 )}
               </div>
             </div>
-          </div>
         </div>
       </div>
 
