@@ -50,7 +50,7 @@ export function ChatInput({
         placeholder={placeholder}
         className="
           flex-1 resize-none rounded border border-border
-          bg-muted px-3 py-2 text-sm
+          bg-muted px-3 py-2.5 text-base
           text-foreground placeholder:text-muted-foreground
           focus:outline-none focus:ring-1 focus:ring-[#306FCC]
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -63,14 +63,14 @@ export function ChatInput({
         aria-label="Enviar mensagem"
         className="
           shrink-0 flex items-center justify-center
-          w-9 h-9 rounded
+          w-11 h-11 rounded
           bg-[#0f1419] text-white
           disabled:opacity-30 disabled:cursor-not-allowed
           enabled:cursor-pointer
           hover:bg-[#1a2332] transition-colors
         "
       >
-        <Send size={15} strokeWidth={2} />
+        <Send size={16} strokeWidth={2} />
       </button>
     </div>
   );
