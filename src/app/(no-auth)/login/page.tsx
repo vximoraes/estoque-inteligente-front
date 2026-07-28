@@ -1,22 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
+import { PulseLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLeftPanel from '@/components/auth-left-panel';
+import GoogleIcon from '@/components/google-icon';
 import { loginSchema, type LoginFormData } from '@/schemas';
 
-export default function LoginPage() {
+const ERROS_GOOGLE: Record<string, string> = {
+  'google-nao-convidado':
+    'Nenhum convite encontrado para essa conta Google. Peça a um administrador para te convidar.',
+};
+
+function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const erro = searchParams.get('erro');
+    if (erro && ERROS_GOOGLE[erro]) {
+      setError(ERROS_GOOGLE[erro]);
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -43,6 +59,21 @@ export default function LoginPage() {
       }
     } catch {
       setError('Erro ao fazer login. Tente novamente.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setGoogleLoading(true);
+
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/itens',
+    });
+
+    if (error) {
+      setError('Erro ao entrar com Google. Tente novamente.');
+      setGoogleLoading(false);
     }
   };
 
@@ -140,8 +171,42 @@ export default function LoginPage() {
               {isSubmitting ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ou
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full gap-2 cursor-pointer"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || isSubmitting}
+            data-test="botao-google"
+          >
+            {!googleLoading && <GoogleIcon />}
+            {googleLoading ? 'Redirecionando...' : 'Entrar com Google'}
+          </Button>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <PulseLoader color="#306FCC" size={15} />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

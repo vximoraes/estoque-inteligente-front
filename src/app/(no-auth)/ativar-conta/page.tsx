@@ -8,11 +8,13 @@ import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthLeftPanel from '@/components/auth-left-panel';
+import GoogleIcon from '@/components/google-icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PulseLoader } from 'react-spinners';
 import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
 import { ativarContaSchema, type AtivarContaFormData } from '@/schemas';
 
 interface PasswordRequirement {
@@ -35,6 +37,7 @@ function AtivarContaContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenValido, setTokenValido] = useState<boolean | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -134,6 +137,28 @@ function AtivarContaContent() {
           transition: Slide,
         });
       }
+    }
+  };
+
+  const handleGoogleContinuar = async () => {
+    setGoogleLoading(true);
+
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/itens',
+    });
+
+    if (error) {
+      toast.error('Erro ao continuar com Google. Tente novamente.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      setGoogleLoading(false);
     }
   };
 
@@ -276,6 +301,28 @@ function AtivarContaContent() {
               {isSubmitting ? 'Ativando conta...' : 'Ativar conta'}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ou
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full gap-2 cursor-pointer"
+            onClick={handleGoogleContinuar}
+            disabled={googleLoading || isSubmitting}
+          >
+            {!googleLoading && <GoogleIcon />}
+            {googleLoading ? 'Redirecionando...' : 'Continuar com Google'}
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Use o mesmo e-mail para o qual o convite foi enviado.
+          </p>
 
           <p className="mt-6 text-sm font-medium text-muted-foreground">
             Já tem uma conta ativa?{' '}
