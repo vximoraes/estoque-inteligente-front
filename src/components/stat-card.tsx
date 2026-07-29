@@ -22,17 +22,17 @@ export default function StatCard({
 
   return (
     <div
-      className="flex flex-col gap-1.5 px-6 py-5 bg-card border border-border rounded-sm flex-1 min-w-[120px]"
+      className="flex flex-col gap-1 sm:gap-1.5 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5 bg-card border border-border rounded-sm flex-1 min-w-0"
       data-test={dataTest}
       title={cardTitle}
     >
       <span
-        className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+        className="text-lg sm:text-xl lg:text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value truncate"
         style={valueColor ? { color: valueColor } : undefined}
       >
         {value}
       </span>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+      <p className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none truncate">
         {title}
         {subtitle ? ` ${subtitle}` : ''}
       </p>

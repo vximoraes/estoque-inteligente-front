@@ -1,6 +1,5 @@
 'use client';
 import ItemEstoque from '@/components/item-estoque';
-import StatCard from '@/components/stat-card';
 import Cabecalho from '@/components/cabecalho';
 import ModalLocalizacoes from '@/components/modal-localizacoes';
 import ModalFiltros from '@/components/modal-filtros';
@@ -21,8 +20,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
@@ -36,29 +33,25 @@ interface CategoriasApiResponse {
   };
 }
 
-interface ItensStats {
-  totalItens: number;
-  emEstoque: number;
-  baixoEstoque: number;
-  indisponiveis: number;
-}
-
-export default function ItensPageContent({ initialData }: { initialData?: ApiResponse }) {
+export default function ItensPageContent({
+  initialData,
+}: {
+  initialData?: ApiResponse;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [entradaItemId, setEntradaItemId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   const [saidaItemId, setSaidaItemId] = useState<string | null>(null);
   const [isEmprestimoModalOpen, setIsEmprestimoModalOpen] = useState(false);
-  const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(
-    null,
-  );
+  const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
@@ -121,15 +114,6 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
       placeholderData: initialData,
     },
   );
-
-  const { data: globalStats } = useQuery<ItensStats>({
-    queryKey: ['itens-global-stats'],
-    queryFn: async () => {
-      const response = await get<{ data: ItensStats }>('/itens/stats');
-      return response.data;
-    },
-    staleTime: 30_000,
-  });
 
   const { data: estoquesData, isLoading: isLoadingEstoques } =
     useQuery<EstoqueApiResponse>({
@@ -340,71 +324,17 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
     nextPage: null,
   };
 
-  const totalItens = globalStats?.totalItens ?? 0;
-  const emEstoque = globalStats?.emEstoque ?? 0;
-  const baixoEstoque = globalStats?.baixoEstoque ?? 0;
-  const indisponiveis = globalStats?.indisponiveis ?? 0;
-
   return (
     <div
-      className="w-full h-screen flex flex-col overflow-x-hidden bg-white"
+      className="w-full h-screen flex flex-col overflow-x-hidden"
       data-test="itens-page"
     >
       <Cabecalho pagina="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          <div className="mb-6">
-            <button
-              onClick={() => setIsStatsOpen(!isStatsOpen)}
-              className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted transition-colors h-10 cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" />
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Estatísticas
-                </span>
-              </div>
-              {isStatsOpen ? (
-                <ChevronUp className="w-5 h-5 text-gray-600" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-600" />
-              )}
-            </button>
-
-            <div
-              className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
-              data-test="stats-grid"
-            >
-              <StatCard
-                title="Total de itens"
-                value={totalItens}
-                data-test="stat-total-itens"
-                hoverTitle={`Total de itens cadastrados: ${totalItens}`}
-              />
-              <StatCard
-                title="Em estoque"
-                value={emEstoque}
-                data-test="stat-em-estoque"
-                hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
-              />
-              <StatCard
-                title="Baixo estoque"
-                value={baixoEstoque}
-                data-test="stat-baixo-estoque"
-                hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
-              />
-              <StatCard
-                title="Indisponível"
-                value={indisponiveis}
-                data-test="stat-indisponiveis"
-                hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
-              />
-            </div>
-          </div>
-
           <div
-            className="flex flex-col sm:flex-row gap-3 mb-6"
+            className="flex flex-col sm:flex-row gap-3 mb-4"
             data-test="search-actions-bar"
           >
             <div className="relative flex-1" data-test="search-container">
@@ -414,13 +344,13 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
                 placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 pl-11 pr-4 bg-card border-border/80 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+                className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
                 data-test="search-input"
               />
             </div>
             <Button
               variant="outline"
-              className="h-10 px-4 flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+              className="h-10 px-4 flex items-center gap-2 cursor-pointer"
               data-test="filtros-button"
               onClick={handleOpenFiltrosModal}
             >
@@ -443,7 +373,7 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-card text-foreground rounded text-xs border border-border font-medium"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
                     data-test="applied-filter-categoria"
                   >
                     <span className="font-medium">Categoria:</span>
@@ -454,17 +384,17 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
                     </span>
                     <button
                       onClick={() => setCategoriaFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                       title="Remover filtro de categoria"
                       data-test="applied-filter-categoria-remover"
                     >
-                      <X size={12} />
+                      <X size={12} strokeWidth={2.5} />
                     </button>
                   </div>
                 )}
                 {statusFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-card text-foreground rounded text-xs border border-border font-medium"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
                     data-test="applied-filter-status"
                   >
                     <span className="font-medium">Status:</span>
@@ -473,11 +403,11 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
                     </span>
                     <button
                       onClick={() => setStatusFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                       title="Remover filtro de status"
                       data-test="applied-filter-status-remover"
                     >
-                      <X size={12} />
+                      <X size={12} strokeWidth={2.5} />
                     </button>
                   </div>
                 )}
@@ -487,7 +417,7 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
 
           {error && (
             <div
-              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
+              className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded"
               data-test="error-message"
               title={`Erro completo: ${error.message}`}
             >
@@ -501,10 +431,10 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando itens...
               </p>
             </div>
@@ -539,13 +469,18 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 gap-4" data-test="empty-state">
+            <div
+              className="flex flex-col items-center justify-center py-16 gap-4"
+              data-test="empty-state"
+            >
               <div className="w-12 h-12 rounded-full border-2 border-dashed border-border flex items-center justify-center">
                 <Package className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-foreground mb-1">
-                  {searchTerm || categoriaFilter || statusFilter ? 'Nenhum resultado' : 'Nenhum item cadastrado'}
+                  {searchTerm || categoriaFilter || statusFilter
+                    ? 'Nenhum resultado'
+                    : 'Nenhum item cadastrado'}
                 </p>
                 <p className="text-xs text-muted-foreground max-w-[32ch]">
                   {searchTerm || categoriaFilter || statusFilter
@@ -559,18 +494,18 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
 
         {itens.length > 0 && paginationInfo.totalPages > 1 && (
           <div
-            className="bg-white py-4 px-6 flex justify-center items-center shrink-0"
+            className="py-4 px-6 flex justify-center items-center shrink-0"
             data-test="pagination-controls"
           >
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={!paginationInfo.hasPrevPage || isFetching}
-                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="prev-page-button"
                 aria-label="Página anterior"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5 text-muted-foreground" />
               </button>
 
               {(() => {
@@ -612,7 +547,7 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
                     return (
                       <span
                         key={`ellipsis-${index}`}
-                        className="px-3 py-2 text-gray-500"
+                        className="px-3 py-2 text-muted-foreground"
                       >
                         ...
                       </span>
@@ -632,7 +567,9 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
                           ? 'text-white font-semibold'
                           : 'hover:bg-muted text-foreground'
                       } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
-                    style={isActive ? { backgroundColor: '#306FCC' } : undefined}
+                      style={
+                        isActive ? { backgroundColor: '#306FCC' } : undefined
+                      }
                       data-test={`page-${pageNum}-button`}
                     >
                       {pageNum}
@@ -644,11 +581,11 @@ export default function ItensPageContent({ initialData }: { initialData?: ApiRes
               <button
                 onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={!paginationInfo.hasNextPage || isFetching}
-                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 data-test="next-page-button"
                 aria-label="Próxima página"
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
           </div>

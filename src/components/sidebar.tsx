@@ -215,6 +215,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
         <SidebarProvider
           data-test="sidebar-provider"
           className={`m-0 p-0 h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
+          style={
+            {
+              '--sidebar-width': collapsed ? '100px' : '280px',
+            } as React.CSSProperties
+          }
         >
           <Sidebar
             data-test="sidebar-main"

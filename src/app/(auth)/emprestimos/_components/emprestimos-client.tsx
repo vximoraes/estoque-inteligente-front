@@ -20,8 +20,6 @@ import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
   Search,
   Handshake,
-  ChevronDown,
-  ChevronUp,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -37,7 +35,6 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
   const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const [observacoesEmprestimo, setObservacoesEmprestimo] = useState<Emprestimo | null>(null);
   const [isObservacoesModalOpen, setIsObservacoesModalOpen] = useState(false);
@@ -158,24 +155,7 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
         <div className="shrink-0 mb-6">
-          <button
-            onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted transition-colors h-10 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Handshake className="w-5 h-5 text-[#306FCC]" />
-              <span className="font-semibold text-foreground">Estatísticas</span>
-            </div>
-            {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-
-          <div
-            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             <StatCard title="Total de empréstimos" value={total} />
             <StatCard title="Ativos" value={ativos} />
             <StatCard title="Atrasados" value={atrasados} />
@@ -183,22 +163,22 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar por item, solicitante ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 px-3 border border-gray-300 rounded-md bg-white"
+            className="h-10 px-4 border border-border rounded-md bg-card text-foreground"
           >
             <option value="">Todos os status</option>
             <option value="Ativo">Ativo</option>
@@ -255,7 +235,7 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
                         </TableCell>
                         <TableCell className="text-center px-6 py-3">
                           <span
-                            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
+                            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium text-center whitespace-nowrap ${
                               emp.status === 'Ativo'
                                 ? 'bg-green-100 text-green-800'
                                 : emp.status === 'Atrasado'
