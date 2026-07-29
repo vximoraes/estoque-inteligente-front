@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Camera, User, Eye, EyeOff } from 'lucide-react';
+import { X, Camera, User, Eye, EyeOff, Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cabecalho from '@/components/cabecalho';
@@ -16,6 +16,8 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
 
 interface PasswordRequirement {
@@ -42,7 +44,7 @@ interface UsuarioData {
   convidadoEm?: string;
   ativadoEm?: string;
   fotoPerfil?: string;
-  ultimoAcesso?: string;
+  createdAt?: string;
 }
 
 interface UsuarioApiResponse {
@@ -77,6 +79,8 @@ interface NotificacoesApiResponse {
 export default function HomePage() {
   const { user } = useSession();
   const [isEditingFoto, setIsEditingFoto] = useState(false);
+  const [isEditingNome, setIsEditingNome] = useState(false);
+  const [isEditingSenha, setIsEditingSenha] = useState(false);
   const [userData, setUserData] = useState<UsuarioData | null>(null);
   const [editedNome, setEditedNome] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -231,6 +235,7 @@ export default function HomePage() {
         transition: Slide,
       });
       resetSenhaForm();
+      setIsEditingSenha(false);
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Erro ao alterar senha', {
@@ -243,6 +248,14 @@ export default function HomePage() {
 
   const onSubmitSenha = (data: AlterarSenhaFormData) => {
     alterarSenhaMutation.mutate(data);
+  };
+
+  const handleCancelarEdicaoSenha = () => {
+    resetSenhaForm();
+    setShowSenhaAtual(false);
+    setShowSenhaNova(false);
+    setShowSenhaConfirmar(false);
+    setIsEditingSenha(false);
   };
 
   useEffect(() => {
@@ -453,32 +466,23 @@ export default function HomePage() {
     const diferencaDias = Math.floor(diferencaHoras / 24);
 
     if (diferencaMinutos < 1) return 'Agora';
-    if (diferencaMinutos < 60)
-      {return `Há ${diferencaMinutos} minuto${diferencaMinutos > 1 ? 's' : ''}`;}
-    if (diferencaHoras < 24)
-      {return `Há ${diferencaHoras} hora${diferencaHoras > 1 ? 's' : ''}`;}
+    if (diferencaMinutos < 60) {
+      return `Há ${diferencaMinutos} minuto${diferencaMinutos > 1 ? 's' : ''}`;
+    }
+    if (diferencaHoras < 24) {
+      return `Há ${diferencaHoras} hora${diferencaHoras > 1 ? 's' : ''}`;
+    }
     if (diferencaDias === 1) return 'Ontem';
     if (diferencaDias < 7) return `Há ${diferencaDias} dias`;
-    if (diferencaDias < 30)
-      {return `Há ${Math.floor(diferencaDias / 7)} semana${Math.floor(diferencaDias / 7) > 1 ? 's' : ''}`;}
+    if (diferencaDias < 30) {
+      return `Há ${Math.floor(diferencaDias / 7)} semana${Math.floor(diferencaDias / 7) > 1 ? 's' : ''}`;
+    }
     return `Há ${Math.floor(diferencaDias / 30)} mês${Math.floor(diferencaDias / 30) > 1 ? 'es' : ''}`;
   }
 
   function formatDate(dateString?: string) {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR');
-  }
-
-  function formatDateTime(dateString?: string) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    const today = new Date();
-    const isToday = date.toDateString() === today.toDateString();
-
-    if (isToday) {
-      return `Hoje, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    }
-    return date.toLocaleDateString('pt-BR');
   }
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -549,6 +553,11 @@ export default function HomePage() {
     }
   };
 
+  const handleCancelarEdicaoNome = () => {
+    setEditedNome(userData?.nome ?? '');
+    setIsEditingNome(false);
+  };
+
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
@@ -560,6 +569,7 @@ export default function HomePage() {
       });
 
       setUserData({ ...userData, nome: editedNome });
+      setIsEditingNome(false);
 
       toast.success('Perfil atualizado com sucesso!', {
         position: 'bottom-right',
@@ -589,7 +599,13 @@ export default function HomePage() {
           <div className="flex flex-col items-center">
             <div className="relative w-12 h-12">
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin" style={{ borderColor: 'var(--ei-accent) transparent transparent transparent' }}></div>
+              <div
+                className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin"
+                style={{
+                  borderColor:
+                    'var(--ei-accent) transparent transparent transparent',
+                }}
+              ></div>
             </div>
             <p className="mt-4 text-muted-foreground font-medium">
               Carregando perfil...
@@ -605,7 +621,9 @@ export default function HomePage() {
       <div className="w-full h-screen flex flex-col">
         <Cabecalho pagina="Perfil" />
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Erro ao carregar dados do usuário</p>
+          <p className="text-muted-foreground">
+            Erro ao carregar dados do usuário
+          </p>
         </div>
       </div>
     );
@@ -686,213 +704,323 @@ export default function HomePage() {
             </h3>
             <div className="w-full border-t border-border mb-4"></div>
 
-            <form
-              onSubmit={handleSaveEdit}
-              className="space-y-3"
-              data-test="form-editar-nome"
-            >
-              <div className="space-y-1 max-w-sm">
-                <label
-                  htmlFor="nome"
-                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                >
-                  Nome completo
-                </label>
-                <input
-                  id="nome"
-                  type="text"
-                  value={editedNome}
-                  onChange={(e) => setEditedNome(e.target.value)}
-                  maxLength={100}
-                  className="w-full px-3 py-2 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  required
-                  disabled={isSaving}
-                  data-test="input-nome"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={
-                  isSaving ||
-                  !editedNome.trim() ||
-                  editedNome.trim() === userData.nome
-                }
-                className="text-white cursor-pointer hover:opacity-90"
-                style={{ backgroundColor: 'var(--ei-accent)' }}
-                data-test="save-perfil-button"
+            {isEditingNome ? (
+              <form
+                onSubmit={handleSaveEdit}
+                className="flex flex-col gap-3"
+                data-test="form-editar-nome"
               >
-                {isSaving ? 'Salvando...' : 'Salvar nome'}
-              </Button>
-            </form>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  E-mail
-                </p>
-                <p
-                  className="text-sm font-medium text-foreground mt-1 truncate"
-                  title={userData.email}
-                  data-test="perfil-email-readonly"
-                >
-                  {userData.email}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Alteração de e-mail requer contato com administrador.
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Membro desde
-                </p>
-                <p
-                  className="text-sm font-medium text-foreground mt-1"
-                  data-test="perfil-membro-desde"
-                >
-                  {formatDate(userData.ativadoEm ?? userData.convidadoEm)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Último acesso: {formatDateTime(userData.ultimoAcesso)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card Senha */}
-          <div
-            className="p-6 bg-card rounded-sm border border-border"
-            data-test="perfil-senha-section"
-          >
-            <h3 className="text-lg font-semibold mb-3 tracking-wide">Senha</h3>
-            <div className="w-full border-t border-border mb-4"></div>
-
-            <form
-              onSubmit={handleSubmitSenha(onSubmitSenha)}
-              className="space-y-4"
-              data-test="alterar-senha-form"
-            >
-              <div className="space-y-1 max-w-sm">
-                <label
-                  htmlFor="senhaAtual"
-                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                >
-                  Senha atual
-                </label>
-                <div className="relative w-full">
-                  <input
-                    id="senhaAtual"
-                    type={showSenhaAtual ? 'text' : 'password'}
-                    className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={alterarSenhaMutation.isPending}
-                    autoComplete="current-password"
-                    data-test="input-senha-atual"
-                    {...registerSenha('senhaAtual')}
+                <div className="flex flex-col gap-1.5 max-w-sm">
+                  <Label
+                    htmlFor="nome"
+                    className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  >
+                    Nome completo
+                  </Label>
+                  <Input
+                    id="nome"
+                    type="text"
+                    value={editedNome}
+                    onChange={(e) => setEditedNome(e.target.value)}
+                    maxLength={100}
+                    className="h-10"
+                    required
+                    autoFocus
+                    disabled={isSaving}
+                    data-test="input-nome"
                   />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={
+                      isSaving ||
+                      !editedNome.trim() ||
+                      editedNome.trim() === userData.nome
+                    }
+                    className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                    style={{ backgroundColor: 'var(--ei-accent)' }}
+                    data-test="save-perfil-button"
+                  >
+                    {isSaving ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelarEdicaoNome}
+                    disabled={isSaving}
+                    className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+                    data-test="cancel-edit-perfil-button"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex flex-col gap-1.5 max-w-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  Nome completo
+                </p>
+                <div className="flex items-center gap-2 min-w-0">
+                  <p
+                    className="text-sm font-medium text-foreground truncate"
+                    title={userData.nome}
+                    data-test="perfil-nome-valor"
+                  >
+                    {userData.nome}
+                  </p>
                   <button
                     type="button"
-                    aria-label={showSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'}
-                    onClick={() => setShowSenhaAtual((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={() => setIsEditingNome(true)}
+                    className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                    title="Editar nome"
+                    aria-label="Editar nome"
+                    data-test="edit-perfil-button"
                   >
-                    {showSenhaAtual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <Pencil className="w-4 h-4" />
                   </button>
                 </div>
-                {senhaErrors.senhaAtual && (
-                  <p className="text-xs text-destructive">{senhaErrors.senhaAtual.message}</p>
-                )}
               </div>
+            )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-                <div className="space-y-1">
-                  <label
-                    htmlFor="senhaNova"
-                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                  >
-                    Nova senha
-                  </label>
-                  <div className="relative w-full">
-                    <input
-                      id="senhaNova"
-                      type={showSenhaNova ? 'text' : 'password'}
-                      className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={alterarSenhaMutation.isPending}
-                      autoComplete="new-password"
-                      data-test="input-senha-nova"
-                      {...registerSenha('senha')}
-                    />
-                    <button
-                      type="button"
-                      aria-label={showSenhaNova ? 'Ocultar senha' : 'Mostrar senha'}
-                      onClick={() => setShowSenhaNova((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {showSenhaNova ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {senhaErrors.senha && (
-                    <p className="text-xs text-destructive">{senhaErrors.senha.message}</p>
-                  )}
-                </div>
+            <div className="mt-6 flex flex-col gap-1.5 max-w-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                E-mail
+              </p>
+              <p
+                className="text-sm font-medium text-foreground truncate"
+                title={userData.email}
+                data-test="perfil-email-readonly"
+              >
+                {userData.email}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Alteração de e-mail requer contato com administrador.
+              </p>
+            </div>
 
-                <div className="space-y-1">
-                  <label
-                    htmlFor="senhaConfirmar"
-                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                  >
-                    Confirmar nova senha
-                  </label>
-                  <div className="relative w-full">
-                    <input
-                      id="senhaConfirmar"
-                      type={showSenhaConfirmar ? 'text' : 'password'}
-                      className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={alterarSenhaMutation.isPending}
-                      autoComplete="new-password"
-                      data-test="input-senha-confirmar"
-                      {...registerSenha('confirmarSenha')}
-                    />
-                    <button
-                      type="button"
-                      aria-label={showSenhaConfirmar ? 'Ocultar senha' : 'Mostrar senha'}
-                      onClick={() => setShowSenhaConfirmar((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {showSenhaConfirmar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {senhaErrors.confirmarSenha && (
-                    <p className="text-xs text-destructive">{senhaErrors.confirmarSenha.message}</p>
-                  )}
-                </div>
-              </div>
-
-              {novaSenhaDigitada && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-w-2xl">
-                  {passwordRequirements.map((req, i) => {
-                    const met = req.regex.test(novaSenhaDigitada);
-                    return (
-                      <div
-                        key={i}
-                        className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
+            <div className="mt-6" data-test="perfil-senha-section">
+              {isEditingSenha ? (
+                <form
+                  onSubmit={handleSubmitSenha(onSubmitSenha)}
+                  className="flex flex-col gap-4"
+                  data-test="alterar-senha-form"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+                    <div className="flex flex-col gap-1.5">
+                      <Label
+                        htmlFor="senhaAtual"
+                        className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                       >
-                        <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`} />
-                        {req.text}
+                        Senha atual
+                      </Label>
+                      <div className="relative w-full">
+                        <Input
+                          id="senhaAtual"
+                          type={showSenhaAtual ? 'text' : 'password'}
+                          aria-invalid={!!senhaErrors.senhaAtual}
+                          className="h-10 pr-11"
+                          placeholder="••••••••"
+                          disabled={alterarSenhaMutation.isPending}
+                          autoComplete="current-password"
+                          autoFocus
+                          data-test="input-senha-atual"
+                          {...registerSenha('senhaAtual')}
+                        />
+                        <button
+                          type="button"
+                          aria-label={
+                            showSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'
+                          }
+                          onClick={() => setShowSenhaAtual((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {showSenhaAtual ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
                       </div>
-                    );
-                  })}
+                      {senhaErrors.senhaAtual && (
+                        <p className="text-xs text-destructive">
+                          {senhaErrors.senhaAtual.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+                    <div className="flex flex-col gap-1.5">
+                      <Label
+                        htmlFor="senhaNova"
+                        className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                      >
+                        Nova senha
+                      </Label>
+                      <div className="relative w-full">
+                        <Input
+                          id="senhaNova"
+                          type={showSenhaNova ? 'text' : 'password'}
+                          aria-invalid={!!senhaErrors.senha}
+                          className="h-10 pr-11"
+                          placeholder="••••••••"
+                          disabled={alterarSenhaMutation.isPending}
+                          autoComplete="new-password"
+                          data-test="input-senha-nova"
+                          {...registerSenha('senha')}
+                        />
+                        <button
+                          type="button"
+                          aria-label={
+                            showSenhaNova ? 'Ocultar senha' : 'Mostrar senha'
+                          }
+                          onClick={() => setShowSenhaNova((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {showSenhaNova ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      {senhaErrors.senha && (
+                        <p className="text-xs text-destructive">
+                          {senhaErrors.senha.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label
+                        htmlFor="senhaConfirmar"
+                        className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                      >
+                        Confirmar nova senha
+                      </Label>
+                      <div className="relative w-full">
+                        <Input
+                          id="senhaConfirmar"
+                          type={showSenhaConfirmar ? 'text' : 'password'}
+                          aria-invalid={!!senhaErrors.confirmarSenha}
+                          className="h-10 pr-11"
+                          placeholder="••••••••"
+                          disabled={alterarSenhaMutation.isPending}
+                          autoComplete="new-password"
+                          data-test="input-senha-confirmar"
+                          {...registerSenha('confirmarSenha')}
+                        />
+                        <button
+                          type="button"
+                          aria-label={
+                            showSenhaConfirmar
+                              ? 'Ocultar senha'
+                              : 'Mostrar senha'
+                          }
+                          onClick={() => setShowSenhaConfirmar((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {showSenhaConfirmar ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      {senhaErrors.confirmarSenha && (
+                        <p className="text-xs text-destructive">
+                          {senhaErrors.confirmarSenha.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {novaSenhaDigitada && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-w-2xl">
+                      {passwordRequirements.map((req, i) => {
+                        const met = req.regex.test(novaSenhaDigitada);
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
+                          >
+                            <div
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                            />
+                            {req.text}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="submit"
+                      disabled={alterarSenhaMutation.isPending}
+                      className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                      style={{ backgroundColor: 'var(--ei-accent)' }}
+                      data-test="save-senha-button"
+                    >
+                      {alterarSenhaMutation.isPending
+                        ? 'Salvando...'
+                        : 'Salvar'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancelarEdicaoSenha}
+                      disabled={alterarSenhaMutation.isPending}
+                      className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+                      data-test="cancel-edit-senha-button"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex flex-col gap-1.5 max-w-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    Senha
+                  </p>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <p
+                      className="text-sm font-medium text-foreground tracking-widest"
+                      data-test="perfil-senha-mascarada"
+                    >
+                      ••••••••
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingSenha(true)}
+                      className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                      title="Alterar senha"
+                      aria-label="Alterar senha"
+                      data-test="edit-senha-button"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
+            </div>
 
-              <Button
-                type="submit"
-                disabled={alterarSenhaMutation.isPending}
-                className="text-white cursor-pointer hover:opacity-90"
-                style={{ backgroundColor: 'var(--ei-accent)' }}
-                data-test="save-senha-button"
+            <div className="mt-6 flex flex-col gap-1.5 max-w-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                Membro desde
+              </p>
+              <p
+                className="text-sm font-medium text-foreground"
+                data-test="perfil-membro-desde"
               >
-                {alterarSenhaMutation.isPending ? 'Salvando...' : 'Alterar senha'}
-              </Button>
-            </form>
+                {formatDate(
+                  userData.ativadoEm ??
+                    userData.convidadoEm ??
+                    userData.createdAt,
+                )}
+              </p>
+            </div>
           </div>
 
           {/* Estatísticas de uso */}
@@ -900,219 +1028,223 @@ export default function HomePage() {
             className="p-6 bg-card rounded-sm border border-border flex flex-col w-full"
             data-test="estatisticas-section"
           >
-              <h3 className="text-lg font-semibold mb-3 tracking-wide">
-                Estatísticas de uso
-              </h3>
-              <div className="w-full border-t border-border mb-4"></div>
+            <h3 className="text-lg font-semibold mb-3 tracking-wide">
+              Estatísticas de uso
+            </h3>
+            <div className="w-full border-t border-border mb-4"></div>
 
-              {isLoadingStats ? (
+            {isLoadingStats ? (
+              <div
+                className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1"
+                data-test="loading-estatisticas"
+              >
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col justify-center px-6 py-8 gap-3 animate-pulse"
+                  >
+                    <div className="h-3 bg-muted-foreground/20 rounded-sm w-24"></div>
+                    <div className="h-9 bg-muted-foreground/20 rounded-sm w-16"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1"
-                  data-test="loading-estatisticas"
+                  className="flex flex-col justify-center px-6 py-8 gap-1"
+                  data-test="card-total-itens"
                 >
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col justify-center px-6 py-8 gap-3 animate-pulse"
-                    >
-                      <div className="h-3 bg-muted-foreground/20 rounded-sm w-24"></div>
-                      <div className="h-9 bg-muted-foreground/20 rounded-sm w-16"></div>
-                    </div>
-                  ))}
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+                    Itens cadastrados
+                  </p>
+                  <p
+                    className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+                    title={stats.totalItens.toString()}
+                    data-test="total-itens-value"
+                  >
+                    {stats.totalItens}
+                  </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
-                  <div
-                    className="flex flex-col justify-center px-6 py-8 gap-1"
-                    data-test="card-total-itens"
-                  >
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                      Itens cadastrados
-                    </p>
-                    <p
-                      className="text-5xl font-bold leading-none text-ei-accent"
-                      title={stats.totalItens.toString()}
-                      data-test="total-itens-value"
-                    >
-                      {stats.totalItens}
-                    </p>
-                  </div>
 
-                  <div
-                    className="flex flex-col justify-center px-6 py-8 gap-1"
-                    data-test="card-total-movimentacoes"
+                <div
+                  className="flex flex-col justify-center px-6 py-8 gap-1"
+                  data-test="card-total-movimentacoes"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+                    Movimentações
+                  </p>
+                  <p
+                    className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+                    title={stats.totalMovimentacoes.toString()}
+                    data-test="total-movimentacoes-value"
                   >
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                      Movimentações
-                    </p>
-                    <p
-                      className="text-5xl font-bold leading-none text-ei-accent"
-                      title={stats.totalMovimentacoes.toString()}
-                      data-test="total-movimentacoes-value"
-                    >
-                      {stats.totalMovimentacoes}
-                    </p>
-                  </div>
-
-                  <div
-                    className="flex flex-col justify-center px-6 py-8 gap-1"
-                    data-test="card-total-orcamentos"
-                  >
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                      Orçamentos Criados
-                    </p>
-                    <p
-                      className="text-5xl font-bold leading-none text-ei-accent"
-                      title={stats.totalOrcamentos.toString()}
-                      data-test="total-orcamentos-value"
-                    >
-                      {stats.totalOrcamentos}
-                    </p>
-                  </div>
+                    {stats.totalMovimentacoes}
+                  </p>
                 </div>
-              )}
-            </div>
+
+                <div
+                  className="flex flex-col justify-center px-6 py-8 gap-1"
+                  data-test="card-total-orcamentos"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
+                    Orçamentos Criados
+                  </p>
+                  <p
+                    className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
+                    title={stats.totalOrcamentos.toString()}
+                    data-test="total-orcamentos-value"
+                  >
+                    {stats.totalOrcamentos}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Notificações */}
           <div
-              className="p-6 bg-card rounded-sm border border-border w-full"
-              data-test="notificacoes-section"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold tracking-wide">Notificações</h3>
-                  {notificacoes.filter((n) => !n.visualizada).length > 0 && (
-                    <span
-                      className="text-base text-ei-accent font-medium"
-                      data-test="notificacoes-nao-lidas-count"
+            className="p-6 bg-card rounded-sm border border-border w-full"
+            data-test="notificacoes-section"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold tracking-wide">
+                  Notificações
+                </h3>
+                {notificacoes.filter((n) => !n.visualizada).length > 0 && (
+                  <span
+                    className="text-base text-ei-accent font-medium"
+                    data-test="notificacoes-nao-lidas-count"
+                  >
+                    ({notificacoes.filter((n) => !n.visualizada).length})
+                  </span>
+                )}
+              </div>
+              {notificacoes.filter((n) => !n.visualizada).length > 0 && (
+                <button
+                  onClick={marcarTodasComoVisualizadas}
+                  className="text-sm text-ei-accent hover:text-ei-accent/80 hover:underline transition-colors cursor-pointer"
+                  data-test="marcar-todas-lidas-button"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+            </div>
+            <div className="w-full border-t border-border"></div>
+
+            <div className="max-h-60 overflow-y-auto">
+              {isLoadingNotificacoes ? (
+                <div
+                  className="divide-y divide-border w-full"
+                  data-test="loading-notificacoes"
+                >
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="px-3 py-3 animate-pulse">
+                      <div className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full shrink-0 mt-1.5"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-muted rounded-sm w-3/4"></div>
+                          <div className="h-3 bg-muted rounded-sm w-1/4"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : notificacoes.length > 0 ? (
+                <div
+                  className="divide-y divide-border w-full"
+                  data-test="notificacoes-list"
+                >
+                  {notificacoes.map((notificacao) => {
+                    const isLoadingThis =
+                      loadingNotificacaoId === notificacao._id;
+                    const loadingMessage = isLoadingThis
+                      ? loadingAction === 'excluir'
+                        ? 'Excluindo...'
+                        : 'Marcando como lida...'
+                      : notificacao.mensagem;
+                    return (
+                      <div
+                        key={notificacao._id}
+                        className={`px-3 py-3 ${notificacao.visualizada ? 'bg-card' : 'bg-muted/30'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-muted/50 group`}
+                        data-test={`notificacao-item-${notificacao._id}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {!notificacao.visualizada && (
+                            <div
+                              className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                              style={{ backgroundColor: 'var(--ei-accent)' }}
+                              data-test="notificacao-nao-lida-indicator"
+                            ></div>
+                          )}
+                          <div
+                            className="flex-1 cursor-pointer"
+                            onClick={() =>
+                              !notificacao.visualizada &&
+                              !isLoadingThis &&
+                              marcarComoVisualizada(notificacao._id)
+                            }
+                            data-test="notificacao-marcar-lida-area"
+                          >
+                            <p
+                              className={`text-sm text-foreground ${notificacao.visualizada ? '' : 'font-medium'}`}
+                              data-test="notificacao-mensagem"
+                            >
+                              {loadingMessage}
+                              {!isLoadingThis && (
+                                <span
+                                  className="text-sm text-muted-foreground font-normal ml-2"
+                                  data-test="notificacao-tempo-relativo"
+                                >
+                                  - {formatTempoRelativo(notificacao.data_hora)}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          {!isLoadingThis && (
+                            <button
+                              onClick={(e) =>
+                                excluirNotificacao(notificacao._id, e)
+                              }
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded-sm cursor-pointer"
+                              title="Excluir notificação"
+                              data-test="notificacao-excluir-button"
+                            >
+                              <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={observerTarget} className="h-2" />
+                  {isFetchingNextNotificacoes && (
+                    <div
+                      className="px-3 py-3 text-center"
+                      data-test="loading-more-notificacoes"
                     >
-                      ({notificacoes.filter((n) => !n.visualizada).length})
-                    </span>
+                      <p className="text-sm text-muted-foreground">
+                        Carregando mais...
+                      </p>
+                    </div>
                   )}
                 </div>
-                {notificacoes.filter((n) => !n.visualizada).length > 0 && (
-                  <button
-                    onClick={marcarTodasComoVisualizadas}
-                    className="text-sm text-ei-accent hover:text-ei-accent/80 hover:underline transition-colors cursor-pointer"
-                    data-test="marcar-todas-lidas-button"
-                  >
-                    Marcar todas como lidas
-                  </button>
-                )}
-              </div>
-              <div className="w-full border-t border-border"></div>
-
-              <div className="max-h-60 overflow-y-auto">
-                {isLoadingNotificacoes ? (
-                  <div
-                    className="divide-y divide-border w-full"
-                    data-test="loading-notificacoes"
-                  >
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="px-3 py-3 animate-pulse">
-                        <div className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full shrink-0 mt-1.5"></div>
-                          <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-muted rounded-sm w-3/4"></div>
-                            <div className="h-3 bg-muted rounded-sm w-1/4"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : notificacoes.length > 0 ? (
-                  <div
-                    className="divide-y divide-border w-full"
-                    data-test="notificacoes-list"
-                  >
-                    {notificacoes.map((notificacao) => {
-                      const isLoadingThis =
-                        loadingNotificacaoId === notificacao._id;
-                      const loadingMessage = isLoadingThis
-                        ? loadingAction === 'excluir'
-                          ? 'Excluindo...'
-                          : 'Marcando como lida...'
-                        : notificacao.mensagem;
-                      return (
-                        <div
-                          key={notificacao._id}
-                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-card' : 'bg-muted/30'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-muted/50 group`}
-                          data-test={`notificacao-item-${notificacao._id}`}
-                        >
-                          <div className="flex items-start gap-2">
-                            {!notificacao.visualizada && (
-                              <div
-                                className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
-                                style={{ backgroundColor: 'var(--ei-accent)' }}
-                                data-test="notificacao-nao-lida-indicator"
-                              ></div>
-                            )}
-                            <div
-                              className="flex-1 cursor-pointer"
-                              onClick={() =>
-                                !notificacao.visualizada &&
-                                !isLoadingThis &&
-                                marcarComoVisualizada(notificacao._id)
-                              }
-                              data-test="notificacao-marcar-lida-area"
-                            >
-                              <p
-                                className={`text-sm text-foreground ${notificacao.visualizada ? '' : 'font-medium'}`}
-                                data-test="notificacao-mensagem"
-                              >
-                                {loadingMessage}
-                                {!isLoadingThis && (
-                                  <span
-                                    className="text-sm text-muted-foreground font-normal ml-2"
-                                    data-test="notificacao-tempo-relativo"
-                                  >
-                                    -{' '}
-                                    {formatTempoRelativo(notificacao.data_hora)}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                            {!isLoadingThis && (
-                              <button
-                                onClick={(e) =>
-                                  excluirNotificacao(notificacao._id, e)
-                                }
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded-sm cursor-pointer"
-                                title="Excluir notificação"
-                                data-test="notificacao-excluir-button"
-                              >
-                                <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div ref={observerTarget} className="h-2" />
-                    {isFetchingNextNotificacoes && (
-                      <div
-                        className="px-3 py-3 text-center"
-                        data-test="loading-more-notificacoes"
-                      >
-                        <p className="text-sm text-muted-foreground">
-                          Carregando mais...
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className="flex flex-col items-center justify-center w-full py-12 gap-2"
-                    data-test="no-notificacoes-message"
-                  >
-                    <p className="text-sm font-medium text-foreground">Tudo em dia</p>
-                    <p className="text-xs text-muted-foreground text-center max-w-60">
-                      Novas notificações sobre estoque e atividades aparecerão aqui.
-                    </p>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div
+                  className="flex flex-col items-center justify-center w-full py-12 gap-2"
+                  data-test="no-notificacoes-message"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    Tudo em dia
+                  </p>
+                  <p className="text-xs text-muted-foreground text-center max-w-60">
+                    Novas notificações sobre estoque e atividades aparecerão
+                    aqui.
+                  </p>
+                </div>
+              )}
             </div>
+          </div>
         </div>
       </div>
 
@@ -1196,7 +1328,9 @@ export default function HomePage() {
                     <span className="font-semibold text-ei-accent">
                       Selecione uma nova foto
                     </span>{' '}
-                    <span className="text-muted-foreground">ou arraste aqui</span>
+                    <span className="text-muted-foreground">
+                      ou arraste aqui
+                    </span>
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     PNG, JPG ou JPEG até 5MB

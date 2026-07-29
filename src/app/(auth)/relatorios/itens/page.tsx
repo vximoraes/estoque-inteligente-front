@@ -20,8 +20,6 @@ import {
   Filter,
   Package,
   X,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
@@ -50,7 +48,6 @@ function RelatorioItensPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -387,27 +384,9 @@ function RelatorioItensPageContent() {
       <Cabecalho pagina="Relatórios" acao="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
-        {/* Stats Cards - Colapsável no mobile */}
         <div className="shrink-0 mb-6">
-          {/* Botão para mobile */}
-          <button
-            onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted/40 transition-colors h-10 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-[#306FCC]" />
-              <span className="font-semibold text-foreground">Estatísticas</span>
-            </div>
-            {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-
-          {/* Cards - Sempre visível no desktop, colapsável no mobile */}
           <div
-            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
             data-test="stats-grid"
           >
             <StatCard
@@ -439,23 +418,23 @@ function RelatorioItensPageContent() {
 
         {/* Barra de Pesquisa e Botões */}
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-4 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1" data-test="search-container">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar itens..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2 cursor-pointer"
+            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
@@ -464,7 +443,7 @@ function RelatorioItensPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`flex items-center gap-2 text-white transition-all ${
+            className={`h-10 px-4 flex items-center gap-2 text-white transition-all ${
               selectedItems.size > 0
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
@@ -503,11 +482,11 @@ function RelatorioItensPageContent() {
                   </span>
                   <button
                     onClick={() => setCategoriaFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de categoria"
                     data-test="remove-categoria-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -520,11 +499,11 @@ function RelatorioItensPageContent() {
                   <span>{statusFilter}</span>
                   <button
                     onClick={() => setStatusFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de status"
                     data-test="remove-status-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -620,10 +599,14 @@ function RelatorioItensPageContent() {
                       <TableRow
                         data-test="item-row"
                         key={estoque._id}
-                        className="hover:bg-muted/35 border-b border-border"
+                        className="hover:bg-muted/35 border-b border-border cursor-pointer"
                         style={{ height: '60px' }}
+                        onClick={() => handleSelectItem(estoque._id)}
                       >
-                        <TableCell className="text-center px-8 py-3 align-middle">
+                        <TableCell
+                          className="text-center px-8 py-3 align-middle"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -666,7 +649,7 @@ function RelatorioItensPageContent() {
                             data-test="item-status"
                           >
                             <span
-                              className="inline-flex items-center px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.07em] whitespace-nowrap"
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 bg-current/10 text-xs font-medium whitespace-nowrap"
                               title={estoque.item.status}
                               style={{
                                 color:

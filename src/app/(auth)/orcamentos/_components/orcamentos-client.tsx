@@ -11,11 +11,13 @@ import {
 } from '@/components/ui/table';
 import ModalExcluirOrcamento from '@/components/modal-excluir-orcamento';
 import ModalDetalhesOrcamento from '@/components/modal-detalhes-orcamento';
+import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
 import {
   Search,
+  Filter,
   Plus,
   Edit,
   Trash2,
@@ -24,6 +26,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -36,6 +39,11 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [valorMinFilter, setValorMinFilter] = useQueryState('valorMin', { defaultValue: '' });
+  const [valorMaxFilter, setValorMaxFilter] = useQueryState('valorMax', { defaultValue: '' });
+  const [dataInicioFilter, setDataInicioFilter] = useQueryState('dataInicio', { defaultValue: '' });
+  const [dataFimFilter, setDataFimFilter] = useQueryState('dataFim', { defaultValue: '' });
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(null);
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
@@ -52,10 +60,22 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
     error,
     refetch,
   } = useQuery<OrcamentoApiResponse>({
-    queryKey: ['orcamentos', searchTerm, currentPage],
+    queryKey: [
+      'orcamentos',
+      searchTerm,
+      valorMinFilter,
+      valorMaxFilter,
+      dataInicioFilter,
+      dataFimFilter,
+      currentPage,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
+      if (valorMinFilter) params.append('valorMin', valorMinFilter);
+      if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
+      if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
+      if (dataFimFilter) params.append('dataFim', dataFimFilter);
       params.append('limite', '20');
       params.append('page', currentPage.toString());
 
@@ -71,7 +91,7 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, valorMinFilter, valorMaxFilter, dataInicioFilter, dataFimFilter]);
 
   useEffect(() => {
     const success = searchParams.get('success');
@@ -105,6 +125,34 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
 
   const handleAdicionarClick = () => {
     router.push('/orcamentos/adicionar');
+  };
+
+  const handleOpenFiltrosModal = () => {
+    setIsFiltrosModalOpen(true);
+  };
+
+  const handleCloseFiltrosModal = () => {
+    setIsFiltrosModalOpen(false);
+  };
+
+  const handleFiltersChange = (
+    valorMin: string,
+    valorMax: string,
+    dataInicio: string,
+    dataFim: string,
+  ) => {
+    setValorMinFilter(valorMin);
+    setValorMaxFilter(valorMax);
+    setDataInicioFilter(dataInicio);
+    setDataFimFilter(dataFim);
+  };
+
+  const hasActiveFilters =
+    !!valorMinFilter || !!valorMaxFilter || !!dataInicioFilter || !!dataFimFilter;
+
+  const formatarData = (data: string) => {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
   };
 
   const handleEdit = (id: string) => {
@@ -268,7 +316,7 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-4 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1">
@@ -283,6 +331,15 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
             />
           </div>
           <Button
+            variant="outline"
+            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
+            onClick={handleOpenFiltrosModal}
+            data-test="filtros-button"
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          <Button
             className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={handleAdicionarClick}
@@ -292,6 +349,59 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
             Adicionar
           </Button>
         </div>
+
+        {hasActiveFilters && (
+          <div className="mb-4 shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+              {(valorMinFilter || valorMaxFilter) && (
+                <div
+                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                  data-test="applied-filter-valor"
+                >
+                  <span className="font-medium">Valor:</span>
+                  <span data-test="applied-filter-valor-valor">
+                    {valorMinFilter ? `R$ ${valorMinFilter}` : 'R$ 0'} até{' '}
+                    {valorMaxFilter ? `R$ ${valorMaxFilter}` : '∞'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setValorMinFilter('');
+                      setValorMaxFilter('');
+                    }}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de valor"
+                    data-test="applied-filter-valor-remover"
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
+              {(dataInicioFilter || dataFimFilter) && (
+                <div
+                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                  data-test="applied-filter-periodo"
+                >
+                  <span className="font-medium">Período:</span>
+                  <span data-test="applied-filter-periodo-valor">
+                    {dataInicioFilter ? formatarData(dataInicioFilter) : '...'} até{' '}
+                    {dataFimFilter ? formatarData(dataFimFilter) : '...'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setDataInicioFilter('');
+                      setDataFimFilter('');
+                    }}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de período"
+                    data-test="applied-filter-periodo-remover"
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0">
@@ -445,7 +555,7 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {searchTerm
+                  {searchTerm || hasActiveFilters
                     ? 'Nenhum orçamento encontrado para sua pesquisa.'
                     : 'Não há orçamentos cadastrados...'}
                 </p>
@@ -463,6 +573,16 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
         pauseOnHover
         draggable={false}
         transition={Slide}
+      />
+
+      <ModalFiltrosOrcamentos
+        isOpen={isFiltrosModalOpen}
+        onClose={handleCloseFiltrosModal}
+        valorMinFilter={valorMinFilter}
+        valorMaxFilter={valorMaxFilter}
+        dataInicioFilter={dataInicioFilter}
+        dataFimFilter={dataFimFilter}
+        onFiltersChange={handleFiltersChange}
       />
 
       {excluirOrcamentoId && (

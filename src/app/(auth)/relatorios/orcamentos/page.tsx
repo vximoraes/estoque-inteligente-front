@@ -19,8 +19,6 @@ import {
   Search,
   FileText,
   Filter,
-  ChevronDown,
-  ChevronUp,
   X,
 } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
@@ -41,7 +39,6 @@ function RelatorioOrcamentosPageContent() {
   const [dataFimFilter, setDataFimFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -319,27 +316,9 @@ function RelatorioOrcamentosPageContent() {
       <Cabecalho pagina="Relatórios" acao="Orçamentos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
-        {/* Stats Cards - Colapsável no mobile */}
         <div className="shrink-0 mb-6">
-          {/* Botão para mobile */}
-          <button
-            onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-card rounded-lg border border-border hover:bg-muted/40 transition-colors h-10 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#306FCC]" />
-              <span className="font-semibold text-foreground">Estatísticas</span>
-            </div>
-            {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-
-          {/* Cards - Sempre visível no desktop, colapsável no mobile */}
           <div
-            className={`${isStatsOpen ? 'flex mt-4' : 'hidden'} xl:flex xl:mt-0 flex-col sm:flex-row gap-3`}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
             data-test="stats-grid"
           >
             <StatCard
@@ -371,23 +350,23 @@ function RelatorioOrcamentosPageContent() {
 
         {/* Barra de Pesquisa e Botões */}
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-4 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1" data-test="search-container">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar orçamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2 cursor-pointer"
+            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
@@ -396,7 +375,7 @@ function RelatorioOrcamentosPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`flex items-center gap-2 text-white transition-all ${
+            className={`h-10 px-4 flex items-center gap-2 text-white transition-all ${
               selectedItems.size > 0
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
@@ -440,11 +419,11 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setValorMinFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de valor mínimo"
                     data-test="remove-valor-min-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -463,11 +442,11 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setValorMaxFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de valor máximo"
                     data-test="remove-valor-max-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -484,11 +463,11 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setDataInicioFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de data inicial"
                     data-test="remove-data-inicio-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -505,11 +484,11 @@ function RelatorioOrcamentosPageContent() {
                   </span>
                   <button
                     onClick={() => setDataFimFilter('')}
-                    className="ml-1 hover:bg-muted-foreground/20 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de data final"
                     data-test="remove-data-fim-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -614,10 +593,14 @@ function RelatorioOrcamentosPageContent() {
                       <TableRow
                         data-test="orcamento-row"
                         key={orcamento._id}
-                        className="hover:bg-muted/35 border-b border-border"
+                        className="hover:bg-muted/35 border-b border-border cursor-pointer"
                         style={{ height: '60px' }}
+                        onClick={() => handleSelectItem(orcamento._id)}
                       >
-                        <TableCell className="text-center px-8 py-3 align-middle">
+                        <TableCell
+                          className="text-center px-8 py-3 align-middle"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
