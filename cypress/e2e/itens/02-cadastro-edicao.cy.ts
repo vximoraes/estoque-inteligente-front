@@ -143,12 +143,11 @@ describe('Componentes - Cadastro e Edição', () => {
       // Busca um item existente via API
       const apiUrl = Cypress.env('API_URL');
 
+      // Sessão vem do cookie do cy.login() do beforeEach — cy.request reenvia
+      // automaticamente os cookies do domínio, sem precisar de Authorization.
       cy.request({
         method: 'GET',
         url: `${apiUrl}/itens?limit=1`,
-        headers: {
-          Authorization: `Bearer ${window.localStorage.getItem('token')}`,
-        },
         failOnStatusCode: false,
       }).then((response) => {
         if (response.body?.data?.docs?.length > 0) {
@@ -339,10 +338,10 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.request({
         method: 'POST',
-        url: `${apiUrl}/login`,
-        body: { email, senha },
+        url: `${apiUrl}/api/auth/sign-in/email`,
+        body: { email, password: senha },
       }).then((loginResponse) => {
-        const token = loginResponse.body.data.user.accesstoken;
+        const token = loginResponse.body.token;
 
         cy.request({
           method: 'PATCH',

@@ -36,24 +36,19 @@ Cypress.Commands.add('login', (email: string, senha: string) => {
 Cypress.Commands.add('loginViaAPI', (email: string, senha: string) => {
   const apiUrl = Cypress.env('API_URL');
 
+  // Better Auth é cookie-based: o Set-Cookie da resposta já autentica
+  // requisições seguintes (cy.request e o app), sem precisar guardar nada
+  // manualmente. Não usar Authorization: Bearer com valor de localStorage
+  // depois disso — não existe token nenhum lá.
   cy.request({
     method: 'POST',
-    url: `${apiUrl}/auth/login`,
+    url: `${apiUrl}/api/auth/sign-in/email`,
     body: {
       email,
-      senha,
+      password: senha,
     },
   }).then((response) => {
     expect(response.status).to.eq(200);
-
-    window.localStorage.setItem('token', response.body.data.token);
-
-    if (response.body.data.usuario) {
-      window.localStorage.setItem(
-        'usuario',
-        JSON.stringify(response.body.data.usuario),
-      );
-    }
   });
 });
 

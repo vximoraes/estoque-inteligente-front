@@ -9,11 +9,11 @@ describe('Componentes - Exclusão', () => {
   before(() => {
     cy.request({
       method: 'POST',
-      url: `${apiUrl}/login`,
-      body: { email, senha },
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      body: { email, password: senha },
       timeout: 30000,
     }).then((loginResponse) => {
-      const token = loginResponse.body.data.user.accesstoken;
+      const token = loginResponse.body.token;
 
       cy.request({
         method: 'GET',
@@ -354,13 +354,13 @@ describe('Componentes - Exclusão', () => {
 
       cy.request({
         method: 'POST',
-        url: `${apiUrl}/login`,
-        body: { email, senha },
+        url: `${apiUrl}/api/auth/sign-in/email`,
+        body: { email, password: senha },
         timeout: 30000,
         failOnStatusCode: false,
       }).then((loginResponse) => {
-        if (loginResponse.body?.data?.user?.accesstoken) {
-          const token = loginResponse.body.data.user.accesstoken;
+        if (loginResponse.body?.token) {
+          const token = loginResponse.body.token;
 
           cy.request({
             method: 'PATCH',
