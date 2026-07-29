@@ -11,11 +11,11 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   before(() => {
     cy.request({
       method: 'POST',
-      url: `${apiUrl}/login`,
-      body: { email, senha },
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
-      authToken = response.body.data.user.accesstoken;
+      authToken = response.body.token;
 
       cy.request({
         method: 'GET',

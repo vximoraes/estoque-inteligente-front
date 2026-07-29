@@ -316,12 +316,10 @@ describe('Componentes - Localizações e Status Automático', () => {
             expect(itemCriado.status).to.eq('Indisponível');
 
             if (itemCriado._id) {
+              // Sessão vem do cookie do cy.login() do beforeEach.
               cy.request({
                 method: 'PATCH',
                 url: `${apiUrl}/itens/${itemCriado._id}/inativar`,
-                headers: {
-                  Authorization: `Bearer ${window.localStorage.getItem('token')}`,
-                },
                 failOnStatusCode: false,
               });
             }

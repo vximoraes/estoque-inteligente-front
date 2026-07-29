@@ -151,12 +151,11 @@ export const waitForAPIRequests = (aliases: `@${string}`[], timeout = 10000) => 
 export const limparComponenteTeste = (itemId: string) => {
   const apiUrl = Cypress.env('API_URL');
 
+  // Sessão vem do cookie do cy.login() já rodado antes — cy.request reenvia
+  // automaticamente os cookies do domínio, sem precisar de Authorization.
   cy.request({
     method: 'PATCH',
     url: `${apiUrl}/itens/${itemId}/inativar`,
-    headers: {
-      Authorization: `Bearer ${window.localStorage.getItem('token')}`,
-    },
     failOnStatusCode: false,
   }).then(() => {
     cy.log(`Componente ${itemId} removido`);
