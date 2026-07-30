@@ -173,7 +173,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').should('exist');
+                cy.root().should('have.class', 'cursor-pointer');
                 cy.getByData('editar-button').should('exist');
                 cy.getByData('excluir-button').should('exist');
               });
@@ -284,12 +284,12 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   });
 
   describe('Navegação', () => {
-    it('redireciona para adicionar orçamento', () => {
+    it('abre modal de cadastro ao clicar em Adicionar', () => {
       cy.getByData('adicionar-button').click();
-      cy.url().should('include', '/orcamentos/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
-    it('redireciona para editar orçamento ao clicar no botão editar', () => {
+    it('abre modal de edição ao clicar no botão editar', () => {
       cy.get('body').then(($body) => {
         if ($body.find('[data-test="orcamentos-table"]').length > 0) {
           cy.getByData('orcamentos-table').within(() => {
@@ -299,7 +299,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
                 cy.getByData('editar-button').click();
               });
           });
-          cy.url().should('include', '/orcamentos/editar/');
+          cy.get('[data-test="modal-editar-orcamento"]').should('be.visible');
         } else {
           cy.log('Tabela não disponível - teste ignorado');
         }

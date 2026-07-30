@@ -56,14 +56,12 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.contains('button', 'Adicionar').click();
 
-      cy.url().should('include', '/orcamentos/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
-    it('Deve redirecionar para tela de cadastro ao clicar em Adicionar', () => {
-      cy.url().should('include', '/orcamentos/adicionar');
-
-      cy.contains('Orçamentos').should('be.visible');
-      cy.contains('Adicionar').should('be.visible');
+    it('Deve abrir modal de cadastro ao clicar em Adicionar', () => {
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
+      cy.contains('Adicionar orçamento').should('be.visible');
     });
 
     it('Deve exibir todos os campos obrigatórios do formulário', () => {
@@ -119,13 +117,16 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.contains('button', 'Salvar').click();
 
       cy.wait(500);
-      cy.url().should('include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
   });
 
   describe('Seleção de Componentes', () => {
     beforeEach(() => {
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
     it('Deve abrir modal de seleção ao clicar em Adicionar item', () => {
@@ -252,7 +253,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
       cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
@@ -371,7 +375,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
       cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
@@ -516,7 +523,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
       cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
@@ -606,7 +616,10 @@ describe('Orçamentos - Cadastro e Edição', () => {
         return;
       }
 
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
       cy.getByData('botao-adicionar-item').click();
       cy.wait('@getComponentes');
 
@@ -691,13 +704,16 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   describe('Validações no Cadastro', () => {
     beforeEach(() => {
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
     it('Deve validar nome obrigatório', () => {
       cy.contains('button', 'Salvar').click();
       cy.wait(500);
-      cy.url().should('include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
     it('Deve validar que pelo menos um item é necessário', () => {
@@ -705,7 +721,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.get('#nome').type(nomeOrcamento);
       cy.contains('button', 'Salvar').click();
       cy.wait(500);
-      cy.url().should('include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
     it('Deve validar que todos itens têm fornecedor', () => {
@@ -727,7 +743,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       cy.contains('button', 'Salvar').click();
       cy.wait(500);
-      cy.url().should('include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
     it('Deve desabilitar botão Salvar durante processamento', () => {
@@ -824,8 +840,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
         orcamentoIdCriado = createInterception.response?.body?.data?._id;
 
-        cy.url().should('include', '/orcamentos');
-        cy.url().should('not.include', '/adicionar');
+        cy.get('[data-test="modal-cadastrar-orcamento"]').should('not.exist');
 
         cy.contains('sucesso', { matchCase: false }).should('be.visible');
       });
@@ -845,9 +860,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve redirecionar para tela de edição ao clicar em Editar', () => {
-      if (!primeiroOrcamento) return;
-
+    const abrirModalEdicao = () => {
       cy.getByData('orcamentos-table').within(() => {
         cy.get('tbody tr')
           .first()
@@ -855,14 +868,19 @@ describe('Orçamentos - Cadastro e Edição', () => {
             cy.getByData('editar-button').click();
           });
       });
+      cy.get('[data-test="modal-editar-orcamento"]').should('be.visible');
+    };
 
-      cy.url().should('include', `/orcamentos/editar/${primeiroOrcamento._id}`);
+    it('Deve abrir modal de edição ao clicar em Editar', () => {
+      if (!primeiroOrcamento) return;
+
+      abrirModalEdicao();
     });
 
     it('Deve pré-preencher campos com dados atuais', () => {
       if (!primeiroOrcamento) return;
 
-      cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
+      abrirModalEdicao();
 
       cy.get('#nome').should('have.value', primeiroOrcamento.nome);
 
@@ -883,20 +901,20 @@ describe('Orçamentos - Cadastro e Edição', () => {
     it('Deve manter mesmas validações do cadastro', () => {
       if (!primeiroOrcamento) return;
 
-      cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
+      abrirModalEdicao();
 
       cy.get('#nome').clear();
 
       cy.contains('button', 'Salvar').click();
 
       cy.wait(500);
-      cy.url().should('include', '/editar');
+      cy.get('[data-test="modal-editar-orcamento"]').should('be.visible');
     });
 
     it('Deve permitir adicionar novos itens', () => {
       if (!primeiroOrcamento || itensTeste.length === 0) return;
 
-      cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
+      abrirModalEdicao();
 
       cy.getByData('tabela-itens-orcamento').within(() => {
         cy.get('tbody tr').then(($rows) => {
@@ -926,10 +944,11 @@ describe('Orçamentos - Cadastro e Edição', () => {
         !primeiroOrcamento ||
         !primeiroOrcamento.itens ||
         primeiroOrcamento.itens.length === 0
-      )
-        {return;}
+      ) {
+        return;
+      }
 
-      cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
+      abrirModalEdicao();
 
       const qtdAnterior = primeiroOrcamento.itens.length;
 
@@ -951,7 +970,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
       const novaDescricao = `Descrição atualizada ${Date.now()}`;
 
-      cy.visit(`${frontendUrl}/orcamentos/editar/${primeiroOrcamento._id}`);
+      abrirModalEdicao();
 
       cy.get('#descricao').clear().type(novaDescricao);
 
@@ -960,8 +979,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.wait('@patchOrcamento', { timeout: 10000 }).then((interception) => {
         expect(interception.response?.statusCode).to.be.oneOf([200, 201]);
 
-        cy.url().should('include', '/orcamentos');
-        cy.url().should('not.include', '/editar');
+        cy.get('[data-test="modal-editar-orcamento"]').should('not.exist');
 
         cy.contains(/atualizado|sucesso/i).should('be.visible');
       });
@@ -970,22 +988,27 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
   describe('Cancelar Operação', () => {
     it('Deve redirecionar para listagem ao clicar em Cancelar no cadastro', () => {
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
 
       cy.getByData('botao-cancelar').click();
 
-      cy.url().should('include', '/orcamentos');
-      cy.url().should('not.include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('not.exist');
     });
 
     it('Não deve persistir dados ao cancelar', () => {
-      cy.visit(`${frontendUrl}/orcamentos/adicionar`);
+      cy.visit(`${frontendUrl}/orcamentos`);
+      cy.wait('@getOrcamentos');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
 
       cy.get('#nome').type('Orçamento Cancelado');
 
       cy.getByData('botao-cancelar').click();
 
-      cy.url().should('include', '/orcamentos');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('not.exist');
       cy.get('body').should('not.contain', 'Orçamento Cancelado');
     });
   });
