@@ -25,6 +25,16 @@ interface ModalDetalhesUsuarioProps {
   usuarioId: string;
 }
 
+const STATUS_BG: Record<'ativo' | 'aguardando', string> = {
+  ativo: 'oklch(0.986 0.010 145)',
+  aguardando: 'oklch(0.986 0.010 78)',
+};
+
+const STATUS_TEXT: Record<'ativo' | 'aguardando', string> = {
+  ativo: 'oklch(0.55 0.16 145)',
+  aguardando: 'oklch(0.58 0.14 78)',
+};
+
 export default function ModalDetalhesUsuario({
   isOpen,
   onClose,
@@ -141,6 +151,21 @@ export default function ModalDetalhesUsuario({
                 {usuario?.nome || 'Detalhes do Usuário'}
               </h2>
             </div>
+            {usuario && (
+              <div className="flex justify-center mt-2">
+                <span
+                  data-test="modal-detalhes-status"
+                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                  style={{
+                    color: STATUS_TEXT[usuario.ativo ? 'ativo' : 'aguardando'],
+                    backgroundColor:
+                      STATUS_BG[usuario.ativo ? 'ativo' : 'aguardando'],
+                  }}
+                >
+                  {usuario.ativo ? 'Ativo' : 'Aguardando ativação'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,32 +191,6 @@ export default function ModalDetalhesUsuario({
             </div>
           ) : usuario ? (
             <div className="space-y-4 text-left">
-              {/* Status */}
-              <div>
-                <label className="text-lg font-semibold text-foreground block mb-2">
-                  Status
-                </label>
-                <div className="flex items-center gap-2">
-                  {usuario.ativo ? (
-                    <span
-                      data-test="modal-detalhes-status"
-                      className="inline-flex items-center justify-center px-3 py-1.5 rounded-sm text-sm font-medium bg-muted/40 border border-border"
-                      style={{ color: 'oklch(0.55 0.16 145)' }}
-                    >
-                      Ativo
-                    </span>
-                  ) : (
-                    <span
-                      data-test="modal-detalhes-status"
-                      className="inline-flex items-center justify-center px-3 py-1.5 rounded-sm text-sm font-medium bg-muted/40 border border-border"
-                      style={{ color: 'oklch(0.58 0.14 78)' }}
-                    >
-                      Aguardando ativação
-                    </span>
-                  )}
-                </div>
-              </div>
-
               {/* E-mail com botão de copiar */}
               <div>
                 <label className="text-lg font-semibold text-foreground block mb-2">

@@ -64,7 +64,7 @@ describe('Usuários - Listagem e Pesquisa', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').should('exist');
+                cy.root().should('have.class', 'cursor-pointer');
                 cy.getByData('excluir-button').should('exist');
               });
           });

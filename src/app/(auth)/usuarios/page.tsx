@@ -25,7 +25,9 @@ interface UsuarioApiResponse {
 }
 
 export default async function PageUsuarios() {
-  const initialData = await serverFetch<UsuarioApiResponse>('/usuarios?limite=20&page=1');
+  const initialData = await serverFetch<UsuarioApiResponse>(
+    '/usuarios?limite=20&page=1',
+  );
 
   return (
     <Suspense>

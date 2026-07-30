@@ -9,10 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
-import { Search, Plus, Trash2, Mail, Loader2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Plus, Trash2, Mail, Loader2, Users } from 'lucide-react';
+import EmptyState from '@/components/empty-state';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -21,6 +22,7 @@ import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario';
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario';
 import ModalDetalhesUsuario from '@/components/modal-detalhes-usuario';
 import { useSession } from '@/hooks/use-session';
+import { PulseLoader } from 'react-spinners';
 
 interface Usuario {
   _id: string;
@@ -46,11 +48,17 @@ interface UsuarioApiResponse {
   };
 }
 
-export default function PageUsuariosContent({ initialData }: { initialData?: UsuarioApiResponse }) {
+export default function PageUsuariosContent({
+  initialData,
+}: {
+  initialData?: UsuarioApiResponse;
+}) {
   const router = useRouter();
   const { user } = useSession();
-  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
+  const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null);
   const [excluirUsuarioNome, setExcluirUsuarioNome] = useState<string>('');
@@ -67,30 +75,54 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
   const {
     data,
     isLoading,
-    isFetching,
     error,
     refetch,
-  } = useQuery<UsuarioApiResponse>({
-    queryKey: ['usuarios', searchTerm, currentPage],
-    queryFn: async () => {
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<UsuarioApiResponse>({
+    queryKey: ['usuarios', searchTerm],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
       params.append('limite', '20');
-      params.append('page', currentPage.toString());
+      params.append('page', page.toString());
 
       const queryString = params.toString();
       const url = `/usuarios${queryString ? `?${queryString}` : ''}`;
 
       return await get<UsuarioApiResponse>(url);
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    placeholderData: initialData,
+    placeholderData: initialData
+      ? { pages: [initialData], pageParams: [1] }
+      : undefined,
   });
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+    if (!observerTarget.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleCadastrarSuccess = async () => {
     setIsRefetchingAfterDelete(true);
@@ -107,9 +139,6 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
   const handleExcluirSuccess = async () => {
     setIsRefetchingAfterDelete(true);
 
-    const isLastItemOnPage = usuarios.length === 1;
-    const shouldGoToPreviousPage = isLastItemOnPage && currentPage > 1;
-
     toast.success('Usuário excluído com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
@@ -119,10 +148,6 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
       draggable: false,
       transition: Slide,
     });
-
-    if (shouldGoToPreviousPage) {
-      setCurrentPage((prev) => prev - 1);
-    }
 
     await refetch();
     setIsRefetchingAfterDelete(false);
@@ -164,16 +189,9 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
     setIsDetalhesModalOpen(true);
   };
 
-  const usuarios = (data?.data?.docs || []).filter(
-    (usuario) => usuario._id !== user?.id,
-  );
-  const paginationInfo = data?.data || {
-    totalDocs: 0,
-    totalPages: 0,
-    page: 1,
-    hasPrevPage: false,
-    hasNextPage: false,
-  };
+  const usuarios = (
+    data?.pages.flatMap((page) => page.data.docs) || []
+  ).filter((usuario) => usuario._id !== user?.id);
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
@@ -181,7 +199,7 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1">
@@ -192,12 +210,12 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
               placeholder="Pesquisar usuários..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-11 pl-10"
             />
           </div>
           <Button
             data-test="cadastrar-usuario-button"
-            className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+            className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={() => setIsCadastrarModalOpen(true)}
           >
@@ -256,7 +274,9 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
                     {usuarios.map((usuario) => (
                       <TableRow
                         key={usuario._id}
-                        className="hover:bg-gray-50 border-b relative"
+                        data-test="visualizar-button"
+                        onClick={() => handleViewDetails(usuario._id)}
+                        className="hover:bg-gray-50 border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-8 py-2">
@@ -278,12 +298,19 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className="inline-flex items-center px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.07em] whitespace-nowrap"
-                              title={usuario.ativo ? 'Usuário ativo' : 'Aguardando ativação'}
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                              title={
+                                usuario.ativo
+                                  ? 'Usuário ativo'
+                                  : 'Aguardando ativação'
+                              }
                               style={{
                                 color: usuario.ativo
-                                  ? 'oklch(0.55 0.16 145)'
-                                  : 'oklch(0.58 0.14 78)',
+                                  ? 'oklch(0.448 0.119 151.328)'
+                                  : 'oklch(0.473 0.137 46.201)',
+                                backgroundColor: usuario.ativo
+                                  ? 'oklch(0.962 0.044 156.743)'
+                                  : 'oklch(0.962 0.059 95.617)',
                               }}
                             >
                               {usuario.ativo ? 'Ativo' : 'Aguardando ativação'}
@@ -293,45 +320,42 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
-                              data-test="visualizar-button"
-                              onClick={() => handleViewDetails(usuario._id)}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Ver detalhes do usuário"
+                              data-test="reenviar-convite-button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (usuario.ativo) return;
+                                handleReenviarConvite(
+                                  usuario._id,
+                                  usuario.nome,
+                                );
+                              }}
+                              disabled={
+                                usuario.ativo ||
+                                reenviarConviteId === usuario._id
+                              }
+                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              title={
+                                usuario.ativo
+                                  ? 'Usuário já ativo'
+                                  : 'Reenviar convite'
+                              }
                             >
-                              <Eye size={16} className="sm:w-5 sm:h-5" />
+                              {reenviarConviteId === usuario._id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Mail className="w-4 h-4" />
+                              )}
                             </button>
-                            {!usuario.ativo && (
-                              <button
-                                data-test="reenviar-convite-button"
-                                onClick={() =>
-                                  handleReenviarConvite(
-                                    usuario._id,
-                                    usuario.nome,
-                                  )
-                                }
-                                disabled={reenviarConviteId === usuario._id}
-                                className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Reenviar convite"
-                              >
-                                {reenviarConviteId === usuario._id ? (
-                                  <Loader2
-                                    size={16}
-                                    className="sm:w-5 sm:h-5 animate-spin"
-                                  />
-                                ) : (
-                                  <Mail size={16} className="sm:w-5 sm:h-5" />
-                                )}
-                              </button>
-                            )}
                             <button
                               data-test="excluir-button"
-                              onClick={() =>
-                                handleExcluirUsuario(usuario._id, usuario.nome)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExcluirUsuario(usuario._id, usuario.nome);
+                              }}
                               className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir usuário"
                             >
-                              <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </TableCell>
@@ -339,48 +363,35 @@ export default function PageUsuariosContent({ initialData }: { initialData?: Usu
                     ))}
                   </TableBody>
                 </table>
-              </div>
-              {paginationInfo.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
-                  <p className="text-sm text-gray-600">
-                    Página {paginationInfo.page} de {paginationInfo.totalPages}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                      disabled={!paginationInfo.hasPrevPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Página anterior"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage((prev) => prev + 1)}
-                      disabled={!paginationInfo.hasNextPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Próxima página"
-                    >
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
-                    </button>
-                  </div>
+
+                {/* Observer target for infinite scroll */}
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                >
+                  {isFetchingNextPage && (
+                    <PulseLoader
+                      color="#3b82f6"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ) : (
-            <div
-              data-test="empty-state"
-              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
-                </div>
-                <p data-test="empty-message" className="text-gray-500 text-lg">
-                  {searchTerm
-                    ? 'Nenhum usuário encontrado para sua pesquisa.'
-                    : 'Não há usuários cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={Users}
+                title={
+                  searchTerm ? 'Nenhum resultado' : 'Nenhum usuário cadastrado'
+                }
+                subtitle={
+                  searchTerm
+                    ? 'Tente ajustar sua pesquisa.'
+                    : 'Comece adicionando o primeiro usuário.'
+                }
+              />
             </div>
           )}
         </div>
