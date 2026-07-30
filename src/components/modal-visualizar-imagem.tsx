@@ -1,6 +1,8 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+
+const ANIMATION_DURATION = 300;
 
 interface ModalVisualizarImagemProps {
   isOpen: boolean;
@@ -15,6 +17,27 @@ export default function ModalVisualizarImagem({
   imagemUrl,
   nomeItem,
 }: ModalVisualizarImagemProps) {
+  const [visible, setVisible] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setVisible(true);
+      setIsClosing(false);
+      return;
+    }
+
+    if (visible) {
+      setIsClosing(true);
+      const timeout = setTimeout(() => {
+        setVisible(false);
+        setIsClosing(false);
+      }, ANIMATION_DURATION);
+      return () => clearTimeout(timeout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -22,7 +45,7 @@ export default function ModalVisualizarImagem({
       }
     };
 
-    if (isOpen) {
+    if (visible) {
       window.addEventListener('keydown', handleEsc);
       document.body.style.overflow = 'hidden';
     }
@@ -31,9 +54,9 @@ export default function ModalVisualizarImagem({
       window.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
+  }, [visible, onClose]);
 
-  if (!isOpen) return null;
+  if (!visible) return null;
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -46,7 +69,11 @@ export default function ModalVisualizarImagem({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 cursor-default"
+      className={`fixed inset-0 z-[60] backdrop-blur-[3px] cursor-default ${
+        isClosing
+          ? 'animate-out fade-out-0 duration-300'
+          : 'animate-in fade-in-0 duration-300'
+      }`}
       onClick={handleOverlayClick}
       data-test="modal-visualizar-imagem-overlay"
     >
@@ -63,7 +90,11 @@ export default function ModalVisualizarImagem({
         <img
           src={imagemUrl}
           alt={nomeItem}
-          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-300"
+          className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto duration-300 ${
+            isClosing
+              ? 'animate-out fade-out-0 zoom-out-95'
+              : 'animate-in fade-in-0 zoom-in-95'
+          }`}
           data-test="modal-visualizar-imagem-img"
           onClick={handleContentClick}
         />

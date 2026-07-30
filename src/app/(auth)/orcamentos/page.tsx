@@ -4,7 +4,9 @@ import PageOrcamentosContent from './_components/orcamentos-client';
 import type { OrcamentoApiResponse } from '@/types/orcamentos';
 
 export default async function PageOrcamentos() {
-  const initialData = await serverFetch<OrcamentoApiResponse>('/orcamentos?limite=20&page=1');
+  const initialData = await serverFetch<OrcamentoApiResponse>(
+    '/orcamentos?limite=20&page=1',
+  );
 
   return (
     <Suspense>

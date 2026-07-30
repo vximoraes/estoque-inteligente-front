@@ -161,7 +161,9 @@ export default function ModalEditarCategoria({
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Editar categoria
             </h2>
-            <p className="text-muted-foreground">Atualize o nome da categoria</p>
+            <p className="text-muted-foreground">
+              Atualize o nome da categoria
+            </p>
           </div>
 
           <div>
@@ -182,11 +184,13 @@ export default function ModalEditarCategoria({
               placeholder="Digite o nome da categoria"
               {...register('nome')}
               maxLength={100}
-              className={errors.nome ? 'border-destructive' : ''}
+              className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
               disabled={isSubmitting || updateCategoriaMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-destructive text-sm mt-1">{errors.nome.message}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.nome.message}
+              </p>
             )}
           </div>
 
@@ -210,14 +214,14 @@ export default function ModalEditarCategoria({
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting || updateCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || updateCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
               {isSubmitting || updateCategoriaMutation.isPending

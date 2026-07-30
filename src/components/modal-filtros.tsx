@@ -63,15 +63,10 @@ export default function ModalFiltros({
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoriaSearch, setCategoriaSearch] = useState('');
 
-  const {
-    data: categoriasData,
-    isLoading: isLoadingCategorias,
-  } = useQuery({
+  const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(
-        `/categorias?limite=100&page=1`,
-      );
+      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -205,13 +200,10 @@ export default function ModalFiltros({
         </div>
 
         {/* Conteúdo dos Filtros */}
-        <div className="px-6 pb-6 space-y-6">
+        <div className="px-6 pt-4 pb-6 space-y-6">
           {/* Filtro por Categoria - Condicional */}
           {showCategoria && (
-            <div
-              className="space-y-2 pt-4"
-              data-test="filtro-categoria-container"
-            >
+            <div className="space-y-2" data-test="filtro-categoria-container">
               <label className="block text-sm font-semibold text-foreground tracking-tight">
                 Categoria
               </label>
@@ -231,7 +223,9 @@ export default function ModalFiltros({
                 >
                   <span
                     className={
-                      selectedCategoria ? 'text-foreground' : 'text-muted-foreground'
+                      selectedCategoria
+                        ? 'text-foreground'
+                        : 'text-muted-foreground'
                     }
                   >
                     {isLoadingCategorias
@@ -254,7 +248,7 @@ export default function ModalFiltros({
                         onChange={(e) => {
                           setCategoriaSearch(e.target.value);
                         }}
-                        className="w-full h-9 px-3 text-sm border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
+                        className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#306FCC]/35 focus:border-[#306FCC]"
                         onClick={(e) => e.stopPropagation()}
                         data-test="filtro-categoria-search-input"
                       />
@@ -313,7 +307,9 @@ export default function ModalFiltros({
                 data-test="filtro-status-dropdown"
               >
                 <span
-                  className={selectedStatus ? 'text-foreground' : 'text-muted-foreground'}
+                  className={
+                    selectedStatus ? 'text-foreground' : 'text-muted-foreground'
+                  }
                 >
                   {getSelectedStatusLabel()}
                 </span>
@@ -353,14 +349,14 @@ export default function ModalFiltros({
             <Button
               variant="outline"
               onClick={handleClearFilters}
-              className="flex-1 h-10 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+              className="h-11 flex-1 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
               data-test="limpar-filtros-button"
             >
               Limpar Filtros
             </Button>
             <Button
               onClick={handleApplyFilters}
-              className="flex-1 h-10 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
+              className="h-11 flex-1 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="aplicar-filtros-button"
             >

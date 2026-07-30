@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
+import { X, ChevronDown, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   useQuery,
   useInfiniteQuery,
@@ -437,17 +437,12 @@ export default function ModalEntradaItem({
             className="space-y-2"
             data-test="modal-entrada-quantidade-container"
           >
-            <div className="flex justify-between items-center">
-              <label
-                htmlFor="quantidade"
-                className="block text-base font-medium text-foreground"
-              >
-                Quantidade <span className="text-destructive">*</span>
-              </label>
-              <span className="text-sm text-muted-foreground">
-                {quantidade.length}/9
-              </span>
-            </div>
+            <label
+              htmlFor="quantidade"
+              className="block text-base font-medium text-foreground"
+            >
+              Quantidade <span className="text-destructive">*</span>
+            </label>
             <input
               id="quantidade"
               name="quantidade"
@@ -456,7 +451,7 @@ export default function ModalEntradaItem({
               value={quantidade}
               onChange={handleQuantidadeChange}
               maxLength={9}
-              className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.quantidade ? 'border-destructive' : 'border-border'
               }`}
               disabled={entradaMutation.isPending}
@@ -485,7 +480,7 @@ export default function ModalEntradaItem({
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                  className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                     errors.localizacao ? 'border-destructive' : 'border-border'
                   }`}
                   disabled={isLoadingLocalizacoes || entradaMutation.isPending}
@@ -530,7 +525,7 @@ export default function ModalEntradaItem({
                         placeholder="Pesquisar..."
                         value={localizacaoPesquisa}
                         onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                        className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
@@ -546,7 +541,7 @@ export default function ModalEntradaItem({
                             return (
                               <div
                                 key={localizacao._id}
-                              className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
+                                className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
                                   localizacaoSelecionada === localizacao._id
                                     ? 'bg-[#306FCC]/5'
                                     : ''
@@ -588,7 +583,7 @@ export default function ModalEntradaItem({
                                     className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                     title="Editar localização"
                                   >
-                                    <Edit size={20} />
+                                    <Pencil className="w-4 h-4" />
                                   </button>
                                   <button
                                     type="button"
@@ -600,7 +595,7 @@ export default function ModalEntradaItem({
                                     className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                     title="Excluir localização"
                                   >
-                                    <Trash2 size={20} />
+                                    <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>
@@ -627,14 +622,16 @@ export default function ModalEntradaItem({
               <Button
                 type="button"
                 onClick={() => setIsAddingLocalizacao(true)}
-                className="text-white h-[50px]! w-[50px]! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+                className="text-white h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
                 style={{ backgroundColor: '#306FCC' }}
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
             {errors.localizacao && (
-              <p className="text-destructive text-sm mt-1">{errors.localizacao}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.localizacao}
+              </p>
             )}
           </div>
 
@@ -663,7 +660,7 @@ export default function ModalEntradaItem({
               variant="outline"
               onClick={onClose}
               disabled={entradaMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               data-test="modal-entrada-cancelar"
             >
               Cancelar
@@ -671,7 +668,7 @@ export default function ModalEntradaItem({
             <Button
               onClick={handleSubmit}
               disabled={entradaMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="modal-entrada-confirmar"
             >
@@ -734,7 +731,8 @@ export default function ModalEntradaItem({
                     htmlFor="novaLocalizacao"
                     className="block text-base font-medium text-foreground"
                   >
-                    Nome da Localização <span className="text-destructive">*</span>
+                    Nome da Localização{' '}
+                    <span className="text-destructive">*</span>
                   </label>
                   <span className="text-sm text-muted-foreground">
                     {novaLocalizacao.length}/100
@@ -755,7 +753,7 @@ export default function ModalEntradaItem({
                     }
                   }}
                   maxLength={100}
-                  className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors ${
+                  className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors ${
                     errors.novaLocalizacao
                       ? 'border-destructive'
                       : 'border-border'
@@ -791,7 +789,7 @@ export default function ModalEntradaItem({
                     }));
                   }}
                   disabled={createLocalizacaoMutation.isPending}
-                  className="flex-1 cursor-pointer"
+                  className="h-11 flex-1 cursor-pointer"
                 >
                   Cancelar
                 </Button>
@@ -799,7 +797,7 @@ export default function ModalEntradaItem({
                   type="button"
                   onClick={handleAddLocalizacao}
                   disabled={createLocalizacaoMutation.isPending}
-                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
                   style={{ backgroundColor: '#306FCC' }}
                 >
                   {createLocalizacaoMutation.isPending ? 'Criando...' : 'Criar'}

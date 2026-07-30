@@ -161,7 +161,9 @@ export default function ModalEditarLocalizacao({
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Editar localização
             </h2>
-            <p className="text-muted-foreground">Atualize o nome da localização</p>
+            <p className="text-muted-foreground">
+              Atualize o nome da localização
+            </p>
           </div>
 
           <div>
@@ -182,11 +184,13 @@ export default function ModalEditarLocalizacao({
               placeholder="Digite o nome da localização"
               {...register('nome')}
               maxLength={100}
-              className={errors.nome ? 'border-destructive' : ''}
+              className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
               disabled={isSubmitting || updateLocalizacaoMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-destructive text-sm mt-1">{errors.nome.message}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.nome.message}
+              </p>
             )}
           </div>
 
@@ -210,14 +214,14 @@ export default function ModalEditarLocalizacao({
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting || updateLocalizacaoMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || updateLocalizacaoMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
               {isSubmitting || updateLocalizacaoMutation.isPending

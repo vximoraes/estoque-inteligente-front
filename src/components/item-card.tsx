@@ -31,7 +31,10 @@ export default function ItemCardSimples({
       .toLocaleLowerCase('pt-BR')
       .split(' ')
       .filter(Boolean)
-      .map((palavra) => palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1))
+      .map(
+        (palavra) =>
+          palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1),
+      )
       .join(' ');
   }, [categoria]);
 
@@ -94,7 +97,10 @@ export default function ItemCardSimples({
         </div>
 
         {/* Categoria */}
-        <p className="text-sm text-muted-foreground truncate w-full" title={categoriaFormatada}>
+        <p
+          className="text-sm text-muted-foreground truncate w-full"
+          title={categoriaFormatada}
+        >
           {categoriaFormatada}
         </p>
       </div>

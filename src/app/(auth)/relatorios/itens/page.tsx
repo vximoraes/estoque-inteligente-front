@@ -3,6 +3,7 @@ import StatCard from '@/components/stat-card';
 import Cabecalho from '@/components/cabecalho';
 import ModalFiltros from '@/components/modal-filtros';
 import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
+import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,12 +16,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import {
-  Search,
-  Filter,
-  Package,
-  X,
-} from 'lucide-react';
+import { Search, Filter, Package, X } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
@@ -139,7 +135,9 @@ function RelatorioItensPageContent() {
           params.append('status', statusFilter);
         }
 
-        const response = await get<EstoqueApiResponse>(`/estoques?${params.toString()}`);
+        const response = await get<EstoqueApiResponse>(
+          `/estoques?${params.toString()}`,
+        );
         const pageDocs = response?.data?.docs || [];
         docs.push(...pageDocs);
 
@@ -155,7 +153,8 @@ function RelatorioItensPageContent() {
         const matchCategoria =
           !categoriaFilter || estoque.item.categoria === categoriaFilter;
 
-        const matchStatus = !statusFilter || estoque.item.status === statusFilter;
+        const matchStatus =
+          !statusFilter || estoque.item.status === statusFilter;
 
         return matchCategoria && matchStatus;
       });
@@ -428,13 +427,13 @@ function RelatorioItensPageContent() {
               placeholder="Pesquisar itens..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
@@ -443,7 +442,7 @@ function RelatorioItensPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`h-10 px-4 flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 text-white transition-all ${
               selectedItems.size > 0
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
@@ -539,7 +538,7 @@ function RelatorioItensPageContent() {
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
-                    <TableRow className="bg-muted border-b border-border">
+                    <TableRow className="bg-muted border-b">
                       <TableHead
                         className="font-semibold text-muted-foreground bg-muted text-center w-[50px] px-8"
                         data-test="table-head-checkbox"
@@ -587,7 +586,7 @@ function RelatorioItensPageContent() {
                         STATUS
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-localizacao"
                       >
                         LOCALIZAÇÃO
@@ -649,15 +648,21 @@ function RelatorioItensPageContent() {
                             data-test="item-status"
                           >
                             <span
-                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 bg-current/10 text-xs font-medium whitespace-nowrap"
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
                               title={estoque.item.status}
                               style={{
                                 color:
                                   estoque.item.status === 'Em Estoque'
-                                    ? 'oklch(0.55 0.16 145)'
+                                    ? 'oklch(0.448 0.119 151.328)'
                                     : estoque.item.status === 'Baixo Estoque'
-                                      ? 'oklch(0.58 0.14 78)'
-                                      : 'oklch(0.58 0.18 25)',
+                                      ? 'oklch(0.473 0.137 46.201)'
+                                      : 'oklch(0.444 0.177 26.899)',
+                                backgroundColor:
+                                  estoque.item.status === 'Em Estoque'
+                                    ? 'oklch(0.962 0.044 156.743)'
+                                    : estoque.item.status === 'Baixo Estoque'
+                                      ? 'oklch(0.962 0.059 95.617)'
+                                      : 'oklch(0.936 0.032 17.717)',
                               }}
                             >
                               {estoque.item.status}
@@ -665,11 +670,11 @@ function RelatorioItensPageContent() {
                           </div>
                         </TableCell>
                         <TableCell
-                          className="text-left px-8 py-3 font-medium"
+                          className="text-center px-8 py-3 font-medium"
                           data-test="item-localizacao"
                         >
                           <span
-                            className="truncate block max-w-[200px]"
+                            className="truncate inline-block max-w-[200px]"
                             title={estoque.localizacao.nome}
                           >
                             {estoque.localizacao.nome}
@@ -696,20 +701,18 @@ function RelatorioItensPageContent() {
               </div>
             </div>
           ) : (
-            <div
-              className="text-center flex-1 flex items-center justify-center bg-card rounded-lg border border-border"
-              data-test="empty-state"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center mb-4">
-                  <Package className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground text-base">
-                  {searchTerm
-                    ? 'Nenhum item encontrado para sua pesquisa.'
-                    : 'Não há itens cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={Package}
+                title={
+                  searchTerm ? 'Nenhum resultado' : 'Nenhum item encontrado'
+                }
+                subtitle={
+                  searchTerm
+                    ? 'Tente ajustar sua pesquisa.'
+                    : 'Não há itens para exibir no relatório.'
+                }
+              />
             </div>
           )}
         </div>
@@ -744,7 +747,9 @@ export default function RelatorioItensPage() {
             <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
             <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
           </div>
-          <p className="mt-4 text-muted-foreground font-medium">Carregando...</p>
+          <p className="mt-4 text-muted-foreground font-medium">
+            Carregando...
+          </p>
         </div>
       }
     >
