@@ -1,44 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown, Edit, Trash2 } from 'lucide-react';
-import {
-  useQuery,
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { X, ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
 import ModalExcluirLocalizacao from './modal-excluir-localizacao';
-import { PulseLoader } from 'react-spinners';
 
 interface Localizacao {
   _id: string;
   nome: string;
-  ativo: boolean;
-  usuario: string;
-  __v: number;
-}
-
-interface LocalizacoesApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Localizacao[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
 }
 
 interface EstoqueData {
@@ -98,41 +70,22 @@ export default function ModalSaidaItem({
     useState(false);
   const [localizacaoToEdit, setLocalizacaoToEdit] =
     useState<Localizacao | null>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const [retirarTudo, setRetirarTudo] = useState(false);
 
-  const {
-    data: localizacoesData,
-    isLoading: isLoadingLocalizacoes,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['localizacoes-infinite'],
-    queryFn: async ({ pageParam = 1 }) => {
-      return await get<LocalizacoesApiResponse>(
-        `/localizacoes?limite=20&page=${pageParam}`,
-      );
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
-    enabled: isOpen,
-  });
-
-  const { data: estoquesData } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', itemId],
-    queryFn: async () => {
-      return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
-    },
-    enabled: isOpen && !!itemId,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  const { data: estoquesData, isLoading: isLoadingLocalizacoes } =
+    useQuery<EstoqueApiResponse>({
+      queryKey: ['estoques', itemId],
+      queryFn: async () => {
+        return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
+      },
+      enabled: isOpen && !!itemId,
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    });
 
   const saidaMutation = useMutation({
     mutationFn: async (data: MovimentacaoRequest) => {
@@ -150,6 +103,7 @@ export default function ModalSaidaItem({
       setQuantidade('');
       setLocalizacaoSelecionada('');
       setErrors({});
+      setRetirarTudo(false);
       onSuccess?.();
       onClose();
     },
@@ -256,34 +210,16 @@ export default function ModalSaidaItem({
       setLocalizacaoSelecionada('');
       setErrors({});
       setIsDropdownOpen(false);
+      setRetirarTudo(false);
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!observerTarget.current || !isDropdownOpen) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 },
-    );
-
-    observer.observe(observerTarget.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   if (!isOpen) return null;
 
-  const localizacoes = localizacoesData?.pages
-    ? localizacoesData.pages.flatMap((page) => page.data.docs)
-    : [];
   const estoques = estoquesData?.data?.docs || [];
+  const localizacoes = estoques
+    .filter((e) => e.quantidade > 0)
+    .map((e) => e.localizacao);
   const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
     loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase()),
   );
@@ -319,6 +255,22 @@ export default function ModalSaidaItem({
     if (errors.localizacao) {
       setErrors((prev) => ({ ...prev, localizacao: undefined }));
     }
+    if (retirarTudo) {
+      const disponivel = getQuantidadeDisponivel(localizacao._id);
+      setQuantidade(disponivel > 0 ? String(disponivel) : '');
+    }
+  };
+
+  const handleRetirarTudoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setRetirarTudo(checked);
+    if (checked && localizacaoSelecionada) {
+      const disponivel = getQuantidadeDisponivel(localizacaoSelecionada);
+      setQuantidade(disponivel > 0 ? String(disponivel) : '');
+    }
+    if (errors.quantidade) {
+      setErrors((prev) => ({ ...prev, quantidade: undefined }));
+    }
   };
 
   const validateForm = () => {
@@ -326,6 +278,11 @@ export default function ModalSaidaItem({
 
     if (!quantidade || quantidade === '0') {
       newErrors.quantidade = 'Quantidade deve ser maior que 0';
+    } else if (
+      localizacaoSelecionada &&
+      Number(quantidade) > getQuantidadeDisponivel(localizacaoSelecionada)
+    ) {
+      newErrors.quantidade = 'Quantidade maior que a disponível em estoque';
     }
 
     if (!localizacaoSelecionada) {
@@ -412,17 +369,12 @@ export default function ModalSaidaItem({
             className="space-y-2"
             data-test="modal-saida-quantidade-container"
           >
-            <div className="flex justify-between items-center">
-              <label
-                htmlFor="quantidade"
-                className="block text-base font-medium text-foreground"
-              >
-                Quantidade <span className="text-destructive">*</span>
-              </label>
-              <span className="text-sm text-muted-foreground">
-                {quantidade.length}/9
-              </span>
-            </div>
+            <label
+              htmlFor="quantidade"
+              className="block text-base font-medium text-foreground"
+            >
+              Quantidade <span className="text-destructive">*</span>
+            </label>
             <input
               id="quantidade"
               name="quantidade"
@@ -431,10 +383,10 @@ export default function ModalSaidaItem({
               value={quantidade}
               onChange={handleQuantidadeChange}
               maxLength={9}
-              className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.quantidade ? 'border-destructive' : 'border-border'
               }`}
-              disabled={saidaMutation.isPending}
+              disabled={saidaMutation.isPending || retirarTudo}
               data-test="modal-saida-quantidade-input"
             />
             {errors.quantidade && (
@@ -459,7 +411,7 @@ export default function ModalSaidaItem({
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                   errors.localizacao ? 'border-destructive' : 'border-border'
                 }`}
                 disabled={isLoadingLocalizacoes || saidaMutation.isPending}
@@ -504,7 +456,7 @@ export default function ModalSaidaItem({
                       placeholder="Pesquisar..."
                       value={localizacaoPesquisa}
                       onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                      className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
@@ -520,7 +472,7 @@ export default function ModalSaidaItem({
                           return (
                             <div
                               key={localizacao._id}
-                            className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
+                              className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
                                 localizacaoSelecionada === localizacao._id
                                   ? 'bg-[#306FCC]/5'
                                   : ''
@@ -562,7 +514,7 @@ export default function ModalSaidaItem({
                                   className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                   title="Editar localização"
                                 >
-                                  <Edit size={20} />
+                                  <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
                                   type="button"
@@ -574,20 +526,12 @@ export default function ModalSaidaItem({
                                   className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
                                   title="Excluir localização"
                                 >
-                                  <Trash2 size={20} />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
                             </div>
                           );
                         })}
-                        {/* Infinite scroll trigger */}
-                        <div ref={observerTarget} className="h-1" />
-                        {/* Loading indicator */}
-                        {isFetchingNextPage && (
-                          <div className="flex justify-center py-4">
-                            <PulseLoader color="#306FCC" size={8} />
-                          </div>
-                        )}
                       </>
                     ) : (
                       <div className="px-4 py-8 text-center text-muted-foreground text-sm">
@@ -599,9 +543,31 @@ export default function ModalSaidaItem({
               )}
             </div>
             {errors.localizacao && (
-              <p className="text-destructive text-sm mt-1">{errors.localizacao}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.localizacao}
+              </p>
             )}
           </div>
+
+          {/* Retirar tudo */}
+          <label
+            className={`flex items-center gap-2 text-sm text-muted-foreground ml-2 ${
+              !localizacaoSelecionada || saidaMutation.isPending
+                ? 'opacity-50 cursor-not-allowed'
+                : 'cursor-pointer'
+            }`}
+            data-test="modal-saida-retirar-tudo-container"
+          >
+            <input
+              type="checkbox"
+              checked={retirarTudo}
+              onChange={handleRetirarTudoChange}
+              disabled={!localizacaoSelecionada || saidaMutation.isPending}
+              className="w-4 h-4 accent-[#306FCC] cursor-pointer disabled:cursor-not-allowed"
+              data-test="modal-saida-retirar-tudo-checkbox"
+            />
+            Retirar quantidade total
+          </label>
 
           {/* Mensagem de erro da API */}
           {saidaMutation.error && (
@@ -628,7 +594,7 @@ export default function ModalSaidaItem({
               variant="outline"
               onClick={onClose}
               disabled={saidaMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               data-test="modal-saida-cancelar"
             >
               Cancelar
@@ -636,7 +602,7 @@ export default function ModalSaidaItem({
             <Button
               onClick={handleSubmit}
               disabled={saidaMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="modal-saida-confirmar"
             >
