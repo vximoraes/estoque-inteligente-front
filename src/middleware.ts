@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login', '/cadastro', '/ativar-conta', '/esqueci-senha', '/redefinir-senha'];
+const PUBLIC_ROUTES = [
+  '/login',
+  '/cadastro',
+  '/ativar-conta',
+  '/esqueci-senha',
+  '/redefinir-senha',
+];
 
-const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3010';
+const API_URL =
+  process.env.API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://localhost:3010';
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
 
   // Valida sessão encaminhando o cookie Better Auth para a API
   let isAuth = false;
@@ -29,7 +40,9 @@ export async function middleware(req: NextRequest) {
   if (!isPublicRoute && !isAuth) {
     let from = pathname;
     if (req.nextUrl.search) from += req.nextUrl.search;
-    return NextResponse.redirect(new URL(`/login?from=${encodeURIComponent(from)}`, req.url));
+    return NextResponse.redirect(
+      new URL(`/login?from=${encodeURIComponent(from)}`, req.url),
+    );
   }
 }
 

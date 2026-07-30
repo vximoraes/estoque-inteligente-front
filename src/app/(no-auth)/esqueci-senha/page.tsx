@@ -93,7 +93,9 @@ export default function EsqueciSenhaPage() {
                       disabled={isSubmitting}
                     />
                     {errors.email && (
-                      <p className="text-xs text-destructive">{errors.email.message}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.email.message}
+                      </p>
                     )}
                   </div>
 
@@ -114,8 +116,10 @@ export default function EsqueciSenhaPage() {
                   </h1>
                   <p className="mt-3 text-sm font-medium text-muted-foreground">
                     Enviamos as instruções para{' '}
-                    <span className="font-semibold text-foreground">{emailUsuario}</span>.
-                    Verifique sua caixa de entrada.
+                    <span className="font-semibold text-foreground">
+                      {emailUsuario}
+                    </span>
+                    . Verifique sua caixa de entrada.
                   </p>
                 </div>
 

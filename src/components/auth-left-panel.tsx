@@ -13,7 +13,10 @@ export default function AuthLeftPanel() {
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover scale-150"
-        style={{ transformOrigin: 'center center', filter: 'contrast(1.1) brightness(0.75) saturate(0.55)' }}
+        style={{
+          transformOrigin: 'center center',
+          filter: 'contrast(1.1) brightness(0.75) saturate(0.55)',
+        }}
       />
       {/* Dark overlay for institutional weight */}
       <div className="absolute inset-0 bg-[#0b0f14]/50" />
@@ -27,7 +30,9 @@ export default function AuthLeftPanel() {
               Powered by AI
             </p>
             <h2 className="text-[2rem] font-semibold leading-[1.2] text-white">
-              Gestão de estoque inteligente,<br />com decisões guiadas por IA.
+              Gestão de estoque inteligente,
+              <br />
+              com decisões guiadas por IA.
             </h2>
           </div>
 
@@ -41,12 +46,13 @@ export default function AuthLeftPanel() {
                 <span className="w-6 shrink-0 text-right text-[10px] font-semibold tabular-nums tracking-widest text-white/30">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="text-[13px] font-medium text-white/60">{feature}</span>
+                <span className="text-[13px] font-medium text-white/60">
+                  {feature}
+                </span>
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

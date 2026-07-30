@@ -102,15 +102,18 @@ function RedefinirSenhaContent() {
       return;
     }
 
-    toast.success('Senha redefinida com sucesso! Redirecionando para o login...', {
-      position: 'bottom-right',
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    });
+    toast.success(
+      'Senha redefinida com sucesso! Redirecionando para o login...',
+      {
+        position: 'bottom-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      },
+    );
     setTimeout(() => router.push('/login'), 2000);
   };
 
@@ -186,16 +189,24 @@ function RedefinirSenhaContent() {
                     />
                     <button
                       type="button"
-                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      aria-label={
+                        showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                      }
                       onClick={() => setShowPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                       disabled={isSubmitting}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                   {errors.senha && (
-                    <p className="text-xs text-destructive">{errors.senha.message}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.senha.message}
+                    </p>
                   )}
                   {senhaAtual && (
                     <div className="mt-1 grid grid-cols-1 gap-1">
@@ -206,7 +217,9 @@ function RedefinirSenhaContent() {
                             key={i}
                             className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
                           >
-                            <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`} />
+                            <div
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                            />
                             {req.text}
                           </div>
                         );
@@ -234,16 +247,24 @@ function RedefinirSenhaContent() {
                     />
                     <button
                       type="button"
-                      aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      aria-label={
+                        showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
+                      }
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                       disabled={isSubmitting}
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                   {errors.confirmarSenha && (
-                    <p className="text-xs text-destructive">{errors.confirmarSenha.message}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.confirmarSenha.message}
+                    </p>
                   )}
                 </div>
               </div>

@@ -142,7 +142,10 @@ export const verificarCardComponente = (
   });
 };
 
-export const waitForAPIRequests = (aliases: `@${string}`[], timeout = 10000) => {
+export const waitForAPIRequests = (
+  aliases: `@${string}`[],
+  timeout = 10000,
+) => {
   aliases.forEach((alias) => {
     cy.wait(alias, { timeout });
   });

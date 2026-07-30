@@ -37,6 +37,7 @@ Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas cli
 ### Padrão de página: server fetch + client component
 
 Cada rota de listagem segue o mesmo padrão:
+
 - `page.tsx` (Server Component) busca os dados iniciais via `serverFetch` (`src/lib/serverFetch.ts`, que propaga o cookie da requisição e usa `cache: 'no-store'`) e passa como `initialData` para um componente client dentro de `_components/*-client.tsx`.
 - O componente client (`'use client'`) usa React Query para refetch/mutations subsequentes, mantendo `initialData` como estado inicial.
 - Exemplo: `src/app/(auth)/itens/page.tsx` → `src/app/(auth)/itens/_components/itens-client.tsx`.

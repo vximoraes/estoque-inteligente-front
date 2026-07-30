@@ -117,15 +117,18 @@ function AtivarContaContent() {
     } catch (error) {
       if (!(error instanceof Error)) {
         const errorData = error as { message?: string };
-        toast.error(errorData.message || 'Ocorreu um erro ao ativar sua conta.', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
+        toast.error(
+          errorData.message || 'Ocorreu um erro ao ativar sua conta.',
+          {
+            position: 'bottom-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            transition: Slide,
+          },
+        );
       } else {
         toast.error('Ocorreu um erro inesperado. Tente novamente.', {
           position: 'bottom-right',
@@ -208,7 +211,8 @@ function AtivarContaContent() {
               Ativação de conta
             </h1>
             <p className="mt-2 text-sm font-medium text-muted-foreground">
-              Crie uma senha segura para ativar sua conta e começar a utilizar o sistema.
+              Crie uma senha segura para ativar sua conta e começar a utilizar o
+              sistema.
             </p>
           </div>
 
@@ -233,15 +237,23 @@ function AtivarContaContent() {
                   />
                   <button
                     type="button"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.senha && (
-                  <p className="text-xs text-destructive">{errors.senha.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.senha.message}
+                  </p>
                 )}
                 {senhaAtual && (
                   <div className="mt-1 grid grid-cols-1 gap-1">
@@ -252,7 +264,9 @@ function AtivarContaContent() {
                           key={i}
                           className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
                         >
-                          <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`} />
+                          <div
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                          />
                           {req.text}
                         </div>
                       );
@@ -280,15 +294,23 @@ function AtivarContaContent() {
                   />
                   <button
                     type="button"
-                    aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                     onClick={() => setShowConfirmPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.confirmarSenha && (
-                  <p className="text-xs text-destructive">{errors.confirmarSenha.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.confirmarSenha.message}
+                  </p>
                 )}
               </div>
             </div>
