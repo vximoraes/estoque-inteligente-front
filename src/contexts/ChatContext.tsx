@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import type { Conversa, Mensagem } from '@/types/chat';
 
 interface ChatContextValue {
@@ -26,11 +32,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
 
   const abrirChat = useCallback(() => setIsOpen(true), []);
-  const fecharChat = useCallback(() => {
-    setIsOpen(false);
-    setConversaAtiva(null);
-    setMensagensLocais([]);
-  }, []);
+  const fecharChat = useCallback(() => setIsOpen(false), []);
 
   const selecionarConversa = useCallback((conversa: Conversa | null) => {
     setConversaAtiva(conversa);
@@ -46,7 +48,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       if (prev.length === 0) return prev;
       const ultima = prev[prev.length - 1];
       if (ultima.role !== 'assistant') return prev;
-      return [...prev.slice(0, -1), { ...ultima, content: ultima.content + chunk }];
+      return [
+        ...prev.slice(0, -1),
+        { ...ultima, content: ultima.content + chunk },
+      ];
     });
   }, []);
 

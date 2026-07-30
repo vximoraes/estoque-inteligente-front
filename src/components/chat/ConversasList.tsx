@@ -18,7 +18,10 @@ function formatDate(isoString: string): string {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
   if (diffDays === 1) return 'Ontem';
   if (diffDays < 7) return `${diffDays}d atrás`;
@@ -32,7 +35,6 @@ export function ConversasList({
   onSelectConversa,
   onRequestDelete,
 }: ConversasListProps) {
-
   return (
     <div className="flex flex-col h-full w-full bg-card shrink-0">
       {/* Header */}
@@ -45,12 +47,19 @@ export function ConversasList({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {isLoading && (
-          <div className="px-3 py-4 text-xs text-muted-foreground">Carregando...</div>
+          <div className="px-3 py-4 text-xs text-muted-foreground">
+            Carregando...
+          </div>
         )}
         {!isLoading && conversas.length === 0 && (
           <div className="px-3 py-4 flex flex-col items-center gap-2 text-center">
-            <MessageSquare size={20} className="text-muted-foreground opacity-40" />
-            <span className="text-xs text-muted-foreground">Nenhuma conversa</span>
+            <MessageSquare
+              size={20}
+              className="text-muted-foreground opacity-40"
+            />
+            <span className="text-xs text-muted-foreground">
+              Nenhuma conversa
+            </span>
           </div>
         )}
         {conversas.map((conversa) => {
@@ -62,16 +71,14 @@ export function ConversasList({
               className={`
                 group flex items-start gap-1.5 px-3 py-2 cursor-pointer
                 transition-colors
-                ${
-                  isActive
-                    ? 'bg-[#306FCC]/10'
-                    : 'hover:bg-muted'
-                }
+                ${isActive ? 'bg-[#306FCC]/10' : 'hover:bg-muted'}
               `}
               onClick={() => onSelectConversa(conversa)}
             >
               <div className="flex-1 min-w-0">
-                <p className={`text-sm truncate leading-snug ${isActive ? 'font-semibold text-foreground' : 'font-medium text-foreground'}`}>
+                <p
+                  className={`text-sm truncate leading-snug ${isActive ? 'font-semibold text-foreground' : 'font-medium text-foreground'}`}
+                >
                   {conversa.titulo}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -80,7 +87,10 @@ export function ConversasList({
               </div>
 
               <button
-                onClick={(e) => { e.stopPropagation(); onRequestDelete(conversa._id); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRequestDelete(conversa._id);
+                }}
                 aria-label="Excluir conversa"
                 className="
                   shrink-0 opacity-0 group-hover:opacity-100
@@ -89,7 +99,7 @@ export function ConversasList({
                   transition-all cursor-pointer
                 "
               >
-                <Trash2 size={12} />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           );
@@ -98,4 +108,3 @@ export function ConversasList({
     </div>
   );
 }
-

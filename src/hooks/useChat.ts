@@ -1,12 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchData } from '@/lib/fetchData';
-import type { Conversa, ConversaResumo, PaginatedConversas } from '@/types/chat';
+import type {
+  Conversa,
+  ConversaResumo,
+  PaginatedConversas,
+} from '@/types/chat';
 
 export function useConversas() {
   return useQuery<PaginatedConversas>({
     queryKey: ['conversas'],
     queryFn: async () => {
-      const res = await fetchData<{ data: PaginatedConversas }>('/ia/conversas?limite=50');
+      const res = await fetchData<{ data: PaginatedConversas }>(
+        '/ia/conversas?limite=50',
+      );
       return res.data;
     },
   });
@@ -62,12 +68,15 @@ export async function sendMessage(
 ): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const response = await fetch(`${apiUrl}/ia/conversas/${conversaId}/mensagens`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',  // cookie de sessão Better Auth
-    body: JSON.stringify({ content }),
-  });
+  const response = await fetch(
+    `${apiUrl}/ia/conversas/${conversaId}/mensagens`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // cookie de sessão Better Auth
+      body: JSON.stringify({ content }),
+    },
+  );
 
   if (!response.ok || !response.body) {
     callbacks.onError('Erro ao conectar com o assistente.');

@@ -25,8 +25,13 @@ const SUGESTOES = [
 ];
 
 export function ChatPanel() {
-  const { fecharChat, conversaAtiva, selecionarConversa, isStreaming, setIsStreaming } =
-    useChatContext();
+  const {
+    fecharChat,
+    conversaAtiva,
+    selecionarConversa,
+    isStreaming,
+    setIsStreaming,
+  } = useChatContext();
   const queryClient = useQueryClient();
   const { user } = useSession();
   const firstName = user?.name?.split(' ')[0] ?? null;
@@ -124,7 +129,15 @@ export function ChatPanel() {
       setMensagensLocais((prev) => {
         const last = prev[prev.length - 1];
         if (!last || last.role !== 'assistant') return prev;
-        return [...prev.slice(0, -1), { ...last, role: 'error' as const, content: 'Não foi possível processar sua mensagem. Tente novamente.' }];
+        return [
+          ...prev.slice(0, -1),
+          {
+            ...last,
+            role: 'error' as const,
+            content:
+              'Não foi possível processar sua mensagem. Tente novamente.',
+          },
+        ];
       });
       return;
     }
@@ -136,7 +149,10 @@ export function ChatPanel() {
             if (prev.length === 0) return prev;
             const last = prev[prev.length - 1];
             if (last.role !== 'assistant') return prev;
-            return [...prev.slice(0, -1), { ...last, content: last.content + chunk }];
+            return [
+              ...prev.slice(0, -1),
+              { ...last, content: last.content + chunk },
+            ];
           });
         },
         onDone: () => {
@@ -177,8 +193,12 @@ export function ChatPanel() {
       {confirmDeleteId && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
           <div className="bg-background border border-border rounded shadow-lg px-5 py-4 flex flex-col gap-3 w-64">
-            <p className="text-sm font-medium text-foreground">Excluir conversa?</p>
-            <p className="text-xs text-muted-foreground">Esta ação não pode ser desfeita.</p>
+            <p className="text-sm font-medium text-foreground">
+              Excluir conversa?
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Esta ação não pode ser desfeita.
+            </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmDeleteId(null)}
@@ -204,7 +224,10 @@ export function ChatPanel() {
         </span>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => { handleNewConversa(); setShowHistory(false); }}
+            onClick={() => {
+              handleNewConversa();
+              setShowHistory(false);
+            }}
             aria-label="Nova conversa"
             className="flex items-center justify-center w-7 h-7 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
@@ -214,7 +237,9 @@ export function ChatPanel() {
             onClick={() => setShowHistory((v) => !v)}
             aria-label="Histórico de conversas"
             className={`flex items-center justify-center w-7 h-7 rounded transition-colors cursor-pointer ${
-              showHistory ? 'text-[#306FCC] bg-[#306FCC]/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              showHistory
+                ? 'text-[#306FCC] bg-[#306FCC]/10'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
             <History size={16} strokeWidth={2} />
@@ -243,7 +268,10 @@ export function ChatPanel() {
             conversas={conversas}
             conversaAtivaId={conversaAtiva?._id ?? null}
             isLoading={loadingConversas}
-            onSelectConversa={(c) => { handleSelectConversa(c); setShowHistory(false); }}
+            onSelectConversa={(c) => {
+              handleSelectConversa(c);
+              setShowHistory(false);
+            }}
             onRequestDelete={setConfirmDeleteId}
           />
         </div>
@@ -265,7 +293,10 @@ export function ChatPanel() {
             </div>
           ) : !conversaAtiva && !pendingNewConversa ? (
             <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6 text-center">
-              <MessageSquare size={28} className="text-muted-foreground opacity-30" />
+              <MessageSquare
+                size={28}
+                className="text-muted-foreground opacity-30"
+              />
               <p className="text-sm text-muted-foreground">
                 Selecione ou inicie uma nova conversa
               </p>
@@ -307,7 +338,9 @@ export function ChatPanel() {
                     <ChatMessage
                       key={i}
                       mensagem={msg}
-                      isStreaming={isStreaming && i === mensagensLocais.length - 1}
+                      isStreaming={
+                        isStreaming && i === mensagensLocais.length - 1
+                      }
                     />
                   ))
                 )}
