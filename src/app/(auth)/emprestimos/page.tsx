@@ -4,7 +4,9 @@ import EmprestimosPageContent from './_components/emprestimos-client';
 import type { EmprestimosApiResponse } from '@/types/emprestimos';
 
 export default async function EmprestimosPage() {
-  const initialData = await serverFetch<EmprestimosApiResponse>('/emprestimos?limite=20&page=1');
+  const initialData = await serverFetch<EmprestimosApiResponse>(
+    '/emprestimos?limite=20&page=1',
+  );
 
   return (
     <Suspense>

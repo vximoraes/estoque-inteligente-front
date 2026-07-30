@@ -11,6 +11,15 @@ export const emprestimoSchema = z.object({
     .trim()
     .min(3, 'Informe um nome com no mínimo 3 caracteres')
     .max(120, 'O nome deve ter no máximo 120 caracteres'),
+  data_saida: z
+    .string()
+    .optional()
+    .refine((value) => !value || !Number.isNaN(new Date(value).getTime()), {
+      message: 'Data do empréstimo inválida',
+    })
+    .refine((value) => !value || new Date(value) <= new Date(), {
+      message: 'A data do empréstimo não pode ser futura',
+    }),
   data_prevista_devolucao: z
     .string()
     .optional()
