@@ -113,14 +113,18 @@ export default function ModalDevolverItem({
             <X size={20} className="text-muted-foreground" />
           </button>
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground mb-1">Devolver Item</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-1">
+              Devolver Item
+            </h2>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-base font-medium text-foreground mb-1">Item</label>
-            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
+            <label className="block text-base font-medium text-foreground mb-1">
+              Item
+            </label>
+            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {itemNome}
             </div>
           </div>
@@ -129,7 +133,7 @@ export default function ModalDevolverItem({
             <label className="block text-base font-medium text-foreground mb-1">
               Quantidade em aberto
             </label>
-            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
+            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {quantidadeAberta}
             </div>
           </div>
@@ -147,7 +151,7 @@ export default function ModalDevolverItem({
                 setQuantidade(e.target.value);
                 setQuantidadeError('');
               }}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Digite a quantidade"
             />
             {quantidadeError && (
@@ -156,7 +160,9 @@ export default function ModalDevolverItem({
           </div>
 
           <div>
-            <label className="block text-base font-medium text-foreground mb-1">Observações</label>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Observações
+            </label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
@@ -173,18 +179,20 @@ export default function ModalDevolverItem({
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               disabled={devolucaoMutation.isPending}
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 text-white cursor-pointer hover:opacity-90"
+              className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
               style={{ backgroundColor: '#306FCC' }}
               disabled={devolucaoMutation.isPending}
             >
-              {devolucaoMutation.isPending ? 'Registrando...' : 'Confirmar Devolução'}
+              {devolucaoMutation.isPending
+                ? 'Registrando...'
+                : 'Confirmar Devolução'}
             </Button>
           </div>
         </div>

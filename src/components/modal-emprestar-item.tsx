@@ -44,6 +44,7 @@ interface EmprestimoRequest {
   quantidade_emprestada: number;
   solicitante_nome: string;
   solicitante_email?: string;
+  data_saida?: string;
   data_prevista_devolucao?: string;
   observacoes_emprestimo?: string;
 }
@@ -69,6 +70,7 @@ export default function ModalEmprestarItem({
   const [quantidade, setQuantidade] = useState('');
   const [solicitanteNome, setSolicitanteNome] = useState('');
   const [solicitanteEmail, setSolicitanteEmail] = useState('');
+  const [dataEmprestimo, setDataEmprestimo] = useState('');
   const [dataPrevista, setDataPrevista] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState('');
@@ -78,6 +80,7 @@ export default function ModalEmprestarItem({
     quantidade?: string;
     solicitanteNome?: string;
     solicitanteEmail?: string;
+    dataEmprestimo?: string;
     dataPrevista?: string;
     localizacao?: string;
   }>({});
@@ -225,6 +228,7 @@ export default function ModalEmprestarItem({
     setQuantidade('');
     setSolicitanteNome('');
     setSolicitanteEmail('');
+    setDataEmprestimo('');
     setDataPrevista('');
     setObservacoes('');
     setLocalizacaoSelecionada('');
@@ -240,6 +244,7 @@ export default function ModalEmprestarItem({
       quantidade?: string;
       solicitanteNome?: string;
       solicitanteEmail?: string;
+      dataEmprestimo?: string;
       dataPrevista?: string;
       localizacao?: string;
     } = {};
@@ -249,9 +254,16 @@ export default function ModalEmprestarItem({
     }
 
     const quantidadeNumber = Number(quantidade);
-    if (!quantidade || !Number.isInteger(quantidadeNumber) || quantidadeNumber <= 0) {
+    if (
+      !quantidade ||
+      !Number.isInteger(quantidadeNumber) ||
+      quantidadeNumber <= 0
+    ) {
       newErrors.quantidade = 'Quantidade deve ser maior que 0';
-    } else if (localizacaoSelecionada && quantidadeNumber > quantidadeDisponivel) {
+    } else if (
+      localizacaoSelecionada &&
+      quantidadeNumber > quantidadeDisponivel
+    ) {
       newErrors.quantidade = `Quantidade maior que o disponível (${quantidadeDisponivel})`;
     }
 
@@ -263,6 +275,13 @@ export default function ModalEmprestarItem({
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(solicitanteEmail.trim())) {
         newErrors.solicitanteEmail = 'E-mail inválido';
+      }
+    }
+
+    if (dataEmprestimo) {
+      const data = new Date(dataEmprestimo);
+      if (Number.isNaN(data.getTime()) || data > new Date()) {
+        newErrors.dataEmprestimo = 'A data do empréstimo não pode ser futura';
       }
     }
 
@@ -286,6 +305,9 @@ export default function ModalEmprestarItem({
       quantidade_emprestada: Number(quantidade),
       solicitante_nome: solicitanteNome.trim(),
       solicitante_email: solicitanteEmail.trim() || undefined,
+      data_saida: dataEmprestimo
+        ? new Date(dataEmprestimo).toISOString()
+        : undefined,
       data_prevista_devolucao: dataPrevista
         ? new Date(dataPrevista).toISOString()
         : undefined,
@@ -309,28 +331,38 @@ export default function ModalEmprestarItem({
             <X size={20} className="text-muted-foreground" />
           </button>
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground mb-1">Emprestar Item</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-1">
+              Emprestar Item
+            </h2>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-base font-medium text-foreground mb-1">Item</label>
-            <div className="w-full px-3 py-2 border border-border rounded-sm bg-muted/50 text-muted-foreground">
+            <label className="block text-base font-medium text-foreground mb-1">
+              Item
+            </label>
+            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
               {itemNome}
             </div>
           </div>
 
-          <div data-dropdown>
+          <div className="relative" data-dropdown>
             <label className="block text-base font-medium text-foreground mb-1">
               Localização <span className="text-destructive">*</span>
             </label>
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 border border-border rounded-sm text-left hover:border-[#306FCC]/40 transition-colors cursor-pointer"
+              className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-sm text-left hover:border-[#306FCC]/40 transition-colors cursor-pointer"
             >
-              <span className={localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}>
+              <span
+                className={
+                  localizacaoSelecionadaObj
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                }
+              >
                 {localizacaoSelecionadaObj
                   ? `${localizacaoSelecionadaObj.nome} (${quantidadeDisponivel} disponíveis)`
                   : 'Selecionar localização'}
@@ -342,48 +374,69 @@ export default function ModalEmprestarItem({
             </button>
 
             {isDropdownOpen && (
-              <div className="mt-2 border border-border rounded-sm bg-card max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
                 <div className="p-3 border-b border-border bg-muted/50">
                   <input
                     type="text"
                     value={localizacaoPesquisa}
                     onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
                     placeholder="Pesquisar..."
-                    className="w-full px-3 py-2 text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
 
-                {isLoadingLocalizacoes ? (
-                  <div className="p-3 text-sm text-muted-foreground">Carregando...</div>
-                ) : localizacoesFiltradas.length > 0 ? (
-                  localizacoesFiltradas.map((loc) => {
-                    const estoque =
-                      estoques.find((e) => e.localizacao._id === loc._id)?.quantidade || 0;
-                    return (
-                      <button
-                        key={loc._id}
-                        type="button"
-                        className="w-full p-2 text-left hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => {
-                          setLocalizacaoSelecionada(loc._id);
-                          setIsDropdownOpen(false);
-                          setLocalizacaoPesquisa('');
-                          setErrors((prev) => ({ ...prev, localizacao: undefined }));
-                        }}
-                      >
-                        {loc.nome} ({estoque} disponíveis)
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="p-3 text-sm text-muted-foreground">Nenhuma localização com estoque.</div>
-                )}
-                <div ref={observerTarget} className="h-2" />
+                <div className="overflow-y-auto">
+                  {isLoadingLocalizacoes ? (
+                    <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                      Carregando...
+                    </div>
+                  ) : localizacoesFiltradas.length > 0 ? (
+                    <>
+                      {localizacoesFiltradas.map((loc) => {
+                        const estoque =
+                          estoques.find((e) => e.localizacao._id === loc._id)
+                            ?.quantidade || 0;
+                        return (
+                          <button
+                            key={loc._id}
+                            type="button"
+                            className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
+                              localizacaoSelecionada === loc._id
+                                ? 'bg-[#306FCC]/5 text-[#306FCC] font-medium'
+                                : 'text-foreground'
+                            }`}
+                            onClick={() => {
+                              setLocalizacaoSelecionada(loc._id);
+                              setIsDropdownOpen(false);
+                              setLocalizacaoPesquisa('');
+                              setErrors((prev) => ({
+                                ...prev,
+                                localizacao: undefined,
+                              }));
+                            }}
+                          >
+                            <span className="truncate">{loc.nome}</span>
+                            <span className="text-sm px-2 py-0.5 rounded shrink-0 bg-muted/50 text-muted-foreground">
+                              {estoque} disponível
+                            </span>
+                          </button>
+                        );
+                      })}
+                      <div ref={observerTarget} className="h-2" />
+                    </>
+                  ) : (
+                    <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                      Nenhuma localização com estoque.
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {errors.localizacao && (
-              <p className="mt-1 text-sm text-destructive">{errors.localizacao}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {errors.localizacao}
+              </p>
             )}
           </div>
 
@@ -399,11 +452,13 @@ export default function ModalEmprestarItem({
                 setQuantidade(e.target.value);
                 setErrors((prev) => ({ ...prev, quantidade: undefined }));
               }}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Digite a quantidade"
             />
             {errors.quantidade && (
-              <p className="mt-1 text-sm text-destructive">{errors.quantidade}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {errors.quantidade}
+              </p>
             )}
           </div>
 
@@ -418,11 +473,13 @@ export default function ModalEmprestarItem({
                 setSolicitanteNome(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
               }}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="Nome da pessoa solicitante"
             />
             {errors.solicitanteNome && (
-              <p className="mt-1 text-sm text-destructive">{errors.solicitanteNome}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {errors.solicitanteNome}
+              </p>
             )}
           </div>
 
@@ -437,11 +494,37 @@ export default function ModalEmprestarItem({
                 setSolicitanteEmail(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
               }}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               placeholder="E-mail da pessoa solicitante (opcional)"
             />
             {errors.solicitanteEmail && (
-              <p className="mt-1 text-sm text-destructive">{errors.solicitanteEmail}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {errors.solicitanteEmail}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Data do empréstimo
+            </label>
+            <input
+              type="datetime-local"
+              value={dataEmprestimo}
+              onChange={(e) => {
+                setDataEmprestimo(e.target.value);
+                setErrors((prev) => ({ ...prev, dataEmprestimo: undefined }));
+              }}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+            />
+            <p className="mt-1 text-sm text-muted-foreground">
+              Deixe em branco para usar o momento atual. Use para registrar um
+              empréstimo feito no passado.
+            </p>
+            {errors.dataEmprestimo && (
+              <p className="mt-1 text-sm text-destructive">
+                {errors.dataEmprestimo}
+              </p>
             )}
           </div>
 
@@ -456,19 +539,23 @@ export default function ModalEmprestarItem({
                 setDataPrevista(e.target.value);
                 setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
               }}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
             />
             {errors.dataPrevista && (
-              <p className="mt-1 text-sm text-destructive">{errors.dataPrevista}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {errors.dataPrevista}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-base font-medium text-foreground mb-1">Observações</label>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Observações
+            </label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
               rows={3}
               placeholder="Observações opcionais"
               maxLength={500}
@@ -481,18 +568,20 @@ export default function ModalEmprestarItem({
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
               disabled={emprestimoMutation.isPending}
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 text-white cursor-pointer hover:opacity-90"
+              className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
               style={{ backgroundColor: '#306FCC' }}
               disabled={emprestimoMutation.isPending}
             >
-              {emprestimoMutation.isPending ? 'Registrando...' : 'Confirmar Empréstimo'}
+              {emprestimoMutation.isPending
+                ? 'Registrando...'
+                : 'Confirmar Empréstimo'}
             </Button>
           </div>
         </div>

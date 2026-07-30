@@ -1,11 +1,14 @@
 'use client';
 
 import Cabecalho from '@/components/cabecalho';
-import ModalObservacoesEmprestimo from '@/components/modal-observacoes-emprestimo';
+import ModalDetalhesEmprestimo from '@/components/modal-detalhes-emprestimo';
 import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
 import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
 import ModalDevolverItem from '@/components/modal-devolver-item';
+import ModalFiltros from '@/components/modal-filtros';
+import EmptyState from '@/components/empty-state';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   TableBody,
   TableCell,
@@ -22,38 +25,54 @@ import {
   Handshake,
   ChevronLeft,
   ChevronRight,
-  Eye,
   Pencil,
   Trash2,
+  Filter,
+  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import StatCard from '@/components/stat-card';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function EmprestimosPageContent({ initialData }: { initialData?: EmprestimosApiResponse }) {
-  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+const statusOptions = [
+  { value: '', label: 'Todos os status' },
+  { value: 'Ativo', label: 'Ativo' },
+  { value: 'Atrasado', label: 'Atrasado' },
+  { value: 'Devolvido', label: 'Devolvido' },
+];
+
+export default function EmprestimosPageContent({
+  initialData,
+}: {
+  initialData?: EmprestimosApiResponse;
+}) {
+  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
 
-  const [observacoesEmprestimo, setObservacoesEmprestimo] = useState<Emprestimo | null>(null);
-  const [isObservacoesModalOpen, setIsObservacoesModalOpen] = useState(false);
+  const [detalhesEmprestimo, setDetalhesEmprestimo] =
+    useState<Emprestimo | null>(null);
+  const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
 
-  const [editarEmprestimo, setEditarEmprestimo] = useState<Emprestimo | null>(null);
+  const [editarEmprestimo, setEditarEmprestimo] = useState<Emprestimo | null>(
+    null,
+  );
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
 
-  const [excluirEmprestimo, setExcluirEmprestimo] = useState<Emprestimo | null>(null);
+  const [excluirEmprestimo, setExcluirEmprestimo] = useState<Emprestimo | null>(
+    null,
+  );
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
 
-  const [devolverEmprestimo, setDevolverEmprestimo] = useState<Emprestimo | null>(null);
+  const [devolverEmprestimo, setDevolverEmprestimo] =
+    useState<Emprestimo | null>(null);
   const [isDevolverModalOpen, setIsDevolverModalOpen] = useState(false);
 
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<EmprestimosApiResponse>({
+  const { data, isLoading, error, refetch } = useQuery<EmprestimosApiResponse>({
     queryKey: ['emprestimos', searchTerm, statusFilter, currentPage],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -64,7 +83,9 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
       if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
       if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
 
-      return await get<EmprestimosApiResponse>(`/emprestimos?${params.toString()}`);
+      return await get<EmprestimosApiResponse>(
+        `/emprestimos?${params.toString()}`,
+      );
     },
     refetchOnMount: 'always',
     placeholderData: initialData,
@@ -134,8 +155,12 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
 
   const totalLocal = emprestimos.length;
   const ativosLocal = emprestimos.filter((e) => e.status === 'Ativo').length;
-  const atrasadosLocal = emprestimos.filter((e) => e.status === 'Atrasado').length;
-  const devolvidosLocal = emprestimos.filter((e) => e.status === 'Devolvido').length;
+  const atrasadosLocal = emprestimos.filter(
+    (e) => e.status === 'Atrasado',
+  ).length;
+  const devolvidosLocal = emprestimos.filter(
+    (e) => e.status === 'Devolvido',
+  ).length;
 
   const total = globalStats?.total ?? totalLocal;
   const ativos = globalStats?.ativos ?? ativosLocal;
@@ -150,7 +175,10 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
   };
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden" data-test="emprestimos-page">
+    <div
+      className="w-full h-screen flex flex-col overflow-hidden"
+      data-test="emprestimos-page"
+    >
       <Cabecalho pagina="Empréstimos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
@@ -171,21 +199,44 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
               placeholder="Pesquisar por item, solicitante ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 px-4 border border-border rounded-md bg-card text-foreground"
+          <Button
+            variant="outline"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
+            data-test="filtros-button"
+            onClick={() => setIsFiltrosModalOpen(true)}
           >
-            <option value="">Todos os status</option>
-            <option value="Ativo">Ativo</option>
-            <option value="Atrasado">Atrasado</option>
-            <option value="Devolvido">Devolvido</option>
-          </select>
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
         </div>
+
+        {statusFilter && (
+          <div className="mb-4 shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+              <div
+                className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                data-test="applied-filter-status"
+              >
+                <span className="font-medium">Status:</span>
+                <span data-test="applied-filter-status-nome">
+                  {statusFilter}
+                </span>
+                <button
+                  onClick={() => setStatusFilter('')}
+                  className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                  title="Remover filtro de status"
+                  data-test="applied-filter-status-remover"
+                >
+                  <X size={12} strokeWidth={2.5} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -200,36 +251,60 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando empréstimos...</p>
+              <p className="mt-4 text-gray-600 font-medium">
+                Carregando empréstimos...
+              </p>
             </div>
           ) : emprestimos.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[700px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">ITEM</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">SOLICITANTE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">E-MAIL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. EMPRESTADA</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">QTD. ABERTA</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">LOCALIZAÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">DATA PREVISTA</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">DEVOLVER</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-8">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">
+                        ITEM
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-left px-6">
+                        SOLICITANTE
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                        QTD. EMPRESTADA
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                        DATA PREVISTA
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                        STATUS
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                        AÇÕES
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center px-8">
+                        DEVOLVER
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
 
                   <TableBody>
                     {emprestimos.map((emp) => (
-                      <TableRow key={emp._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
-                        <TableCell className="font-medium text-left px-6 py-3">{emp.item?.nome || '-'}</TableCell>
-                        <TableCell className="text-left px-6 py-3">{emp.solicitante_nome}</TableCell>
-                        <TableCell className="text-left px-6 py-3">{emp.solicitante_email || '-'}</TableCell>
-                        <TableCell className="text-center px-6 py-3">{emp.quantidade_emprestada}</TableCell>
-                        <TableCell className="text-center px-6 py-3">{emp.quantidade_aberta}</TableCell>
-                        <TableCell className="text-left px-6 py-3">{emp.localizacao?.nome || '-'}</TableCell>
+                      <TableRow
+                        key={emp._id}
+                        onClick={() => {
+                          setDetalhesEmprestimo(emp);
+                          setIsDetalhesModalOpen(true);
+                        }}
+                        className="hover:bg-gray-50 border-b cursor-pointer"
+                        style={{ height: '60px' }}
+                      >
+                        <TableCell className="font-medium text-left px-6 py-3">
+                          {emp.item?.nome || '-'}
+                        </TableCell>
+                        <TableCell className="text-left px-6 py-3">
+                          {emp.solicitante_nome}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-3">
+                          {emp.quantidade_emprestada}
+                        </TableCell>
                         <TableCell className="text-center px-6 py-3 whitespace-nowrap">
                           {formatarDataPrevista(emp.data_prevista_devolucao)}
                         </TableCell>
@@ -249,38 +324,37 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
                         <TableCell className="text-center px-8 py-3">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
-                              onClick={() => { setObservacoesEmprestimo(emp); setIsObservacoesModalOpen(true); }}
-                              className="p-1 sm:p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Ver observações"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditarEmprestimo(emp);
+                                setIsEditarModalOpen(true);
+                              }}
+                              className="p-1 sm:p-2 rounded-md transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-blue-50 cursor-pointer"
+                              title="Editar empréstimo"
                             >
-                              <Eye size={16} className="sm:w-5 sm:h-5" />
+                              <Pencil className="w-4 h-4" />
                             </button>
 
                             <button
-                              onClick={() => { setEditarEmprestimo(emp); setIsEditarModalOpen(true); }}
-                              className={`p-1 sm:p-2 rounded-md transition-colors duration-200 ${
-                                emp.quantidade_aberta <= 0
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'
-                              }`}
-                              title={emp.quantidade_aberta <= 0 ? 'Empréstimo já devolvido' : 'Editar empréstimo'}
-                              disabled={emp.quantidade_aberta <= 0}
-                            >
-                              <Pencil size={16} className="sm:w-5 sm:h-5" />
-                            </button>
-
-                            <button
-                              onClick={() => { setExcluirEmprestimo(emp); setIsExcluirModalOpen(true); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExcluirEmprestimo(emp);
+                                setIsExcluirModalOpen(true);
+                              }}
                               className="p-1 sm:p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir empréstimo"
                             >
-                              <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-6 py-3">
                           <button
-                            onClick={() => { setDevolverEmprestimo(emp); setIsDevolverModalOpen(true); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDevolverEmprestimo(emp);
+                              setIsDevolverModalOpen(true);
+                            }}
                             disabled={emp.quantidade_aberta <= 0}
                             className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
                               emp.quantidade_aberta <= 0
@@ -310,7 +384,11 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.min(paginationInfo.totalPages, p + 1))}
+                      onClick={() =>
+                        setCurrentPage((p) =>
+                          Math.min(paginationInfo.totalPages, p + 1),
+                        )
+                      }
                       disabled={!paginationInfo.hasNextPage}
                       className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                     >
@@ -321,30 +399,53 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
               )}
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Handshake className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500 text-lg">Nenhum empréstimo encontrado.</p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={Handshake}
+                title={
+                  searchTerm || statusFilter
+                    ? 'Nenhum resultado'
+                    : 'Nenhum empréstimo encontrado'
+                }
+                subtitle={
+                  searchTerm || statusFilter
+                    ? 'Tente ajustar sua pesquisa ou remover os filtros.'
+                    : 'Os empréstimos aparecerão aqui quando forem registrados.'
+                }
+              />
             </div>
           )}
         </div>
       </div>
 
-      {observacoesEmprestimo && (
-        <ModalObservacoesEmprestimo
-          isOpen={isObservacoesModalOpen}
-          onClose={() => { setIsObservacoesModalOpen(false); setObservacoesEmprestimo(null); }}
-          emprestimo={observacoesEmprestimo}
+      <ModalFiltros
+        isOpen={isFiltrosModalOpen}
+        onClose={() => setIsFiltrosModalOpen(false)}
+        categoriaFilter=""
+        statusFilter={statusFilter}
+        onFiltersChange={(_categoria, status) => setStatusFilter(status)}
+        statusOptions={statusOptions}
+        showCategoria={false}
+      />
+
+      {detalhesEmprestimo && (
+        <ModalDetalhesEmprestimo
+          isOpen={isDetalhesModalOpen}
+          onClose={() => {
+            setIsDetalhesModalOpen(false);
+            setDetalhesEmprestimo(null);
+          }}
+          emprestimo={detalhesEmprestimo}
         />
       )}
 
       {editarEmprestimo && (
         <ModalEditarEmprestimo
           isOpen={isEditarModalOpen}
-          onClose={() => { setIsEditarModalOpen(false); setEditarEmprestimo(null); }}
+          onClose={() => {
+            setIsEditarModalOpen(false);
+            setEditarEmprestimo(null);
+          }}
           emprestimo={editarEmprestimo}
           onSuccess={() => refetch()}
         />
@@ -353,7 +454,10 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
       {devolverEmprestimo && (
         <ModalDevolverItem
           isOpen={isDevolverModalOpen}
-          onClose={() => { setIsDevolverModalOpen(false); setDevolverEmprestimo(null); }}
+          onClose={() => {
+            setIsDevolverModalOpen(false);
+            setDevolverEmprestimo(null);
+          }}
           emprestimoId={devolverEmprestimo._id}
           itemNome={devolverEmprestimo.item?.nome || 'Item'}
           quantidadeAberta={devolverEmprestimo.quantidade_aberta}
@@ -364,7 +468,10 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
       {excluirEmprestimo && (
         <ModalExcluirEmprestimo
           isOpen={isExcluirModalOpen}
-          onClose={() => { setIsExcluirModalOpen(false); setExcluirEmprestimo(null); }}
+          onClose={() => {
+            setIsExcluirModalOpen(false);
+            setExcluirEmprestimo(null);
+          }}
           emprestimoId={excluirEmprestimo._id}
           itemNome={excluirEmprestimo.item?.nome || 'Item'}
           solicitanteNome={excluirEmprestimo.solicitante_nome}
@@ -378,7 +485,15 @@ export default function EmprestimosPageContent({ initialData }: { initialData?: 
         />
       )}
 
-      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover draggable={false} transition={Slide} />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        transition={Slide}
+      />
     </div>
   );
 }

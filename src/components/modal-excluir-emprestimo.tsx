@@ -30,12 +30,18 @@ export default function ModalExcluirEmprestimo({
     mutationFn: async () => del(`/emprestimos/${emprestimoId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      toast.success('Empréstimo excluído com sucesso!', { position: 'bottom-right', autoClose: 3000 });
+      toast.success('Empréstimo excluído com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+      });
       onSuccess?.();
       onClose();
     },
     onError: (error: any) => {
-      const msg = error?.errors?.[0]?.message || error?.message || 'Erro ao excluir empréstimo.';
+      const msg =
+        error?.errors?.[0]?.message ||
+        error?.message ||
+        'Erro ao excluir empréstimo.';
       toast.error(msg, { position: 'bottom-right', autoClose: 5000 });
     },
   });
@@ -46,11 +52,15 @@ export default function ModalExcluirEmprestimo({
     } else {
       document.body.style.overflow = 'unset';
     }
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     if (isOpen) document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
@@ -99,7 +109,9 @@ export default function ModalExcluirEmprestimo({
 
           {excluirMutation.error && (
             <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
-              <div className="font-medium mb-1">Não foi possível excluir o empréstimo</div>
+              <div className="font-medium mb-1">
+                Não foi possível excluir o empréstimo
+              </div>
               <div className="text-destructive/80">
                 {(excluirMutation.error as any)?.message || 'Erro desconhecido'}
               </div>
@@ -114,14 +126,14 @@ export default function ModalExcluirEmprestimo({
               variant="outline"
               onClick={onClose}
               disabled={excluirMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               onClick={() => excluirMutation.mutate()}
               disabled={excluirMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#DC2626' }}
             >
               {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}

@@ -30,7 +30,9 @@ export function gerarPdfEmprestimo(emp: Emprestimo): void {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
   doc.setTextColor(100);
-  doc.text('Termo de Empréstimo de Equipamento', pageW / 2, y, { align: 'center' });
+  doc.text('Termo de Empréstimo de Equipamento', pageW / 2, y, {
+    align: 'center',
+  });
   y += 3;
 
   doc.setDrawColor(180);
@@ -109,9 +111,14 @@ export function gerarPdfEmprestimo(emp: Emprestimo): void {
   // Linha esquerda
   doc.line(margin, signatureY, margin + halfW - 10, signatureY);
   doc.setFont('helvetica', 'bold');
-  doc.text('Responsável pelo empréstimo', margin + (halfW - 10) / 2, signatureY + 5, {
-    align: 'center',
-  });
+  doc.text(
+    'Responsável pelo empréstimo',
+    margin + (halfW - 10) / 2,
+    signatureY + 5,
+    {
+      align: 'center',
+    },
+  );
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.text('(Assinatura Digital)', margin + (halfW - 10) / 2, signatureY + 10, {
@@ -128,9 +135,14 @@ export function gerarPdfEmprestimo(emp: Emprestimo): void {
   });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text('(Assinatura Digital)', rightStart + (halfW - 10) / 2, signatureY + 10, {
-    align: 'center',
-  });
+  doc.text(
+    '(Assinatura Digital)',
+    rightStart + (halfW - 10) / 2,
+    signatureY + 10,
+    {
+      align: 'center',
+    },
+  );
 
   const nomeArquivo = `emprestimo-${emp.solicitante_nome.replace(/\s+/g, '-').toLowerCase()}-${emp._id.slice(-6)}.pdf`;
   doc.save(nomeArquivo);
