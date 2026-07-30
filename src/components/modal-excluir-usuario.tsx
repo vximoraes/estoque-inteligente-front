@@ -155,7 +155,7 @@ export default function ModalExcluirUsuario({
               variant="outline"
               onClick={onClose}
               disabled={excluirMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
@@ -163,7 +163,7 @@ export default function ModalExcluirUsuario({
               data-test="modal-excluir-confirmar"
               onClick={handleExcluir}
               disabled={excluirMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#DC2626' }}
             >
               {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}

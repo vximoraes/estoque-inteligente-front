@@ -25,7 +25,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -58,7 +58,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
                   .then((text) => {
                     emailUsuario = text.trim();
                   });
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -86,7 +86,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
                   .then((text) => {
                     statusUsuario = text.trim();
                   });
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -106,7 +106,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -134,7 +134,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
                   .then((text) => {
                     emailUsuario = text.trim();
                   });
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -164,7 +164,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -184,7 +184,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -204,7 +204,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -234,7 +234,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -259,7 +259,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -292,7 +292,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .eq(0)
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -304,7 +304,7 @@ describe('Usuários - Detalhes e Reenvio de Convite', () => {
             cy.get('tbody tr')
               .eq(1)
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 

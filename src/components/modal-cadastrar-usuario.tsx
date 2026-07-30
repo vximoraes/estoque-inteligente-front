@@ -169,13 +169,15 @@ export default function ModalCadastrarUsuario({
               placeholder="Nome do usuário"
               maxLength={100}
               {...register('nome')}
-              className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.nome ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting || cadastrarMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-destructive text-sm mt-1">{errors.nome.message}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.nome.message}
+              </p>
             )}
           </div>
 
@@ -193,7 +195,7 @@ export default function ModalCadastrarUsuario({
               type="email"
               placeholder="E-mail do usuário"
               {...register('email')}
-              className={`w-full px-4 py-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.email ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting || cadastrarMutation.isPending}
@@ -228,7 +230,7 @@ export default function ModalCadastrarUsuario({
               variant="outline"
               onClick={onClose}
               disabled={isSubmitting || cadastrarMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
@@ -236,7 +238,7 @@ export default function ModalCadastrarUsuario({
               data-test="modal-cadastrar-confirmar"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || cadastrarMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
               {isSubmitting || cadastrarMutation.isPending
