@@ -11,21 +11,29 @@ import {
 } from '@/components/ui/table';
 import ModalExcluirFornecedor from '@/components/modal-excluir-fornecedor';
 import ModalDetalhesFornecedor from '@/components/modal-detalhes-fornecedor';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { FornecedorApiResponse } from '@/types/fornecedores';
-import { Search, Plus, Edit, Trash2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Truck, Plus, Pencil, Trash2 } from 'lucide-react';
+import EmptyState from '@/components/empty-state';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
 
-export default function PageFornecedoresContent({ initialData }: { initialData?: FornecedorApiResponse }) {
+export default function PageFornecedoresContent({
+  initialData,
+}: {
+  initialData?: FornecedorApiResponse;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
+  const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirFornecedorId, setExcluirFornecedorId] = useState<string | null>(
     null,
@@ -45,27 +53,52 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
     isFetching,
     error,
     refetch,
-  } = useQuery<FornecedorApiResponse>({
-    queryKey: ['fornecedores', searchTerm, currentPage],
-    queryFn: async () => {
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<FornecedorApiResponse>({
+    queryKey: ['fornecedores', searchTerm],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
       params.append('limite', '20');
-      params.append('page', currentPage.toString());
+      params.append('page', page.toString());
 
       const queryString = params.toString();
       const url = `/fornecedores${queryString ? `?${queryString}` : ''}`;
 
       return await get<FornecedorApiResponse>(url);
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    placeholderData: initialData,
+    placeholderData: initialData
+      ? { pages: [initialData], pageParams: [1] }
+      : undefined,
   });
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+    if (!observerTarget.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     const success = searchParams.get('success');
@@ -145,14 +178,7 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
     setIsDetalhesModalOpen(true);
   };
 
-  const fornecedores = data?.data?.docs || [];
-  const paginationInfo = data?.data || {
-    totalDocs: 0,
-    totalPages: 0,
-    page: 1,
-    hasPrevPage: false,
-    hasNextPage: false,
-  };
+  const fornecedores = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
@@ -160,7 +186,7 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1">
@@ -170,11 +196,11 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
               placeholder="Pesquisar fornecedores..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-11 pl-10"
             />
           </div>
           <Button
-            className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+            className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={handleAdicionarClick}
           >
@@ -227,7 +253,8 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
                     {fornecedores.map((fornecedor) => (
                       <TableRow
                         key={fornecedor._id}
-                        className="hover:bg-gray-50 border-b relative"
+                        onClick={() => handleViewDetails(fornecedor._id)}
+                        className="hover:bg-gray-50 border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         {atualizandoFornecedorId === fornecedor._id &&
@@ -258,6 +285,7 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
                               href={fornecedor.url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-[200px]"
                               title={fornecedor.url}
                             >
@@ -286,25 +314,24 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
-                              onClick={() => handleViewDetails(fornecedor._id)}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Ver detalhes do fornecedor"
-                            >
-                              <Eye size={16} className="sm:w-5 sm:h-5" />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(fornecedor._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(fornecedor._id);
+                              }}
                               className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar fornecedor"
                             >
-                              <Edit size={16} className="sm:w-5 sm:h-5" />
+                              <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(fornecedor._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(fornecedor._id);
+                              }}
                               className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir fornecedor"
                             >
-                              <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </TableCell>
@@ -312,45 +339,37 @@ export default function PageFornecedoresContent({ initialData }: { initialData?:
                     ))}
                   </TableBody>
                 </table>
-              </div>
-              {paginationInfo.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
-                  <p className="text-sm text-gray-600">
-                    Página {paginationInfo.page} de {paginationInfo.totalPages}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                      disabled={!paginationInfo.hasPrevPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Página anterior"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage((prev) => prev + 1)}
-                      disabled={!paginationInfo.hasNextPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Próxima página"
-                    >
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
-                    </button>
-                  </div>
+
+                {/* Observer target for infinite scroll */}
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                >
+                  {isFetchingNextPage && (
+                    <PulseLoader
+                      color="#3b82f6"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500 text-lg">
-                  {searchTerm
-                    ? 'Nenhum fornecedor encontrado para sua pesquisa.'
-                    : 'Não há fornecedores cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={Truck}
+                title={
+                  searchTerm
+                    ? 'Nenhum resultado'
+                    : 'Nenhum fornecedor cadastrado'
+                }
+                subtitle={
+                  searchTerm
+                    ? 'Tente ajustar sua pesquisa.'
+                    : 'Comece adicionando o primeiro fornecedor.'
+                }
+              />
             </div>
           )}
         </div>

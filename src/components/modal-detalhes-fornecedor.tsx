@@ -196,14 +196,25 @@ export default function ModalDetalhesFornecedor({
                     </p>
                     <button
                       onClick={() => handleCopy(fornecedor.contato!, 'contato')}
-                      className="p-1.5 text-muted-foreground hover:bg-muted rounded-sm transition-colors flex-shrink-0 cursor-pointer"
+                      className="relative p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar contato"
                     >
-                      {copiedField === 'contato' ? (
-                        <Check size={16} />
-                      ) : (
-                        <Copy size={16} />
-                      )}
+                      <span className="relative block w-4 h-4">
+                        <Copy
+                          className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                            copiedField === 'contato'
+                              ? 'opacity-0 scale-50 -rotate-45'
+                              : 'opacity-100 scale-100 rotate-0'
+                          }`}
+                        />
+                        <Check
+                          className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                            copiedField === 'contato'
+                              ? 'opacity-100 scale-100 rotate-0'
+                              : 'opacity-0 scale-50 rotate-45'
+                          }`}
+                        />
+                      </span>
                     </button>
                   </div>
                 </div>

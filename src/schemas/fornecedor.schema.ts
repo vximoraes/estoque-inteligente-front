@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-const urlRegex =
-  /^(https?:\/\/)?([-\da-z.]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+const urlRegex = /^(https?:\/\/)?([-\da-z.]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
 export const fornecedorSchema = z.object({
   nome: z
