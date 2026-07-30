@@ -25,7 +25,7 @@ export async function fetchData<T>(
   const options: RequestInit = {
     method,
     headers,
-    credentials: 'include',  // envia cookie de sessão Better Auth
+    credentials: 'include', // envia cookie de sessão Better Auth
     ...(body ? { body: JSON.stringify(body) } : {}),
   };
 
@@ -41,11 +41,17 @@ export async function fetchData<T>(
   try {
     data = (await response.json()) as T;
   } catch {
-    data = { status: response.status, message: 'Resposta da API não é JSON válido' };
+    data = {
+      status: response.status,
+      message: 'Resposta da API não é JSON válido',
+    };
   }
 
   if (!response.ok) {
-    if ((response.status === 401 || response.status === 498) && typeof window !== 'undefined') {
+    if (
+      (response.status === 401 || response.status === 498) &&
+      typeof window !== 'undefined'
+    ) {
       if (!isRedirecting) {
         isRedirecting = true;
         await authClient.signOut().catch(() => {});

@@ -27,7 +27,10 @@ export default function SidebarButtonMenu({
   className = '',
 }: SidebarMenuButtonProps) {
   const router = useRouter();
-  const slug = name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const slug = name
+    ?.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   const isActive = !!path?.startsWith('/' + slug);
 
   function navigate() {

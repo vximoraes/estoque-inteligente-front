@@ -54,18 +54,15 @@ export default function CadastroPage() {
 
   const onSubmit = async (data: CadastroFormData) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/signup`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nome: data.nome,
-            email: data.email,
-            senha: data.senha,
-          }),
-        },
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: data.nome,
+          email: data.email,
+          senha: data.senha,
+        }),
+      });
       const responseData = await res.json();
       if (!res.ok) throw responseData;
 
@@ -89,7 +86,10 @@ export default function CadastroPage() {
       }
     } catch (error) {
       if (!(error instanceof Error)) {
-        const errorData = error as { message?: string; errors?: Array<{ path: string; message: string }> };
+        const errorData = error as {
+          message?: string;
+          errors?: Array<{ path: string; message: string }>;
+        };
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((err: { path: string; message: string }) => {
@@ -159,7 +159,9 @@ export default function CadastroPage() {
                   disabled={isSubmitting}
                 />
                 {errors.nome && (
-                  <p className="text-xs text-destructive">{errors.nome.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.nome.message}
+                  </p>
                 )}
               </div>
 
@@ -180,7 +182,9 @@ export default function CadastroPage() {
                   disabled={isSubmitting}
                 />
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -203,15 +207,23 @@ export default function CadastroPage() {
                   />
                   <button
                     type="button"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.senha && (
-                  <p className="text-xs text-destructive">{errors.senha.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.senha.message}
+                  </p>
                 )}
                 {senhaAtual && (
                   <div className="mt-1 grid grid-cols-1 gap-1">
@@ -222,7 +234,9 @@ export default function CadastroPage() {
                           key={i}
                           className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
                         >
-                          <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`} />
+                          <div
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                          />
                           {req.text}
                         </div>
                       );
@@ -250,15 +264,23 @@ export default function CadastroPage() {
                   />
                   <button
                     type="button"
-                    aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                     onClick={() => setShowConfirmPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.confirmarSenha && (
-                  <p className="text-xs text-destructive">{errors.confirmarSenha.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.confirmarSenha.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -296,4 +318,3 @@ export default function CadastroPage() {
     </div>
   );
 }
-

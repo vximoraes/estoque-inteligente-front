@@ -44,7 +44,7 @@ cy.request({
 });
 ```
 
-Better Auth é cookie-based: o `Set-Cookie` da resposta já autentica qualquer `cy.request()` seguinte pro mesmo domínio (Cypress reenvia cookies automaticamente), sem precisar do header `Authorization`. Ele só é necessário quando o teste roda checks de API *fora* da sequência de um `cy.login()`/`cy.request` de sessão já feito antes — nesse caso, usar o `token` do body da resposta, nunca ler de `localStorage` (o app não guarda token nenhum lá; isso já foi causa de testes quebrados no passado).
+Better Auth é cookie-based: o `Set-Cookie` da resposta já autentica qualquer `cy.request()` seguinte pro mesmo domínio (Cypress reenvia cookies automaticamente), sem precisar do header `Authorization`. Ele só é necessário quando o teste roda checks de API _fora_ da sequência de um `cy.login()`/`cy.request` de sessão já feito antes — nesse caso, usar o `token` do body da resposta, nunca ler de `localStorage` (o app não guarda token nenhum lá; isso já foi causa de testes quebrados no passado).
 
 ## Escrevendo uma spec nova
 

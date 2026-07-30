@@ -112,7 +112,9 @@ function LoginContent() {
                   data-test="email-input"
                 />
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -144,23 +146,29 @@ function LoginContent() {
                   />
                   <button
                     type="button"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                     disabled={isSubmitting}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.senha && (
-                  <p className="text-xs text-destructive">{errors.senha.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.senha.message}
+                  </p>
                 )}
               </div>
             </div>
 
-            {error && (
-              <p className="mt-4 text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
             <Button
               type="submit"

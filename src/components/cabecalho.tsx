@@ -254,7 +254,9 @@ export default function Cabecalho({
         <h1 className="text-[18px] md:text-[20px] font-bold text-foreground">
           {pagina}
           {acao && (
-            <span className="text-muted-foreground font-semibold ml-2">&gt; {acao}</span>
+            <span className="text-muted-foreground font-semibold ml-2">
+              &gt; {acao}
+            </span>
           )}
         </h1>
         {descricao && (

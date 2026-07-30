@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
-const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3010';
+const API_URL =
+  process.env.API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://localhost:3010';
 
 export default async function Home() {
   try {

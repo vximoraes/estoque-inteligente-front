@@ -79,11 +79,7 @@ function MobileMenuItem({
             : 'text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
         }`}
       >
-        <img
-          src={icon}
-          alt={name}
-          className="w-[18px] h-[18px] shrink-0"
-        />
+        <img src={icon} alt={name} className="w-[18px] h-[18px] shrink-0" />
         <span
           className={`text-[13px] tracking-wide flex-1 text-left ${isActive ? 'font-semibold' : 'font-medium'}`}
         >
@@ -133,8 +129,13 @@ function MobileMenuItem({
                         : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
                     }`}
                   >
-                    <span className="w-[18px] h-[18px] shrink-0" aria-hidden="true" />
-                    <span className="text-[13px] tracking-wide">{item.name}</span>
+                    <span
+                      className="w-[18px] h-[18px] shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span className="text-[13px] tracking-wide">
+                      {item.name}
+                    </span>
                   </button>
                 );
               })}
@@ -368,7 +369,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-btn-sair"
                   title={collapsed ? 'Sair' : undefined}
                 >
-                  <img src="/sair.svg" alt="" className="w-[18px] h-[18px] shrink-0" />
+                  <img
+                    src="/sair.svg"
+                    alt=""
+                    className="w-[18px] h-[18px] shrink-0"
+                  />
                   {!collapsed && (
                     <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
                       Sair
@@ -396,7 +401,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               className="w-9 h-9 flex items-center justify-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150"
               aria-label="Fechar menu"
             >
-              <X className="w-4 h-4 text-ei-sidebar-text-soft" strokeWidth={1.5} />
+              <X
+                className="w-4 h-4 text-ei-sidebar-text-soft"
+                strokeWidth={1.5}
+              />
             </button>
           </div>
 
@@ -520,7 +528,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 className="pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 text-ei-sidebar-text-soft hover:text-ei-sidebar-text"
                 data-test="sidebar-btn-sair-mobile"
               >
-                <img src="/sair.svg" alt="" className="w-[18px] h-[18px] shrink-0" />
+                <img
+                  src="/sair.svg"
+                  alt=""
+                  className="w-[18px] h-[18px] shrink-0"
+                />
                 <span className="text-[13px] font-medium tracking-wide">
                   Sair
                 </span>

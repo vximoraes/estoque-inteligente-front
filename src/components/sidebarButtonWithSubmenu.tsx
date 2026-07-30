@@ -32,7 +32,10 @@ export default function SidebarButtonWithSubmenu({
   collapsed = false,
 }: SidebarMenuButtonWithSubmenuProps) {
   const router = useRouter();
-  const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const slug = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   const isActive = !!path?.startsWith('/' + slug);
   const [isOpen, setIsOpen] = useState(isActive);
 
@@ -62,11 +65,7 @@ export default function SidebarButtonWithSubmenu({
           data-test={dataTest || 'sidebar-menu-button'}
           title={name}
         >
-          <img
-            src={src}
-            alt={name}
-            className="w-[18px] h-[18px]"
-          />
+          <img src={src} alt={name} className="w-[18px] h-[18px]" />
         </SidebarMenuButton>
 
         <div
@@ -109,11 +108,7 @@ export default function SidebarButtonWithSubmenu({
         }`}
         data-test={dataTest || 'sidebar-menu-button'}
       >
-        <img
-          src={src}
-          alt=""
-          className="w-[18px] h-[18px] shrink-0"
-        />
+        <img src={src} alt="" className="w-[18px] h-[18px] shrink-0" />
         <span
           className={`text-[13px] tracking-wide flex-1 ${
             isActive
@@ -147,12 +142,15 @@ export default function SidebarButtonWithSubmenu({
                 onClick={() => handleSubItemClick(item.route)}
                 className={`w-[250px] h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-sm transition-colors duration-150 cursor-pointer ${
                   path === item.route
-                      ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium'
-                      : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
+                    ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium'
+                    : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
                 }`}
                 data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
               >
-                <span className="w-[18px] h-[18px] shrink-0" aria-hidden="true" />
+                <span
+                  className="w-[18px] h-[18px] shrink-0"
+                  aria-hidden="true"
+                />
                 <span className="text-[13px] tracking-wide">{item.name}</span>
               </button>
             ))}
