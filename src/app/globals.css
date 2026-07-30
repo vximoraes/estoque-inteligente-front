@@ -59,8 +59,13 @@
   --radius-xl: calc(var(--radius) + 4px);
   --animate-dot-pulse: dot-pulse 1.4s ease-in-out infinite;
   @keyframes dot-pulse {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 1; }
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }
 
@@ -180,12 +185,6 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans), sans-serif !important;
   }
-}
-
-[data-test='search-actions-bar'] [data-slot='input'],
-[data-test='search-actions-bar'] [data-slot='button'] {
-  height: 2.5rem;
-  min-height: 2.5rem;
 }
 
 /* Estilos responsivos para Toastify */

@@ -168,7 +168,7 @@ export default function ModalExcluirLocalizacao({
               variant="outline"
               onClick={handleClose}
               disabled={inativarLocalizacaoMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
@@ -176,7 +176,7 @@ export default function ModalExcluirLocalizacao({
               type="button"
               onClick={handleConfirm}
               disabled={inativarLocalizacaoMutation.isPending}
-              className="flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
+              className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
             >
               {inativarLocalizacaoMutation.isPending
                 ? 'Excluindo...'

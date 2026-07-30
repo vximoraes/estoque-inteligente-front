@@ -30,19 +30,13 @@ interface ItemEstoqueProps {
 const STATUS_BG: Record<string, string> = {
   'Em Estoque': 'oklch(0.986 0.010 145)',
   'Baixo Estoque': 'oklch(0.986 0.013 82)',
-  'Indisponível': 'oklch(0.986 0.010 25)',
-};
-
-const STATUS_DOT: Record<string, string> = {
-  'Em Estoque': 'oklch(0.65 0.18 145)',
-  'Baixo Estoque': 'oklch(0.68 0.16 78)',
-  'Indisponível': 'oklch(0.65 0.19 25)',
+  Indisponível: 'oklch(0.986 0.010 25)',
 };
 
 const STATUS_TEXT: Record<string, string> = {
   'Em Estoque': 'oklch(0.55 0.16 145)',
   'Baixo Estoque': 'oklch(0.58 0.14 78)',
-  'Indisponível': 'oklch(0.58 0.18 25)',
+  Indisponível: 'oklch(0.58 0.18 25)',
 };
 
 export default function ItemEstoque({
@@ -114,7 +108,10 @@ export default function ItemEstoque({
       .toLocaleLowerCase('pt-BR')
       .split(' ')
       .filter(Boolean)
-      .map((palavra) => palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1))
+      .map(
+        (palavra) =>
+          palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1),
+      )
       .join(' ');
   }, [categoria]);
 
@@ -139,7 +136,9 @@ export default function ItemEstoque({
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
               <div
                 className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin"
-                style={{ borderColor: '#306FCC transparent transparent transparent' }}
+                style={{
+                  borderColor: '#306FCC transparent transparent transparent',
+                }}
               ></div>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">Atualizando...</p>
@@ -159,11 +158,17 @@ export default function ItemEstoque({
           {/* Image */}
           <div
             className={`w-10 h-10 rounded-sm flex items-center justify-center overflow-hidden shrink-0 bg-muted/40 border border-border/40 ${
-              imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+              imagemComTimestamp
+                ? 'cursor-pointer hover:opacity-80 transition-opacity'
+                : ''
             }`}
             data-test="component-icon"
             onClick={handleImageClick}
-            title={imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''}
+            title={
+              imagemComTimestamp
+                ? `Clique para ampliar a imagem de ${nome}`
+                : ''
+            }
           >
             {imagemComTimestamp ? (
               <img
@@ -198,7 +203,10 @@ export default function ItemEstoque({
 
         {/* Toggle button with animated MoreHorizontal → X crossfade */}
         <button
-          onClick={(e) => { e.stopPropagation(); setIsMenuOpen((v) => !v); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen((v) => !v);
+          }}
           className="relative w-8 h-8 flex items-center justify-center shrink-0 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors duration-150 cursor-pointer"
           title={isMenuOpen ? 'Fechar ações' : 'Ações do item'}
           data-test="actions-menu-button"
@@ -224,7 +232,6 @@ export default function ItemEstoque({
 
       {/* Footer area: footer e actions ocupam o mesmo espaço, com fade entre eles */}
       <div className="relative mt-auto" style={{ minHeight: '44px' }}>
-
         {/* Normal footer */}
         <div
           className={`transition-opacity duration-150 ${
@@ -235,88 +242,84 @@ export default function ItemEstoque({
             className="flex items-center justify-between gap-2 pt-3 overflow-hidden"
             data-test="footer"
           >
-        {/* Quantity */}
-        <div
-          className="flex flex-col text-sm min-w-0 shrink-0"
-          data-test="quantity"
-        >
-          <span title={`Quantidade em estoque: ${quantidade} unidades`}>
-            <span className="text-muted-foreground font-medium">Qtd</span>
-            <span
-              className="font-semibold text-foreground ml-1 tabular-nums text-base"
+            {/* Quantity */}
+            <div
+              className="flex flex-col text-sm min-w-0 shrink-0"
+              data-test="quantity"
             >
-              {quantidade}
-            </span>
-          </span>
-          {estoqueMinimo !== undefined && (
-            <span
-              className="mt-0.5"
-              title={`Estoque mínimo: ${estoqueMinimo} unidades`}
-            >
-              <span className="text-muted-foreground font-medium">Mín</span>
-              <span
-                className="font-semibold text-foreground ml-1 tabular-nums text-base"
-              >
-                {estoqueMinimo}
+              <span title={`Quantidade em estoque: ${quantidade} unidades`}>
+                <span className="text-muted-foreground font-medium">Qtd</span>
+                <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
+                  {quantidade}
+                </span>
               </span>
-            </span>
-          )}
-        </div>
+              {estoqueMinimo !== undefined && (
+                <span
+                  className="mt-0.5"
+                  title={`Estoque mínimo: ${estoqueMinimo} unidades`}
+                >
+                  <span className="text-muted-foreground font-medium">Mín</span>
+                  <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
+                    {estoqueMinimo}
+                  </span>
+                </span>
+              )}
+            </div>
 
-        {/* Status indicator */}
-        <div
-          className="flex items-center gap-1.5 justify-center flex-1 min-w-0 overflow-hidden px-2"
-          data-test="status-container"
-        >
-          <span
-            className="inline-block w-2 h-2 rounded-full shrink-0"
-            style={{ backgroundColor: STATUS_DOT[status] || 'oklch(0.6 0.1 255)' }}
-          />
-          <span
-            className="text-xs font-semibold uppercase tracking-[0.07em] truncate"
-            title={`Status atual: ${status}`}
-            data-test="status-badge"
-            style={{ color: STATUS_TEXT[status] || 'var(--muted-foreground)' }}
-          >
-            {status}
-          </span>
-        </div>
+            {/* Status indicator */}
+            <div
+              className="flex items-center gap-1.5 justify-center flex-1 min-w-0 overflow-hidden px-2"
+              data-test="status-container"
+            >
+              <span
+                className="text-xs font-semibold uppercase tracking-[0.07em] truncate"
+                title={`Status atual: ${status}`}
+                data-test="status-badge"
+                style={{
+                  color: STATUS_TEXT[status] || 'var(--muted-foreground)',
+                }}
+              >
+                {status}
+              </span>
+            </div>
 
-        {/* Movement icons */}
-        <div
-          className="flex items-center gap-0.5 shrink-0"
-          data-test="movement-icons"
-        >
-          <button
-            className="p-1.5 rounded hover:bg-muted/40 transition-colors duration-150 cursor-pointer shrink-0"
-            title={`Registrar entrada de ${nome}`}
-            data-test="entrada-icon"
-            onClick={handleEntrada}
-          >
-            <PlusCircle size={16} className="text-green-600" />
-          </button>
-          <button
-            className={`p-1.5 rounded transition-colors duration-150 shrink-0 ${
-              quantidade === 0
-                ? 'opacity-30 cursor-not-allowed'
-                : 'hover:bg-muted/40 cursor-pointer'
-            }`}
-            title={
-              quantidade === 0
-                ? `${nome} sem estoque disponível`
-                : `Registrar saída de ${nome}`
-            }
-            data-test="saida-icon"
-            onClick={quantidade === 0 ? undefined : handleSaida}
-            disabled={quantidade === 0}
-          >
-            <MinusCircle
-              size={16}
-              className={quantidade === 0 ? 'text-muted-foreground' : 'text-red-500'}
-            />
-          </button>
+            {/* Movement icons */}
+            <div
+              className="flex items-center gap-0.5 shrink-0"
+              data-test="movement-icons"
+            >
+              <button
+                className="p-1.5 rounded hover:bg-muted/40 transition-colors duration-150 cursor-pointer shrink-0"
+                title={`Registrar entrada de ${nome}`}
+                data-test="entrada-icon"
+                onClick={handleEntrada}
+              >
+                <PlusCircle size={16} className="text-green-600" />
+              </button>
+              <button
+                className={`p-1.5 rounded transition-colors duration-150 shrink-0 ${
+                  quantidade === 0
+                    ? 'opacity-30 cursor-not-allowed'
+                    : 'hover:bg-muted/40 cursor-pointer'
+                }`}
+                title={
+                  quantidade === 0
+                    ? `${nome} sem estoque disponível`
+                    : `Registrar saída de ${nome}`
+                }
+                data-test="saida-icon"
+                onClick={quantidade === 0 ? undefined : handleSaida}
+                disabled={quantidade === 0}
+              >
+                <MinusCircle
+                  size={16}
+                  className={
+                    quantidade === 0 ? 'text-muted-foreground' : 'text-red-500'
+                  }
+                />
+              </button>
+            </div>
           </div>
-        </div>
         </div>
 
         {/* Actions panel — sobrepõe o footer no mesmo espaço */}
@@ -327,28 +330,44 @@ export default function ItemEstoque({
           data-test="action-buttons"
         >
           <button
-            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onEdit && id) onEdit(id); }}
-            className="flex-1 h-9 px-3 text-sm font-semibold text-foreground bg-card border border-border hover:bg-muted/45 rounded-sm transition-colors duration-100 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(false);
+              if (onEdit && id) onEdit(id);
+            }}
+            className="flex-1 h-11 px-3 text-sm font-semibold text-foreground bg-card border border-border hover:bg-muted/45 rounded-sm transition-colors duration-100 cursor-pointer"
             data-test="edit-button"
           >
             Editar
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onEmprestar && id) onEmprestar(id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(false);
+              if (onEmprestar && id) onEmprestar(id);
+            }}
             disabled={quantidade === 0}
-            className={`flex-1 h-9 px-3 text-sm font-semibold rounded-sm border transition-colors duration-100 ${
+            className={`flex-1 h-11 px-3 text-sm font-semibold rounded-sm border transition-colors duration-100 ${
               quantidade === 0
                 ? 'opacity-45 cursor-not-allowed text-muted-foreground bg-muted/25 border-border'
                 : 'text-foreground bg-card border-border hover:bg-muted/45 cursor-pointer'
             }`}
-            title={quantidade === 0 ? `${nome} sem estoque disponível para empréstimo` : undefined}
+            title={
+              quantidade === 0
+                ? `${nome} sem estoque disponível para empréstimo`
+                : undefined
+            }
             data-test="emprestimo-button"
           >
             Emprestar
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); if (onDelete && id) onDelete(id); }}
-            className="flex-1 h-9 px-3 text-sm font-semibold text-destructive bg-destructive/10 border border-destructive/25 hover:bg-destructive/20 dark:border-destructive/40 dark:hover:bg-destructive/30 rounded-sm transition-colors duration-100 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(false);
+              if (onDelete && id) onDelete(id);
+            }}
+            className="flex-1 h-11 px-3 text-sm font-semibold text-destructive bg-destructive/10 border border-destructive/25 hover:bg-destructive/20 dark:border-destructive/40 dark:hover:bg-destructive/30 rounded-sm transition-colors duration-100 cursor-pointer"
             data-test="delete-button"
           >
             Excluir

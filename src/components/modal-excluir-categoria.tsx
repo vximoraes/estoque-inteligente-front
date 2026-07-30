@@ -166,7 +166,7 @@ export default function ModalExcluirCategoria({
               variant="outline"
               onClick={handleClose}
               disabled={inativarCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer"
+              className="h-11 flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
@@ -174,7 +174,7 @@ export default function ModalExcluirCategoria({
               type="button"
               onClick={handleConfirm}
               disabled={inativarCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
+              className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
             >
               {inativarCategoriaMutation.isPending ? 'Excluindo...' : 'Excluir'}
             </Button>

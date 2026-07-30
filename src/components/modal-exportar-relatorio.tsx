@@ -74,7 +74,7 @@ export default function ModalExportarRelatorio({
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
               placeholder="Digite o nome do arquivo"
-              className="w-full"
+              className="w-full h-11"
               data-test="filename-input"
             />
           </div>
@@ -130,7 +130,7 @@ export default function ModalExportarRelatorio({
           <Button
             variant="outline"
             onClick={onClose}
-            className="cursor-pointer"
+            className="h-11 cursor-pointer"
             data-test="modal-exportar-cancel-button"
           >
             Cancelar
@@ -138,7 +138,7 @@ export default function ModalExportarRelatorio({
           <Button
             onClick={handleExport}
             disabled={!fileName.trim()}
-            className={`text-white transition-all ${
+            className={`h-11 text-white transition-all ${
               fileName.trim()
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'

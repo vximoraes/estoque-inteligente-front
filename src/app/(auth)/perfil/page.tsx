@@ -723,7 +723,7 @@ export default function HomePage() {
                     value={editedNome}
                     onChange={(e) => setEditedNome(e.target.value)}
                     maxLength={100}
-                    className="h-10"
+                    className="h-11"
                     required
                     autoFocus
                     disabled={isSaving}
@@ -738,7 +738,7 @@ export default function HomePage() {
                       !editedNome.trim() ||
                       editedNome.trim() === userData.nome
                     }
-                    className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                    className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
                     style={{ backgroundColor: 'var(--ei-accent)' }}
                     data-test="save-perfil-button"
                   >
@@ -749,7 +749,7 @@ export default function HomePage() {
                     variant="outline"
                     onClick={handleCancelarEdicaoNome}
                     disabled={isSaving}
-                    className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+                    className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
                     data-test="cancel-edit-perfil-button"
                   >
                     Cancelar
@@ -819,7 +819,7 @@ export default function HomePage() {
                           id="senhaAtual"
                           type={showSenhaAtual ? 'text' : 'password'}
                           aria-invalid={!!senhaErrors.senhaAtual}
-                          className="h-10 pr-11"
+                          className="h-11 pr-11"
                           placeholder="••••••••"
                           disabled={alterarSenhaMutation.isPending}
                           autoComplete="current-password"
@@ -863,7 +863,7 @@ export default function HomePage() {
                           id="senhaNova"
                           type={showSenhaNova ? 'text' : 'password'}
                           aria-invalid={!!senhaErrors.senha}
-                          className="h-10 pr-11"
+                          className="h-11 pr-11"
                           placeholder="••••••••"
                           disabled={alterarSenhaMutation.isPending}
                           autoComplete="new-password"
@@ -904,7 +904,7 @@ export default function HomePage() {
                           id="senhaConfirmar"
                           type={showSenhaConfirmar ? 'text' : 'password'}
                           aria-invalid={!!senhaErrors.confirmarSenha}
-                          className="h-10 pr-11"
+                          className="h-11 pr-11"
                           placeholder="••••••••"
                           disabled={alterarSenhaMutation.isPending}
                           autoComplete="new-password"
@@ -959,7 +959,7 @@ export default function HomePage() {
                     <Button
                       type="submit"
                       disabled={alterarSenhaMutation.isPending}
-                      className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                      className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
                       style={{ backgroundColor: 'var(--ei-accent)' }}
                       data-test="save-senha-button"
                     >
@@ -972,7 +972,7 @@ export default function HomePage() {
                       variant="outline"
                       onClick={handleCancelarEdicaoSenha}
                       disabled={alterarSenhaMutation.isPending}
-                      className="h-10 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+                      className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
                       data-test="cancel-edit-senha-button"
                     >
                       Cancelar
@@ -1356,7 +1356,7 @@ export default function HomePage() {
                   disabled={
                     uploadFotoMutation.isPending || deleteFotoMutation.isPending
                   }
-                  className="flex-1 cursor-pointer"
+                  className="h-11 flex-1 cursor-pointer"
                   data-test="cancel-edit-foto-button"
                 >
                   Cancelar
@@ -1365,7 +1365,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleRemoverFoto}
                     disabled={deleteFotoMutation.isPending}
-                    className="flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
+                    className="h-11 flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
                     data-test="remove-foto-button"
                   >
                     {deleteFotoMutation.isPending
@@ -1377,7 +1377,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleSalvarFoto}
                     disabled={uploadFotoMutation.isPending}
-                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                    className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
                     style={{ backgroundColor: 'var(--ei-accent)' }}
                     data-test="save-foto-button"
                   >
@@ -1459,7 +1459,7 @@ export default function HomePage() {
                   variant="outline"
                   onClick={() => setIsConfirmRemoveOpen(false)}
                   disabled={deleteFotoMutation.isPending}
-                  className="flex-1 cursor-pointer"
+                  className="h-11 flex-1 cursor-pointer"
                   data-test="cancel-remove-foto-button"
                 >
                   Cancelar
@@ -1467,7 +1467,7 @@ export default function HomePage() {
                 <Button
                   onClick={handleConfirmRemoverFoto}
                   disabled={deleteFotoMutation.isPending}
-                  className="flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
+                  className="h-11 flex-1 bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
                   data-test="confirm-remove-foto-button"
                 >
                   {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover'}

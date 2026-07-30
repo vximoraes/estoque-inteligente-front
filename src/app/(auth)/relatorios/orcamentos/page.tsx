@@ -3,6 +3,7 @@ import StatCard from '@/components/stat-card';
 import Cabecalho from '@/components/cabecalho';
 import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
 import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
+import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,12 +16,7 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
-import {
-  Search,
-  FileText,
-  Filter,
-  X,
-} from 'lucide-react';
+import { Search, FileText, Filter, X } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
@@ -360,13 +356,13 @@ function RelatorioOrcamentosPageContent() {
               placeholder="Pesquisar orçamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
@@ -375,7 +371,7 @@ function RelatorioOrcamentosPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`h-10 px-4 flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 text-white transition-all ${
               selectedItems.size > 0
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
@@ -527,7 +523,7 @@ function RelatorioOrcamentosPageContent() {
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
-                    <TableRow className="bg-muted border-b border-border">
+                    <TableRow className="bg-muted border-b">
                       <TableHead
                         className="font-semibold text-muted-foreground bg-muted text-center w-[50px] px-8"
                         data-test="table-head-checkbox"
@@ -700,20 +696,20 @@ function RelatorioOrcamentosPageContent() {
               </div>
             </div>
           ) : (
-            <div
-              className="text-center flex-1 flex items-center justify-center bg-card rounded-lg border border-border"
-              data-test="empty-state"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground text-base">
-                  {searchTerm
-                    ? 'Nenhum orçamento encontrado para sua pesquisa.'
-                    : 'Não há orçamentos cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={FileText}
+                title={
+                  searchTerm
+                    ? 'Nenhum resultado'
+                    : 'Nenhum orçamento encontrado'
+                }
+                subtitle={
+                  searchTerm
+                    ? 'Tente ajustar sua pesquisa.'
+                    : 'Não há orçamentos para exibir no relatório.'
+                }
+              />
             </div>
           )}
         </div>
@@ -750,7 +746,9 @@ export default function RelatorioOrcamentosPage() {
             <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
             <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
           </div>
-          <p className="mt-4 text-muted-foreground font-medium">Carregando...</p>
+          <p className="mt-4 text-muted-foreground font-medium">
+            Carregando...
+          </p>
         </div>
       }
     >
