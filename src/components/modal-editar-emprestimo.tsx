@@ -97,7 +97,10 @@ export default function ModalEditarEmprestimo({
 
   const desfazerDevolucaoMutation = useMutation({
     mutationFn: async () => {
-      return await patch(`/emprestimos/${emprestimo._id}/desfazer-devolucao`, {});
+      return await patch(
+        `/emprestimos/${emprestimo._id}/desfazer-devolucao`,
+        {},
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emprestimos'] });

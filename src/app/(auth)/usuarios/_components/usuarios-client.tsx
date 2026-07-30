@@ -189,9 +189,9 @@ export default function PageUsuariosContent({
     setIsDetalhesModalOpen(true);
   };
 
-  const usuarios = (
-    data?.pages.flatMap((page) => page.data.docs) || []
-  ).filter((usuario) => usuario._id !== user?.id);
+  const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
+    (usuario) => usuario._id !== user?.id,
+  );
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
