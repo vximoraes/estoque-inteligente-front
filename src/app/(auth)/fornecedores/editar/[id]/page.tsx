@@ -116,20 +116,20 @@ export default function EditarFornecedorPage() {
                 {/* Nome */}
                 <div>
                   <Skeleton className="h-5 w-20 mb-2" />
-                  <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                  <Skeleton className="w-full h-11" />
                 </div>
 
                 {/* URL */}
                 <div>
                   <Skeleton className="h-5 w-16 mb-2" />
-                  <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                  <Skeleton className="w-full h-11" />
                 </div>
               </div>
 
               {/* Contato */}
               <div>
                 <Skeleton className="h-5 w-20 mb-2" />
-                <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                <Skeleton className="w-full h-11" />
               </div>
 
               {/* Descrição */}
@@ -144,8 +144,8 @@ export default function EditarFornecedorPage() {
 
             {/* Footer com botões */}
             <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
-              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
-              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
+              <Skeleton className="h-11 w-[80px] sm:w-[120px]" />
+              <Skeleton className="h-11 w-[80px] sm:w-[120px]" />
             </div>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function EditarFornecedorPage() {
                     placeholder="Nome do fornecedor"
                     {...register('nome')}
                     maxLength={100}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                    className={`w-full h-11 ${errors.nome ? '!border-red-500' : ''}`}
                     disabled={isSubmitting}
                   />
                   {errors.nome && (
@@ -208,7 +208,7 @@ export default function EditarFornecedorPage() {
                     type="url"
                     placeholder="https://exemplo.com"
                     {...register('url')}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.url ? '!border-red-500' : ''}`}
+                    className={`w-full h-11 ${errors.url ? '!border-red-500' : ''}`}
                     disabled={isSubmitting}
                   />
                   {errors.url && (
@@ -238,7 +238,7 @@ export default function EditarFornecedorPage() {
                   placeholder="email@exemplo.com ou telefone"
                   {...register('contato')}
                   maxLength={100}
-                  className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.contato ? '!border-red-500' : ''}`}
+                  className={`w-full h-11 ${errors.contato ? '!border-red-500' : ''}`}
                   disabled={isSubmitting}
                 />
                 {errors.contato && (
@@ -279,13 +279,13 @@ export default function EditarFornecedorPage() {
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isSubmitting || updateFornecedorMutation.isPending}
-                className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="h-11 min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="h-11 min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={isSubmitting || updateFornecedorMutation.isPending}
               >

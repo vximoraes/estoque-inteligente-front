@@ -115,7 +115,7 @@ export default function AdicionarFornecedorPage() {
                     placeholder="Nome do fornecedor"
                     maxLength={100}
                     {...register('nome')}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                    className={`w-full h-11 ${errors.nome ? '!border-red-500' : ''}`}
                   />
                   {errors.nome && (
                     <p className="text-red-500 text-xs sm:text-sm mt-1">
@@ -137,7 +137,7 @@ export default function AdicionarFornecedorPage() {
                     type="url"
                     placeholder="https://exemplo.com"
                     {...register('url')}
-                    className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.url ? '!border-red-500' : ''}`}
+                    className={`w-full h-11 ${errors.url ? '!border-red-500' : ''}`}
                   />
                   {errors.url && (
                     <p className="text-red-500 text-xs sm:text-sm mt-1">
@@ -166,7 +166,7 @@ export default function AdicionarFornecedorPage() {
                   placeholder="email@exemplo.com ou telefone"
                   maxLength={100}
                   {...register('contato')}
-                  className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.contato ? '!border-red-500' : ''}`}
+                  className={`w-full h-11 ${errors.contato ? '!border-red-500' : ''}`}
                 />
                 {errors.contato && (
                   <p className="text-red-500 text-xs sm:text-sm mt-1">
@@ -204,13 +204,13 @@ export default function AdicionarFornecedorPage() {
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                className="h-11 min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+                className="h-11 min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={isSubmitting || createFornecedorMutation.isPending}
               >

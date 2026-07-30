@@ -4,7 +4,9 @@ import PageFornecedoresContent from './_components/fornecedores-client';
 import type { FornecedorApiResponse } from '@/types/fornecedores';
 
 export default async function PageFornecedores() {
-  const initialData = await serverFetch<FornecedorApiResponse>('/fornecedores?limite=20&page=1');
+  const initialData = await serverFetch<FornecedorApiResponse>(
+    '/fornecedores?limite=20&page=1',
+  );
 
   return (
     <Suspense>
