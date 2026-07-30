@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { PulseLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLeftPanel from '@/components/auth-left-panel';
@@ -22,6 +23,7 @@ const ERROS_GOOGLE: Record<string, string> = {
 
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
@@ -49,6 +51,7 @@ function LoginContent() {
       const { error } = await authClient.signIn.email({
         email: data.email,
         password: data.senha,
+        rememberMe,
         fetchOptions: { credentials: 'include' },
       });
 
@@ -119,20 +122,12 @@ function LoginContent() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <Label
-                    className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-                    htmlFor="senha"
-                  >
-                    Senha
-                  </Label>
-                  <Link
-                    href="/esqueci-senha"
-                    className="text-sm text-[#306FCC] transition-colors hover:text-[#2557a7]"
-                  >
-                    Esqueci minha senha
-                  </Link>
-                </div>
+                <Label
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  htmlFor="senha"
+                >
+                  Senha
+                </Label>
                 <div className="relative w-full">
                   <Input
                     aria-invalid={!!errors.senha}
@@ -168,6 +163,31 @@ function LoginContent() {
               </div>
             </div>
 
+            <div className="mt-5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="lembrar-me"
+                  className="cursor-pointer"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  disabled={isSubmitting}
+                  data-test="lembrar-me-checkbox"
+                />
+                <Label
+                  htmlFor="lembrar-me"
+                  className="text-sm font-normal text-muted-foreground cursor-pointer"
+                >
+                  Lembrar-me
+                </Label>
+              </div>
+              <Link
+                href="/esqueci-senha"
+                className="text-sm text-[#306FCC] transition-colors hover:text-[#2557a7]"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
             <Button
@@ -199,6 +219,10 @@ function LoginContent() {
             {!googleLoading && <GoogleIcon />}
             {googleLoading ? 'Redirecionando...' : 'Entrar com Google'}
           </Button>
+
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            © 2026 Estoque Inteligente
+          </p>
         </div>
       </div>
     </div>
