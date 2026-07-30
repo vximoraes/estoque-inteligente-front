@@ -12,6 +12,9 @@ import {
 import ModalExcluirOrcamento from '@/components/modal-excluir-orcamento';
 import ModalDetalhesOrcamento from '@/components/modal-detalhes-orcamento';
 import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
+import ModalCadastrarOrcamento from '@/components/modal-cadastrar-orcamento';
+import ModalEditarOrcamento from '@/components/modal-editar-orcamento';
+import EmptyState from '@/components/empty-state';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
@@ -19,112 +22,141 @@ import {
   Search,
   Filter,
   Plus,
-  Edit,
+  Pencil,
   Trash2,
-  Eye,
   FileDown,
+  FileText,
   Loader2,
   ChevronLeft,
   ChevronRight,
   X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function PageOrcamentosContent({ initialData }: { initialData?: OrcamentoApiResponse }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useQueryState('busca', { defaultValue: '' });
+export default function PageOrcamentosContent({
+  initialData,
+}: {
+  initialData?: OrcamentoApiResponse;
+}) {
+  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
-  const [valorMinFilter, setValorMinFilter] = useQueryState('valorMin', { defaultValue: '' });
-  const [valorMaxFilter, setValorMaxFilter] = useQueryState('valorMax', { defaultValue: '' });
-  const [dataInicioFilter, setDataInicioFilter] = useQueryState('dataInicio', { defaultValue: '' });
-  const [dataFimFilter, setDataFimFilter] = useQueryState('dataFim', { defaultValue: '' });
+  const [valorMinFilter, setValorMinFilter] = useQueryState('valorMin', {
+    defaultValue: '',
+  });
+  const [valorMaxFilter, setValorMaxFilter] = useQueryState('valorMax', {
+    defaultValue: '',
+  });
+  const [dataInicioFilter, setDataInicioFilter] = useQueryState('dataInicio', {
+    defaultValue: '',
+  });
+  const [dataFimFilter, setDataFimFilter] = useQueryState('dataFim', {
+    defaultValue: '',
+  });
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
-  const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(null);
+  const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(
+    null,
+  );
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
-  const [detalhesOrcamentoId, setDetalhesOrcamentoId] = useState<string | null>(null);
-  const [detalhesOrcamentoNome, setDetalhesOrcamentoNome] = useState<string>('');
-  const [detalhesOrcamentoDescricao, setDetalhesOrcamentoDescricao] = useState<string | undefined>(undefined);
+  const [detalhesOrcamentoId, setDetalhesOrcamentoId] = useState<string | null>(
+    null,
+  );
+  const [detalhesOrcamentoNome, setDetalhesOrcamentoNome] =
+    useState<string>('');
+  const [detalhesOrcamentoDescricao, setDetalhesOrcamentoDescricao] = useState<
+    string | undefined
+  >(undefined);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
+  const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
+  const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
+  const [editarOrcamentoId, setEditarOrcamentoId] = useState<string | null>(
+    null,
+  );
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    error,
-    refetch,
-  } = useQuery<OrcamentoApiResponse>({
-    queryKey: [
-      'orcamentos',
-      searchTerm,
-      valorMinFilter,
-      valorMaxFilter,
-      dataInicioFilter,
-      dataFimFilter,
-      currentPage,
-    ],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('nome', searchTerm);
-      if (valorMinFilter) params.append('valorMin', valorMinFilter);
-      if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
-      if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
-      if (dataFimFilter) params.append('dataFim', dataFimFilter);
-      params.append('limite', '20');
-      params.append('page', currentPage.toString());
+  const { data, isLoading, isFetching, error, refetch } =
+    useQuery<OrcamentoApiResponse>({
+      queryKey: [
+        'orcamentos',
+        searchTerm,
+        valorMinFilter,
+        valorMaxFilter,
+        dataInicioFilter,
+        dataFimFilter,
+        currentPage,
+      ],
+      queryFn: async () => {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('nome', searchTerm);
+        if (valorMinFilter) params.append('valorMin', valorMinFilter);
+        if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
+        if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
+        if (dataFimFilter) params.append('dataFim', dataFimFilter);
+        params.append('limite', '20');
+        params.append('page', currentPage.toString());
 
-      const queryString = params.toString();
-      const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;
+        const queryString = params.toString();
+        const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;
 
-      return await get<OrcamentoApiResponse>(url);
-    },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    placeholderData: initialData,
-  });
+        return await get<OrcamentoApiResponse>(url);
+      },
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      placeholderData: initialData,
+    });
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, valorMinFilter, valorMaxFilter, dataInicioFilter, dataFimFilter]);
-
-  useEffect(() => {
-    const success = searchParams.get('success');
-
-    if (success === 'created') {
-      toast.success('Orçamento criado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      refetch();
-      router.replace('/orcamentos');
-    } else if (success === 'updated') {
-      toast.success('Orçamento atualizado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      refetch();
-      router.replace('/orcamentos');
-    }
-  }, [searchParams, router, refetch]);
+  }, [
+    searchTerm,
+    valorMinFilter,
+    valorMaxFilter,
+    dataInicioFilter,
+    dataFimFilter,
+  ]);
 
   const handleAdicionarClick = () => {
-    router.push('/orcamentos/adicionar');
+    setIsCadastrarModalOpen(true);
+  };
+
+  const handleCloseCadastrarModal = () => {
+    setIsCadastrarModalOpen(false);
+  };
+
+  const handleCadastrarSuccess = () => {
+    toast.success('Orçamento criado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    refetch();
+  };
+
+  const handleCloseEditarModal = () => {
+    setIsEditarModalOpen(false);
+    setEditarOrcamentoId(null);
+  };
+
+  const handleEditarSuccess = () => {
+    toast.success('Orçamento atualizado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    refetch();
   };
 
   const handleOpenFiltrosModal = () => {
@@ -148,7 +180,10 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
   };
 
   const hasActiveFilters =
-    !!valorMinFilter || !!valorMaxFilter || !!dataInicioFilter || !!dataFimFilter;
+    !!valorMinFilter ||
+    !!valorMaxFilter ||
+    !!dataInicioFilter ||
+    !!dataFimFilter;
 
   const formatarData = (data: string) => {
     const [ano, mes, dia] = data.split('-');
@@ -156,7 +191,8 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/orcamentos/editar/${id}`);
+    setEditarOrcamentoId(id);
+    setIsEditarModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -208,14 +244,20 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
       yPosition += 15;
 
       doc.setFontSize(14);
-      const splitNome = doc.splitTextToSize(orcamento.nome, pageWidth - 2 * margin);
+      const splitNome = doc.splitTextToSize(
+        orcamento.nome,
+        pageWidth - 2 * margin,
+      );
       doc.text(splitNome, margin, yPosition);
       yPosition += splitNome.length * 7 + 5;
 
       if (orcamento.descricao) {
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        const splitDescription = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin);
+        const splitDescription = doc.splitTextToSize(
+          orcamento.descricao,
+          pageWidth - 2 * margin,
+        );
         doc.text(splitDescription, margin, yPosition);
         yPosition += splitDescription.length * 5 + 5;
       }
@@ -248,7 +290,11 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
         const nomeItem = doc.splitTextToSize(comp.nome || '-', 75);
         doc.text(nomeItem, margin, yPosition);
         doc.text(comp.quantidade.toString(), margin + 80, yPosition);
-        doc.text(`R$ ${comp.valor_unitario.toFixed(2)}`, margin + 100, yPosition);
+        doc.text(
+          `R$ ${comp.valor_unitario.toFixed(2)}`,
+          margin + 100,
+          yPosition,
+        );
         doc.text(`R$ ${comp.subtotal.toFixed(2)}`, margin + 140, yPosition);
         yPosition += Math.max(nomeItem.length * 5, 7);
       });
@@ -259,7 +305,11 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
 
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Total: R$ ${orcamento.total.toFixed(2)}`, margin + 100, yPosition);
+      doc.text(
+        `Total: R$ ${orcamento.total.toFixed(2)}`,
+        margin + 100,
+        yPosition,
+      );
 
       yPosition = doc.internal.pageSize.getHeight() - 15;
       doc.setFontSize(8);
@@ -326,13 +376,13 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
               placeholder="Pesquisar orçamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-10"
+              className="pl-10 h-11"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="h-10 px-4 flex items-center gap-2 cursor-pointer"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
             onClick={handleOpenFiltrosModal}
             data-test="filtros-button"
           >
@@ -340,7 +390,7 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
             Filtros
           </Button>
           <Button
-            className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+            className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={handleAdicionarClick}
             data-test="adicionar-button"
@@ -383,8 +433,8 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
                 >
                   <span className="font-medium">Período:</span>
                   <span data-test="applied-filter-periodo-valor">
-                    {dataInicioFilter ? formatarData(dataInicioFilter) : '...'} até{' '}
-                    {dataFimFilter ? formatarData(dataFimFilter) : '...'}
+                    {dataInicioFilter ? formatarData(dataInicioFilter) : '...'}{' '}
+                    até {dataFimFilter ? formatarData(dataFimFilter) : '...'}
                   </span>
                   <button
                     onClick={() => {
@@ -410,7 +460,9 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {isLoading || isRefetchingAfterDelete || (isFetching && !isLoading) ? (
+          {isLoading ||
+          isRefetchingAfterDelete ||
+          (isFetching && !isLoading) ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
@@ -447,7 +499,9 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
                     {orcamentos.map((orcamento) => (
                       <TableRow
                         key={orcamento._id}
-                        className="hover:bg-gray-50 border-b relative"
+                        data-test="visualizar-button"
+                        onClick={() => handleViewDetails(orcamento._id)}
+                        className="hover:bg-gray-50 border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-8 py-2">
@@ -472,45 +526,50 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
-                              onClick={() => handleViewDetails(orcamento._id)}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Ver detalhes do orçamento"
-                              data-test="visualizar-button"
-                            >
-                              <Eye size={16} className="sm:w-5 sm:h-5" />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(orcamento._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(orcamento._id);
+                              }}
                               className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar orçamento"
                               data-test="editar-button"
                             >
-                              <Edit size={16} className="sm:w-5 sm:h-5" />
+                              <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleExportarPDF(orcamento._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExportarPDF(orcamento._id);
+                              }}
                               disabled={pdfLoadingId === orcamento._id}
                               className={`p-1 sm:p-2 rounded-md transition-colors duration-200 ${
                                 pdfLoadingId === orcamento._id
                                   ? 'text-gray-400 cursor-wait'
                                   : 'text-gray-900 hover:text-green-600 hover:bg-green-50 cursor-pointer'
                               }`}
-                              title={pdfLoadingId === orcamento._id ? 'Gerando PDF...' : 'Exportar PDF'}
+                              title={
+                                pdfLoadingId === orcamento._id
+                                  ? 'Gerando PDF...'
+                                  : 'Exportar PDF'
+                              }
                               data-test="exportar-pdf-button"
                             >
                               {pdfLoadingId === orcamento._id ? (
-                                <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
+                                <Loader2 className="w-4 h-4 animate-spin" />
                               ) : (
-                                <FileDown size={16} className="sm:w-5 sm:h-5" />
+                                <FileDown className="w-4 h-4" />
                               )}
                             </button>
                             <button
-                              onClick={() => handleDelete(orcamento._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(orcamento._id);
+                              }}
                               className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir orçamento"
                               data-test="excluir-button"
                             >
-                              <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </TableCell>
@@ -526,7 +585,9 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
                   </p>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
                       disabled={!paginationInfo.hasPrevPage || isFetching}
                       className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       aria-label="Página anterior"
@@ -546,20 +607,20 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
               )}
             </div>
           ) : (
-            <div
-              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
-              data-test="empty-state"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500 text-lg">
-                  {searchTerm || hasActiveFilters
-                    ? 'Nenhum orçamento encontrado para sua pesquisa.'
-                    : 'Não há orçamentos cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+              <EmptyState
+                icon={FileText}
+                title={
+                  searchTerm || hasActiveFilters
+                    ? 'Nenhum resultado'
+                    : 'Nenhum orçamento cadastrado'
+                }
+                subtitle={
+                  searchTerm || hasActiveFilters
+                    ? 'Tente ajustar sua pesquisa ou remover os filtros.'
+                    : 'Comece adicionando o primeiro orçamento.'
+                }
+              />
             </div>
           )}
         </div>
@@ -585,6 +646,21 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
         onFiltersChange={handleFiltersChange}
       />
 
+      <ModalCadastrarOrcamento
+        isOpen={isCadastrarModalOpen}
+        onClose={handleCloseCadastrarModal}
+        onSuccess={handleCadastrarSuccess}
+      />
+
+      {editarOrcamentoId && (
+        <ModalEditarOrcamento
+          isOpen={isEditarModalOpen}
+          onClose={handleCloseEditarModal}
+          orcamentoId={editarOrcamentoId}
+          onSuccess={handleEditarSuccess}
+        />
+      )}
+
       {excluirOrcamentoId && (
         <ModalExcluirOrcamento
           isOpen={isExcluirModalOpen}
@@ -594,7 +670,9 @@ export default function PageOrcamentosContent({ initialData }: { initialData?: O
           }}
           onSuccess={handleExcluirSuccess}
           orcamentoId={excluirOrcamentoId}
-          orcamentoNome={orcamentos.find((o) => o._id === excluirOrcamentoId)?.nome || ''}
+          orcamentoNome={
+            orcamentos.find((o) => o._id === excluirOrcamentoId)?.nome || ''
+          }
         />
       )}
 

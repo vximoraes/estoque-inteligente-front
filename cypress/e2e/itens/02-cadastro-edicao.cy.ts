@@ -24,15 +24,13 @@ describe('Componentes - Cadastro e Edição', () => {
 
       cy.contains('button', 'Adicionar').click();
 
-      cy.url().should('include', '/itens/adicionar');
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
       cy.wait('@getCategorias');
     });
 
-    it('Deve redirecionar para tela de cadastro ao clicar em Adicionar', () => {
-      cy.url().should('include', '/itens/adicionar');
-
-      cy.contains('Itens').should('be.visible');
-      cy.contains('Adicionar').should('be.visible');
+    it('Deve abrir modal de cadastro ao clicar em Adicionar', () => {
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
+      cy.contains('Adicionar item').should('be.visible');
     });
 
     it('Deve exibir todos os campos obrigatórios do formulário', () => {
@@ -54,7 +52,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.contains('button', 'Salvar').click();
 
       cy.wait(500);
-      cy.url().should('include', '/adicionar');
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
     });
 
     it('Deve validar limite de caracteres do Nome (máx 100)', () => {
@@ -121,8 +119,7 @@ describe('Componentes - Cadastro e Edição', () => {
 
         itemIdCriado = createInterception.response?.body?.data?._id;
 
-        cy.url().should('include', '/itens');
-        cy.url().should('not.include', '/novo');
+        cy.get('[data-test="modal-cadastrar-item"]').should('not.exist');
 
         cy.contains('sucesso', { matchCase: false }).should('be.visible');
       });
@@ -190,21 +187,24 @@ describe('Componentes - Cadastro e Edição', () => {
       });
     });
 
-    it('Deve redirecionar para tela de edição ao clicar em Editar', () => {
+    const abrirModalEdicao = () => {
+      cy.getByData('item-card-0').within(() => {
+        cy.getByData('edit-button').click({ force: true });
+      });
+      cy.get('[data-test="modal-editar-item"]').should('be.visible');
+      cy.wait('@getCategorias');
+    };
+
+    it('Deve abrir modal de edição ao clicar em Editar', () => {
       if (!primeiroItem) return;
 
-      cy.getByData('item-card-0').within(() => {
-        cy.getByData('edit-button').click();
-      });
-
-      cy.url().should('include', `/itens/editar/${primeiroItem._id}`);
+      abrirModalEdicao();
     });
 
     it('Deve pré-preencher todos os campos com dados atuais', () => {
       if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
-      cy.wait('@getCategorias');
+      abrirModalEdicao();
 
       cy.get('#nome').should('have.value', primeiroItem.nome);
       cy.get('#estoqueMinimo').should(
@@ -222,8 +222,7 @@ describe('Componentes - Cadastro e Edição', () => {
 
       const novaDescricao = `Descrição atualizada ${Date.now()}`;
 
-      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
-      cy.wait('@getCategorias');
+      abrirModalEdicao();
 
       cy.get('#descricao').clear().type(novaDescricao);
 
@@ -232,8 +231,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.wait('@patchComponente', { timeout: 10000 }).then((interception) => {
         expect(interception.response?.statusCode).to.be.oneOf([200, 201]);
 
-        cy.url().should('include', '/itens');
-        cy.url().should('not.include', '/editar');
+        cy.get('[data-test="modal-editar-item"]').should('not.exist');
 
         cy.contains(/atualizado|sucesso/i).should('be.visible');
       });
@@ -242,8 +240,7 @@ describe('Componentes - Cadastro e Edição', () => {
     it('Deve recalcular status ao alterar estoque mínimo', () => {
       if (!primeiroItem || primeiroItem.quantidade <= 0) return;
 
-      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
-      cy.wait('@getCategorias');
+      abrirModalEdicao();
 
       const novoEstoqueMinimo = primeiroItem.quantidade + 10;
       cy.get('#estoqueMinimo').clear().type(novoEstoqueMinimo.toString());
@@ -254,15 +251,13 @@ describe('Componentes - Cadastro e Edição', () => {
         expect(interception.response?.statusCode).to.be.oneOf([200, 201]);
       });
 
-      cy.url().should('include', '/itens');
-      cy.url().should('not.include', '/editar');
+      cy.get('[data-test="modal-editar-item"]').should('not.exist');
     });
 
     it('Deve permitir alterar/remover imagem', () => {
       if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
-      cy.wait('@getCategorias');
+      abrirModalEdicao();
 
       cy.get('body').then(($body) => {
         if (
@@ -288,23 +283,27 @@ describe('Componentes - Cadastro e Edição', () => {
     it('Deve manter mesmas validações do cadastro', () => {
       if (!primeiroItem) return;
 
-      cy.visit(`${frontendUrl}/itens/editar/${primeiroItem._id}`);
-      cy.wait('@getCategorias');
+      abrirModalEdicao();
 
       cy.get('#nome').clear();
 
       cy.contains('button', 'Salvar').click();
 
       cy.wait(500);
-      cy.url().should('include', '/editar');
+      cy.get('[data-test="modal-editar-item"]').should('be.visible');
     });
   });
 
   describe('Upload de Imagem', () => {
-    it('Deve aceitar formatos válidos de imagem (JPG, PNG, GIF, WEBP)', () => {
-      cy.visit(`${frontendUrl}/itens/adicionar`);
+    beforeEach(() => {
+      cy.visit(`${frontendUrl}/itens`);
+      cy.wait('@getComponentes');
+      cy.contains('button', 'Adicionar').click();
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
       cy.wait('@getCategorias');
+    });
 
+    it('Deve aceitar formatos válidos de imagem (JPG, PNG, GIF, WEBP)', () => {
       cy.get('body').then(($body) => {
         if ($body.find('input[type="file"]').length > 0) {
           cy.log('Campo de upload de imagem encontrado');
@@ -315,13 +314,8 @@ describe('Componentes - Cadastro e Edição', () => {
     });
 
     it('Deve exibir preview da imagem após upload', () => {
-      cy.visit(`${frontendUrl}/itens/adicionar`);
-      cy.wait('@getCategorias');
-
       cy.get('body').then(($body) => {
         if ($body.find('input[type="file"]').length > 0) {
-          const fileName = 'test-image.png';
-
           cy.fixture('example.json').then(() => {
             cy.log('Upload de imagem testável');
           });

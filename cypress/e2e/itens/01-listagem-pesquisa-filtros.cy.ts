@@ -229,16 +229,16 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
   });
 
   describe('Navegação', () => {
-    it('redireciona para adicionar item', () => {
+    it('abre modal de cadastro ao clicar em Adicionar', () => {
       cy.get('[data-test="adicionar-button"]').click();
-      cy.url().should('include', '/itens/adicionar');
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
     });
 
-    it('redireciona para editar item ao clicar no botão editar', () => {
+    it('abre modal de edição ao clicar no botão editar', () => {
       cy.get('[data-test="item-card-0"]').within(() => {
         cy.get('[data-test="edit-button"]').click();
       });
-      cy.url().should('include', '/itens/editar/');
+      cy.get('[data-test="modal-editar-item"]').should('be.visible');
     });
   });
 

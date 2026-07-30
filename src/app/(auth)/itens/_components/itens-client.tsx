@@ -7,6 +7,9 @@ import ModalEntradaItem from '@/components/modal-entrada-item';
 import ModalSaidaItem from '@/components/modal-saida-item';
 import ModalEmprestarItem from '@/components/modal-emprestar-item';
 import ModalExcluirItem from '@/components/modal-excluir-item';
+import ModalCadastrarItem from '@/components/modal-cadastrar-item';
+import ModalEditarItem from '@/components/modal-editar-item';
+import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useQuery } from '@tanstack/react-query';
@@ -23,7 +26,6 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -38,14 +40,15 @@ export default function ItensPageContent({
 }: {
   initialData?: ApiResponse;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
+  const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
+  const [editarItemId, setEditarItemId] = useState<string | null>(null);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [entradaItemId, setEntradaItemId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
@@ -133,42 +136,47 @@ export default function ItensPageContent({
     },
   });
 
-  useEffect(() => {
-    const success = searchParams.get('success');
-    const itemId = searchParams.get('id');
-    const imagem = searchParams.get('imagem');
-
-    if (success === 'created') {
-      toast.success('Item criado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      router.replace('/itens');
-    } else if (success === 'updated') {
-      if (itemId) {
-        setUpdatingItemId(itemId);
-      }
-      toast.success('Item atualizado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      refetch();
-      router.replace('/itens');
-    }
-  }, [searchParams, router, refetch]);
-
   const handleEdit = (id: string) => {
-    router.push(`/itens/editar/${id}`);
+    setEditarItemId(id);
+    setIsEditarModalOpen(true);
+  };
+
+  const handleCloseCadastrarModal = () => {
+    setIsCadastrarModalOpen(false);
+  };
+
+  const handleCadastrarSuccess = () => {
+    toast.success('Item criado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    refetch();
+  };
+
+  const handleCloseEditarModal = () => {
+    setIsEditarModalOpen(false);
+    setEditarItemId(null);
+  };
+
+  const handleEditarSuccess = () => {
+    if (editarItemId) {
+      setUpdatingItemId(editarItemId);
+    }
+    toast.success('Item atualizado com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+    refetch();
   };
 
   const handleDelete = (id: string) => {
@@ -298,7 +306,7 @@ export default function ItensPageContent({
   };
 
   const handleAdicionarClick = () => {
-    router.push('/itens/adicionar');
+    setIsCadastrarModalOpen(true);
   };
 
   useEffect(() => {
@@ -344,13 +352,13 @@ export default function ItensPageContent({
                 placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
                 data-test="search-input"
               />
             </div>
             <Button
               variant="outline"
-              className="h-10 px-4 flex items-center gap-2 cursor-pointer"
+              className="h-11 px-4 flex items-center gap-2 cursor-pointer"
               data-test="filtros-button"
               onClick={handleOpenFiltrosModal}
             >
@@ -358,7 +366,7 @@ export default function ItensPageContent({
               Filtros
             </Button>
             <Button
-              className="h-10 px-4 flex items-center gap-2 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
+              className="h-11 px-4 flex items-center gap-2 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
               data-test="adicionar-button"
               onClick={handleAdicionarClick}
@@ -469,26 +477,19 @@ export default function ItensPageContent({
               ))}
             </div>
           ) : (
-            <div
-              className="flex flex-col items-center justify-center py-16 gap-4"
-              data-test="empty-state"
-            >
-              <div className="w-12 h-12 rounded-full border-2 border-dashed border-border flex items-center justify-center">
-                <Package className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  {searchTerm || categoriaFilter || statusFilter
-                    ? 'Nenhum resultado'
-                    : 'Nenhum item cadastrado'}
-                </p>
-                <p className="text-xs text-muted-foreground max-w-[32ch]">
-                  {searchTerm || categoriaFilter || statusFilter
-                    ? 'Tente ajustar sua pesquisa ou remover os filtros.'
-                    : 'Comece adicionando o primeiro item ao estoque.'}
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              icon={Package}
+              title={
+                searchTerm || categoriaFilter || statusFilter
+                  ? 'Nenhum resultado'
+                  : 'Nenhum item cadastrado'
+              }
+              subtitle={
+                searchTerm || categoriaFilter || statusFilter
+                  ? 'Tente ajustar sua pesquisa ou remover os filtros.'
+                  : 'Comece adicionando o primeiro item ao estoque.'
+              }
+            />
           )}
         </div>
 
@@ -624,6 +625,21 @@ export default function ItensPageContent({
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
       />
+
+      <ModalCadastrarItem
+        isOpen={isCadastrarModalOpen}
+        onClose={handleCloseCadastrarModal}
+        onSuccess={handleCadastrarSuccess}
+      />
+
+      {editarItemId && (
+        <ModalEditarItem
+          isOpen={isEditarModalOpen}
+          onClose={handleCloseEditarModal}
+          itemId={editarItemId}
+          onSuccess={handleEditarSuccess}
+        />
+      )}
 
       {entradaItemId && (
         <ModalEntradaItem

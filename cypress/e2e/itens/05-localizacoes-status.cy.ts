@@ -289,7 +289,8 @@ describe('Componentes - Localizações e Status Automático', () => {
       cy.intercept('POST', `${apiUrl}/itens`).as('createComponente');
       cy.intercept('GET', `${apiUrl}/categorias*`).as('getCategorias');
 
-      cy.visit(`${frontendUrl}/itens/adicionar`);
+      cy.get('[data-test="adicionar-button"]').click();
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
       cy.wait('@getCategorias').then((interception) => {
         const categorias = interception.response?.body?.data?.docs || [];
 
@@ -441,7 +442,12 @@ describe('Componentes - Localizações e Status Automático', () => {
           );
           cy.intercept('GET', `${apiUrl}/categorias*`).as('getCategorias');
 
-          cy.visit(`${frontendUrl}/itens/editar/${itemId}`);
+          cy.contains('[data-test^="item-card-"]', itemComEstoque.nome).within(
+            () => {
+              cy.get('[data-test="edit-button"]').click({ force: true });
+            },
+          );
+          cy.get('[data-test="modal-editar-item"]').should('be.visible');
           cy.wait('@getCategorias');
 
           const novoEstoqueMinimo = itemComEstoque.quantidade + 10;
@@ -451,7 +457,7 @@ describe('Componentes - Localizações e Status Automático', () => {
 
           cy.wait('@patchComponente', { timeout: 10000 });
 
-          cy.visit(`${frontendUrl}/itens`);
+          cy.get('[data-test="modal-editar-item"]').should('not.exist');
           cy.wait('@getComponentes');
 
           cy.wait(1000);

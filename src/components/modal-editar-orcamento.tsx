@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import Cabecalho from '@/components/cabecalho';
+import { X, Plus, Minus, Trash2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,19 +10,27 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  useInfiniteQuery,
 } from '@tanstack/react-query';
 import { get, post, patch, del } from '@/lib/fetchData';
-import { Plus, Minus, Trash2, ChevronDown } from 'lucide-react';
-import { ToastContainer, toast, Slide } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import { ItemOrcamento, OrcamentoSingleApiResponse } from '@/types/orcamentos';
 import { FornecedorApiResponse } from '@/types/fornecedores';
 import ModalSelecionarItem from '@/components/modal-selecionar-item';
 
-export default function EditarOrcamentoPage() {
-  const router = useRouter();
-  const params = useParams();
-  const orcamentoId = params.id as string;
+interface ModalEditarOrcamentoProps {
+  isOpen: boolean;
+  onClose: () => void;
+  orcamentoId: string;
+  onSuccess?: () => void;
+}
+
+export default function ModalEditarOrcamento({
+  isOpen,
+  onClose,
+  orcamentoId,
+  onSuccess,
+}: ModalEditarOrcamentoProps) {
   const queryClient = useQueryClient();
 
   const [nome, setNome] = useState('');
@@ -31,7 +38,7 @@ export default function EditarOrcamentoPage() {
   const [itens, setItens] = useState<ItemOrcamento[]>([]);
   const [itensOriginais, setItensOriginais] = useState<ItemOrcamento[]>([]);
   const [errors, setErrors] = useState<{ nome?: string }>({});
-  const [isLoadingItems, setIsLoadingComponentes] = useState(false);
+  const [isLoadingItems, setIsLoadingItems] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -46,6 +53,8 @@ export default function EditarOrcamentoPage() {
   } | null>(null);
 
   const fornecedorButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const fornecedorObserverTarget = useRef<HTMLDivElement>(null);
+  const carregouItensRef = useRef(false);
 
   const { data: orcamentoData, isLoading: isLoadingOrcamento } =
     useQuery<OrcamentoSingleApiResponse>({
@@ -55,16 +64,50 @@ export default function EditarOrcamentoPage() {
           `/orcamentos/${orcamentoId}`,
         );
       },
-      enabled: !!orcamentoId,
+      enabled: isOpen && !!orcamentoId,
     });
 
   useEffect(() => {
-    if (orcamentoData?.data && itens.length === 0) {
+    if (isOpen) {
+      carregouItensRef.current = false;
+      setErrors({});
+      setIsItemModalOpen(false);
+      setIsFornecedorDropdownOpen(null);
+      setDropdownPosition(null);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (orcamentoData?.data && !carregouItensRef.current) {
+      carregouItensRef.current = true;
       setNome(orcamentoData.data.nome);
       setDescricao(orcamentoData.data.descricao || '');
 
       const fetchFornecedoresNomes = async () => {
-        setIsLoadingComponentes(true);
+        setIsLoadingItems(true);
         const itensComFornecedores = await Promise.all(
           (orcamentoData.data.itens || []).map(async (comp) => {
             if (comp.fornecedor) {
@@ -86,7 +129,7 @@ export default function EditarOrcamentoPage() {
         );
         setItens(itensComFornecedores);
         setItensOriginais(itensComFornecedores);
-        setIsLoadingComponentes(false);
+        setIsLoadingItems(false);
       };
 
       fetchFornecedoresNomes();
@@ -96,19 +139,63 @@ export default function EditarOrcamentoPage() {
   const {
     data: fornecedoresData,
     isLoading: isLoadingFornecedores,
-  } = useQuery({
-    queryKey: ['fornecedores', fornecedorPesquisa],
-    queryFn: async () => {
+    error: fornecedoresError,
+    fetchNextPage: fetchNextPageFornecedores,
+    hasNextPage: hasNextPageFornecedores,
+    isFetchingNextPage: isFetchingNextPageFornecedores,
+  } = useInfiniteQuery({
+    queryKey: ['fornecedores-dropdown', fornecedorPesquisa],
+    queryFn: async ({ pageParam = 1 }) => {
       const params = new URLSearchParams();
       if (fornecedorPesquisa) params.append('nome', fornecedorPesquisa);
-      params.append('limite', '200');
-      params.append('page', '1');
+      params.append('limite', '20');
+      params.append('page', pageParam.toString());
       return await get<FornecedorApiResponse>(
         `/fornecedores?${params.toString()}`,
       );
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     enabled: isFornecedorDropdownOpen !== null,
   });
+
+  useEffect(() => {
+    if (fornecedoresError) {
+      console.error('Erro ao buscar fornecedores:', fornecedoresError);
+    }
+  }, [fornecedoresError]);
+
+  useEffect(() => {
+    if (
+      !fornecedorObserverTarget.current ||
+      isFornecedorDropdownOpen === null
+    ) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextPageFornecedores &&
+          !isFetchingNextPageFornecedores
+        ) {
+          fetchNextPageFornecedores();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(fornecedorObserverTarget.current);
+    return () => observer.disconnect();
+  }, [
+    isFornecedorDropdownOpen,
+    hasNextPageFornecedores,
+    isFetchingNextPageFornecedores,
+    fetchNextPageFornecedores,
+  ]);
 
   const updateOrcamentoMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -117,16 +204,8 @@ export default function EditarOrcamentoPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orcamentos'] });
       queryClient.invalidateQueries({ queryKey: ['orcamento', orcamentoId] });
-      toast.success('Orçamento atualizado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      router.push(`/orcamentos?success=updated&id=${orcamentoId}`);
+      onSuccess?.();
+      onClose();
     },
     onError: (error: any) => {
       console.error('Erro ao atualizar orçamento:', error);
@@ -182,11 +261,6 @@ export default function EditarOrcamentoPage() {
         {
           position: 'bottom-right',
           autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
         },
       );
       return;
@@ -241,11 +315,6 @@ export default function EditarOrcamentoPage() {
       toast.error(errorMessage, {
         position: 'bottom-right',
         autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
       });
     } finally {
       setIsSaving(false);
@@ -256,7 +325,7 @@ export default function EditarOrcamentoPage() {
     setIsItemModalOpen(true);
   };
 
-  const handleAdicionarItensMultiplos = async (
+  const handleAdicionarItensMultiplos = (
     itensSelecionados: Array<{ id: string; nome: string }>,
   ) => {
     const novosItens = itensSelecionados.map((comp) => ({
@@ -324,11 +393,9 @@ export default function EditarOrcamentoPage() {
     return itens.reduce((total, comp) => total + comp.subtotal, 0);
   };
 
-  const handleCancel = () => {
-    router.push('/orcamentos');
-  };
-
-  const fornecedoresLista = fornecedoresData?.data?.docs ?? [];
+  const fornecedoresLista = fornecedoresData?.pages
+    ? fornecedoresData.pages.flatMap((page) => page.data.docs)
+    : [];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -369,53 +436,70 @@ export default function EditarOrcamentoPage() {
     };
   }, [isFornecedorDropdownOpen]);
 
-  if (isLoadingOrcamento) {
-    return (
-      <div className="w-full min-h-screen flex flex-col">
-        <Cabecalho pagina="Orçamentos" acao="Editar" />
-        <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
-          <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
-              <div>
-                <Skeleton className="h-5 w-20 mb-2" />
-                <Skeleton className="w-full h-[38px] sm:h-[46px]" />
-              </div>
-              <div>
-                <Skeleton className="h-5 w-24 mb-2" />
-                <Skeleton className="w-full h-[100px]" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
-              <Skeleton className="h-[38px] w-20 sm:w-[120px]" />
-              <Skeleton className="h-[38px] w-20 sm:w-[120px]" />
-            </div>
+  if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const carregando = isLoadingOrcamento || isLoadingItems;
+
+  const modalContent = (
+    <div
+      data-test="modal-editar-orcamento"
+      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
+      style={{
+        zIndex: 99999,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      }}
+      onClick={handleBackdropClick}
+    >
+      <div
+        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative p-6 pb-0">
+          <button
+            data-test="modal-editar-orcamento-close"
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            title="Fechar"
+          >
+            <X size={20} />
+          </button>
+          <div className="text-center pt-4 px-8">
+            <h2 className="text-xl font-semibold text-foreground">
+              Editar orçamento
+            </h2>
           </div>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="w-full min-h-screen flex flex-col">
-      <Cabecalho pagina="Orçamentos" acao="Editar" />
-
-      <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
-        <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
-          <form
-            onSubmit={handleSubmit}
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-hidden">
+        {isLoadingOrcamento ? (
+          <div className="p-6 space-y-4 sm:space-y-6">
+            <div>
+              <Skeleton className="h-5 w-20 mb-2" />
+              <Skeleton className="w-full h-11" />
+            </div>
+            <div>
+              <Skeleton className="h-5 w-24 mb-2" />
+              <Skeleton className="w-full h-[100px]" />
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="p-6 space-y-4 sm:space-y-6">
               {/* Nome */}
-              <div className="shrink-0">
+              <div>
                 <div className="flex justify-between items-center mb-2">
                   <Label
                     htmlFor="nome"
-                    className="text-sm md:text-base font-medium text-gray-900"
+                    className="text-sm font-semibold text-foreground tracking-tight"
                   >
-                    Nome <span className="text-red-500">*</span>
+                    Nome <span className="text-destructive">*</span>
                   </Label>
-                  <span className="text-xs sm:text-sm text-gray-500">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     {nome.length}/100
                   </span>
                 </div>
@@ -431,25 +515,26 @@ export default function EditarOrcamentoPage() {
                     }
                   }}
                   maxLength={100}
-                  className={`w-full px-3! sm:px-4! h-auto! min-h-[38px]! sm:min-h-[46px]! text-sm sm:text-base ${errors.nome ? 'border-red-500!' : ''}`}
+                  className={`w-full h-11 ${errors.nome ? 'border-destructive!' : ''}`}
+                  data-test="input-nome-orcamento"
                 />
                 {errors.nome && (
-                  <p className="text-red-500 text-xs sm:text-sm mt-1">
+                  <p className="text-destructive text-xs sm:text-sm mt-1">
                     {errors.nome}
                   </p>
                 )}
               </div>
 
               {/* Descrição */}
-              <div className="shrink-0">
+              <div>
                 <div className="flex justify-between items-center mb-2">
                   <Label
                     htmlFor="descricao"
-                    className="text-sm md:text-base font-medium text-gray-900"
+                    className="text-sm font-semibold text-foreground tracking-tight"
                   >
                     Descrição
                   </Label>
-                  <span className="text-xs sm:text-sm text-gray-500">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     {descricao.length}/10000
                   </span>
                 </div>
@@ -458,159 +543,94 @@ export default function EditarOrcamentoPage() {
                   placeholder="Desenvolvimento de uma horta automatizada por arduino."
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[100px]"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring/50 resize-none min-h-[100px] bg-card"
                   maxLength={10000}
+                  data-test="textarea-descricao-orcamento"
                 />
               </div>
 
               {/* Itens do orçamento */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center mb-2 shrink-0">
-                  <Label className="text-sm md:text-base font-medium text-gray-900">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <Label className="text-sm font-semibold text-foreground tracking-tight">
                     Itens do orçamento
                   </Label>
                   <Button
                     type="button"
                     onClick={handleAdicionarItem}
-                    className="flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm sm:text-base px-3 sm:px-4"
+                    className="h-9 flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm px-3"
                     data-test="botao-adicionar-item"
                   >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Adicionar item</span>
-                    <span className="sm:hidden">Adicionar</span>
+                    Adicionar item
                   </Button>
                 </div>
 
                 {/* Tabela */}
                 <div
-                  className="border rounded-t-lg bg-white flex-1 flex flex-col overflow-hidden"
+                  className="border rounded-t-md bg-card overflow-hidden"
                   data-test="tabela-itens-orcamento"
                 >
                   {isLoadingItems ? (
-                    <>
-                      <div className="overflow-x-auto">
-                        <table className="w-full caption-bottom text-xs sm:text-sm min-w-[600px]">
-                          <thead className="bg-gray-50 z-10 shadow-sm">
-                            <tr className="bg-gray-50 border-b">
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                NOME
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                FORNECEDOR
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                QUANTIDADE
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                VALOR UNITÁRIO
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                SUBTOTAL
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                AÇÕES
-                              </th>
-                            </tr>
-                          </thead>
-                        </table>
+                    <div className="py-8 flex flex-col items-center justify-center">
+                      <div className="relative w-8 h-8">
+                        <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
                       </div>
-                      <div className="flex-1 flex items-center justify-center">
-                        <div className="flex flex-col items-center py-8">
-                          <div className="relative w-10 h-10">
-                            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
-                          </div>
-                          <p className="mt-3 text-gray-600 text-sm">
-                            Carregando itens...
-                          </p>
-                        </div>
-                      </div>
-                    </>
+                      <p className="mt-2 text-muted-foreground text-xs">
+                        Carregando itens...
+                      </p>
+                    </div>
                   ) : itens.length === 0 ? (
-                    <>
-                      <div className="overflow-x-auto">
-                        <table className="w-full caption-bottom text-xs sm:text-sm min-w-[600px]">
-                          <thead className="bg-gray-50 z-10 shadow-sm">
-                            <tr className="bg-gray-50 border-b">
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                NOME
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                FORNECEDOR
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                QUANTIDADE
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                VALOR UNITÁRIO
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                SUBTOTAL
-                              </th>
-                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
-                                AÇÕES
-                              </th>
-                            </tr>
-                          </thead>
-                        </table>
-                      </div>
-                      <div className="flex-1 flex items-center justify-center text-gray-500 text-xs sm:text-sm">
-                        Nenhum item adicionado.
-                      </div>
-                    </>
+                    <div className="py-8 flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
+                      Nenhum item adicionado.
+                    </div>
                   ) : (
-                    <div className="overflow-x-auto flex-1">
-                      <table className="w-full caption-bottom text-xs sm:text-sm min-w-[800px]">
+                    <div className="overflow-x-auto">
+                      <table className="w-full caption-bottom text-xs min-w-[720px]">
                         <colgroup>
-                          <col style={{ width: '20%' }} />
-                          <col style={{ width: '20%' }} />
-                          <col style={{ width: '15%' }} />
-                          <col style={{ width: '15%' }} />
-                          <col style={{ width: '15%' }} />
-                          <col style={{ width: '15%' }} />
+                          <col style={{ width: '18%' }} />
+                          <col style={{ width: '26%' }} />
+                          <col style={{ width: '16%' }} />
+                          <col style={{ width: '16%' }} />
+                          <col style={{ width: '14%' }} />
+                          <col style={{ width: '10%' }} />
                         </colgroup>
-                        <thead className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                          <tr className="bg-gray-50 border-b">
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                        <thead className="bg-muted shadow-sm">
+                          <tr className="bg-muted border-b">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               NOME
                             </th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               FORNECEDOR
                             </th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               QUANTIDADE
                             </th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               VALOR UNITÁRIO
                             </th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               SUBTOTAL
                             </th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">
+                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
                               AÇÕES
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {itens.map((comp, index) => (
-                            <tr
-                              key={index}
-                              className="hover:bg-gray-50 border-b"
-                            >
-                              {/* Nome */}
-                              <td className="px-4 py-3">
-                                <div className="px-3 py-2">
-                                  <span
-                                    className="text-sm font-semibold text-gray-900 truncate block"
-                                    title={comp.nome}
-                                  >
-                                    {comp.nome}
-                                  </span>
-                                </div>
+                            <tr key={index} className="hover:bg-muted border-b">
+                              <td className="px-3 py-2">
+                                <span
+                                  className="text-xs font-semibold text-foreground truncate block"
+                                  title={comp.nome}
+                                >
+                                  {comp.nome}
+                                </span>
                               </td>
 
-                              {/* Fornecedor */}
-                              <td className="px-4 py-3">
+                              <td className="px-3 py-2">
                                 <div className="relative" data-dropdown>
                                   <button
                                     ref={(el) => {
@@ -626,32 +646,31 @@ export default function EditarOrcamentoPage() {
                                         handleOpenFornecedorDropdown(index);
                                       }
                                     }}
-                                    className="w-full h-[38px] flex items-center justify-between px-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm cursor-pointer"
+                                    className="w-full h-9 flex items-center justify-between px-2 bg-card border border-border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 text-xs cursor-pointer"
                                     data-test="select-fornecedor"
                                   >
                                     <span
-                                      className={`truncate ${comp.fornecedor_nome ? 'text-gray-900' : 'text-gray-500'}`}
+                                      className={`truncate ${comp.fornecedor_nome ? 'text-foreground' : 'text-muted-foreground'}`}
                                     >
                                       {comp.fornecedor_nome || 'Selecione'}
                                     </span>
-                                    <ChevronDown className="w-4 h-4 text-gray-400 ml-2 shrink-0" />
+                                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1 shrink-0" />
                                   </button>
                                 </div>
                               </td>
 
-                              {/* Quantidade */}
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-center gap-2">
+                              <td className="px-3 py-2">
+                                <div className="flex items-center justify-center gap-1">
                                   <button
                                     type="button"
                                     onClick={() =>
                                       handleQuantidadeChange(index, -1)
                                     }
-                                    className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                                    className="p-1 hover:bg-muted rounded cursor-pointer"
                                     disabled={comp.quantidade <= 1}
                                     data-test="botao-decrementar"
                                   >
-                                    <Minus className="w-4 h-4" />
+                                    <Minus className="w-3.5 h-3.5" />
                                   </button>
                                   <input
                                     type="number"
@@ -667,7 +686,7 @@ export default function EditarOrcamentoPage() {
                                         novosItens[index].valor_unitario;
                                       setItens(novosItens);
                                     }}
-                                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded-md"
+                                    className="w-12 px-1 py-1 text-center border border-border rounded-md"
                                     min="1"
                                     data-test="input-quantidade"
                                   />
@@ -676,16 +695,15 @@ export default function EditarOrcamentoPage() {
                                     onClick={() =>
                                       handleQuantidadeChange(index, 1)
                                     }
-                                    className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                                    className="p-1 hover:bg-muted rounded cursor-pointer"
                                     data-test="botao-incrementar"
                                   >
-                                    <Plus className="w-4 h-4" />
+                                    <Plus className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               </td>
 
-                              {/* Valor Unitário */}
-                              <td className="px-4 py-3">
+                              <td className="px-3 py-2">
                                 <input
                                   type="number"
                                   value={comp.valor_unitario}
@@ -695,7 +713,7 @@ export default function EditarOrcamentoPage() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-3 py-2 text-center border border-gray-300 rounded-md"
+                                  className="w-full h-9 text-center border border-border rounded-md"
                                   placeholder="R$0,00"
                                   step="0.01"
                                   min="0"
@@ -703,25 +721,23 @@ export default function EditarOrcamentoPage() {
                                 />
                               </td>
 
-                              {/* Subtotal */}
                               <td
-                                className="px-4 py-3 text-center text-gray-900 font-medium"
+                                className="px-3 py-2 text-center text-foreground font-medium"
                                 data-test="subtotal"
                               >
                                 R${comp.subtotal.toFixed(2)}
                               </td>
 
-                              {/* Ações */}
-                              <td className="px-4 py-3">
+                              <td className="px-3 py-2">
                                 <div className="flex justify-center">
                                   <button
                                     type="button"
                                     onClick={() => handleRemoverItem(index)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                                     title="Remover item"
                                     data-test="botao-remover-item"
                                   >
-                                    <Trash2 className="w-5 h-5" />
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               </td>
@@ -734,9 +750,9 @@ export default function EditarOrcamentoPage() {
                 </div>
 
                 {/* Total */}
-                <div className="border-x border-b rounded-b-lg bg-gray-50 px-4 py-3 shrink-0">
+                <div className="border-x border-b rounded-b-md bg-muted px-4 py-2">
                   <div
-                    className="text-center font-semibold text-gray-700 text-sm sm:text-base"
+                    className="text-center font-semibold text-foreground text-sm"
                     data-test="total-orcamento"
                   >
                     Total: R${calcularTotal().toFixed(2)}
@@ -745,39 +761,33 @@ export default function EditarOrcamentoPage() {
               </div>
             </div>
 
-            {/* Footer com botões */}
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                className="min-w-20 sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
-                data-test="botao-cancelar"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="min-w-20 sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
-                style={{ backgroundColor: '#306FCC' }}
-                disabled={isSaving}
-              >
-                {isSaving ? 'Salvando...' : 'Salvar'}
-              </Button>
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isSaving || carregando}
+                  className="h-11 flex-1 cursor-pointer"
+                  data-test="botao-cancelar"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSaving || carregando}
+                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: '#306FCC' }}
+                  data-test="botao-salvar"
+                >
+                  {isSaving ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </div>
             </div>
           </form>
-        </div>
+        )}
       </div>
-
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        draggable={false}
-        transition={Slide}
-      />
 
       {/* Modal de Seleção de Itens */}
       <ModalSelecionarItem
@@ -800,9 +810,9 @@ export default function EditarOrcamentoPage() {
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,
               width: `${dropdownPosition.width}px`,
-              zIndex: 9999,
+              zIndex: 100000,
             }}
-            className="mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden flex flex-col"
+            className="mt-1 bg-card border border-border rounded-md shadow-lg max-h-60 overflow-hidden flex flex-col"
           >
             <div className="p-2 border-b">
               <input
@@ -810,7 +820,7 @@ export default function EditarOrcamentoPage() {
                 placeholder="Pesquisar..."
                 value={fornecedorPesquisa}
                 onChange={(e) => setFornecedorPesquisa(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-9 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50"
                 onClick={(e) => e.stopPropagation()}
                 data-test="dropdown-search-input"
               />
@@ -818,7 +828,15 @@ export default function EditarOrcamentoPage() {
             <div className="overflow-y-auto" data-test="fornecedores-list">
               {isLoadingFornecedores ? (
                 <div className="flex justify-center py-4">
-                  <div className="relative w-6 h-6"><div className="absolute inset-0 rounded-full border-2 border-blue-100"></div><div className="absolute inset-0 rounded-full border-2 border-blue-500 border-r-transparent animate-spin"></div></div>
+                  <div className="relative w-6 h-6">
+                    <div className="absolute inset-0 rounded-full border-2 border-[#306FCC]/15"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-[#306FCC] border-r-transparent animate-spin"></div>
+                  </div>
+                </div>
+              ) : fornecedoresError ? (
+                <div className="px-4 py-6 text-center text-red-600 text-sm">
+                  Erro ao buscar fornecedores:{' '}
+                  {(fornecedoresError as any)?.message || 'erro desconhecido'}
                 </div>
               ) : fornecedoresLista.length > 0 ? (
                 <>
@@ -833,15 +851,24 @@ export default function EditarOrcamentoPage() {
                           fornecedor.nome,
                         )
                       }
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm cursor-pointer"
+                      className="w-full px-4 py-2 text-left text-foreground hover:bg-muted text-sm cursor-pointer"
                       data-test={`fornecedor-option-${idx}`}
                     >
                       {fornecedor.nome}
                     </button>
                   ))}
+                  <div ref={fornecedorObserverTarget} className="h-1" />
+                  {isFetchingNextPageFornecedores && (
+                    <div className="flex justify-center py-2">
+                      <div className="relative w-4 h-4">
+                        <div className="absolute inset-0 rounded-full border-2 border-[#306FCC]/15"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#306FCC] border-r-transparent animate-spin"></div>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
-                <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                <div className="px-4 py-6 text-center text-muted-foreground text-sm">
                   Nenhum fornecedor encontrado
                 </div>
               )}
@@ -851,4 +878,8 @@ export default function EditarOrcamentoPage() {
         )}
     </div>
   );
+
+  return typeof window !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : null;
 }
