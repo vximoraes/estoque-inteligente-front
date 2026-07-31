@@ -164,7 +164,7 @@ function LoginContent() {
             </div>
 
             <div className="mt-5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-2">
                 <Checkbox
                   id="lembrar-me"
                   className="cursor-pointer"
