@@ -45,6 +45,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     cy.intercept('GET', '**/itens*').as('getComponentes');
     cy.intercept('GET', '**/categorias*').as('getCategorias');
 
+    cy.clearCookies();
     cy.visit(`${frontendUrl}/login`);
     cy.get('[data-test="email-input"]')
       .should('be.visible')

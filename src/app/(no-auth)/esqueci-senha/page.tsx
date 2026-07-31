@@ -91,6 +91,7 @@ export default function EsqueciSenhaPage() {
                       placeholder="seu@email.com"
                       {...register('email')}
                       disabled={isSubmitting}
+                      data-test="email-input"
                     />
                     {errors.email && (
                       <p className="text-xs text-destructive">
@@ -103,13 +104,14 @@ export default function EsqueciSenhaPage() {
                     type="submit"
                     className="mt-6 h-11 w-full rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
                     disabled={isSubmitting}
+                    data-test="botao-enviar-link"
                   >
                     {isSubmitting ? 'Enviando...' : 'Enviar link'}
                   </Button>
                 </form>
               </>
             ) : (
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6" data-test="email-enviado-confirmacao">
                 <div>
                   <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
                     E-mail enviado
