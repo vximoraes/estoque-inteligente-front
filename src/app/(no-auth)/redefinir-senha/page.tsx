@@ -132,7 +132,7 @@ function RedefinirSenhaContent() {
         <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
           <AuthLeftPanel />
           <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
-            <div className="w-full max-w-sm">
+            <div className="w-full max-w-sm" data-test="token-invalido">
               <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
                 Link inválido
               </h2>
@@ -186,6 +186,7 @@ function RedefinirSenhaContent() {
                       placeholder="••••••••"
                       {...register('senha')}
                       disabled={isSubmitting}
+                      data-test="senha-input"
                     />
                     <button
                       type="button"
@@ -244,6 +245,7 @@ function RedefinirSenhaContent() {
                       placeholder="••••••••"
                       {...register('confirmarSenha')}
                       disabled={isSubmitting}
+                      data-test="confirmar-senha-input"
                     />
                     <button
                       type="button"
@@ -273,6 +275,7 @@ function RedefinirSenhaContent() {
                 type="submit"
                 className="mt-6 h-11 w-full rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
                 disabled={isSubmitting}
+                data-test="botao-redefinir-senha"
               >
                 {isSubmitting ? 'Redefinindo...' : 'Redefinir senha'}
               </Button>
