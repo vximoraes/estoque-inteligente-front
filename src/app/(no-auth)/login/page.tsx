@@ -48,15 +48,30 @@ function LoginContent() {
     setError('');
 
     try {
+      let retryAfter: string | null = null;
+
       const { error } = await authClient.signIn.email({
         email: data.email,
         password: data.senha,
         rememberMe,
-        fetchOptions: { credentials: 'include' },
+        fetchOptions: {
+          credentials: 'include',
+          onError: (context) => {
+            retryAfter = context.response.headers.get('X-Retry-After');
+          },
+        },
       });
 
       if (error) {
-        setError('E-mail ou senha incorretos.');
+        if (error.status === 429) {
+          setError(
+            retryAfter
+              ? `Muitas tentativas. Aguarde ${retryAfter} segundos e tente novamente.`
+              : 'Muitas tentativas. Aguarde alguns segundos e tente novamente.',
+          );
+        } else {
+          setError('E-mail ou senha incorretos.');
+        }
       } else {
         router.push('/itens');
       }
