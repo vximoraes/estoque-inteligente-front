@@ -220,7 +220,7 @@ export default function PageUsuariosContent({
             onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Cadastrar usuário
+            Adicionar
           </Button>
         </div>
 
