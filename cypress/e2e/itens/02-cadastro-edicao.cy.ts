@@ -140,8 +140,7 @@ describe('Componentes - Cadastro e Edição', () => {
       // Busca um item existente via API
       const apiUrl = Cypress.env('API_URL');
 
-      // Sessão vem do cookie do cy.login() do beforeEach — cy.request reenvia
-      // automaticamente os cookies do domínio, sem precisar de Authorization.
+      // cy.request reenvia o cookie de sessão do cy.login() automaticamente.
       cy.request({
         method: 'GET',
         url: `${apiUrl}/itens?limit=1`,
