@@ -1,5 +1,6 @@
 import { EstoqueData } from '@/types/itens';
 import { Orcamento } from '@/types/orcamentos';
+import { Emprestimo } from '@/types/emprestimos';
 
 interface CSVGeneratorOptions {
   estoques: EstoqueData[];
@@ -366,6 +367,110 @@ export const generateMovimentacoesCSV = ({
 
   const csvContent = lines.join('\n');
   const blob = new Blob(['\uFEFF' + csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
+    const hoje = new Date();
+    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+};
+
+// ==================== GERADOR DE CSV PARA EMPRÉSTIMOS ====================
+
+interface EmprestimoCSVGeneratorOptions {
+  emprestimos: Emprestimo[];
+  fileName?: string;
+  includeStats?: boolean;
+}
+
+export const generateEmprestimosCSV = ({
+  emprestimos,
+  fileName = 'relatorio-emprestimos',
+  includeStats = true,
+}: EmprestimoCSVGeneratorOptions) => {
+  const lines: string[] = [];
+
+  lines.push('RELATÓRIO DE EMPRÉSTIMOS');
+  lines.push(
+    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+  );
+  lines.push('');
+
+  if (includeStats && emprestimos.length > 0) {
+    const total = emprestimos.length;
+    const ativos = emprestimos.filter((e) => e.status === 'Ativo').length;
+    const atrasados = emprestimos.filter((e) => e.status === 'Atrasado').length;
+    const devolvidos = emprestimos.filter(
+      (e) => e.status === 'Devolvido',
+    ).length;
+
+    lines.push('RESUMO ESTATÍSTICO');
+    lines.push(`Total de Empréstimos,${total}`);
+    lines.push(`Ativos,${ativos}`);
+    lines.push(`Atrasados,${atrasados}`);
+    lines.push(`Devolvidos,${devolvidos}`);
+    lines.push('');
+  }
+
+  lines.push('EMPRÉSTIMOS SELECIONADOS');
+  const headers = [
+    'CÓDIGO',
+    'PRODUTO',
+    'SOLICITANTE',
+    'QUANTIDADE EMPRESTADA',
+    'QUANTIDADE ABERTA',
+    'STATUS',
+    'LOCALIZAÇÃO',
+    'DATA SAÍDA',
+    'DATA PREVISTA DEVOLUÇÃO',
+  ];
+  lines.push(headers.join(','));
+
+  emprestimos.forEach((emp) => {
+    const codigo = emp._id || '-';
+    const produto = emp.item?.nome ? escapeCSV(emp.item.nome) : '-';
+    const solicitante = escapeCSV(emp.solicitante_nome || '-');
+    const quantidade = (emp.quantidade_emprestada ?? 0).toString();
+    const quantidadeAberta = (emp.quantidade_aberta ?? 0).toString();
+    const status = emp.status || '-';
+    const local = emp.localizacao?.nome ? escapeCSV(emp.localizacao.nome) : '-';
+    const dataSaida = emp.data_saida ? formatDate(emp.data_saida) : '-';
+    const dataPrevista = emp.data_prevista_devolucao
+      ? formatDate(emp.data_prevista_devolucao)
+      : 'Sem previsão';
+
+    const row = [
+      `"${codigo}"`,
+      `"${produto}"`,
+      `"${solicitante}"`,
+      quantidade,
+      quantidadeAberta,
+      `"${status}"`,
+      `"${local}"`,
+      `"${dataSaida}"`,
+      `"${dataPrevista}"`,
+    ];
+
+    lines.push(row.join(','));
+  });
+
+  lines.push('');
+  lines.push(`Total de registros exportados: ${emprestimos.length}`);
+  lines.push('Estoque Inteligente - Sistema de Gerenciamento');
+
+  const csvContent = lines.join('\n');
+  const blob = new Blob(['﻿' + csvContent], {
     type: 'text/csv;charset=utf-8;',
   });
   const link = document.createElement('a');
