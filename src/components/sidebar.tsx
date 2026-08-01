@@ -301,6 +301,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                         route: '/relatorios/movimentacoes',
                       },
                       { name: 'Orçamentos', route: '/relatorios/orcamentos' },
+                      {
+                        name: 'Empréstimos',
+                        route: '/relatorios/emprestimos',
+                      },
                     ]}
                     path={path}
                     onItemClick={handleItemClick}
@@ -470,6 +474,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   { name: 'Itens', route: '/relatorios/itens' },
                   { name: 'Movimentações', route: '/relatorios/movimentacoes' },
                   { name: 'Orçamentos', route: '/relatorios/orcamentos' },
+                  { name: 'Empréstimos', route: '/relatorios/emprestimos' },
                 ]}
               />
               <MobileMenuItem

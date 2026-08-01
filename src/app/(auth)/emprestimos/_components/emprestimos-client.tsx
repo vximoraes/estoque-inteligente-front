@@ -1,6 +1,7 @@
 'use client';
 
 import Cabecalho from '@/components/cabecalho';
+import ModalCadastrarEmprestimo from '@/components/modal-cadastrar-emprestimo';
 import ModalDetalhesEmprestimo from '@/components/modal-detalhes-emprestimo';
 import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
 import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
@@ -26,12 +27,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Pencil,
+  Plus,
   Trash2,
   Filter,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import StatCard from '@/components/stat-card';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -53,6 +54,7 @@ export default function EmprestimosPageContent({
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
 
   const [detalhesEmprestimo, setDetalhesEmprestimo] =
     useState<Emprestimo | null>(null);
@@ -98,75 +100,6 @@ export default function EmprestimosPageContent({
   const emprestimos = data?.data?.docs || [];
   const paginationInfo = data?.data;
 
-  const { data: globalStats } = useQuery<{
-    total: number;
-    ativos: number;
-    atrasados: number;
-    devolvidos: number;
-  }>({
-    queryKey: ['emprestimos-global-stats', searchTerm, statusFilter],
-    queryFn: async () => {
-      const limit = 500;
-      let page = 1;
-      let hasNextPage = true;
-      const docs: Emprestimo[] = [];
-
-      while (hasNextPage) {
-        const params = new URLSearchParams();
-        params.append('page', page.toString());
-        params.append('limite', String(limit));
-
-        if (searchTerm) params.append('solicitante_nome', searchTerm);
-        if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
-        if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
-
-        const response = await get<EmprestimosApiResponse>(
-          `/emprestimos?${params.toString()}`,
-        );
-
-        docs.push(...(response?.data?.docs || []));
-        hasNextPage = !!response?.data?.hasNextPage;
-        page = response?.data?.nextPage || page + 1;
-      }
-
-      const filtrados = docs.filter((emp) => {
-        const termo = searchTerm.toLowerCase().trim();
-
-        const matchSearch =
-          !termo ||
-          emp.solicitante_nome.toLowerCase().includes(termo) ||
-          emp.item?.nome?.toLowerCase().includes(termo) ||
-          emp.localizacao?.nome?.toLowerCase().includes(termo);
-
-        const matchStatus = !statusFilter || emp.status === statusFilter;
-        return matchSearch && matchStatus;
-      });
-
-      return {
-        total: filtrados.length,
-        ativos: filtrados.filter((e) => e.status === 'Ativo').length,
-        atrasados: filtrados.filter((e) => e.status === 'Atrasado').length,
-        devolvidos: filtrados.filter((e) => e.status === 'Devolvido').length,
-      };
-    },
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  });
-
-  const totalLocal = emprestimos.length;
-  const ativosLocal = emprestimos.filter((e) => e.status === 'Ativo').length;
-  const atrasadosLocal = emprestimos.filter(
-    (e) => e.status === 'Atrasado',
-  ).length;
-  const devolvidosLocal = emprestimos.filter(
-    (e) => e.status === 'Devolvido',
-  ).length;
-
-  const total = globalStats?.total ?? totalLocal;
-  const ativos = globalStats?.ativos ?? ativosLocal;
-  const atrasados = globalStats?.atrasados ?? atrasadosLocal;
-  const devolvidos = globalStats?.devolvidos ?? devolvidosLocal;
-
   const formatarDataPrevista = (data?: string | null) => {
     if (!data) return 'Sem previsão';
     const parsed = new Date(data);
@@ -182,15 +115,6 @@ export default function EmprestimosPageContent({
       <Cabecalho pagina="Empréstimos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
-        <div className="shrink-0 mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-            <StatCard title="Total de empréstimos" value={total} />
-            <StatCard title="Ativos" value={ativos} />
-            <StatCard title="Atrasados" value={atrasados} />
-            <StatCard title="Devolvidos" value={devolvidos} />
-          </div>
-        </div>
-
         <div className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -211,6 +135,16 @@ export default function EmprestimosPageContent({
           >
             <Filter className="w-4 h-4" />
             Filtros
+          </Button>
+
+          <Button
+            className="h-11 px-4 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: '#306FCC' }}
+            data-test="adicionar-button"
+            onClick={() => setIsCadastrarModalOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar
           </Button>
         </div>
 
@@ -417,6 +351,12 @@ export default function EmprestimosPageContent({
           )}
         </div>
       </div>
+
+      <ModalCadastrarEmprestimo
+        isOpen={isCadastrarModalOpen}
+        onClose={() => setIsCadastrarModalOpen(false)}
+        onSuccess={() => refetch()}
+      />
 
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
