@@ -112,66 +112,28 @@ function RelatorioItensPageContent() {
   const todosEstoques = data?.pages.flatMap((page) => page.data.docs) || [];
 
   const { data: globalStats } = useQuery<ItensGlobaisStats>({
-    queryKey: [
-      'estoques-relatorio-global-stats',
-      categoriaFilter,
-      statusFilter,
-    ],
+    queryKey: ['itens-relatorio-global-stats', categoriaFilter, statusFilter],
     queryFn: async () => {
-      const limit = 500;
-      let page = 1;
-      let hasNextPage = true;
-      const docs: any[] = [];
-
-      while (hasNextPage) {
-        const params = new URLSearchParams();
-        params.append('limite', String(limit));
-        params.append('page', String(page));
-
-        if (categoriaFilter) {
-          params.append('categoria', categoriaFilter);
-        }
-        if (statusFilter) {
-          params.append('status', statusFilter);
-        }
-
-        const response = await get<EstoqueApiResponse>(
-          `/estoques?${params.toString()}`,
-        );
-        const pageDocs = response?.data?.docs || [];
-        docs.push(...pageDocs);
-
-        hasNextPage = !!response?.data?.hasNextPage;
-        page = response?.data?.nextPage || page + 1;
+      const params = new URLSearchParams();
+      if (categoriaFilter) {
+        params.append('categoria', categoriaFilter);
+      }
+      if (statusFilter) {
+        params.append('status', statusFilter);
       }
 
-      const filtrados = docs.filter((estoque) => {
-        if (!estoque?.item || !estoque?.localizacao) {
-          return false;
+      const response = await get<{ data: ItensGlobaisStats }>(
+        `/itens/stats?${params.toString()}`,
+      );
+
+      return (
+        response?.data ?? {
+          totalItens: 0,
+          emEstoque: 0,
+          baixoEstoque: 0,
+          indisponiveis: 0,
         }
-
-        const matchCategoria =
-          !categoriaFilter || estoque.item.categoria === categoriaFilter;
-
-        const matchStatus =
-          !statusFilter || estoque.item.status === statusFilter;
-
-        return matchCategoria && matchStatus;
-      });
-
-      return {
-        totalItens: new Set(
-          filtrados.filter((e) => e?.item?._id).map((e) => e.item._id),
-        ).size,
-        emEstoque: filtrados.filter((e) => e?.item?.status === 'Em Estoque')
-          .length,
-        baixoEstoque: filtrados.filter(
-          (e) => e?.item?.status === 'Baixo Estoque',
-        ).length,
-        indisponiveis: filtrados.filter(
-          (e) => e?.item?.status === 'Indisponível',
-        ).length,
-      };
+      );
     },
     staleTime: 30_000,
     retry: (failureCount, error: any) => {
@@ -213,17 +175,26 @@ function RelatorioItensPageContent() {
     });
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
-  const totalItens = new Set(
-    estoquesFiltrados.filter((e) => e?.item?._id).map((e) => e.item._id),
-  ).size;
-  const emEstoqueLocal = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Em Estoque',
+  const itensUnicosLocal = new Map<
+    string,
+    (typeof estoquesFiltrados)[number]['item']
+  >();
+  estoquesFiltrados.forEach((e) => {
+    if (e?.item?._id) {
+      itensUnicosLocal.set(e.item._id, e.item);
+    }
+  });
+  const itensLocal = Array.from(itensUnicosLocal.values());
+
+  const totalItens = itensLocal.length;
+  const emEstoqueLocal = itensLocal.filter(
+    (item) => item.status === 'Em Estoque',
   ).length;
-  const baixoEstoqueLocal = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Baixo Estoque',
+  const baixoEstoqueLocal = itensLocal.filter(
+    (item) => item.status === 'Baixo Estoque',
   ).length;
-  const indisponiveisLocal = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Indisponível',
+  const indisponiveisLocal = itensLocal.filter(
+    (item) => item.status === 'Indisponível',
   ).length;
 
   const totalItensGlobal = globalStats?.totalItens ?? totalItens;
