@@ -4,15 +4,7 @@ describe('Perfil — Edição de Informações', () => {
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
-    cy.session([email, senha], () => {
-      cy.visit(`${frontendUrl}/`);
-
-      cy.get('#email').type(email);
-      cy.get('#senha').type(senha);
-      cy.contains('button', 'Entrar').click();
-
-      cy.url().should('include', '/itens');
-    });
+    cy.login(email, senha);
 
     cy.visit(`${frontendUrl}/perfil`);
     cy.wait(1000);

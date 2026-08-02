@@ -4,15 +4,7 @@ describe('Movimentações — Seleção e Exportação', () => {
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
-    cy.session('login-admin', () => {
-      cy.visit(`${frontendUrl}/login`);
-
-      cy.get('#email').type(email);
-      cy.get('#senha').type(senha);
-      cy.contains('button', 'Entrar').click();
-
-      cy.location('pathname').should('not.include', '/login');
-    });
+    cy.login(email, senha);
 
     cy.visit(`${frontendUrl}/relatorios/movimentacoes`);
 
