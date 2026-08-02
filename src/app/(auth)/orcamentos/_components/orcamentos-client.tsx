@@ -143,7 +143,7 @@ export default function PageOrcamentosContent({
 
   const handleCloseEditarModal = () => {
     setIsEditarModalOpen(false);
-    setEditarOrcamentoId(null);
+    setTimeout(() => setEditarOrcamentoId(null), 300);
   };
 
   const handleEditarSuccess = () => {
@@ -391,7 +391,7 @@ export default function PageOrcamentosContent({
           </Button>
           <Button
             className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            style={{ backgroundColor: '#0f1419' }}
             onClick={handleAdicionarClick}
             data-test="adicionar-button"
           >
@@ -465,8 +465,8 @@ export default function PageOrcamentosContent({
           (isFetching && !isLoading) ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-gray-600 font-medium">
                 Carregando orçamentos...
@@ -530,7 +530,7 @@ export default function PageOrcamentosContent({
                                 e.stopPropagation();
                                 handleEdit(orcamento._id);
                               }}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-gray-900 hover:text-[#0f1419] hover:bg-[#0f1419]/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar orçamento"
                               data-test="editar-button"
                             >
@@ -666,7 +666,7 @@ export default function PageOrcamentosContent({
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setExcluirOrcamentoId(null);
+            setTimeout(() => setExcluirOrcamentoId(null), 300);
           }}
           onSuccess={handleExcluirSuccess}
           orcamentoId={excluirOrcamentoId}
@@ -681,9 +681,11 @@ export default function PageOrcamentosContent({
           isOpen={isDetalhesModalOpen}
           onClose={() => {
             setIsDetalhesModalOpen(false);
-            setDetalhesOrcamentoId(null);
-            setDetalhesOrcamentoNome('');
-            setDetalhesOrcamentoDescricao(undefined);
+            setTimeout(() => {
+              setDetalhesOrcamentoId(null);
+              setDetalhesOrcamentoNome('');
+              setDetalhesOrcamentoDescricao(undefined);
+            }, 300);
           }}
           orcamentoId={detalhesOrcamentoId}
           orcamentoNome={detalhesOrcamentoNome}

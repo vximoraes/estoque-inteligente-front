@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 
 interface Localizacao {
@@ -237,8 +238,6 @@ export default function ModalEmprestarItem({
     setErrors({});
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const validateForm = () => {
     const newErrors: {
       quantidade?: string;
@@ -316,277 +315,275 @@ export default function ModalEmprestarItem({
   };
 
   const modalContent = (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      overlayClassName="z-50"
       data-test="modal-emprestar-item"
+      contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
     >
-      <div className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
-            data-test="close-modal-button"
-          >
-            <X size={20} className="text-muted-foreground" />
-          </button>
-          <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground mb-1">
-              Emprestar Item
-            </h2>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-5">
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Item
-            </label>
-            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
-              {itemNome}
-            </div>
-          </div>
-
-          <div className="relative" data-dropdown>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Localização <span className="text-destructive">*</span>
-            </label>
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-sm text-left hover:border-[#306FCC]/40 transition-colors cursor-pointer"
-            >
-              <span
-                className={
-                  localizacaoSelecionadaObj
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
-                }
-              >
-                {localizacaoSelecionadaObj
-                  ? `${localizacaoSelecionadaObj.nome} (${quantidadeDisponivel} disponíveis)`
-                  : 'Selecionar localização'}
-              </span>
-              <ChevronDown
-                size={16}
-                className={`text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
-                <div className="p-3 border-b border-border bg-muted/50">
-                  <input
-                    type="text"
-                    value={localizacaoPesquisa}
-                    onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                    placeholder="Pesquisar..."
-                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-
-                <div className="overflow-y-auto">
-                  {isLoadingLocalizacoes ? (
-                    <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                      Carregando...
-                    </div>
-                  ) : localizacoesFiltradas.length > 0 ? (
-                    <>
-                      {localizacoesFiltradas.map((loc) => {
-                        const estoque =
-                          estoques.find((e) => e.localizacao._id === loc._id)
-                            ?.quantidade || 0;
-                        return (
-                          <button
-                            key={loc._id}
-                            type="button"
-                            className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
-                              localizacaoSelecionada === loc._id
-                                ? 'bg-[#306FCC]/5 text-[#306FCC] font-medium'
-                                : 'text-foreground'
-                            }`}
-                            onClick={() => {
-                              setLocalizacaoSelecionada(loc._id);
-                              setIsDropdownOpen(false);
-                              setLocalizacaoPesquisa('');
-                              setErrors((prev) => ({
-                                ...prev,
-                                localizacao: undefined,
-                              }));
-                            }}
-                          >
-                            <span className="truncate">{loc.nome}</span>
-                            <span className="text-sm px-2 py-0.5 rounded shrink-0 bg-muted/50 text-muted-foreground">
-                              {estoque} disponível
-                            </span>
-                          </button>
-                        );
-                      })}
-                      <div ref={observerTarget} className="h-2" />
-                    </>
-                  ) : (
-                    <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                      Nenhuma localização com estoque.
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            {errors.localizacao && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.localizacao}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Quantidade <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="number"
-              min={1}
-              value={quantidade}
-              onChange={(e) => {
-                setQuantidade(e.target.value);
-                setErrors((prev) => ({ ...prev, quantidade: undefined }));
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="Digite a quantidade"
-            />
-            {errors.quantidade && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.quantidade}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Solicitante <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              value={solicitanteNome}
-              onChange={(e) => {
-                setSolicitanteNome(e.target.value);
-                setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="Nome da pessoa solicitante"
-            />
-            {errors.solicitanteNome && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.solicitanteNome}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              E-mail do solicitante
-            </label>
-            <input
-              type="email"
-              value={solicitanteEmail}
-              onChange={(e) => {
-                setSolicitanteEmail(e.target.value);
-                setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="E-mail da pessoa solicitante (opcional)"
-            />
-            {errors.solicitanteEmail && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.solicitanteEmail}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Data do empréstimo
-            </label>
-            <input
-              type="datetime-local"
-              value={dataEmprestimo}
-              onChange={(e) => {
-                setDataEmprestimo(e.target.value);
-                setErrors((prev) => ({ ...prev, dataEmprestimo: undefined }));
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-            />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Deixe em branco para usar o momento atual. Use para registrar um
-              empréstimo feito no passado.
-            </p>
-            {errors.dataEmprestimo && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.dataEmprestimo}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Data prevista de devolução
-            </label>
-            <input
-              type="datetime-local"
-              value={dataPrevista}
-              onChange={(e) => {
-                setDataPrevista(e.target.value);
-                setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-            />
-            {errors.dataPrevista && (
-              <p className="mt-1 text-sm text-destructive">
-                {errors.dataPrevista}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Observações
-            </label>
-            <textarea
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              rows={3}
-              placeholder="Observações opcionais"
-              maxLength={500}
-            />
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="h-11 flex-1 cursor-pointer"
-              disabled={emprestimoMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
-              style={{ backgroundColor: '#306FCC' }}
-              disabled={emprestimoMutation.isPending}
-            >
-              {emprestimoMutation.isPending
-                ? 'Registrando...'
-                : 'Confirmar Empréstimo'}
-            </Button>
-          </div>
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          data-test="close-modal-button"
+        >
+          <X size={20} className="text-muted-foreground" />
+        </button>
+        <div className="text-center pt-4 px-8">
+          <h2 className="text-xl font-semibold text-foreground mb-1">
+            Emprestar Item
+          </h2>
         </div>
       </div>
-    </div>
+
+      <div className="p-6 space-y-5">
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Item
+          </label>
+          <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
+            {itemNome}
+          </div>
+        </div>
+
+        <div className="relative" data-dropdown>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Localização <span className="text-destructive">*</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-sm text-left hover:border-[#0f1419]/40 transition-colors cursor-pointer"
+          >
+            <span
+              className={
+                localizacaoSelecionadaObj
+                  ? 'text-foreground'
+                  : 'text-muted-foreground'
+              }
+            >
+              {localizacaoSelecionadaObj
+                ? `${localizacaoSelecionadaObj.nome} (${quantidadeDisponivel} disponíveis)`
+                : 'Selecionar localização'}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
+              <div className="p-3 border-b border-border bg-muted/50">
+                <input
+                  type="text"
+                  value={localizacaoPesquisa}
+                  onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                  placeholder="Pesquisar..."
+                  className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
+              <div className="overflow-y-auto">
+                {isLoadingLocalizacoes ? (
+                  <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                    Carregando...
+                  </div>
+                ) : localizacoesFiltradas.length > 0 ? (
+                  <>
+                    {localizacoesFiltradas.map((loc) => {
+                      const estoque =
+                        estoques.find((e) => e.localizacao._id === loc._id)
+                          ?.quantidade || 0;
+                      return (
+                        <button
+                          key={loc._id}
+                          type="button"
+                          className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
+                            localizacaoSelecionada === loc._id
+                              ? 'bg-[#0f1419]/5 text-[#0f1419] font-medium'
+                              : 'text-foreground'
+                          }`}
+                          onClick={() => {
+                            setLocalizacaoSelecionada(loc._id);
+                            setIsDropdownOpen(false);
+                            setLocalizacaoPesquisa('');
+                            setErrors((prev) => ({
+                              ...prev,
+                              localizacao: undefined,
+                            }));
+                          }}
+                        >
+                          <span className="truncate">{loc.nome}</span>
+                          <span className="text-sm px-2 py-0.5 rounded shrink-0 bg-muted/50 text-muted-foreground">
+                            {estoque} disponível
+                          </span>
+                        </button>
+                      );
+                    })}
+                    <div ref={observerTarget} className="h-2" />
+                  </>
+                ) : (
+                  <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                    Nenhuma localização com estoque.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {errors.localizacao && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.localizacao}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Quantidade <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            value={quantidade}
+            onChange={(e) => {
+              setQuantidade(e.target.value);
+              setErrors((prev) => ({ ...prev, quantidade: undefined }));
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            placeholder="Digite a quantidade"
+          />
+          {errors.quantidade && (
+            <p className="mt-1 text-sm text-destructive">{errors.quantidade}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Solicitante <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="text"
+            value={solicitanteNome}
+            onChange={(e) => {
+              setSolicitanteNome(e.target.value);
+              setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            placeholder="Nome da pessoa solicitante"
+          />
+          {errors.solicitanteNome && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.solicitanteNome}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            E-mail do solicitante
+          </label>
+          <input
+            type="email"
+            value={solicitanteEmail}
+            onChange={(e) => {
+              setSolicitanteEmail(e.target.value);
+              setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            placeholder="E-mail da pessoa solicitante (opcional)"
+          />
+          {errors.solicitanteEmail && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.solicitanteEmail}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Data do empréstimo
+          </label>
+          <input
+            type="datetime-local"
+            value={dataEmprestimo}
+            onChange={(e) => {
+              setDataEmprestimo(e.target.value);
+              setErrors((prev) => ({ ...prev, dataEmprestimo: undefined }));
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+          />
+          <p className="mt-1 text-sm text-muted-foreground">
+            Deixe em branco para usar o momento atual. Use para registrar um
+            empréstimo feito no passado.
+          </p>
+          {errors.dataEmprestimo && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.dataEmprestimo}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Data prevista de devolução
+          </label>
+          <input
+            type="datetime-local"
+            value={dataPrevista}
+            onChange={(e) => {
+              setDataPrevista(e.target.value);
+              setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+          />
+          {errors.dataPrevista && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.dataPrevista}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Observações
+          </label>
+          <textarea
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            rows={3}
+            placeholder="Observações opcionais"
+            maxLength={500}
+          />
+        </div>
+      </div>
+
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="h-11 flex-1 cursor-pointer"
+            disabled={emprestimoMutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
+            style={{ backgroundColor: '#0f1419' }}
+            disabled={emprestimoMutation.isPending}
+          >
+            {emprestimoMutation.isPending
+              ? 'Registrando...'
+              : 'Confirmar Empréstimo'}
+          </Button>
+        </div>
+      </div>
+    </ModalShell>
   );
 
   return createPortal(modalContent, document.body);

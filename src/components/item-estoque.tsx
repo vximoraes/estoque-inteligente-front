@@ -137,7 +137,7 @@ export default function ItemEstoque({
               <div
                 className="absolute inset-0 rounded-full border-4 border-r-transparent animate-spin"
                 style={{
-                  borderColor: '#306FCC transparent transparent transparent',
+                  borderColor: '#0f1419 transparent transparent transparent',
                 }}
               ></div>
             </div>

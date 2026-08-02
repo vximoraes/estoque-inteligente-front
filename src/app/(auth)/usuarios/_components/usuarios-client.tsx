@@ -216,7 +216,7 @@ export default function PageUsuariosContent({
           <Button
             data-test="cadastrar-usuario-button"
             className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            style={{ backgroundColor: '#0f1419' }}
             onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
@@ -240,8 +240,8 @@ export default function PageUsuariosContent({
               className="flex flex-col items-center justify-center flex-1"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-gray-600 font-medium">
                 Carregando usuários...
@@ -333,7 +333,7 @@ export default function PageUsuariosContent({
                                 usuario.ativo ||
                                 reenviarConviteId === usuario._id
                               }
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="p-1 sm:p-2 text-gray-900 hover:text-[#0f1419] hover:bg-[#0f1419]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
                               title={
                                 usuario.ativo
                                   ? 'Usuário já ativo'
@@ -408,7 +408,7 @@ export default function PageUsuariosContent({
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setExcluirUsuarioId(null);
+            setTimeout(() => setExcluirUsuarioId(null), 300);
           }}
           onSuccess={handleExcluirSuccess}
           usuarioId={excluirUsuarioId}
@@ -421,7 +421,7 @@ export default function PageUsuariosContent({
           isOpen={isDetalhesModalOpen}
           onClose={() => {
             setIsDetalhesModalOpen(false);
-            setDetalhesUsuarioId(null);
+            setTimeout(() => setDetalhesUsuarioId(null), 300);
           }}
           usuarioId={detalhesUsuarioId}
         />

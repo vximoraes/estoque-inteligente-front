@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import Header from '@/components/header/header';
 import { QueryProvider } from '@/providers/queryProvider';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta-sans',
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
   title: 'Estoque Inteligente',
@@ -21,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={plusJakartaSans.variable}>
       <body className="flex justify-center">
         <SidebarProvider>
           <NuqsAdapter>

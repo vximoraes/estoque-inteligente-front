@@ -249,7 +249,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="#306FCC" size={15} />
+          <PulseLoader color="#0f1419" size={15} />
         </div>
       }
     >

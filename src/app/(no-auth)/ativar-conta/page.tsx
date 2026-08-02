@@ -168,7 +168,7 @@ function AtivarContaContent() {
   if (tokenValido === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <PulseLoader color="#306FCC" size={15} />
+        <PulseLoader color="#0f1419" size={15} />
       </div>
     );
   }
@@ -375,7 +375,7 @@ export default function AtivarContaPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="#306FCC" size={15} />
+          <PulseLoader color="#0f1419" size={15} />
         </div>
       }
     >

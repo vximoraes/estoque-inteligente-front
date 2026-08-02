@@ -120,7 +120,7 @@ function RedefinirSenhaContent() {
   if (tokenValido === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <PulseLoader color="#306FCC" />
+        <PulseLoader color="#0f1419" />
       </div>
     );
   }
@@ -292,7 +292,7 @@ export default function RedefinirSenhaPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="#306FCC" />
+          <PulseLoader color="#0f1419" />
         </div>
       }
     >

@@ -111,7 +111,10 @@ export default function EsqueciSenhaPage() {
                 </form>
               </>
             ) : (
-              <div className="flex flex-col gap-6" data-test="email-enviado-confirmacao">
+              <div
+                className="flex flex-col gap-6"
+                data-test="email-enviado-confirmacao"
+              >
                 <div>
                   <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
                     E-mail enviado

@@ -52,7 +52,7 @@ export function ChatInput({
           flex-1 resize-none rounded border border-border
           bg-muted px-3 py-2.5 text-base
           text-foreground placeholder:text-muted-foreground
-          focus:outline-none focus:ring-1 focus:ring-[#306FCC]
+          focus:outline-none focus:ring-1 focus:ring-[#0f1419]
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-[height] overflow-hidden
         "

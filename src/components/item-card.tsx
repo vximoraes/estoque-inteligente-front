@@ -56,8 +56,8 @@ export default function ItemCardSimples({
       onClick={() => onClick(id, nome)}
       className={`bg-card rounded-sm border-2 p-4 transition-colors cursor-pointer ${
         isSelected
-          ? 'border-[#306FCC] bg-[#306FCC]/5 selected'
-          : 'border-border hover:border-[#306FCC]/40'
+          ? 'border-[#0f1419] bg-[#0f1419]/5 selected'
+          : 'border-border hover:border-[#0f1419]/40'
       }`}
       data-test={dataTestId}
     >

@@ -71,7 +71,7 @@ export function ConversasList({
               className={`
                 group flex items-start gap-1.5 px-3 py-2 cursor-pointer
                 transition-colors
-                ${isActive ? 'bg-[#306FCC]/10' : 'hover:bg-muted'}
+                ${isActive ? 'bg-[#0f1419]/10' : 'hover:bg-muted'}
               `}
               onClick={() => onSelectConversa(conversa)}
             >

@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { localizacaoSchema, type LocalizacaoFormData } from '@/schemas';
@@ -118,120 +119,105 @@ export default function ModalEditarLocalizacao({
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
-
   const onSubmit = (data: LocalizacaoFormData) => {
     updateLocalizacaoMutation.mutate(data);
   };
 
-  if (!isOpen) return null;
-
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={handleClose}
+      zIndex={99999}
+      contentClassName="max-w-md overflow-visible"
     >
-      <div
-        className="bg-card rounded-sm border border-border max-w-md w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Botão de fechar */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={handleClose}
-            disabled={updateLocalizacaoMutation.isPending}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Fechar"
-          >
-            <X size={20} />
-          </button>
+      {/* Botão de fechar */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={handleClose}
+          disabled={updateLocalizacaoMutation.isPending}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Fechar"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Conteúdo do Modal */}
+      <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
+        <div className="text-center pt-4">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
+            Editar localização
+          </h2>
+          <p className="text-muted-foreground">
+            Atualize o nome da localização
+          </p>
         </div>
 
-        {/* Conteúdo do Modal */}
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Editar localização
-            </h2>
-            <p className="text-muted-foreground">
-              Atualize o nome da localização
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <Label
+              htmlFor="nome"
+              className="text-sm font-medium text-foreground"
+            >
+              Nome da localização <span className="text-destructive">*</span>
+            </Label>
+            <span className="text-sm text-muted-foreground">
+              {nomeValue.length}/100
+            </span>
+          </div>
+          <Input
+            id="nome"
+            type="text"
+            placeholder="Digite o nome da localização"
+            {...register('nome')}
+            maxLength={100}
+            className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
+            disabled={isSubmitting || updateLocalizacaoMutation.isPending}
+          />
+          {errors.nome && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.nome.message}
             </p>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <Label
-                htmlFor="nome"
-                className="text-sm font-medium text-foreground"
-              >
-                Nome da localização <span className="text-destructive">*</span>
-              </Label>
-              <span className="text-sm text-muted-foreground">
-                {nomeValue.length}/100
-              </span>
-            </div>
-            <Input
-              id="nome"
-              type="text"
-              placeholder="Digite o nome da localização"
-              {...register('nome')}
-              maxLength={100}
-              className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
-              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
-            />
-            {errors.nome && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.nome.message}
-              </p>
-            )}
-          </div>
-
-          {updateLocalizacaoMutation.error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
-              <div className="font-medium mb-1">
-                Erro ao atualizar localização
-              </div>
-              <div className="text-destructive/80">
-                {(updateLocalizacaoMutation.error as any)?.response?.data
-                  ?.message ||
-                  (updateLocalizacaoMutation.error as any)?.message ||
-                  'Erro desconhecido'}
-              </div>
-            </div>
           )}
+        </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
-              className="h-11 flex-1 cursor-pointer"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
-              className="h-11 flex-1 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
-            >
-              {isSubmitting || updateLocalizacaoMutation.isPending
-                ? 'Salvando...'
-                : 'Salvar'}
-            </Button>
+        {updateLocalizacaoMutation.error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+            <div className="font-medium mb-1">
+              Erro ao atualizar localização
+            </div>
+            <div className="text-destructive/80">
+              {(updateLocalizacaoMutation.error as any)?.response?.data
+                ?.message ||
+                (updateLocalizacaoMutation.error as any)?.message ||
+                'Erro desconhecido'}
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting || updateLocalizacaoMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting || updateLocalizacaoMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+            style={{ backgroundColor: '#0f1419' }}
+          >
+            {isSubmitting || updateLocalizacaoMutation.isPending
+              ? 'Salvando...'
+              : 'Salvar'}
+          </Button>
+        </div>
+      </form>
+    </ModalShell>
   );
 
   return createPortal(modalContent, document.body);

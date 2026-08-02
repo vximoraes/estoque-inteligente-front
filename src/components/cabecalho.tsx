@@ -295,7 +295,7 @@ export default function Cabecalho({
                   Notificações
                 </span>
                 <button
-                  className="text-xs sm:text-sm text-[#306FCC] hover:text-[#2559a8] transition-colors cursor-pointer whitespace-nowrap"
+                  className="text-xs sm:text-sm text-[#0f1419] hover:text-[#1a2330] transition-colors cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
                   data-test="botao-marcar-todas-visualizadas"
                 >
@@ -327,7 +327,7 @@ export default function Cabecalho({
                       <div className="flex items-start gap-2 flex-1 min-w-0">
                         {!n.visualizada && (
                           <div
-                            className="w-1.5 h-1.5 bg-[#306FCC] rounded-full shrink-0 mt-1.5"
+                            className="w-1.5 h-1.5 bg-[#0f1419] rounded-full shrink-0 mt-1.5"
                             data-test="indicador-nao-lida"
                           ></div>
                         )}

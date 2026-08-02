@@ -218,7 +218,7 @@ export function ChatPanel() {
       )}
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card shrink-0">
-        <Bot size={18} className="text-[#306FCC]" strokeWidth={2} />
+        <Bot size={18} className="text-[#0f1419]" strokeWidth={2} />
         <span className="text-base font-semibold text-foreground tracking-tight flex-1">
           Assistente de Estoque
         </span>
@@ -238,7 +238,7 @@ export function ChatPanel() {
             aria-label="Histórico de conversas"
             className={`flex items-center justify-center w-7 h-7 rounded transition-colors cursor-pointer ${
               showHistory
-                ? 'text-[#306FCC] bg-[#306FCC]/10'
+                ? 'text-[#0f1419] bg-[#0f1419]/10'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
@@ -324,7 +324,7 @@ export function ChatPanel() {
                           className="
                             w-full text-left px-3 py-2 text-sm rounded border border-border
                             bg-muted/50 text-muted-foreground
-                            hover:bg-muted hover:text-foreground hover:border-[#306FCC]/40
+                            hover:bg-muted hover:text-foreground hover:border-[#0f1419]/40
                             transition-colors cursor-pointer
                           "
                         >

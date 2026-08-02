@@ -12,6 +12,7 @@ import { get, post, patch } from '@/lib/fetchData';
 import { toast } from 'react-toastify';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
+import { ModalShell } from '@/components/ui/modal-shell';
 
 interface Categoria {
   _id: string;
@@ -419,8 +420,6 @@ export default function ModalEditarItem({
     };
   }, []);
 
-  if (!isOpen) return null;
-
   const categorias = categoriasData?.data?.docs ?? [];
   const categoriasFiltradas = categorias.filter((cat: Categoria) =>
     cat.nome.toLowerCase().includes(categoriaPesquisa.toLowerCase()),
@@ -431,25 +430,14 @@ export default function ModalEditarItem({
 
   const isPending = updateItemMutation.isPending || sendItemImagem.isPending;
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const modalContent = (
-    <div
-      data-test="modal-editar-item"
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
-    >
-      <div
-        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <ModalShell
+        isOpen={isOpen}
+        onClose={onClose}
+        data-test="modal-editar-item"
+        zIndex={99999}
+        contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
       >
         <div className="relative p-6 pb-0">
           <button
@@ -564,7 +552,7 @@ export default function ModalEditarItem({
                               }));
                             }
                           }}
-                          className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors cursor-pointer ${
+                          className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors cursor-pointer ${
                             errors.categoria
                               ? 'border-destructive'
                               : 'border-border'
@@ -597,7 +585,7 @@ export default function ModalEditarItem({
                                 onChange={(e) =>
                                   setCategoriaPesquisa(e.target.value)
                                 }
-                                className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                                className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent"
                                 onClick={(e) => e.stopPropagation()}
                                 data-test="input-pesquisa-categoria"
                               />
@@ -612,7 +600,7 @@ export default function ModalEditarItem({
                                         key={categoria._id}
                                         className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
                                           categoriaId === categoria._id
-                                            ? 'bg-[#306FCC]/10'
+                                            ? 'bg-[#0f1419]/10'
                                             : ''
                                         }`}
                                       >
@@ -623,7 +611,7 @@ export default function ModalEditarItem({
                                           }
                                           className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${
                                             categoriaId === categoria._id
-                                              ? 'text-[#306FCC] font-medium'
+                                              ? 'text-[#0f1419] font-medium'
                                               : 'text-foreground'
                                           }`}
                                           title={categoria.nome}
@@ -679,7 +667,7 @@ export default function ModalEditarItem({
                         type="button"
                         onClick={() => setIsAddingCategoria(true)}
                         className="text-white h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
-                        style={{ backgroundColor: '#306FCC' }}
+                        style={{ backgroundColor: '#0f1419' }}
                         data-test="botao-adicionar-categoria"
                       >
                         <Plus className="w-4 h-4" />
@@ -771,12 +759,12 @@ export default function ModalEditarItem({
                       onDrop={handleDrop}
                       className={`relative border-2 border-dashed rounded-md min-h-11 flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${
                         isDragging
-                          ? 'border-[#306FCC] bg-[#306FCC]/10'
+                          ? 'border-[#0f1419] bg-[#0f1419]/10'
                           : 'border-border bg-muted/40 hover:bg-muted hover:border-foreground/30'
                       }`}
                     >
                       <p className="text-center text-xs sm:text-sm">
-                        <span className="font-semibold text-[#306FCC]">
+                        <span className="font-semibold text-[#0f1419]">
                           Adicione ou arraste
                         </span>{' '}
                         <span className="text-muted-foreground">
@@ -839,7 +827,7 @@ export default function ModalEditarItem({
                   type="submit"
                   disabled={isPending}
                   className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#306FCC' }}
+                  style={{ backgroundColor: '#0f1419' }}
                   data-test="botao-salvar"
                 >
                   {isPending ? 'Salvando...' : 'Salvar'}
@@ -848,15 +836,14 @@ export default function ModalEditarItem({
             </div>
           </form>
         )}
-      </div>
+      </ModalShell>
 
       {/* Modal para adicionar categoria */}
       {isAddingCategoria && (
         <div
-          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4 bg-black/20 backdrop-blur-sm"
           style={{
             zIndex: 100000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -965,7 +952,7 @@ export default function ModalEditarItem({
                   onClick={handleAddCategoria}
                   disabled={createCategoriaMutation.isPending}
                   className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer text-sm sm:text-base"
-                  style={{ backgroundColor: '#306FCC' }}
+                  style={{ backgroundColor: '#0f1419' }}
                   data-test="botao-criar-categoria"
                 >
                   {createCategoriaMutation.isPending ? 'Criando...' : 'Criar'}
@@ -1001,7 +988,7 @@ export default function ModalEditarItem({
           />
         </>
       )}
-    </div>
+    </>
   );
 
   return typeof window !== 'undefined'

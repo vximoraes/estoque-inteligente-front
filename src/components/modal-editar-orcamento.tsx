@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus, Minus, Trash2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -436,358 +437,343 @@ export default function ModalEditarOrcamento({
     };
   }, [isFornecedorDropdownOpen]);
 
-  if (!isOpen) return null;
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const carregando = isLoadingOrcamento || isLoadingItems;
 
   const modalContent = (
-    <div
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       data-test="modal-editar-orcamento"
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+      zIndex={99999}
+      contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
     >
-      <div
-        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="relative p-6 pb-0">
-          <button
-            data-test="modal-editar-orcamento-close"
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
-            title="Fechar"
-          >
-            <X size={20} />
-          </button>
-          <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground">
-              Editar orçamento
-            </h2>
+      <div className="relative p-6 pb-0">
+        <button
+          data-test="modal-editar-orcamento-close"
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          title="Fechar"
+        >
+          <X size={20} />
+        </button>
+        <div className="text-center pt-4 px-8">
+          <h2 className="text-xl font-semibold text-foreground">
+            Editar orçamento
+          </h2>
+        </div>
+      </div>
+
+      {isLoadingOrcamento ? (
+        <div className="p-6 space-y-4 sm:space-y-6">
+          <div>
+            <Skeleton className="h-5 w-20 mb-2" />
+            <Skeleton className="w-full h-11" />
+          </div>
+          <div>
+            <Skeleton className="h-5 w-24 mb-2" />
+            <Skeleton className="w-full h-[100px]" />
           </div>
         </div>
-
-        {isLoadingOrcamento ? (
+      ) : (
+        <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-4 sm:space-y-6">
+            {/* Nome */}
             <div>
-              <Skeleton className="h-5 w-20 mb-2" />
-              <Skeleton className="w-full h-11" />
+              <div className="flex justify-between items-center mb-2">
+                <Label
+                  htmlFor="nome"
+                  className="text-sm font-semibold text-foreground tracking-tight"
+                >
+                  Nome <span className="text-destructive">*</span>
+                </Label>
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  {nome.length}/100
+                </span>
+              </div>
+              <Input
+                id="nome"
+                type="text"
+                placeholder="Projeto - Horta Automatizada"
+                value={nome}
+                onChange={(e) => {
+                  setNome(e.target.value);
+                  if (errors.nome) {
+                    setErrors((prev) => ({ ...prev, nome: undefined }));
+                  }
+                }}
+                maxLength={100}
+                className={`w-full h-11 ${errors.nome ? 'border-destructive!' : ''}`}
+                data-test="input-nome-orcamento"
+              />
+              {errors.nome && (
+                <p className="text-destructive text-xs sm:text-sm mt-1">
+                  {errors.nome}
+                </p>
+              )}
             </div>
+
+            {/* Descrição */}
             <div>
-              <Skeleton className="h-5 w-24 mb-2" />
-              <Skeleton className="w-full h-[100px]" />
+              <div className="flex justify-between items-center mb-2">
+                <Label
+                  htmlFor="descricao"
+                  className="text-sm font-semibold text-foreground tracking-tight"
+                >
+                  Descrição
+                </Label>
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  {descricao.length}/10000
+                </span>
+              </div>
+              <textarea
+                id="descricao"
+                placeholder="Desenvolvimento de uma horta automatizada por arduino."
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring/50 resize-none min-h-[100px] bg-card"
+                maxLength={10000}
+                data-test="textarea-descricao-orcamento"
+              />
             </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="p-6 space-y-4 sm:space-y-6">
-              {/* Nome */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label
-                    htmlFor="nome"
-                    className="text-sm font-semibold text-foreground tracking-tight"
-                  >
-                    Nome <span className="text-destructive">*</span>
-                  </Label>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    {nome.length}/100
-                  </span>
-                </div>
-                <Input
-                  id="nome"
-                  type="text"
-                  placeholder="Projeto - Horta Automatizada"
-                  value={nome}
-                  onChange={(e) => {
-                    setNome(e.target.value);
-                    if (errors.nome) {
-                      setErrors((prev) => ({ ...prev, nome: undefined }));
-                    }
-                  }}
-                  maxLength={100}
-                  className={`w-full h-11 ${errors.nome ? 'border-destructive!' : ''}`}
-                  data-test="input-nome-orcamento"
-                />
-                {errors.nome && (
-                  <p className="text-destructive text-xs sm:text-sm mt-1">
-                    {errors.nome}
-                  </p>
+
+            {/* Itens do orçamento */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <Label className="text-sm font-semibold text-foreground tracking-tight">
+                  Itens do orçamento
+                </Label>
+                <Button
+                  type="button"
+                  onClick={handleAdicionarItem}
+                  className="h-9 flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm px-3"
+                  data-test="botao-adicionar-item"
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar item
+                </Button>
+              </div>
+
+              {/* Tabela */}
+              <div
+                className="border rounded-t-md bg-card overflow-hidden"
+                data-test="tabela-itens-orcamento"
+              >
+                {isLoadingItems ? (
+                  <div className="py-8 flex flex-col items-center justify-center">
+                    <div className="relative w-8 h-8">
+                      <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                      <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+                    </div>
+                    <p className="mt-2 text-muted-foreground text-xs">
+                      Carregando itens...
+                    </p>
+                  </div>
+                ) : itens.length === 0 ? (
+                  <div className="py-8 flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
+                    Nenhum item adicionado.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full caption-bottom text-xs min-w-[720px]">
+                      <colgroup>
+                        <col style={{ width: '18%' }} />
+                        <col style={{ width: '26%' }} />
+                        <col style={{ width: '16%' }} />
+                        <col style={{ width: '16%' }} />
+                        <col style={{ width: '14%' }} />
+                        <col style={{ width: '10%' }} />
+                      </colgroup>
+                      <thead className="bg-muted shadow-sm">
+                        <tr className="bg-muted border-b">
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            NOME
+                          </th>
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            FORNECEDOR
+                          </th>
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            QUANTIDADE
+                          </th>
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            VALOR UNITÁRIO
+                          </th>
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            SUBTOTAL
+                          </th>
+                          <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
+                            AÇÕES
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {itens.map((comp, index) => (
+                          <tr key={index} className="hover:bg-muted border-b">
+                            <td className="px-3 py-2">
+                              <span
+                                className="text-xs font-semibold text-foreground truncate block"
+                                title={comp.nome}
+                              >
+                                {comp.nome}
+                              </span>
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <div className="relative" data-dropdown>
+                                <button
+                                  ref={(el) => {
+                                    fornecedorButtonRefs.current[index] = el;
+                                  }}
+                                  type="button"
+                                  onClick={() => {
+                                    if (isFornecedorDropdownOpen === index) {
+                                      setIsFornecedorDropdownOpen(null);
+                                      setDropdownPosition(null);
+                                      setFornecedorPesquisa('');
+                                    } else {
+                                      handleOpenFornecedorDropdown(index);
+                                    }
+                                  }}
+                                  className="w-full h-9 flex items-center justify-between px-2 bg-card border border-border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 text-xs cursor-pointer"
+                                  data-test="select-fornecedor"
+                                >
+                                  <span
+                                    className={`truncate ${comp.fornecedor_nome ? 'text-foreground' : 'text-muted-foreground'}`}
+                                  >
+                                    {comp.fornecedor_nome || 'Selecione'}
+                                  </span>
+                                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1 shrink-0" />
+                                </button>
+                              </div>
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleQuantidadeChange(index, -1)
+                                  }
+                                  className="p-1 hover:bg-muted rounded cursor-pointer"
+                                  disabled={comp.quantidade <= 1}
+                                  data-test="botao-decrementar"
+                                >
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <input
+                                  type="number"
+                                  value={comp.quantidade}
+                                  onChange={(e) => {
+                                    const novosItens = [...itens];
+                                    novosItens[index].quantidade = Math.max(
+                                      1,
+                                      parseInt(e.target.value) || 1,
+                                    );
+                                    novosItens[index].subtotal =
+                                      novosItens[index].quantidade *
+                                      novosItens[index].valor_unitario;
+                                    setItens(novosItens);
+                                  }}
+                                  className="w-12 px-1 py-1 text-center border border-border rounded-md"
+                                  min="1"
+                                  data-test="input-quantidade"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleQuantidadeChange(index, 1)
+                                  }
+                                  className="p-1 hover:bg-muted rounded cursor-pointer"
+                                  data-test="botao-incrementar"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <input
+                                type="number"
+                                value={comp.valor_unitario}
+                                onChange={(e) =>
+                                  handleValorUnitarioChange(
+                                    index,
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full h-9 text-center border border-border rounded-md"
+                                placeholder="R$0,00"
+                                step="0.01"
+                                min="0"
+                                data-test="input-valor-unitario"
+                              />
+                            </td>
+
+                            <td
+                              className="px-3 py-2 text-center text-foreground font-medium"
+                              data-test="subtotal"
+                            >
+                              R${comp.subtotal.toFixed(2)}
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <div className="flex justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoverItem(index)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                                  title="Remover item"
+                                  data-test="botao-remover-item"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
 
-              {/* Descrição */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label
-                    htmlFor="descricao"
-                    className="text-sm font-semibold text-foreground tracking-tight"
-                  >
-                    Descrição
-                  </Label>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    {descricao.length}/10000
-                  </span>
-                </div>
-                <textarea
-                  id="descricao"
-                  placeholder="Desenvolvimento de uma horta automatizada por arduino."
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring/50 resize-none min-h-[100px] bg-card"
-                  maxLength={10000}
-                  data-test="textarea-descricao-orcamento"
-                />
-              </div>
-
-              {/* Itens do orçamento */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label className="text-sm font-semibold text-foreground tracking-tight">
-                    Itens do orçamento
-                  </Label>
-                  <Button
-                    type="button"
-                    onClick={handleAdicionarItem}
-                    className="h-9 flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm px-3"
-                    data-test="botao-adicionar-item"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Adicionar item
-                  </Button>
-                </div>
-
-                {/* Tabela */}
+              {/* Total */}
+              <div className="border-x border-b rounded-b-md bg-muted px-4 py-2">
                 <div
-                  className="border rounded-t-md bg-card overflow-hidden"
-                  data-test="tabela-itens-orcamento"
+                  className="text-center font-semibold text-foreground text-sm"
+                  data-test="total-orcamento"
                 >
-                  {isLoadingItems ? (
-                    <div className="py-8 flex flex-col items-center justify-center">
-                      <div className="relative w-8 h-8">
-                        <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                        <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
-                      </div>
-                      <p className="mt-2 text-muted-foreground text-xs">
-                        Carregando itens...
-                      </p>
-                    </div>
-                  ) : itens.length === 0 ? (
-                    <div className="py-8 flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
-                      Nenhum item adicionado.
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full caption-bottom text-xs min-w-[720px]">
-                        <colgroup>
-                          <col style={{ width: '18%' }} />
-                          <col style={{ width: '26%' }} />
-                          <col style={{ width: '16%' }} />
-                          <col style={{ width: '16%' }} />
-                          <col style={{ width: '14%' }} />
-                          <col style={{ width: '10%' }} />
-                        </colgroup>
-                        <thead className="bg-muted shadow-sm">
-                          <tr className="bg-muted border-b">
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              NOME
-                            </th>
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              FORNECEDOR
-                            </th>
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              QUANTIDADE
-                            </th>
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              VALOR UNITÁRIO
-                            </th>
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              SUBTOTAL
-                            </th>
-                            <th className="font-semibold text-foreground bg-muted text-center px-3 py-2">
-                              AÇÕES
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {itens.map((comp, index) => (
-                            <tr key={index} className="hover:bg-muted border-b">
-                              <td className="px-3 py-2">
-                                <span
-                                  className="text-xs font-semibold text-foreground truncate block"
-                                  title={comp.nome}
-                                >
-                                  {comp.nome}
-                                </span>
-                              </td>
-
-                              <td className="px-3 py-2">
-                                <div className="relative" data-dropdown>
-                                  <button
-                                    ref={(el) => {
-                                      fornecedorButtonRefs.current[index] = el;
-                                    }}
-                                    type="button"
-                                    onClick={() => {
-                                      if (isFornecedorDropdownOpen === index) {
-                                        setIsFornecedorDropdownOpen(null);
-                                        setDropdownPosition(null);
-                                        setFornecedorPesquisa('');
-                                      } else {
-                                        handleOpenFornecedorDropdown(index);
-                                      }
-                                    }}
-                                    className="w-full h-9 flex items-center justify-between px-2 bg-card border border-border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 text-xs cursor-pointer"
-                                    data-test="select-fornecedor"
-                                  >
-                                    <span
-                                      className={`truncate ${comp.fornecedor_nome ? 'text-foreground' : 'text-muted-foreground'}`}
-                                    >
-                                      {comp.fornecedor_nome || 'Selecione'}
-                                    </span>
-                                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1 shrink-0" />
-                                  </button>
-                                </div>
-                              </td>
-
-                              <td className="px-3 py-2">
-                                <div className="flex items-center justify-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleQuantidadeChange(index, -1)
-                                    }
-                                    className="p-1 hover:bg-muted rounded cursor-pointer"
-                                    disabled={comp.quantidade <= 1}
-                                    data-test="botao-decrementar"
-                                  >
-                                    <Minus className="w-3.5 h-3.5" />
-                                  </button>
-                                  <input
-                                    type="number"
-                                    value={comp.quantidade}
-                                    onChange={(e) => {
-                                      const novosItens = [...itens];
-                                      novosItens[index].quantidade = Math.max(
-                                        1,
-                                        parseInt(e.target.value) || 1,
-                                      );
-                                      novosItens[index].subtotal =
-                                        novosItens[index].quantidade *
-                                        novosItens[index].valor_unitario;
-                                      setItens(novosItens);
-                                    }}
-                                    className="w-12 px-1 py-1 text-center border border-border rounded-md"
-                                    min="1"
-                                    data-test="input-quantidade"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleQuantidadeChange(index, 1)
-                                    }
-                                    className="p-1 hover:bg-muted rounded cursor-pointer"
-                                    data-test="botao-incrementar"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </td>
-
-                              <td className="px-3 py-2">
-                                <input
-                                  type="number"
-                                  value={comp.valor_unitario}
-                                  onChange={(e) =>
-                                    handleValorUnitarioChange(
-                                      index,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="w-full h-9 text-center border border-border rounded-md"
-                                  placeholder="R$0,00"
-                                  step="0.01"
-                                  min="0"
-                                  data-test="input-valor-unitario"
-                                />
-                              </td>
-
-                              <td
-                                className="px-3 py-2 text-center text-foreground font-medium"
-                                data-test="subtotal"
-                              >
-                                R${comp.subtotal.toFixed(2)}
-                              </td>
-
-                              <td className="px-3 py-2">
-                                <div className="flex justify-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoverItem(index)}
-                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                                    title="Remover item"
-                                    data-test="botao-remover-item"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-
-                {/* Total */}
-                <div className="border-x border-b rounded-b-md bg-muted px-4 py-2">
-                  <div
-                    className="text-center font-semibold text-foreground text-sm"
-                    data-test="total-orcamento"
-                  >
-                    Total: R${calcularTotal().toFixed(2)}
-                  </div>
+                  Total: R${calcularTotal().toFixed(2)}
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  disabled={isSaving || carregando}
-                  className="h-11 flex-1 cursor-pointer"
-                  data-test="botao-cancelar"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSaving || carregando}
-                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#306FCC' }}
-                  data-test="botao-salvar"
-                >
-                  {isSaving ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </div>
+          {/* Footer com ações */}
+          <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isSaving || carregando}
+                className="h-11 flex-1 cursor-pointer"
+                data-test="botao-cancelar"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving || carregando}
+                className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
+                style={{ backgroundColor: '#0f1419' }}
+                data-test="botao-salvar"
+              >
+                {isSaving ? 'Salvando...' : 'Salvar'}
+              </Button>
             </div>
-          </form>
-        )}
-      </div>
+          </div>
+        </form>
+      )}
 
       {/* Modal de Seleção de Itens */}
       <ModalSelecionarItem
@@ -820,7 +806,7 @@ export default function ModalEditarOrcamento({
                 placeholder="Pesquisar..."
                 value={fornecedorPesquisa}
                 onChange={(e) => setFornecedorPesquisa(e.target.value)}
-                className="w-full h-9 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+                className="w-full h-9 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50"
                 onClick={(e) => e.stopPropagation()}
                 data-test="dropdown-search-input"
               />
@@ -829,8 +815,8 @@ export default function ModalEditarOrcamento({
               {isLoadingFornecedores ? (
                 <div className="flex justify-center py-4">
                   <div className="relative w-6 h-6">
-                    <div className="absolute inset-0 rounded-full border-2 border-[#306FCC]/15"></div>
-                    <div className="absolute inset-0 rounded-full border-2 border-[#306FCC] border-r-transparent animate-spin"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-[#0f1419]/15"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-[#0f1419] border-r-transparent animate-spin"></div>
                   </div>
                 </div>
               ) : fornecedoresError ? (
@@ -861,8 +847,8 @@ export default function ModalEditarOrcamento({
                   {isFetchingNextPageFornecedores && (
                     <div className="flex justify-center py-2">
                       <div className="relative w-4 h-4">
-                        <div className="absolute inset-0 rounded-full border-2 border-[#306FCC]/15"></div>
-                        <div className="absolute inset-0 rounded-full border-2 border-[#306FCC] border-r-transparent animate-spin"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#0f1419]/15"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#0f1419] border-r-transparent animate-spin"></div>
                       </div>
                     </div>
                   )}
@@ -876,7 +862,7 @@ export default function ModalEditarOrcamento({
           </div>,
           document.body,
         )}
-    </div>
+    </ModalShell>
   );
 
   return typeof window !== 'undefined'

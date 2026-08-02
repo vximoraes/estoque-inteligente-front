@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
@@ -122,8 +123,6 @@ export default function ModalSelecionarItem({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   const itensLista = itensData?.pages
     ? itensData.pages.flatMap((page) => page.data.docs)
     : [];
@@ -169,153 +168,137 @@ export default function ModalSelecionarItem({
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const modalContent = (
     <>
-      <div
-        className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-        style={{
-          zIndex: 99999,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }}
-        onClick={handleBackdropClick}
+      <ModalShell
+        isOpen={isOpen}
+        onClose={onClose}
         data-test="modal-selecionar-itens"
+        zIndex={99999}
+        contentClassName="max-w-lg max-h-[80vh] flex flex-col overflow-visible"
       >
-        <div
-          className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[80vh] flex flex-col overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Botão de fechar */}
-          <div className="relative p-6 pb-0">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
-              title="Fechar"
+        {/* Botão de fechar */}
+        <div className="relative p-6 pb-0">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            title="Fechar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Header e Barra de pesquisa */}
+        <div className="px-6 pb-6 space-y-6">
+          <div className="text-center pt-4">
+            <h2 className="text-xl font-semibold text-foreground mb-1">
+              {multiSelect ? 'Selecionar Itens' : 'Selecionar Item'}
+            </h2>
+            {multiSelect && tempSelectedIds.size > 0 && (
+              <p
+                className="text-sm text-muted-foreground mt-1"
+                data-test="contador-selecionados"
+              >
+                {tempSelectedIds.size} item
+                {tempSelectedIds.size > 1 ? 's' : ''} selecionado
+                {tempSelectedIds.size > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Pesquisar itens..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-11 pl-10"
+                data-test="modal-search-input"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 px-4 flex items-center gap-2 cursor-pointer shrink-0"
+              onClick={() => setIsFiltrosModalOpen(true)}
+              data-test="modal-selecionar-item-filtros-button"
             >
-              <X size={20} />
-            </button>
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filtros</span>
+            </Button>
           </div>
 
-          {/* Header e Barra de pesquisa */}
-          <div className="px-6 pb-6 space-y-6">
-            <div className="text-center pt-4">
-              <h2 className="text-xl font-semibold text-foreground mb-1">
-                {multiSelect ? 'Selecionar Itens' : 'Selecionar Item'}
-              </h2>
-              {multiSelect && tempSelectedIds.size > 0 && (
-                <p
-                  className="text-sm text-muted-foreground mt-1"
-                  data-test="contador-selecionados"
-                >
-                  {tempSelectedIds.size} item
-                  {tempSelectedIds.size > 1 ? 's' : ''} selecionado
-                  {tempSelectedIds.size > 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Pesquisar itens..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-11 pl-10"
-                  data-test="modal-search-input"
-                />
+          {/* Grid de itens */}
+          <div className="overflow-y-auto max-h-[45vh] -mx-6 px-6">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <PulseLoader color="#0f1419" size={12} />
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 px-4 flex items-center gap-2 cursor-pointer shrink-0"
-                onClick={() => setIsFiltrosModalOpen(true)}
-                data-test="modal-selecionar-item-filtros-button"
-              >
-                <Filter className="w-4 h-4" />
-                <span className="hidden sm:inline">Filtros</span>
-              </Button>
-            </div>
-
-            {/* Grid de itens */}
-            <div className="overflow-y-auto max-h-[45vh] -mx-6 px-6">
-              {isLoading ? (
-                <div className="flex justify-center items-center py-12">
-                  <PulseLoader color="#306FCC" size={12} />
+            ) : itensLista.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 gap-4" data-test="itens-grid">
+                  {itensLista.map((item, idx) => (
+                    <ItemCardSimples
+                      key={item._id}
+                      id={item._id}
+                      nome={item.nome}
+                      categoria={item.categoria.nome}
+                      imagem={item.imagem}
+                      onClick={handleCardClick}
+                      isSelected={
+                        multiSelect
+                          ? tempSelectedIds.has(item._id)
+                          : tempSelectedId === item._id
+                      }
+                      dataTestId={`item-selecao-card-${idx}`}
+                    />
+                  ))}
                 </div>
-              ) : itensLista.length > 0 ? (
-                <>
-                  <div
-                    className="grid grid-cols-2 gap-4"
-                    data-test="itens-grid"
-                  >
-                    {itensLista.map((item, idx) => (
-                      <ItemCardSimples
-                        key={item._id}
-                        id={item._id}
-                        nome={item.nome}
-                        categoria={item.categoria.nome}
-                        imagem={item.imagem}
-                        onClick={handleCardClick}
-                        isSelected={
-                          multiSelect
-                            ? tempSelectedIds.has(item._id)
-                            : tempSelectedId === item._id
-                        }
-                        dataTestId={`item-selecao-card-${idx}`}
-                      />
-                    ))}
+                <div ref={observerTarget} className="h-4 mt-4" />
+                {isFetchingNextPage && (
+                  <div className="flex justify-center py-4">
+                    <PulseLoader color="#0f1419" size={8} />
                   </div>
-                  <div ref={observerTarget} className="h-4 mt-4" />
-                  {isFetchingNextPage && (
-                    <div className="flex justify-center py-4">
-                      <PulseLoader color="#306FCC" size={8} />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <p>Nenhum item encontrado</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Footer com botões */}
-          <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="h-11 flex-1 cursor-pointer"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={handleConfirmar}
-                disabled={
-                  multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId
-                }
-                className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                style={{ backgroundColor: '#306FCC' }}
-                data-test="botao-confirmar-selecao"
-              >
-                {multiSelect && tempSelectedIds.size > 0
-                  ? `Adicionar ${tempSelectedIds.size} item${tempSelectedIds.size > 1 ? 's' : ''}`
-                  : 'Confirmar'}
-              </Button>
-            </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <p>Nenhum item encontrado</p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+
+        {/* Footer com botões */}
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="h-11 flex-1 cursor-pointer"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmar}
+              disabled={
+                multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId
+              }
+              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: '#0f1419' }}
+              data-test="botao-confirmar-selecao"
+            >
+              {multiSelect && tempSelectedIds.size > 0
+                ? `Adicionar ${tempSelectedIds.size} item${tempSelectedIds.size > 1 ? 's' : ''}`
+                : 'Confirmar'}
+            </Button>
+          </div>
+        </div>
+      </ModalShell>
 
       <ModalFiltros
         isOpen={isFiltrosModalOpen}

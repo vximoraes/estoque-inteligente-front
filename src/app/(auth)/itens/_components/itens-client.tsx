@@ -160,7 +160,7 @@ export default function ItensPageContent({
 
   const handleCloseEditarModal = () => {
     setIsEditarModalOpen(false);
-    setEditarItemId(null);
+    setTimeout(() => setEditarItemId(null), 300);
   };
 
   const handleEditarSuccess = () => {
@@ -191,7 +191,7 @@ export default function ItensPageContent({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedItemId(null);
+    setTimeout(() => setSelectedItemId(null), 300);
   };
 
   const handleOpenFiltrosModal = () => {
@@ -219,7 +219,7 @@ export default function ItensPageContent({
 
   const handleCloseEntradaModal = () => {
     setIsEntradaModalOpen(false);
-    setEntradaItemId(null);
+    setTimeout(() => setEntradaItemId(null), 300);
   };
 
   const handleEntradaSuccess = () => {
@@ -240,7 +240,7 @@ export default function ItensPageContent({
 
   const handleCloseSaidaModal = () => {
     setIsSaidaModalOpen(false);
-    setSaidaItemId(null);
+    setTimeout(() => setSaidaItemId(null), 300);
   };
 
   const handleEmprestar = (id: string) => {
@@ -250,7 +250,7 @@ export default function ItensPageContent({
 
   const handleCloseEmprestimoModal = () => {
     setIsEmprestimoModalOpen(false);
-    setEmprestimoItemId(null);
+    setTimeout(() => setEmprestimoItemId(null), 300);
   };
 
   const handleEmprestimoSuccess = () => {
@@ -278,7 +278,7 @@ export default function ItensPageContent({
 
   const handleCloseExcluirModal = () => {
     setIsExcluirModalOpen(false);
-    setExcluirItemId(null);
+    setTimeout(() => setExcluirItemId(null), 300);
   };
 
   const handleExcluirSuccess = async () => {
@@ -352,7 +352,7 @@ export default function ItensPageContent({
                 placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#0f1419]/35 focus-visible:border-[#0f1419]"
                 data-test="search-input"
               />
             </div>
@@ -367,7 +367,7 @@ export default function ItensPageContent({
             </Button>
             <Button
               className="h-11 px-4 flex items-center gap-2 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
+              style={{ backgroundColor: '#0f1419' }}
               data-test="adicionar-button"
               onClick={handleAdicionarClick}
             >
@@ -439,8 +439,8 @@ export default function ItensPageContent({
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando itens...
@@ -569,7 +569,7 @@ export default function ItensPageContent({
                           : 'hover:bg-muted text-foreground'
                       } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
                       style={
-                        isActive ? { backgroundColor: '#306FCC' } : undefined
+                        isActive ? { backgroundColor: '#0f1419' } : undefined
                       }
                       data-test={`page-${pageNum}-button`}
                     >

@@ -123,7 +123,7 @@ export default function EmprestimosPageContent({
               placeholder="Pesquisar por item, solicitante ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#0f1419]/35 focus-visible:border-[#0f1419]"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function EmprestimosPageContent({
 
           <Button
             className="h-11 px-4 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            style={{ backgroundColor: '#0f1419' }}
             data-test="adicionar-button"
             onClick={() => setIsCadastrarModalOpen(true)}
           >
@@ -182,8 +182,8 @@ export default function EmprestimosPageContent({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-gray-600 font-medium">
                 Carregando empréstimos...
@@ -263,7 +263,7 @@ export default function EmprestimosPageContent({
                                 setEditarEmprestimo(emp);
                                 setIsEditarModalOpen(true);
                               }}
-                              className="p-1 sm:p-2 rounded-md transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-blue-50 cursor-pointer"
+                              className="p-1 sm:p-2 rounded-md transition-colors duration-200 text-gray-700 hover:text-[#0f1419] hover:bg-[#0f1419]/10 cursor-pointer"
                               title="Editar empréstimo"
                             >
                               <Pencil className="w-4 h-4" />
@@ -373,7 +373,7 @@ export default function EmprestimosPageContent({
           isOpen={isDetalhesModalOpen}
           onClose={() => {
             setIsDetalhesModalOpen(false);
-            setDetalhesEmprestimo(null);
+            setTimeout(() => setDetalhesEmprestimo(null), 300);
           }}
           emprestimo={detalhesEmprestimo}
         />
@@ -384,7 +384,7 @@ export default function EmprestimosPageContent({
           isOpen={isEditarModalOpen}
           onClose={() => {
             setIsEditarModalOpen(false);
-            setEditarEmprestimo(null);
+            setTimeout(() => setEditarEmprestimo(null), 300);
           }}
           emprestimo={editarEmprestimo}
           onSuccess={() => refetch()}
@@ -396,7 +396,7 @@ export default function EmprestimosPageContent({
           isOpen={isDevolverModalOpen}
           onClose={() => {
             setIsDevolverModalOpen(false);
-            setDevolverEmprestimo(null);
+            setTimeout(() => setDevolverEmprestimo(null), 300);
           }}
           emprestimoId={devolverEmprestimo._id}
           itemNome={devolverEmprestimo.item?.nome || 'Item'}
@@ -410,7 +410,7 @@ export default function EmprestimosPageContent({
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setExcluirEmprestimo(null);
+            setTimeout(() => setExcluirEmprestimo(null), 300);
           }}
           emprestimoId={excluirEmprestimo._id}
           itemNome={excluirEmprestimo.item?.nome || 'Item'}

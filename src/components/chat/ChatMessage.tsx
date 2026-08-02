@@ -86,7 +86,7 @@ export function ChatMessage({
               [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:border-collapse
               prose-th:border prose-th:border-border prose-th:bg-muted prose-th:px-2 prose-th:py-1 prose-th:font-semibold prose-th:whitespace-nowrap
               prose-td:border prose-td:border-border prose-td:px-2 prose-td:py-1 prose-td:whitespace-nowrap
-              prose-code:text-[#306FCC] prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+              prose-code:text-[#0f1419] prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
               prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded prose-pre:text-xs prose-pre:overflow-x-auto
               prose-strong:font-semibold prose-strong:text-foreground
               prose-a:text-[#306FCC] prose-a:no-underline hover:prose-a:underline

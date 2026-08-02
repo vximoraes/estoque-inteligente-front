@@ -356,7 +356,7 @@ function RelatorioOrcamentosPageContent() {
               placeholder="Pesquisar orçamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#0f1419]/35 focus-visible:border-[#0f1419]"
               data-test="search-input"
             />
           </div>
@@ -376,7 +376,7 @@ function RelatorioOrcamentosPageContent() {
                 ? 'hover:opacity-90 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            style={selectedItems.size > 0 ? { backgroundColor: '#0f1419' } : {}}
             data-test="exportar-button"
             onClick={handleOpenExportarModal}
             title={
@@ -511,8 +511,8 @@ function RelatorioOrcamentosPageContent() {
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando orçamentos...
@@ -537,7 +537,7 @@ function RelatorioOrcamentosPageContent() {
                             }
                           }}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 cursor-pointer"
+                          className="w-4 h-4 accent-[#0f1419] cursor-pointer"
                           title={
                             isAllSelected
                               ? 'Desmarcar todos'
@@ -601,7 +601,7 @@ function RelatorioOrcamentosPageContent() {
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
                             onChange={() => handleSelectItem(orcamento._id)}
-                            className="w-4 h-4 cursor-pointer"
+                            className="w-4 h-4 accent-[#0f1419] cursor-pointer"
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
@@ -743,8 +743,8 @@ export default function RelatorioOrcamentosPage() {
       fallback={
         <div className="w-full h-screen flex flex-col items-center justify-center">
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
           </div>
           <p className="mt-4 text-muted-foreground font-medium">
             Carregando...

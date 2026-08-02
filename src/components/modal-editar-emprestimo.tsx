@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { put, patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { Emprestimo } from '@/types/emprestimos';
 
@@ -132,167 +133,161 @@ export default function ModalEditarEmprestimo({
     editarMutation.mutate();
   };
 
-  if (!isOpen) return null;
-
   const isPending = editarMutation.isPending;
 
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{ zIndex: 99999, backgroundColor: 'rgba(0,0,0,0.5)' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndex={99999}
+      contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
     >
-      <div
-        className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
-          >
-            <X size={20} className="text-muted-foreground" />
-          </button>
-          <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground mb-1">
-              Editar Empréstimo
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {emprestimo.item?.nome || 'Item'}
-            </p>
+      {/* Header */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
+        >
+          <X size={20} className="text-muted-foreground" />
+        </button>
+        <div className="text-center pt-4 px-8">
+          <h2 className="text-xl font-semibold text-foreground mb-1">
+            Editar Empréstimo
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {emprestimo.item?.nome || 'Item'}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-5">
+        {emprestimo.quantidade_aberta <= 0 && (
+          <div className="bg-muted/50 border border-border rounded-sm p-3 text-sm text-muted-foreground">
+            Este empréstimo já foi devolvido
+            {emprestimo.data_devolucao_total
+              ? ` em ${new Date(emprestimo.data_devolucao_total).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+              : ''}
+            .
           </div>
+        )}
+
+        {/* Solicitante */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Solicitante <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="text"
+            value={solicitante}
+            onChange={(e) => setSolicitante(e.target.value)}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+          />
         </div>
 
-        <div className="p-6 space-y-5">
-          {emprestimo.quantidade_aberta <= 0 && (
-            <div className="bg-muted/50 border border-border rounded-sm p-3 text-sm text-muted-foreground">
-              Este empréstimo já foi devolvido
-              {emprestimo.data_devolucao_total
-                ? ` em ${new Date(emprestimo.data_devolucao_total).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
-                : ''}
-              .
-            </div>
-          )}
+        {/* Data prevista */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Data prevista de devolução
+          </label>
+          <input
+            type="datetime-local"
+            value={dataPrevista}
+            onChange={(e) => setDataPrevista(e.target.value)}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+          />
+        </div>
 
-          {/* Solicitante */}
+        {/* Observações do empréstimo */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Observações do empréstimo
+          </label>
+          <textarea
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
+            maxLength={500}
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            placeholder="Observações opcionais"
+          />
+        </div>
+
+        {emprestimo.quantidade_devolvida > 0 && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
-              Solicitante <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              value={solicitante}
-              onChange={(e) => setSolicitante(e.target.value)}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-            />
-          </div>
-
-          {/* Data prevista */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Data prevista de devolução
-            </label>
-            <input
-              type="datetime-local"
-              value={dataPrevista}
-              onChange={(e) => setDataPrevista(e.target.value)}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-            />
-          </div>
-
-          {/* Observações do empréstimo */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Observações do empréstimo
+              Observações da devolução
             </label>
             <textarea
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
+              value={observacoesDevolucao}
+              onChange={(e) => setObservacoesDevolucao(e.target.value)}
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
               placeholder="Observações opcionais"
             />
           </div>
+        )}
 
-          {emprestimo.quantidade_devolvida > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Observações da devolução
-              </label>
-              <textarea
-                value={observacoesDevolucao}
-                onChange={(e) => setObservacoesDevolucao(e.target.value)}
-                rows={3}
-                maxLength={500}
-                className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-                placeholder="Observações opcionais"
-              />
-            </div>
-          )}
+        {/* Botão salvar */}
+        <Button
+          onClick={handleSalvar}
+          className="h-11 w-full text-white cursor-pointer hover:opacity-90"
+          style={{ backgroundColor: '#0f1419' }}
+          disabled={isPending}
+        >
+          {isPending ? 'Salvando...' : 'Salvar Alterações'}
+        </Button>
 
-          {/* Botão salvar */}
-          <Button
-            onClick={handleSalvar}
-            className="h-11 w-full text-white cursor-pointer hover:opacity-90"
-            style={{ backgroundColor: '#306FCC' }}
-            disabled={isPending}
-          >
-            {isPending ? 'Salvando...' : 'Salvar Alterações'}
-          </Button>
+        <Button
+          variant="outline"
+          onClick={onClose}
+          className="h-11 w-full cursor-pointer"
+          disabled={isPending}
+        >
+          Cancelar
+        </Button>
 
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="h-11 w-full cursor-pointer"
-            disabled={isPending}
-          >
-            Cancelar
-          </Button>
-
-          {emprestimo.quantidade_devolvida > 0 && (
-            <div className="pt-4 border-t">
-              {!showConfirmDesfazer ? (
-                <Button
-                  variant="outline"
-                  onClick={() => setShowConfirmDesfazer(true)}
-                  className="h-11 w-full cursor-pointer text-destructive border-destructive/40 hover:bg-destructive/10"
-                >
-                  Desfazer devolução
-                </Button>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Isso vai zerar a quantidade devolvida e devolver o estoque
-                    para o estado de aberto. Tem certeza?
-                  </p>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowConfirmDesfazer(false)}
-                      className="h-11 flex-1 cursor-pointer"
-                      disabled={desfazerDevolucaoMutation.isPending}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={() => desfazerDevolucaoMutation.mutate()}
-                      className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
-                      disabled={desfazerDevolucaoMutation.isPending}
-                    >
-                      {desfazerDevolucaoMutation.isPending
-                        ? 'Desfazendo...'
-                        : 'Confirmar'}
-                    </Button>
-                  </div>
+        {emprestimo.quantidade_devolvida > 0 && (
+          <div className="pt-4 border-t">
+            {!showConfirmDesfazer ? (
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDesfazer(true)}
+                className="h-11 w-full cursor-pointer text-destructive border-destructive/40 hover:bg-destructive/10"
+              >
+                Desfazer devolução
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground text-center">
+                  Isso vai zerar a quantidade devolvida e devolver o estoque
+                  para o estado de aberto. Tem certeza?
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowConfirmDesfazer(false)}
+                    className="h-11 flex-1 cursor-pointer"
+                    disabled={desfazerDevolucaoMutation.isPending}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={() => desfazerDevolucaoMutation.mutate()}
+                    className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
+                    disabled={desfazerDevolucaoMutation.isPending}
+                  >
+                    {desfazerDevolucaoMutation.isPending
+                      ? 'Desfazendo...'
+                      : 'Confirmar'}
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </ModalShell>
   );
 
   return createPortal(modalContent, document.body);

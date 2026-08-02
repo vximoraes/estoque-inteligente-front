@@ -29,7 +29,7 @@ export default function Card({
   }, []);
 
   return (
-    <div className="bg-card rounded-sm w-full border border-border overflow-hidden transition-colors hover:border-[#306FCC]/40">
+    <div className="bg-card rounded-sm w-full border border-border overflow-hidden transition-colors hover:border-[#0f1419]/40">
       <div
         ref={cardRef}
         className={

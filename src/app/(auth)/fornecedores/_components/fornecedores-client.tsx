@@ -201,7 +201,7 @@ export default function PageFornecedoresContent({
           </div>
           <Button
             className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            style={{ backgroundColor: '#0f1419' }}
             onClick={handleAdicionarClick}
           >
             <Plus className="w-4 h-4" />
@@ -219,8 +219,8 @@ export default function PageFornecedoresContent({
           {isLoading || isRefetchingAfterDelete ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-gray-600 font-medium">
                 Carregando fornecedores...
@@ -262,8 +262,8 @@ export default function PageFornecedoresContent({
                             <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
                               <div className="flex flex-col items-center">
                                 <div className="relative w-8 h-8">
-                                  <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                                  <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                                  <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
+                                  <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
                                 </div>
                                 <p className="mt-2 text-sm text-gray-600">
                                   Atualizando...
@@ -318,7 +318,7 @@ export default function PageFornecedoresContent({
                                 e.stopPropagation();
                                 handleEdit(fornecedor._id);
                               }}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-gray-900 hover:text-[#0f1419] hover:bg-[#0f1419]/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar fornecedor"
                             >
                               <Pencil className="w-4 h-4" />
@@ -390,7 +390,7 @@ export default function PageFornecedoresContent({
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setExcluirFornecedorId(null);
+            setTimeout(() => setExcluirFornecedorId(null), 300);
           }}
           onSuccess={handleExcluirSuccess}
           fornecedorId={excluirFornecedorId}
@@ -405,7 +405,7 @@ export default function PageFornecedoresContent({
           isOpen={isDetalhesModalOpen}
           onClose={() => {
             setIsDetalhesModalOpen(false);
-            setDetalhesFornecedorId(null);
+            setTimeout(() => setDetalhesFornecedorId(null), 300);
           }}
           fornecedorId={detalhesFornecedorId}
         />

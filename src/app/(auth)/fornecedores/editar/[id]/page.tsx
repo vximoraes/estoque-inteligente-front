@@ -267,7 +267,7 @@ export default function EditarFornecedorPage() {
                   {...register('descricao')}
                   maxLength={200}
                   disabled={isSubmitting}
-                  className="w-full flex-1 px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[120px]"
+                  className="w-full flex-1 px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f1419] focus:border-transparent resize-none min-h-[120px]"
                 />
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function EditarFornecedorPage() {
               <Button
                 type="submit"
                 className="h-11 min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
-                style={{ backgroundColor: '#306FCC' }}
+                style={{ backgroundColor: '#0f1419' }}
                 disabled={isSubmitting || updateFornecedorMutation.isPending}
               >
                 {isSubmitting || updateFornecedorMutation.isPending
