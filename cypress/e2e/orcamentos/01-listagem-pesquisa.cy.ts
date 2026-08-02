@@ -91,12 +91,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   beforeEach(() => {
     cy.intercept('GET', '**/orcamentos*').as('getOrcamentos');
 
-    cy.visit(`${frontendUrl}/login`);
-    cy.getByData('email-input').should('be.visible').clear().type(email);
-    cy.getByData('senha-input').should('be.visible').clear().type(senha);
-    cy.getByData('botao-entrar').click();
-
-    cy.url({ timeout: 30000 }).should('include', '/itens');
+    cy.login(email, senha);
 
     cy.visit(`${frontendUrl}/orcamentos`, { failOnStatusCode: false });
     cy.wait('@getOrcamentos', { timeout: 30000 });

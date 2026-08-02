@@ -1,14 +1,12 @@
 import path from 'path';
 
 describe('Tela de relatórios de orçamentos.', () => {
-  const frontendUrl = Cypress.env('FRONTEND_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
   const status = ['Em Estoque', 'Baixo Estoque', 'Indisponível'];
 
   beforeEach(() => {
-    cy.visit(`${frontendUrl}/`);
-    login(email, senha);
+    cy.login(email, senha);
   });
 
   describe('Validação da Tabela', () => {
@@ -559,9 +557,3 @@ describe('Tela de relatórios de orçamentos.', () => {
     });
   });
 });
-
-function login(email: string, senha: string) {
-  cy.get('#email').type(email);
-  cy.get('#senha').type(senha);
-  cy.get('button').contains('Entrar').click();
-}

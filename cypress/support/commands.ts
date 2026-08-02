@@ -46,6 +46,7 @@ Cypress.Commands.add('login', (email: string, senha: string) => {
       cy.url({ timeout: 30000 }).should('include', '/itens');
     },
     {
+      cacheAcrossSpecs: true,
       validate() {
         cy.getCookie('better-auth.session_token').should('exist');
       },
