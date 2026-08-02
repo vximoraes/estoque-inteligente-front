@@ -6,6 +6,10 @@
       "headers": {
         "Authorization": "Bearer ${ESTOQUE_MCP_TOKEN}"
       }
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
     }
   }
 }

@@ -61,9 +61,7 @@ describe('Login', () => {
     cy.getByData('senha-input').clear().type('SenhaErrada@999');
     cy.getByData('botao-entrar').click();
 
-    cy.contains(/Muitas tentativas\./, { timeout: 10000 }).should(
-      'be.visible',
-    );
+    cy.contains(/Muitas tentativas\./, { timeout: 10000 }).should('be.visible');
   });
 
   it('exibe checkbox de lembrar-me e botão de login com Google', () => {
