@@ -1,7 +1,14 @@
+import ThemeToggleButton from '@/components/theme-toggle-button';
+
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <ThemeToggleButton />
+      {children}
+    </>
+  );
 }

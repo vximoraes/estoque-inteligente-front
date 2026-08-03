@@ -6,6 +6,7 @@ import { X, ChevronDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { ApiResponse } from '@/types/itens';
 
@@ -193,8 +194,6 @@ export default function ModalCadastrarEmprestimo({
     },
   });
 
-  if (!isOpen) return null;
-
   const handleItemSelect = (item: { _id: string; nome: string }) => {
     setItemSelecionado(item);
     setIsItemDropdownOpen(false);
@@ -282,362 +281,350 @@ export default function ModalCadastrarEmprestimo({
     criarMutation.mutate(data);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
   const isPending = criarMutation.isPending;
 
   const modalContent = (
-    <div
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       data-test="modal-cadastrar-emprestimo"
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
-      style={{ zIndex: 99999, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-      onClick={handleBackdropClick}
+      zIndex={99999}
+      contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
     >
-      <div
-        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
-            title="Fechar"
-            data-test="modal-cadastrar-emprestimo-close"
-          >
-            <X size={20} />
-          </button>
-          <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground">
-              Adicionar empréstimo
-            </h2>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-5">
-          {/* Item */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Item <span className="text-destructive">*</span>
-            </label>
-            <div className="relative" data-item-dropdown>
-              <button
-                type="button"
-                onClick={() => setIsItemDropdownOpen(!isItemDropdownOpen)}
-                className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 transition-colors cursor-pointer ${
-                  errors.item ? 'border-destructive' : 'border-border'
-                }`}
-                data-test="modal-cadastrar-emprestimo-item-dropdown"
-              >
-                <span
-                  className={`truncate ${itemSelecionado ? 'text-foreground' : 'text-muted-foreground'}`}
-                >
-                  {itemSelecionado?.nome || 'Selecione um item'}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
-                    isItemDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {isItemDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                  <div className="p-2 border-b border-border bg-muted/50">
-                    <input
-                      type="text"
-                      placeholder="Pesquisar item..."
-                      value={itemPesquisa}
-                      onChange={(e) => setItemPesquisa(e.target.value)}
-                      className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-                      onClick={(e) => e.stopPropagation()}
-                      data-test="modal-cadastrar-emprestimo-item-pesquisa"
-                    />
-                  </div>
-                  <div className="overflow-y-auto">
-                    {isLoadingItens ? (
-                      <div className="px-4 py-6 text-center text-muted-foreground text-sm">
-                        Carregando...
-                      </div>
-                    ) : itens.length > 0 ? (
-                      itens.map((item) => (
-                        <button
-                          type="button"
-                          key={item._id}
-                          onClick={() =>
-                            handleItemSelect({
-                              _id: item._id,
-                              nome: item.nome,
-                            })
-                          }
-                          className={`w-full text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer truncate ${
-                            itemSelecionado?._id === item._id
-                              ? 'bg-[#306FCC]/5 text-[#306FCC] font-medium'
-                              : 'text-foreground'
-                          }`}
-                          title={item.nome}
-                        >
-                          {item.nome}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-6 text-center text-muted-foreground text-sm">
-                        Nenhum item encontrado
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.item && (
-              <p className="text-destructive text-sm mt-1">{errors.item}</p>
-            )}
-          </div>
-
-          {/* Localização */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Localização <span className="text-destructive">*</span>
-            </label>
-            <div className="relative" data-localizacao-dropdown>
-              <button
-                type="button"
-                onClick={() =>
-                  setIsLocalizacaoDropdownOpen(!isLocalizacaoDropdownOpen)
-                }
-                disabled={!itemSelecionado || isLoadingLocalizacoes}
-                className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                  errors.localizacao ? 'border-destructive' : 'border-border'
-                }`}
-                data-test="modal-cadastrar-emprestimo-localizacao-dropdown"
-              >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span
-                    className={`truncate ${localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}`}
-                  >
-                    {!itemSelecionado
-                      ? 'Selecione um item primeiro'
-                      : isLoadingLocalizacoes
-                        ? 'Carregando...'
-                        : localizacaoSelecionadaObj?.nome ||
-                          'Selecionar localização'}
-                  </span>
-                  {localizacaoSelecionada && (
-                    <span className="text-xs px-2 py-0.5 rounded shrink-0 bg-muted/50 text-foreground whitespace-nowrap">
-                      {getQuantidadeDisponivel(localizacaoSelecionada)}{' '}
-                      disponível
-                    </span>
-                  )}
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
-                    isLocalizacaoDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {isLocalizacaoDropdownOpen && !isLoadingLocalizacoes && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                  <div className="p-2 border-b border-border bg-muted/50">
-                    <input
-                      type="text"
-                      placeholder="Pesquisar localização..."
-                      value={localizacaoPesquisa}
-                      onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                      className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="overflow-y-auto">
-                    {localizacoesFiltradas.length > 0 ? (
-                      localizacoesFiltradas.map((localizacao) => (
-                        <button
-                          type="button"
-                          key={localizacao._id}
-                          onClick={() => handleLocalizacaoSelect(localizacao)}
-                          className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer ${
-                            localizacaoSelecionada === localizacao._id
-                              ? 'bg-[#306FCC]/5 text-[#306FCC] font-medium'
-                              : 'text-foreground'
-                          }`}
-                        >
-                          <span className="truncate">{localizacao.nome}</span>
-                          <span className="text-xs px-2 py-0.5 rounded shrink-0 bg-muted/50 text-foreground">
-                            {getQuantidadeDisponivel(localizacao._id)}{' '}
-                            disponível
-                          </span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-6 text-center text-muted-foreground text-sm">
-                        Nenhuma localização com estoque disponível
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.localizacao && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.localizacao}
-              </p>
-            )}
-          </div>
-
-          {/* Quantidade */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Quantidade <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Digite a quantidade"
-              value={quantidade}
-              onChange={handleQuantidadeChange}
-              maxLength={9}
-              className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 ${
-                errors.quantidade ? 'border-destructive' : 'border-border'
-              }`}
-              data-test="modal-cadastrar-emprestimo-quantidade"
-            />
-            {errors.quantidade && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.quantidade}
-              </p>
-            )}
-          </div>
-
-          {/* Solicitante */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Solicitante <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Nome do solicitante"
-              value={solicitanteNome}
-              onChange={(e) => {
-                setSolicitanteNome(e.target.value);
-                if (errors.solicitanteNome) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    solicitanteNome: undefined,
-                  }));
-                }
-              }}
-              maxLength={120}
-              className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 ${
-                errors.solicitanteNome ? 'border-destructive' : 'border-border'
-              }`}
-              data-test="modal-cadastrar-emprestimo-solicitante"
-            />
-            {errors.solicitanteNome && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.solicitanteNome}
-              </p>
-            )}
-          </div>
-
-          {/* E-mail do solicitante */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              E-mail do solicitante
-            </label>
-            <input
-              type="email"
-              placeholder="email@exemplo.com"
-              value={solicitanteEmail}
-              onChange={(e) => {
-                setSolicitanteEmail(e.target.value);
-                if (errors.solicitanteEmail) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    solicitanteEmail: undefined,
-                  }));
-                }
-              }}
-              className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 ${
-                errors.solicitanteEmail ? 'border-destructive' : 'border-border'
-              }`}
-              data-test="modal-cadastrar-emprestimo-email"
-            />
-            {errors.solicitanteEmail && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.solicitanteEmail}
-              </p>
-            )}
-          </div>
-
-          {/* Data prevista */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Data prevista de devolução
-            </label>
-            <input
-              type="datetime-local"
-              value={dataPrevista}
-              onChange={(e) => {
-                setDataPrevista(e.target.value);
-                if (errors.dataPrevista) {
-                  setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
-                }
-              }}
-              className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50 ${
-                errors.dataPrevista ? 'border-destructive' : 'border-border'
-              }`}
-              data-test="modal-cadastrar-emprestimo-data-prevista"
-            />
-            {errors.dataPrevista && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.dataPrevista}
-              </p>
-            )}
-          </div>
-
-          {/* Observações */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Observações
-            </label>
-            <textarea
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              rows={3}
-              maxLength={500}
-              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="Observações opcionais"
-              data-test="modal-cadastrar-emprestimo-observacoes"
-            />
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isPending}
-              className="h-11 flex-1 cursor-pointer"
-              data-test="modal-cadastrar-emprestimo-cancelar"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isPending}
-              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
-              data-test="modal-cadastrar-emprestimo-salvar"
-            >
-              {isPending ? 'Registrando...' : 'Registrar'}
-            </Button>
-          </div>
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+          title="Fechar"
+          data-test="modal-cadastrar-emprestimo-close"
+        >
+          <X size={20} />
+        </button>
+        <div className="text-center pt-4 px-8">
+          <h2 className="text-xl font-semibold text-foreground">
+            Adicionar empréstimo
+          </h2>
         </div>
       </div>
-    </div>
+
+      <div className="p-6 space-y-5">
+        {/* Item */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Item <span className="text-destructive">*</span>
+          </label>
+          <div className="relative" data-item-dropdown>
+            <button
+              type="button"
+              onClick={() => setIsItemDropdownOpen(!isItemDropdownOpen)}
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 transition-colors cursor-pointer ${
+                errors.item ? 'border-destructive' : 'border-border'
+              }`}
+              data-test="modal-cadastrar-emprestimo-item-dropdown"
+            >
+              <span
+                className={`truncate ${itemSelecionado ? 'text-foreground' : 'text-muted-foreground'}`}
+              >
+                {itemSelecionado?.nome || 'Selecione um item'}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
+                  isItemDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isItemDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                <div className="p-2 border-b border-border bg-muted/50">
+                  <input
+                    type="text"
+                    placeholder="Pesquisar item..."
+                    value={itemPesquisa}
+                    onChange={(e) => setItemPesquisa(e.target.value)}
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+                    onClick={(e) => e.stopPropagation()}
+                    data-test="modal-cadastrar-emprestimo-item-pesquisa"
+                  />
+                </div>
+                <div className="overflow-y-auto">
+                  {isLoadingItens ? (
+                    <div className="px-4 py-6 text-center text-muted-foreground text-sm">
+                      Carregando...
+                    </div>
+                  ) : itens.length > 0 ? (
+                    itens.map((item) => (
+                      <button
+                        type="button"
+                        key={item._id}
+                        onClick={() =>
+                          handleItemSelect({
+                            _id: item._id,
+                            nome: item.nome,
+                          })
+                        }
+                        className={`w-full text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer truncate ${
+                          itemSelecionado?._id === item._id
+                            ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
+                            : 'text-foreground'
+                        }`}
+                        title={item.nome}
+                      >
+                        {item.nome}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-muted-foreground text-sm">
+                      Nenhum item encontrado
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          {errors.item && (
+            <p className="text-destructive text-sm mt-1">{errors.item}</p>
+          )}
+        </div>
+
+        {/* Localização */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Localização <span className="text-destructive">*</span>
+          </label>
+          <div className="relative" data-localizacao-dropdown>
+            <button
+              type="button"
+              onClick={() =>
+                setIsLocalizacaoDropdownOpen(!isLocalizacaoDropdownOpen)
+              }
+              disabled={!itemSelecionado || isLoadingLocalizacoes}
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                errors.localizacao ? 'border-destructive' : 'border-border'
+              }`}
+              data-test="modal-cadastrar-emprestimo-localizacao-dropdown"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span
+                  className={`truncate ${localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}`}
+                >
+                  {!itemSelecionado
+                    ? 'Selecione um item primeiro'
+                    : isLoadingLocalizacoes
+                      ? 'Carregando...'
+                      : localizacaoSelecionadaObj?.nome ||
+                        'Selecionar localização'}
+                </span>
+                {localizacaoSelecionada && (
+                  <span className="text-xs px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-foreground whitespace-nowrap">
+                    {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
+                  </span>
+                )}
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
+                  isLocalizacaoDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isLocalizacaoDropdownOpen && !isLoadingLocalizacoes && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                <div className="p-2 border-b border-border bg-muted/50">
+                  <input
+                    type="text"
+                    placeholder="Pesquisar localização..."
+                    value={localizacaoPesquisa}
+                    onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <div className="overflow-y-auto">
+                  {localizacoesFiltradas.length > 0 ? (
+                    localizacoesFiltradas.map((localizacao) => (
+                      <button
+                        type="button"
+                        key={localizacao._id}
+                        onClick={() => handleLocalizacaoSelect(localizacao)}
+                        className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer ${
+                          localizacaoSelecionada === localizacao._id
+                            ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
+                            : 'text-foreground'
+                        }`}
+                      >
+                        <span className="truncate">{localizacao.nome}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-foreground">
+                          {getQuantidadeDisponivel(localizacao._id)} disponível
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-muted-foreground text-sm">
+                      Nenhuma localização com estoque disponível
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          {errors.localizacao && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.localizacao}
+            </p>
+          )}
+        </div>
+
+        {/* Quantidade */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Quantidade <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Digite a quantidade"
+            value={quantidade}
+            onChange={handleQuantidadeChange}
+            maxLength={9}
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+              errors.quantidade ? 'border-destructive' : 'border-border'
+            }`}
+            data-test="modal-cadastrar-emprestimo-quantidade"
+          />
+          {errors.quantidade && (
+            <p className="text-destructive text-sm mt-1">{errors.quantidade}</p>
+          )}
+        </div>
+
+        {/* Solicitante */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Solicitante <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Nome do solicitante"
+            value={solicitanteNome}
+            onChange={(e) => {
+              setSolicitanteNome(e.target.value);
+              if (errors.solicitanteNome) {
+                setErrors((prev) => ({
+                  ...prev,
+                  solicitanteNome: undefined,
+                }));
+              }
+            }}
+            maxLength={120}
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+              errors.solicitanteNome ? 'border-destructive' : 'border-border'
+            }`}
+            data-test="modal-cadastrar-emprestimo-solicitante"
+          />
+          {errors.solicitanteNome && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.solicitanteNome}
+            </p>
+          )}
+        </div>
+
+        {/* E-mail do solicitante */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            E-mail do solicitante
+          </label>
+          <input
+            type="email"
+            placeholder="email@exemplo.com"
+            value={solicitanteEmail}
+            onChange={(e) => {
+              setSolicitanteEmail(e.target.value);
+              if (errors.solicitanteEmail) {
+                setErrors((prev) => ({
+                  ...prev,
+                  solicitanteEmail: undefined,
+                }));
+              }
+            }}
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+              errors.solicitanteEmail ? 'border-destructive' : 'border-border'
+            }`}
+            data-test="modal-cadastrar-emprestimo-email"
+          />
+          {errors.solicitanteEmail && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.solicitanteEmail}
+            </p>
+          )}
+        </div>
+
+        {/* Data prevista */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Data prevista de devolução
+          </label>
+          <input
+            type="datetime-local"
+            value={dataPrevista}
+            onChange={(e) => {
+              setDataPrevista(e.target.value);
+              if (errors.dataPrevista) {
+                setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
+              }
+            }}
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+              errors.dataPrevista ? 'border-destructive' : 'border-border'
+            }`}
+            data-test="modal-cadastrar-emprestimo-data-prevista"
+          />
+          {errors.dataPrevista && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.dataPrevista}
+            </p>
+          )}
+        </div>
+
+        {/* Observações */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Observações
+          </label>
+          <textarea
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
+            maxLength={500}
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            placeholder="Observações opcionais"
+            data-test="modal-cadastrar-emprestimo-observacoes"
+          />
+        </div>
+      </div>
+
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isPending}
+            className="h-11 flex-1 cursor-pointer"
+            data-test="modal-cadastrar-emprestimo-cancelar"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="modal-cadastrar-emprestimo-salvar"
+          >
+            {isPending ? 'Registrando...' : 'Registrar'}
+          </Button>
+        </div>
+      </div>
+    </ModalShell>
   );
 
   return typeof window !== 'undefined'

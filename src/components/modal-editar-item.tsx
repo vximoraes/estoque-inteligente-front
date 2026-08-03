@@ -12,6 +12,7 @@ import { get, post, patch } from '@/lib/fetchData';
 import { toast } from 'react-toastify';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
+import { ModalShell } from '@/components/ui/modal-shell';
 
 interface Categoria {
   _id: string;
@@ -419,8 +420,6 @@ export default function ModalEditarItem({
     };
   }, []);
 
-  if (!isOpen) return null;
-
   const categorias = categoriasData?.data?.docs ?? [];
   const categoriasFiltradas = categorias.filter((cat: Categoria) =>
     cat.nome.toLowerCase().includes(categoriaPesquisa.toLowerCase()),
@@ -431,31 +430,20 @@ export default function ModalEditarItem({
 
   const isPending = updateItemMutation.isPending || sendItemImagem.isPending;
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const modalContent = (
-    <div
-      data-test="modal-editar-item"
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
-    >
-      <div
-        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <ModalShell
+        isOpen={isOpen}
+        onClose={onClose}
+        data-test="modal-editar-item"
+        zIndex={99999}
+        contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
       >
         <div className="relative p-6 pb-0">
           <button
             data-test="modal-editar-item-close"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
@@ -564,7 +552,7 @@ export default function ModalEditarItem({
                               }));
                             }
                           }}
-                          className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors cursor-pointer ${
+                          className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors cursor-pointer ${
                             errors.categoria
                               ? 'border-destructive'
                               : 'border-border'
@@ -597,7 +585,7 @@ export default function ModalEditarItem({
                                 onChange={(e) =>
                                   setCategoriaPesquisa(e.target.value)
                                 }
-                                className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                                className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
                                 onClick={(e) => e.stopPropagation()}
                                 data-test="input-pesquisa-categoria"
                               />
@@ -612,7 +600,7 @@ export default function ModalEditarItem({
                                         key={categoria._id}
                                         className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
                                           categoriaId === categoria._id
-                                            ? 'bg-[#306FCC]/10'
+                                            ? 'bg-[var(--ei-accent)]/10'
                                             : ''
                                         }`}
                                       >
@@ -623,7 +611,7 @@ export default function ModalEditarItem({
                                           }
                                           className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${
                                             categoriaId === categoria._id
-                                              ? 'text-[#306FCC] font-medium'
+                                              ? 'text-[var(--ei-accent)] font-medium'
                                               : 'text-foreground'
                                           }`}
                                           title={categoria.nome}
@@ -640,7 +628,7 @@ export default function ModalEditarItem({
                                                 true,
                                               );
                                             }}
-                                            className="p-1.5 text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                             title="Editar categoria"
                                             data-test="botao-editar-categoria"
                                           >
@@ -655,7 +643,7 @@ export default function ModalEditarItem({
                                                 true,
                                               );
                                             }}
-                                            className="p-1.5 text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                             title="Excluir categoria"
                                             data-test="botao-excluir-categoria"
                                           >
@@ -678,8 +666,8 @@ export default function ModalEditarItem({
                       <Button
                         type="button"
                         onClick={() => setIsAddingCategoria(true)}
-                        className="text-white h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
-                        style={{ backgroundColor: '#306FCC' }}
+                        className="text-ei-accent-foreground h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+                        style={{ backgroundColor: 'var(--ei-accent)' }}
                         data-test="botao-adicionar-categoria"
                       >
                         <Plus className="w-4 h-4" />
@@ -742,7 +730,7 @@ export default function ModalEditarItem({
                                 : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`
                             }
                             alt="Preview"
-                            className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded"
+                            className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded-md"
                             key={imagemPreview}
                           />
                           <span className="text-xs sm:text-sm text-foreground truncate">
@@ -752,7 +740,7 @@ export default function ModalEditarItem({
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-all duration-200 cursor-pointer"
+                          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-muted transition-all duration-200 cursor-pointer"
                           aria-label="Remover imagem"
                           data-test="botao-remover-imagem"
                         >
@@ -771,12 +759,12 @@ export default function ModalEditarItem({
                       onDrop={handleDrop}
                       className={`relative border-2 border-dashed rounded-md min-h-11 flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${
                         isDragging
-                          ? 'border-[#306FCC] bg-[#306FCC]/10'
+                          ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
                           : 'border-border bg-muted/40 hover:bg-muted hover:border-foreground/30'
                       }`}
                     >
                       <p className="text-center text-xs sm:text-sm">
-                        <span className="font-semibold text-[#306FCC]">
+                        <span className="font-semibold text-[var(--ei-accent)]">
                           Adicione ou arraste
                         </span>{' '}
                         <span className="text-muted-foreground">
@@ -823,7 +811,7 @@ export default function ModalEditarItem({
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
               <div className="flex gap-3">
                 <Button
                   type="button"
@@ -838,8 +826,8 @@ export default function ModalEditarItem({
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#306FCC' }}
+                  className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: 'var(--ei-accent)' }}
                   data-test="botao-salvar"
                 >
                   {isPending ? 'Salvando...' : 'Salvar'}
@@ -848,15 +836,14 @@ export default function ModalEditarItem({
             </div>
           </form>
         )}
-      </div>
+      </ModalShell>
 
       {/* Modal para adicionar categoria */}
       {isAddingCategoria && (
         <div
-          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4 bg-black/20 backdrop-blur-sm"
           style={{
             zIndex: 100000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -867,7 +854,7 @@ export default function ModalEditarItem({
           }}
         >
           <div
-            className="bg-card rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-md shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative p-4 sm:p-6 pb-0">
@@ -941,7 +928,7 @@ export default function ModalEditarItem({
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-lg">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
               <div className="flex gap-2 sm:gap-3">
                 <Button
                   type="button"
@@ -964,8 +951,8 @@ export default function ModalEditarItem({
                   type="button"
                   onClick={handleAddCategoria}
                   disabled={createCategoriaMutation.isPending}
-                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer text-sm sm:text-base"
-                  style={{ backgroundColor: '#306FCC' }}
+                  className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer text-sm sm:text-base"
+                  style={{ backgroundColor: 'var(--ei-accent)' }}
                   data-test="botao-criar-categoria"
                 >
                   {createCategoriaMutation.isPending ? 'Criando...' : 'Criar'}
@@ -1001,7 +988,7 @@ export default function ModalEditarItem({
           />
         </>
       )}
-    </div>
+    </>
   );
 
   return typeof window !== 'undefined'

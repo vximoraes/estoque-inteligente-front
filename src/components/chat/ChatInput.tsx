@@ -49,10 +49,10 @@ export function ChatInput({
         disabled={isStreaming}
         placeholder={placeholder}
         className="
-          flex-1 resize-none rounded border border-border
+          flex-1 resize-none rounded-md border border-border
           bg-muted px-3 py-2.5 text-base
           text-foreground placeholder:text-muted-foreground
-          focus:outline-none focus:ring-1 focus:ring-[#306FCC]
+          focus:outline-none focus:ring-1 focus:ring-[var(--ei-accent)]
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-[height] overflow-hidden
         "
@@ -63,11 +63,11 @@ export function ChatInput({
         aria-label="Enviar mensagem"
         className="
           shrink-0 flex items-center justify-center
-          w-11 h-11 rounded
-          bg-[#0f1419] text-white
+          w-11 h-11 rounded-md
+          bg-[var(--ei-accent)] text-ei-accent-foreground
           disabled:opacity-30 disabled:cursor-not-allowed
           enabled:cursor-pointer
-          hover:bg-[#1a2332] transition-colors
+          hover:bg-[var(--ei-accent-hover)] transition-colors
         "
       >
         <Send size={16} strokeWidth={2} />

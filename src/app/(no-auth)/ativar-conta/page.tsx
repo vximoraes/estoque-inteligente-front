@@ -168,7 +168,7 @@ function AtivarContaContent() {
   if (tokenValido === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <PulseLoader color="#306FCC" size={15} />
+        <PulseLoader color="var(--ei-accent)" size={15} />
       </div>
     );
   }
@@ -190,7 +190,7 @@ function AtivarContaContent() {
               </p>
               <Button
                 onClick={() => router.push('/login')}
-                className="h-11 rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
+                className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
               >
                 Ir para acesso
               </Button>
@@ -317,7 +317,7 @@ function AtivarContaContent() {
 
             <Button
               type="submit"
-              className="mt-6 h-11 w-full rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
+              className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Ativando conta...' : 'Ativar conta'}
@@ -350,7 +350,7 @@ function AtivarContaContent() {
             Já tem uma conta ativa?{' '}
             <Link
               href="/login"
-              className="text-[#306FCC] transition-colors hover:text-[#2557a7]"
+              className="text-[var(--ei-accent)] transition-colors hover:text-[var(--ei-accent-hover)]"
             >
               Acessar sistema
             </Link>
@@ -375,7 +375,7 @@ export default function AtivarContaPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="#306FCC" size={15} />
+          <PulseLoader color="var(--ei-accent)" size={15} />
         </div>
       }
     >

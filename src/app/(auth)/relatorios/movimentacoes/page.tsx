@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { Search, Filter, FileText, X } from 'lucide-react';
+import { Search, Filter, FileText, X, FileDown } from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { toast, Slide } from 'react-toastify';
@@ -336,7 +336,7 @@ function RelatorioMovimentacoesPageContent() {
               placeholder="Pesquisar movimentações..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
               data-test="search-input"
             />
           </div>
@@ -353,12 +353,16 @@ function RelatorioMovimentacoesPageContent() {
 
           <Button
             disabled={selectedItems.size === 0}
-            className={`h-11 px-4 flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 transition-all ${
               selectedItems.size > 0
-                ? 'hover:opacity-90 cursor-pointer'
-                : 'opacity-50 cursor-not-allowed bg-gray-400'
+                ? 'text-ei-accent-foreground hover:opacity-90 cursor-pointer'
+                : 'text-muted-foreground opacity-50 cursor-not-allowed bg-muted'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            style={
+              selectedItems.size > 0
+                ? { backgroundColor: 'var(--ei-accent)' }
+                : {}
+            }
             data-test="exportar-button"
             onClick={() => setIsExportarModalOpen(true)}
             title={
@@ -367,7 +371,7 @@ function RelatorioMovimentacoesPageContent() {
                 : `Exportar ${selectedItems.size} movimentação(ões)`
             }
           >
-            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            <FileDown className="w-5 h-5" />
             Exportar
           </Button>
         </div>
@@ -401,7 +405,7 @@ function RelatorioMovimentacoesPageContent() {
         {/* Mensagem de erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0"
             data-test="error-message"
           >
             Erro ao carregar movimentações: {error.message}
@@ -416,8 +420,8 @@ function RelatorioMovimentacoesPageContent() {
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando movimentações...
@@ -425,7 +429,7 @@ function RelatorioMovimentacoesPageContent() {
             </div>
           ) : movimentacoesFiltradas.length > 0 ? (
             <div
-              className="border border-border rounded-lg bg-card flex-1 overflow-hidden flex flex-col"
+              className="border border-border rounded-md bg-card flex-1 overflow-hidden flex flex-col"
               data-test="movimentacoes-table-container"
             >
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
@@ -446,7 +450,7 @@ function RelatorioMovimentacoesPageContent() {
                             if (input) input.indeterminate = isSomeSelected;
                           }}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 cursor-pointer"
+                          className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                           data-test="checkbox-select-all"
                         />
                       </TableHead>
@@ -507,7 +511,7 @@ function RelatorioMovimentacoesPageContent() {
                             type="checkbox"
                             checked={selectedItems.has(mov._id)}
                             onChange={() => handleSelectItem(mov._id)}
-                            className="w-4 h-4 cursor-pointer"
+                            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                             data-test={`checkbox-item-${mov._id}`}
                           />
                         </TableCell>
@@ -566,20 +570,20 @@ function RelatorioMovimentacoesPageContent() {
                                   : String(mov.tipo ?? '').trim() || '-';
 
                               const bgColor = isEntrada
-                                ? 'oklch(0.962 0.044 156.743)'
+                                ? 'var(--status-success-bg)'
                                 : isSaida
-                                  ? 'oklch(0.936 0.032 17.717)'
+                                  ? 'var(--status-danger-bg)'
                                   : undefined;
 
                               const textColor = isEntrada
-                                ? 'oklch(0.448 0.119 151.328)'
+                                ? 'var(--status-success-text)'
                                 : isSaida
-                                  ? 'oklch(0.444 0.177 26.899)'
+                                  ? 'var(--status-danger-text)'
                                   : undefined;
 
                               return (
                                 <span
-                                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
                                   title={textoFormatado}
                                   style={{
                                     color: textColor,
@@ -637,7 +641,7 @@ function RelatorioMovimentacoesPageContent() {
                 >
                   {isFetchingNextPage && (
                     <PulseLoader
-                      color="#3b82f6"
+                      color="var(--ei-accent)"
                       size={5}
                       data-test="loading-next-page"
                     />
@@ -646,7 +650,7 @@ function RelatorioMovimentacoesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={FileText}
                 title={
@@ -708,8 +712,8 @@ export default function RelatorioMovimentacoesPage() {
           data-test="page-suspense-fallback"
         >
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
           </div>
           <p className="mt-4 text-muted-foreground font-medium">
             Carregando...

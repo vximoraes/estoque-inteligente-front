@@ -54,17 +54,17 @@ export default function ItemCardSimples({
   return (
     <div
       onClick={() => onClick(id, nome)}
-      className={`bg-card rounded-sm border-2 p-4 transition-colors cursor-pointer ${
+      className={`bg-card rounded-md border-2 p-4 transition-colors cursor-pointer ${
         isSelected
-          ? 'border-[#306FCC] bg-[#306FCC]/5 selected'
-          : 'border-border hover:border-[#306FCC]/40'
+          ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/5 selected'
+          : 'border-border hover:border-[var(--ei-accent)]/40'
       }`}
       data-test={dataTestId}
     >
       <div className="flex flex-col items-center text-center gap-3">
         {/* Imagem do item */}
         <div
-          className={`w-16 h-16 bg-muted rounded-sm flex items-center justify-center overflow-hidden shrink-0 ${
+          className={`w-16 h-16 bg-muted rounded-md flex items-center justify-center overflow-hidden shrink-0 ${
             imagemComTimestamp
               ? 'cursor-pointer hover:opacity-80 transition-opacity'
               : ''

@@ -160,7 +160,7 @@ export default function ItensPageContent({
 
   const handleCloseEditarModal = () => {
     setIsEditarModalOpen(false);
-    setEditarItemId(null);
+    setTimeout(() => setEditarItemId(null), 300);
   };
 
   const handleEditarSuccess = () => {
@@ -191,7 +191,7 @@ export default function ItensPageContent({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedItemId(null);
+    setTimeout(() => setSelectedItemId(null), 300);
   };
 
   const handleOpenFiltrosModal = () => {
@@ -219,7 +219,7 @@ export default function ItensPageContent({
 
   const handleCloseEntradaModal = () => {
     setIsEntradaModalOpen(false);
-    setEntradaItemId(null);
+    setTimeout(() => setEntradaItemId(null), 300);
   };
 
   const handleEntradaSuccess = () => {
@@ -240,7 +240,7 @@ export default function ItensPageContent({
 
   const handleCloseSaidaModal = () => {
     setIsSaidaModalOpen(false);
-    setSaidaItemId(null);
+    setTimeout(() => setSaidaItemId(null), 300);
   };
 
   const handleEmprestar = (id: string) => {
@@ -250,7 +250,7 @@ export default function ItensPageContent({
 
   const handleCloseEmprestimoModal = () => {
     setIsEmprestimoModalOpen(false);
-    setEmprestimoItemId(null);
+    setTimeout(() => setEmprestimoItemId(null), 300);
   };
 
   const handleEmprestimoSuccess = () => {
@@ -278,7 +278,7 @@ export default function ItensPageContent({
 
   const handleCloseExcluirModal = () => {
     setIsExcluirModalOpen(false);
-    setExcluirItemId(null);
+    setTimeout(() => setExcluirItemId(null), 300);
   };
 
   const handleExcluirSuccess = async () => {
@@ -352,7 +352,7 @@ export default function ItensPageContent({
                 placeholder="Pesquisar itens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
                 data-test="search-input"
               />
             </div>
@@ -366,8 +366,8 @@ export default function ItensPageContent({
               Filtros
             </Button>
             <Button
-              className="h-11 px-4 flex items-center gap-2 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
+              className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
               data-test="adicionar-button"
               onClick={handleAdicionarClick}
             >
@@ -381,7 +381,7 @@ export default function ItensPageContent({
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
                     data-test="applied-filter-categoria"
                   >
                     <span className="font-medium">Categoria:</span>
@@ -402,7 +402,7 @@ export default function ItensPageContent({
                 )}
                 {statusFilter && (
                   <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
                     data-test="applied-filter-status"
                   >
                     <span className="font-medium">Status:</span>
@@ -425,7 +425,7 @@ export default function ItensPageContent({
 
           {error && (
             <div
-              className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded"
+              className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md"
               data-test="error-message"
               title={`Erro completo: ${error.message}`}
             >
@@ -439,8 +439,8 @@ export default function ItensPageContent({
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando itens...
@@ -563,13 +563,15 @@ export default function ItensPageContent({
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={isFetching}
-                      className={`min-w-10 px-3 py-2 rounded transition-colors cursor-pointer text-sm ${
+                      className={`min-w-10 px-3 py-2 rounded-md transition-colors cursor-pointer text-sm ${
                         isActive
-                          ? 'text-white font-semibold'
+                          ? 'text-ei-accent-foreground font-semibold'
                           : 'hover:bg-muted text-foreground'
                       } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
                       style={
-                        isActive ? { backgroundColor: '#306FCC' } : undefined
+                        isActive
+                          ? { backgroundColor: 'var(--ei-accent)' }
+                          : undefined
                       }
                       data-test={`page-${pageNum}-button`}
                     >

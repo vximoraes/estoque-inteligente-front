@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 
 interface ModalDevolverItemProps {
@@ -78,8 +79,6 @@ export default function ModalDevolverItem({
     setQuantidadeError('');
   }, [isOpen, quantidadeAberta]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = () => {
     const quantidadeDevolvida = Number(quantidade);
     if (!Number.isInteger(quantidadeDevolvida) || quantidadeDevolvida <= 0) {
@@ -99,105 +98,105 @@ export default function ModalDevolverItem({
   };
 
   const modalContent = (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      overlayClassName="z-50"
       data-test="modal-devolver-item"
+      contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
     >
-      <div className="bg-card rounded-sm border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
-          >
-            <X size={20} className="text-muted-foreground" />
-          </button>
-          <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-foreground mb-1">
-              Devolver Item
-            </h2>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-5">
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Item
-            </label>
-            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
-              {itemNome}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Quantidade em aberto
-            </label>
-            <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
-              {quantidadeAberta}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Quantidade devolvida <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={quantidadeAberta}
-              value={quantidade}
-              onChange={(e) => {
-                setQuantidade(e.target.value);
-                setQuantidadeError('');
-              }}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="Digite a quantidade"
-            />
-            {quantidadeError && (
-              <p className="mt-1 text-sm text-destructive">{quantidadeError}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Observações
-            </label>
-            <textarea
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              rows={3}
-              maxLength={500}
-              className="w-full px-3 py-2 border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#306FCC]/50"
-              placeholder="Observações opcionais"
-            />
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="h-11 flex-1 cursor-pointer"
-              disabled={devolucaoMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
-              style={{ backgroundColor: '#306FCC' }}
-              disabled={devolucaoMutation.isPending}
-            >
-              {devolucaoMutation.isPending
-                ? 'Registrando...'
-                : 'Confirmar Devolução'}
-            </Button>
-          </div>
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
+        >
+          <X size={20} className="text-muted-foreground" />
+        </button>
+        <div className="text-center pt-4 px-8">
+          <h2 className="text-xl font-semibold text-foreground mb-1">
+            Devolver Item
+          </h2>
         </div>
       </div>
-    </div>
+
+      <div className="p-6 space-y-5">
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Item
+          </label>
+          <div className="w-full h-11 flex items-center px-3 border border-border rounded-md bg-muted/50 text-muted-foreground">
+            {itemNome}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Quantidade em aberto
+          </label>
+          <div className="w-full h-11 flex items-center px-3 border border-border rounded-md bg-muted/50 text-muted-foreground">
+            {quantidadeAberta}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Quantidade devolvida <span className="text-destructive">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={quantidadeAberta}
+            value={quantidade}
+            onChange={(e) => {
+              setQuantidade(e.target.value);
+              setQuantidadeError('');
+            }}
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            placeholder="Digite a quantidade"
+          />
+          {quantidadeError && (
+            <p className="mt-1 text-sm text-destructive">{quantidadeError}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-foreground mb-1">
+            Observações
+          </label>
+          <textarea
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
+            maxLength={500}
+            className="w-full px-3 py-2 border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            placeholder="Observações opcionais"
+          />
+        </div>
+      </div>
+
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="h-11 flex-1 cursor-pointer"
+            disabled={devolucaoMutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+            disabled={devolucaoMutation.isPending}
+          >
+            {devolucaoMutation.isPending
+              ? 'Registrando...'
+              : 'Confirmar Devolução'}
+          </Button>
+        </div>
+      </div>
+    </ModalShell>
   );
 
   return createPortal(modalContent, document.body);

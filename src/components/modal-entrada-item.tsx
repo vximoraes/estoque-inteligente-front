@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
 import ModalExcluirLocalizacao from './modal-excluir-localizacao';
@@ -290,8 +291,6 @@ export default function ModalEntradaItem({
     };
   }, [isDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (!isOpen) return null;
-
   const localizacoes = localizacoesData?.pages
     ? localizacoesData.pages.flatMap((page) => page.data.docs)
     : [];
@@ -392,26 +391,21 @@ export default function ModalEntradaItem({
   };
 
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
-      data-test="modal-entrada-backdrop"
-    >
-      <div
-        className="bg-card rounded-sm border border-border max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <ModalShell
+        isOpen={isOpen}
+        onClose={onClose}
+        data-test="modal-entrada-backdrop"
+        zIndex={99999}
+        contentClassName="max-w-lg max-h-[80vh] overflow-visible"
         role="dialog"
-        data-test="modal-entrada"
+        contentDataTest="modal-entrada"
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
             data-test="modal-entrada-close"
           >
@@ -451,7 +445,7 @@ export default function ModalEntradaItem({
               value={quantidade}
               onChange={handleQuantidadeChange}
               maxLength={9}
-              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.quantidade ? 'border-destructive' : 'border-border'
               }`}
               disabled={entradaMutation.isPending}
@@ -480,7 +474,7 @@ export default function ModalEntradaItem({
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                  className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                     errors.localizacao ? 'border-destructive' : 'border-border'
                   }`}
                   disabled={isLoadingLocalizacoes || entradaMutation.isPending}
@@ -497,7 +491,7 @@ export default function ModalEntradaItem({
                     </span>
                     {localizacaoSelecionada && (
                       <span
-                        className={`text-sm px-1.5 sm:px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
+                        className={`text-sm px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap ${
                           getQuantidadeDisponivel(localizacaoSelecionada) > 0
                             ? 'bg-muted/50 text-foreground'
                             : 'bg-muted/50 text-muted-foreground'
@@ -517,7 +511,7 @@ export default function ModalEntradaItem({
 
                 {/* Dropdown */}
                 {isDropdownOpen && !isLoadingLocalizacoes && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-hidden flex flex-col">
                     {/* Input de pesquisa */}
                     <div className="p-3 border-b border-border bg-muted/50">
                       <input
@@ -525,7 +519,7 @@ export default function ModalEntradaItem({
                         placeholder="Pesquisar..."
                         value={localizacaoPesquisa}
                         onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                        className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent"
+                        className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
@@ -543,7 +537,7 @@ export default function ModalEntradaItem({
                                 key={localizacao._id}
                                 className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
                                   localizacaoSelecionada === localizacao._id
-                                    ? 'bg-[#306FCC]/5'
+                                    ? 'bg-[var(--ei-accent)]/5'
                                     : ''
                                 }`}
                               >
@@ -554,7 +548,7 @@ export default function ModalEntradaItem({
                                   }
                                   className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
                                     localizacaoSelecionada === localizacao._id
-                                      ? 'text-[#306FCC] font-medium'
+                                      ? 'text-[var(--ei-accent)] font-medium'
                                       : 'text-foreground'
                                   }`}
                                   title={localizacao.nome}
@@ -563,7 +557,7 @@ export default function ModalEntradaItem({
                                     {localizacao.nome}
                                   </span>
                                   <span
-                                    className={`text-sm px-2 py-0.5 rounded shrink-0 ${
+                                    className={`text-sm px-2 py-0.5 rounded-md shrink-0 ${
                                       qtdDisponivel > 0
                                         ? 'bg-muted/50 text-foreground'
                                         : 'bg-muted/50 text-muted-foreground'
@@ -580,7 +574,7 @@ export default function ModalEntradaItem({
                                       setLocalizacaoToEdit(localizacao);
                                       setIsEditarLocalizacaoModalOpen(true);
                                     }}
-                                    className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                                    className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                     title="Editar localização"
                                   >
                                     <Pencil className="w-4 h-4" />
@@ -592,7 +586,7 @@ export default function ModalEntradaItem({
                                       setLocalizacaoToEdit(localizacao);
                                       setIsExcluirLocalizacaoModalOpen(true);
                                     }}
-                                    className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                                    className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                     title="Excluir localização"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -606,7 +600,7 @@ export default function ModalEntradaItem({
                           {/* Loading indicator */}
                           {isFetchingNextPage && (
                             <div className="flex justify-center py-4">
-                              <PulseLoader color="#306FCC" size={8} />
+                              <PulseLoader color="var(--ei-accent)" size={8} />
                             </div>
                           )}
                         </>
@@ -622,8 +616,8 @@ export default function ModalEntradaItem({
               <Button
                 type="button"
                 onClick={() => setIsAddingLocalizacao(true)}
-                className="text-white h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
-                style={{ backgroundColor: '#306FCC' }}
+                className="text-ei-accent-foreground h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+                style={{ backgroundColor: 'var(--ei-accent)' }}
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -637,7 +631,7 @@ export default function ModalEntradaItem({
 
           {/* Mensagem de erro da API */}
           {entradaMutation.error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
               <div className="font-medium mb-1">
                 Não foi possível registrar a entrada
               </div>
@@ -652,7 +646,7 @@ export default function ModalEntradaItem({
 
         {/* Footer com ações */}
         <div
-          className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm"
+          className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md"
           data-test="modal-entrada-footer"
         >
           <div className="flex gap-3">
@@ -668,23 +662,22 @@ export default function ModalEntradaItem({
             <Button
               onClick={handleSubmit}
               disabled={entradaMutation.isPending}
-              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
+              className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
               data-test="modal-entrada-confirmar"
             >
               {entradaMutation.isPending ? 'Registrando...' : 'Registrar'}
             </Button>
           </div>
         </div>
-      </div>
+      </ModalShell>
 
       {/* Modal para adicionar localização */}
       {isAddingLocalizacao && (
         <div
-          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm"
           style={{
             zIndex: 100000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -695,7 +688,7 @@ export default function ModalEntradaItem({
           }}
         >
           <div
-            className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-md border border-border shadow-none max-w-lg w-full animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
@@ -709,7 +702,7 @@ export default function ModalEntradaItem({
                     novaLocalizacao: undefined,
                   }));
                 }}
-                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                 title="Fechar"
               >
                 <X size={20} />
@@ -753,7 +746,7 @@ export default function ModalEntradaItem({
                     }
                   }}
                   maxLength={100}
-                  className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[#306FCC]/50 focus:border-transparent transition-colors ${
+                  className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors ${
                     errors.novaLocalizacao
                       ? 'border-destructive'
                       : 'border-border'
@@ -775,7 +768,7 @@ export default function ModalEntradaItem({
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
               <div className="flex gap-3">
                 <Button
                   type="button"
@@ -797,8 +790,8 @@ export default function ModalEntradaItem({
                   type="button"
                   onClick={handleAddLocalizacao}
                   disabled={createLocalizacaoMutation.isPending}
-                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                  style={{ backgroundColor: '#306FCC' }}
+                  className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: 'var(--ei-accent)' }}
                 >
                   {createLocalizacaoMutation.isPending ? 'Criando...' : 'Criar'}
                 </Button>
@@ -807,7 +800,7 @@ export default function ModalEntradaItem({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 
   return (

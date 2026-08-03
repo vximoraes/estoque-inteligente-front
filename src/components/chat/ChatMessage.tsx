@@ -19,7 +19,7 @@ export function ChatMessage({
   if (isError) {
     return (
       <div className="flex justify-start mb-3">
-        <div className="max-w-[90%] px-3.5 py-2.5 rounded-tr-lg rounded-br-lg rounded-tl-sm rounded-bl-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+        <div className="max-w-[90%] px-3.5 py-2.5 rounded-tr-md rounded-br-md rounded-tl-md rounded-bl-md bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           {mensagem.content}
         </div>
       </div>
@@ -33,8 +33,8 @@ export function ChatMessage({
           ${isUser ? 'max-w-[80%]' : 'max-w-[90%]'} px-3.5 py-2.5 text-base leading-relaxed
           ${
             isUser
-              ? 'bg-[#0f1419] text-white rounded-tl-lg rounded-bl-lg rounded-tr-sm rounded-br-lg'
-              : 'bg-card border border-border text-foreground rounded-tr-lg rounded-br-lg rounded-tl-sm rounded-bl-lg'
+              ? 'bg-[var(--ei-accent)] text-ei-accent-foreground rounded-tl-md rounded-bl-md rounded-tr-md rounded-br-md'
+              : 'bg-card border border-border text-foreground rounded-tr-md rounded-br-md rounded-tl-md rounded-bl-md'
           }
         `}
       >
@@ -86,10 +86,10 @@ export function ChatMessage({
               [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:border-collapse
               prose-th:border prose-th:border-border prose-th:bg-muted prose-th:px-2 prose-th:py-1 prose-th:font-semibold prose-th:whitespace-nowrap
               prose-td:border prose-td:border-border prose-td:px-2 prose-td:py-1 prose-td:whitespace-nowrap
-              prose-code:text-[#306FCC] prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-              prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded prose-pre:text-xs prose-pre:overflow-x-auto
+              prose-code:text-[var(--ei-accent)] prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded-md prose-code:text-xs prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+              prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-md prose-pre:text-xs prose-pre:overflow-x-auto
               prose-strong:font-semibold prose-strong:text-foreground
-              prose-a:text-[#306FCC] prose-a:no-underline hover:prose-a:underline
+              prose-a:text-[var(--ei-accent)] prose-a:no-underline hover:prose-a:underline
             "
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>

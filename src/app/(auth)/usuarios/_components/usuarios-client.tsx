@@ -203,7 +203,7 @@ export default function PageUsuariosContent({
           data-test="search-actions-bar"
         >
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               data-test="search-input"
               type="text"
@@ -215,8 +215,8 @@ export default function PageUsuariosContent({
           </div>
           <Button
             data-test="cadastrar-usuario-button"
-            className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
@@ -227,7 +227,7 @@ export default function PageUsuariosContent({
         {error && (
           <div
             data-test="error-message"
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0"
           >
             Erro ao carregar usuários: {error.message}
           </div>
@@ -240,32 +240,32 @@ export default function PageUsuariosContent({
               className="flex flex-col items-center justify-center flex-1"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando usuários...
               </p>
             </div>
           ) : usuarios.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table
                   data-test="usuarios-table"
                   className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm"
                 >
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
                         NOME
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
                         E-MAIL
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-center px-8 whitespace-nowrap">
                         STATUS
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-center px-8 whitespace-nowrap">
                         AÇÕES
                       </TableHead>
                     </TableRow>
@@ -276,7 +276,7 @@ export default function PageUsuariosContent({
                         key={usuario._id}
                         data-test="visualizar-button"
                         onClick={() => handleViewDetails(usuario._id)}
-                        className="hover:bg-gray-50 border-b relative cursor-pointer"
+                        className="hover:bg-muted border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-8 py-2">
@@ -298,7 +298,7 @@ export default function PageUsuariosContent({
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
                               title={
                                 usuario.ativo
                                   ? 'Usuário ativo'
@@ -306,11 +306,11 @@ export default function PageUsuariosContent({
                               }
                               style={{
                                 color: usuario.ativo
-                                  ? 'oklch(0.448 0.119 151.328)'
-                                  : 'oklch(0.473 0.137 46.201)',
+                                  ? 'var(--status-success-text)'
+                                  : 'var(--status-warning-text)',
                                 backgroundColor: usuario.ativo
-                                  ? 'oklch(0.962 0.044 156.743)'
-                                  : 'oklch(0.962 0.059 95.617)',
+                                  ? 'var(--status-success-bg)'
+                                  : 'var(--status-warning-bg)',
                               }}
                             >
                               {usuario.ativo ? 'Ativo' : 'Aguardando ativação'}
@@ -333,7 +333,7 @@ export default function PageUsuariosContent({
                                 usuario.ativo ||
                                 reenviarConviteId === usuario._id
                               }
-                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-muted-foreground disabled:hover:bg-transparent disabled:cursor-not-allowed"
                               title={
                                 usuario.ativo
                                   ? 'Usuário já ativo'
@@ -352,7 +352,7 @@ export default function PageUsuariosContent({
                                 e.stopPropagation();
                                 handleExcluirUsuario(usuario._id, usuario.nome);
                               }}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir usuário"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -371,7 +371,7 @@ export default function PageUsuariosContent({
                 >
                   {isFetchingNextPage && (
                     <PulseLoader
-                      color="#3b82f6"
+                      color="var(--ei-accent)"
                       size={5}
                       speedMultiplier={0.8}
                     />
@@ -380,7 +380,7 @@ export default function PageUsuariosContent({
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={Users}
                 title={
@@ -408,7 +408,7 @@ export default function PageUsuariosContent({
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setExcluirUsuarioId(null);
+            setTimeout(() => setExcluirUsuarioId(null), 300);
           }}
           onSuccess={handleExcluirSuccess}
           usuarioId={excluirUsuarioId}
@@ -421,7 +421,7 @@ export default function PageUsuariosContent({
           isOpen={isDetalhesModalOpen}
           onClose={() => {
             setIsDetalhesModalOpen(false);
-            setDetalhesUsuarioId(null);
+            setTimeout(() => setDetalhesUsuarioId(null), 300);
           }}
           usuarioId={detalhesUsuarioId}
         />

@@ -16,7 +16,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import { Search, Filter, Package, X } from 'lucide-react';
+import { Search, Filter, Package, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
@@ -398,7 +398,7 @@ function RelatorioItensPageContent() {
               placeholder="Pesquisar itens..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#306FCC]/35 focus-visible:border-[#306FCC]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
               data-test="search-input"
             />
           </div>
@@ -413,12 +413,16 @@ function RelatorioItensPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`h-11 px-4 flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 transition-all ${
               selectedItems.size > 0
-                ? 'hover:opacity-90 cursor-pointer'
-                : 'opacity-50 cursor-not-allowed bg-gray-400'
+                ? 'text-ei-accent-foreground hover:opacity-90 cursor-pointer'
+                : 'text-muted-foreground opacity-50 cursor-not-allowed bg-muted'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            style={
+              selectedItems.size > 0
+                ? { backgroundColor: 'var(--ei-accent)' }
+                : {}
+            }
             data-test="exportar-button"
             onClick={handleOpenExportarModal}
             title={
@@ -427,7 +431,7 @@ function RelatorioItensPageContent() {
                 : `Exportar ${selectedItems.size} item(ns)`
             }
           >
-            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            <FileDown className="w-5 h-5" />
             Exportar
           </Button>
         </div>
@@ -484,7 +488,7 @@ function RelatorioItensPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -497,15 +501,15 @@ function RelatorioItensPageContent() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando itens...
               </p>
             </div>
           ) : estoquesFiltrados.length > 0 ? (
-            <div className="border border-border rounded-lg bg-card flex-1 overflow-hidden flex flex-col">
+            <div className="border border-border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
@@ -523,7 +527,7 @@ function RelatorioItensPageContent() {
                             }
                           }}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 cursor-pointer"
+                          className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                           title={
                             isAllSelected
                               ? 'Desmarcar todos'
@@ -581,7 +585,7 @@ function RelatorioItensPageContent() {
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
                             onChange={() => handleSelectItem(estoque._id)}
-                            className="w-4 h-4 cursor-pointer"
+                            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
@@ -619,21 +623,21 @@ function RelatorioItensPageContent() {
                             data-test="item-status"
                           >
                             <span
-                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
                               title={estoque.item.status}
                               style={{
                                 color:
                                   estoque.item.status === 'Em Estoque'
-                                    ? 'oklch(0.448 0.119 151.328)'
+                                    ? 'var(--status-success-text)'
                                     : estoque.item.status === 'Baixo Estoque'
-                                      ? 'oklch(0.473 0.137 46.201)'
-                                      : 'oklch(0.444 0.177 26.899)',
+                                      ? 'var(--status-warning-text)'
+                                      : 'var(--status-danger-text)',
                                 backgroundColor:
                                   estoque.item.status === 'Em Estoque'
-                                    ? 'oklch(0.962 0.044 156.743)'
+                                    ? 'var(--status-success-bg)'
                                     : estoque.item.status === 'Baixo Estoque'
-                                      ? 'oklch(0.962 0.059 95.617)'
-                                      : 'oklch(0.936 0.032 17.717)',
+                                      ? 'var(--status-warning-bg)'
+                                      : 'var(--status-danger-bg)',
                               }}
                             >
                               {estoque.item.status}
@@ -663,7 +667,7 @@ function RelatorioItensPageContent() {
                 >
                   {isFetchingNextPage && (
                     <PulseLoader
-                      color="#3b82f6"
+                      color="var(--ei-accent)"
                       size={5}
                       speedMultiplier={0.8}
                     />
@@ -672,7 +676,7 @@ function RelatorioItensPageContent() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={Package}
                 title={
@@ -715,8 +719,8 @@ export default function RelatorioItensPage() {
       fallback={
         <div className="w-full h-screen flex flex-col items-center justify-center">
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC]/15"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-[#306FCC] border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
           </div>
           <p className="mt-4 text-muted-foreground font-medium">
             Carregando...

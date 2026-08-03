@@ -184,7 +184,7 @@ export function ChatPanel() {
     <div
       className="
         relative flex flex-col bg-background border border-border
-        rounded overflow-hidden
+        rounded-md overflow-hidden
         w-full sm:w-[540px] h-[55vh] sm:h-[560px]
         shadow-[0_8px_32px_-4px_rgba(0,0,0,0.18),0_2px_8px_-2px_rgba(0,0,0,0.12)]
       "
@@ -192,7 +192,7 @@ export function ChatPanel() {
       {/* Delete confirmation popup */}
       {confirmDeleteId && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-          <div className="bg-background border border-border rounded shadow-lg px-5 py-4 flex flex-col gap-3 w-64">
+          <div className="bg-background border border-border rounded-md shadow-lg px-5 py-4 flex flex-col gap-3 w-64">
             <p className="text-sm font-medium text-foreground">
               Excluir conversa?
             </p>
@@ -202,13 +202,13 @@ export function ChatPanel() {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmDeleteId(null)}
-                className="px-3 py-1.5 text-xs rounded border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-xs rounded-md border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDeleteConversa(confirmDeleteId)}
-                className="px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
               >
                 Excluir
               </button>
@@ -218,7 +218,7 @@ export function ChatPanel() {
       )}
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card shrink-0">
-        <Bot size={18} className="text-[#306FCC]" strokeWidth={2} />
+        <Bot size={18} className="text-[var(--ei-accent)]" strokeWidth={2} />
         <span className="text-base font-semibold text-foreground tracking-tight flex-1">
           Assistente de Estoque
         </span>
@@ -229,16 +229,16 @@ export function ChatPanel() {
               setShowHistory(false);
             }}
             aria-label="Nova conversa"
-            className="flex items-center justify-center w-7 h-7 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <SquarePen size={16} strokeWidth={2} />
           </button>
           <button
             onClick={() => setShowHistory((v) => !v)}
             aria-label="Histórico de conversas"
-            className={`flex items-center justify-center w-7 h-7 rounded transition-colors cursor-pointer ${
+            className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors cursor-pointer ${
               showHistory
-                ? 'text-[#306FCC] bg-[#306FCC]/10'
+                ? 'text-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
@@ -247,7 +247,7 @@ export function ChatPanel() {
           <button
             onClick={fecharChat}
             aria-label="Fechar chat"
-            className="flex items-center justify-center w-7 h-7 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <X size={16} strokeWidth={2} />
           </button>
@@ -282,13 +282,13 @@ export function ChatPanel() {
             <div className="flex flex-col items-center justify-center flex-1 gap-5 px-4 pb-4">
               <div className="flex flex-col items-center gap-1">
                 <div className="h-2.5 rounded-full bg-muted animate-pulse w-16 mb-1" />
-                <div className="h-6 rounded bg-muted animate-pulse w-44" />
+                <div className="h-6 rounded-md bg-muted animate-pulse w-44" />
               </div>
               <div className="flex flex-col gap-2 w-full">
-                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
-                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
-                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
-                <div className="h-9 rounded border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded-md border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded-md border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded-md border border-border bg-muted animate-pulse w-full" />
+                <div className="h-9 rounded-md border border-border bg-muted animate-pulse w-full" />
               </div>
             </div>
           ) : !conversaAtiva && !pendingNewConversa ? (
@@ -322,9 +322,9 @@ export function ChatPanel() {
                           key={s}
                           onClick={() => handleSend(s)}
                           className="
-                            w-full text-left px-3 py-2 text-sm rounded border border-border
+                            w-full text-left px-3 py-2 text-sm rounded-md border border-border
                             bg-muted/50 text-muted-foreground
-                            hover:bg-muted hover:text-foreground hover:border-[#306FCC]/40
+                            hover:bg-muted hover:text-foreground hover:border-[var(--ei-accent)]/40
                             transition-colors cursor-pointer
                           "
                         >

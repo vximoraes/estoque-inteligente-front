@@ -102,7 +102,7 @@ export default function EsqueciSenhaPage() {
 
                   <Button
                     type="submit"
-                    className="mt-6 h-11 w-full rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
+                    className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
                     disabled={isSubmitting}
                     data-test="botao-enviar-link"
                   >
@@ -111,7 +111,10 @@ export default function EsqueciSenhaPage() {
                 </form>
               </>
             ) : (
-              <div className="flex flex-col gap-6" data-test="email-enviado-confirmacao">
+              <div
+                className="flex flex-col gap-6"
+                data-test="email-enviado-confirmacao"
+              >
                 <div>
                   <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
                     E-mail enviado
@@ -131,7 +134,7 @@ export default function EsqueciSenhaPage() {
                     setEmailEnviado(false);
                     setEmailUsuario('');
                   }}
-                  className="text-sm text-[#306FCC] transition-colors hover:text-[#2557a7] cursor-pointer self-start"
+                  className="text-sm text-[var(--ei-accent)] transition-colors hover:text-[var(--ei-accent-hover)] cursor-pointer self-start"
                 >
                   Não recebi — tentar novamente
                 </button>
@@ -142,7 +145,7 @@ export default function EsqueciSenhaPage() {
               Lembrou a senha?{' '}
               <Link
                 href="/login"
-                className="text-[#306FCC] transition-colors hover:text-[#2557a7]"
+                className="text-[var(--ei-accent)] transition-colors hover:text-[var(--ei-accent-hover)]"
               >
                 Acessar sistema
               </Link>

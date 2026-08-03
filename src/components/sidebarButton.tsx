@@ -2,10 +2,10 @@
 
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { useRouter } from 'next/navigation';
+import type { LucideIcon } from 'lucide-react';
 
 type SidebarMenuButtonProps = {
-  src: string;
-  srcHover: string;
+  icon: LucideIcon;
   name: string;
   'data-test'?: string;
   route: string;
@@ -16,8 +16,7 @@ type SidebarMenuButtonProps = {
 };
 
 export default function SidebarButtonMenu({
-  src,
-  srcHover,
+  icon: Icon,
   name,
   'data-test': dataTest,
   route,
@@ -42,18 +41,20 @@ export default function SidebarButtonMenu({
     return (
       <SidebarMenuButton
         onClick={navigate}
-        className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-sm transition-colors duration-150 ${
+        className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md border transition-colors duration-150 ${
           isActive
-            ? 'bg-ei-sidebar-surface!'
-            : 'hover:bg-ei-sidebar-surface-hover!'
+            ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+            : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
         }`}
         data-test={dataTest || 'sidebar-menu-button'}
         title={name}
       >
-        <img
-          src={src}
-          alt={name}
-          className="w-[18px] h-[18px]"
+        <Icon
+          className={`w-[18px] h-[18px] ${
+            isActive
+              ? 'text-ei-sidebar-text-strong'
+              : 'text-ei-sidebar-text-soft'
+          }`}
           data-test={`${dataTest}-icon`}
         />
       </SidebarMenuButton>
@@ -63,17 +64,17 @@ export default function SidebarButtonMenu({
   return (
     <SidebarMenuButton
       onClick={navigate}
-      className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-sm transition-colors duration-150 ${
+      className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md border transition-colors duration-150 ${
         isActive
-          ? 'bg-ei-sidebar-surface!'
-          : 'hover:bg-ei-sidebar-surface-hover!'
+          ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+          : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
       } ${className}`}
       data-test={dataTest || 'sidebar-menu-button'}
     >
-      <img
-        src={src}
-        alt=""
-        className="w-[18px] h-[18px] shrink-0"
+      <Icon
+        className={`w-[18px] h-[18px] shrink-0 ${
+          isActive ? 'text-ei-sidebar-text-strong' : 'text-ei-sidebar-text'
+        }`}
         data-test={`${dataTest}-icon`}
       />
       <span
