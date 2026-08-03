@@ -41,10 +41,10 @@ export default function SidebarButtonMenu({
     return (
       <SidebarMenuButton
         onClick={navigate}
-        className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md transition-colors duration-150 ${
+        className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md border transition-colors duration-150 ${
           isActive
-            ? 'bg-ei-sidebar-surface!'
-            : 'hover:bg-ei-sidebar-surface-hover!'
+            ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+            : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
         }`}
         data-test={dataTest || 'sidebar-menu-button'}
         title={name}
@@ -64,10 +64,10 @@ export default function SidebarButtonMenu({
   return (
     <SidebarMenuButton
       onClick={navigate}
-      className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md transition-colors duration-150 ${
+      className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md border transition-colors duration-150 ${
         isActive
-          ? 'bg-ei-sidebar-surface!'
-          : 'hover:bg-ei-sidebar-surface-hover!'
+          ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+          : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
       } ${className}`}
       data-test={dataTest || 'sidebar-menu-button'}
     >

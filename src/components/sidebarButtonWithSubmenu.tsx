@@ -55,10 +55,10 @@ export default function SidebarButtonWithSubmenu({
       <div className="w-full flex flex-col items-center">
         <SidebarMenuButton
           onClick={handleToggle}
-          className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md transition-colors duration-150 ${
+          className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md border transition-colors duration-150 ${
             isActive
-              ? 'bg-ei-sidebar-surface!'
-              : 'hover:bg-ei-sidebar-surface-hover!'
+              ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+              : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
           }`}
           data-test={dataTest || 'sidebar-menu-button'}
           title={name}
@@ -83,10 +83,10 @@ export default function SidebarButtonWithSubmenu({
                 <button
                   key={item.route}
                   onClick={() => handleSubItemClick(item.route)}
-                  className={`w-11 h-11 flex items-center justify-center text-[11px] font-semibold tracking-widest uppercase rounded-md transition-colors duration-150 cursor-pointer ${
+                  className={`w-11 h-11 flex items-center justify-center text-[11px] font-semibold tracking-widest uppercase rounded-md border transition-colors duration-150 cursor-pointer ${
                     path === item.route
-                      ? 'bg-ei-sidebar-surface text-ei-sidebar-text'
-                      : 'text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
+                      ? 'bg-ei-sidebar-surface text-ei-sidebar-text border-ei-sidebar-divider'
+                      : 'border-transparent text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
                   }`}
                   data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
                   title={item.name}
@@ -105,10 +105,10 @@ export default function SidebarButtonWithSubmenu({
     <div className="w-[250px]">
       <SidebarMenuButton
         onClick={handleToggle}
-        className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md transition-colors duration-150 ${
+        className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md border transition-colors duration-150 ${
           isActive
-            ? 'bg-ei-sidebar-surface!'
-            : 'hover:bg-ei-sidebar-surface-hover!'
+            ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+            : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
         }`}
         data-test={dataTest || 'sidebar-menu-button'}
       >
@@ -148,10 +148,10 @@ export default function SidebarButtonWithSubmenu({
               <button
                 key={item.route}
                 onClick={() => handleSubItemClick(item.route)}
-                className={`w-[250px] h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-md transition-colors duration-150 cursor-pointer ${
+                className={`w-[250px] h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-md border transition-colors duration-150 cursor-pointer ${
                   path === item.route
-                    ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium'
-                    : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
+                    ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium border-ei-sidebar-divider'
+                    : 'border-transparent text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
                 }`}
                 data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
               >

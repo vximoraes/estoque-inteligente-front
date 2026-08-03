@@ -87,7 +87,7 @@
   --ei-accent: #0f1419;
   --ei-accent-hover: #1a2332;
   --ei-accent-foreground: oklch(0.985 0 0);
-  --background: oklch(0.965 0 0);
+  --background: oklch(0.975 0 0);
   --foreground: oklch(0.13 0 0);
   --card: oklch(0.99 0 0);
   --card-foreground: oklch(0.13 0 0);
@@ -195,6 +195,12 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease;
   }
   body {
     @apply bg-background text-foreground;
