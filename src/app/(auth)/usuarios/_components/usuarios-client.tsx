@@ -333,7 +333,7 @@ export default function PageUsuariosContent({
                                 usuario.ativo ||
                                 reenviarConviteId === usuario._id
                               }
-                              className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-muted-foreground disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="p-1 sm:p-2 text-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-muted-foreground disabled:hover:bg-transparent disabled:cursor-not-allowed"
                               title={
                                 usuario.ativo
                                   ? 'Usuário já ativo'
@@ -352,7 +352,7 @@ export default function PageUsuariosContent({
                                 e.stopPropagation();
                                 handleExcluirUsuario(usuario._id, usuario.nome);
                               }}
-                              className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir usuário"
                             >
                               <Trash2 className="w-4 h-4" />
