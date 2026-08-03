@@ -231,7 +231,7 @@ export default function Cabecalho({
       <div className="flex items-center gap-3 md:gap-5">
         <button
           onClick={handleMenuClick}
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-sm hover:bg-muted transition-colors"
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
           aria-label="Menu"
         >
           <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
@@ -289,13 +289,13 @@ export default function Cabecalho({
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-card border border-border rounded-sm z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-card border border-border rounded-md z-50 overflow-hidden">
               <div className="px-4 py-3 flex items-center justify-between border-b border-border gap-2 bg-muted/20">
                 <span className="font-semibold text-sm sm:text-base text-foreground tracking-tight">
                   Notificações
                 </span>
                 <button
-                  className="text-xs sm:text-sm text-[#0f1419] hover:text-[#1a2330] transition-colors cursor-pointer whitespace-nowrap"
+                  className="text-xs sm:text-sm text-[var(--ei-accent)] hover:text-[var(--ei-accent-hover)] transition-colors cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
                   data-test="botao-marcar-todas-visualizadas"
                 >
@@ -327,7 +327,7 @@ export default function Cabecalho({
                       <div className="flex items-start gap-2 flex-1 min-w-0">
                         {!n.visualizada && (
                           <div
-                            className="w-1.5 h-1.5 bg-[#0f1419] rounded-full shrink-0 mt-1.5"
+                            className="w-1.5 h-1.5 bg-[var(--ei-accent)] rounded-full shrink-0 mt-1.5"
                             data-test="indicador-nao-lida"
                           ></div>
                         )}

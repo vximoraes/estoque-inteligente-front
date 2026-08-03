@@ -13,7 +13,18 @@ import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
-import { X, User } from 'lucide-react';
+import {
+  X,
+  User,
+  Package,
+  BarChart3,
+  FileText,
+  Handshake,
+  Truck,
+  Users,
+  LogOut,
+  type LucideIcon,
+} from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from '@/hooks/use-session';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -28,8 +39,7 @@ interface PathRouter {
 }
 
 interface MobileMenuItemProps {
-  icon: string;
-  iconHover: string;
+  icon: LucideIcon;
   name: string;
   route: string;
   isActive?: boolean;
@@ -43,8 +53,7 @@ interface SubMenuItem {
 }
 
 function MobileMenuItem({
-  icon,
-  iconHover,
+  icon: Icon,
   name,
   route,
   isActive,
@@ -73,13 +82,13 @@ function MobileMenuItem({
     <div className="w-full">
       <button
         onClick={handleClick}
-        className={`text-[13px] pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-sm transition-colors duration-150 ${
+        className={`text-[13px] pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-md transition-colors duration-150 ${
           isActive
             ? 'bg-ei-sidebar-surface text-ei-sidebar-text-strong'
             : 'text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
         }`}
       >
-        <img src={icon} alt={name} className="w-[18px] h-[18px] shrink-0" />
+        <Icon className="w-[18px] h-[18px] shrink-0" />
         <span
           className={`text-[13px] tracking-wide flex-1 text-left ${isActive ? 'font-semibold' : 'font-medium'}`}
         >
@@ -123,7 +132,7 @@ function MobileMenuItem({
                   <button
                     key={item.route}
                     onClick={() => handleSubItemClick(item.route)}
-                    className={`w-full h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-sm transition-colors duration-150 cursor-pointer ${
+                    className={`w-full h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-md transition-colors duration-150 cursor-pointer ${
                       isSubItemActive
                         ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium'
                         : 'text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
@@ -236,7 +245,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               >
                 <button
                   onClick={handleProfileClick}
-                  className={`flex items-center gap-3 p-2 rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer ${collapsed ? 'w-fit mx-auto justify-center' : 'w-full'}`}
+                  className={`flex items-center gap-3 p-2 rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer ${collapsed ? 'w-fit mx-auto justify-center' : 'w-full'}`}
                 >
                   {user?.fotoPerfil && !imageError ? (
                     <img
@@ -280,8 +289,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-menu-item"
                 >
                   <SidebarButtonMenu
-                    src="/itens.svg"
-                    srcHover="/itens-hover.svg"
+                    icon={Package}
                     name="Itens"
                     route="/itens"
                     data-test="sidebar-btn-itens"
@@ -290,8 +298,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     collapsed={collapsed}
                   />
                   <SidebarButtonWithSubmenu
-                    src="/relatorios.svg"
-                    srcHover="/relatorios-hover.svg"
+                    icon={BarChart3}
                     name="Relatórios"
                     data-test="sidebar-btn-relatorios"
                     subItems={[
@@ -311,8 +318,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     collapsed={collapsed}
                   />
                   <SidebarButtonMenu
-                    src="/orcamentos.svg"
-                    srcHover="/orcamentos-hover.svg"
+                    icon={FileText}
                     name="Orçamentos"
                     route="/orcamentos"
                     data-test="sidebar-btn-orcamentos"
@@ -321,8 +327,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     collapsed={collapsed}
                   />
                   <SidebarButtonMenu
-                    src="/emprestimos.svg"
-                    srcHover="/emprestimos-hover.svg"
+                    icon={Handshake}
                     name="Empréstimos"
                     route="/emprestimos"
                     data-test="sidebar-btn-emprestimos"
@@ -331,8 +336,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     collapsed={collapsed}
                   />
                   <SidebarButtonMenu
-                    src="/fornecedores.svg"
-                    srcHover="/fornecedores-hover.svg"
+                    icon={Truck}
                     name="Fornecedores"
                     route="/fornecedores"
                     data-test="sidebar-btn-fornecedores"
@@ -342,8 +346,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   />
                   {canManageUsers() && (
                     <SidebarButtonMenu
-                      src="/usuarios-menu.svg"
-                      srcHover="/usuarios-menu-hover.svg"
+                      icon={Users}
                       name="Usuários"
                       route="/usuarios"
                       data-test="sidebar-btn-usuarios"
@@ -365,7 +368,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 />
 
                 <SidebarMenuButton
-                  className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-sm' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-sm'}`}
+                  className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-md' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-md'}`}
                   onClick={() => {
                     handleLogout();
                     handleItemClick();
@@ -373,11 +376,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-btn-sair"
                   title={collapsed ? 'Sair' : undefined}
                 >
-                  <img
-                    src="/sair.svg"
-                    alt=""
-                    className="w-[18px] h-[18px] shrink-0"
-                  />
+                  <LogOut className="w-[18px] h-[18px] shrink-0 text-ei-sidebar-text-soft" />
                   {!collapsed && (
                     <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
                       Sair
@@ -402,7 +401,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           <div className="relative px-5 pt-6 pb-2 flex items-center justify-end">
             <button
               onClick={closeSidebar}
-              className="w-9 h-9 flex items-center justify-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150"
+              className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150"
               aria-label="Fechar menu"
             >
               <X
@@ -416,7 +415,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           <div className="px-5 mb-4">
             <button
               onClick={handleProfileClick}
-              className="w-full flex items-center gap-3 p-2 rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer"
+              className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer"
             >
               {user?.fotoPerfil && !imageError ? (
                 <img
@@ -452,8 +451,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-0.5 flex-1 mb-6">
               <MobileMenuItem
-                icon="/itens.svg"
-                iconHover="/itens-hover.svg"
+                icon={Package}
                 name="Itens"
                 route="/itens"
                 isActive={path?.startsWith('/itens')}
@@ -462,8 +460,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 }}
               />
               <MobileMenuItem
-                icon="/relatorios.svg"
-                iconHover="/relatorios-hover.svg"
+                icon={BarChart3}
                 name="Relatórios"
                 route="/relatorios"
                 isActive={path?.startsWith('/relatorios')}
@@ -478,8 +475,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 ]}
               />
               <MobileMenuItem
-                icon="/orcamentos.svg"
-                iconHover="/orcamentos-hover.svg"
+                icon={FileText}
                 name="Orçamentos"
                 route="/orcamentos"
                 isActive={path?.startsWith('/orcamentos')}
@@ -488,8 +484,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 }}
               />
               <MobileMenuItem
-                icon="/emprestimos.svg"
-                iconHover="/emprestimos-hover.svg"
+                icon={Handshake}
                 name="Empréstimos"
                 route="/emprestimos"
                 isActive={path?.startsWith('/emprestimos')}
@@ -498,8 +493,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 }}
               />
               <MobileMenuItem
-                icon="/fornecedores.svg"
-                iconHover="/fornecedores-hover.svg"
+                icon={Truck}
                 name="Fornecedores"
                 route="/fornecedores"
                 isActive={path?.startsWith('/fornecedores')}
@@ -509,8 +503,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               />
               {canManageUsers() && (
                 <MobileMenuItem
-                  icon="/usuarios-menu.svg"
-                  iconHover="/usuarios-menu-hover.svg"
+                  icon={Users}
                   name="Usuários"
                   route="/usuarios"
                   isActive={path?.startsWith('/usuarios')}
@@ -530,14 +523,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleLogout();
                   handleItemClick();
                 }}
-                className="pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-sm hover:bg-ei-sidebar-surface-hover transition-colors duration-150 text-ei-sidebar-text-soft hover:text-ei-sidebar-text"
+                className="pl-4 pr-3 h-10 w-full cursor-pointer flex gap-3 items-center rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150 text-ei-sidebar-text-soft hover:text-ei-sidebar-text"
                 data-test="sidebar-btn-sair-mobile"
               >
-                <img
-                  src="/sair.svg"
-                  alt=""
-                  className="w-[18px] h-[18px] shrink-0"
-                />
+                <LogOut className="w-[18px] h-[18px] shrink-0" />
                 <span className="text-[13px] font-medium tracking-wide">
                   Sair
                 </span>

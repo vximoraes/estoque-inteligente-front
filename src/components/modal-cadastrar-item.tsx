@@ -381,7 +381,7 @@ export default function ModalCadastrarItem({
           <button
             data-test="modal-cadastrar-item-close"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
@@ -454,7 +454,7 @@ export default function ModalCadastrarItem({
                             }));
                           }
                         }}
-                        className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors cursor-pointer ${
+                        className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors cursor-pointer ${
                           errors.categoria
                             ? 'border-destructive'
                             : 'border-border'
@@ -487,7 +487,7 @@ export default function ModalCadastrarItem({
                               onChange={(e) =>
                                 setCategoriaPesquisa(e.target.value)
                               }
-                              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent"
+                              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
                               onClick={(e) => e.stopPropagation()}
                               data-test="input-pesquisa-categoria"
                             />
@@ -502,7 +502,7 @@ export default function ModalCadastrarItem({
                                       key={categoria._id}
                                       className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
                                         categoriaId === categoria._id
-                                          ? 'bg-[#0f1419]/10'
+                                          ? 'bg-[var(--ei-accent)]/10'
                                           : ''
                                       }`}
                                     >
@@ -513,7 +513,7 @@ export default function ModalCadastrarItem({
                                         }
                                         className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${
                                           categoriaId === categoria._id
-                                            ? 'text-[#0f1419] font-medium'
+                                            ? 'text-[var(--ei-accent)] font-medium'
                                             : 'text-foreground'
                                         }`}
                                         title={categoria.nome}
@@ -528,7 +528,7 @@ export default function ModalCadastrarItem({
                                             setCategoriaToEdit(categoria);
                                             setIsEditarCategoriaModalOpen(true);
                                           }}
-                                          className="p-1.5 text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                          className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                           title="Editar categoria"
                                           data-test="botao-editar-categoria"
                                         >
@@ -543,7 +543,7 @@ export default function ModalCadastrarItem({
                                               true,
                                             );
                                           }}
-                                          className="p-1.5 text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                          className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                           title="Excluir categoria"
                                           data-test="botao-excluir-categoria"
                                         >
@@ -566,8 +566,8 @@ export default function ModalCadastrarItem({
                     <Button
                       type="button"
                       onClick={() => setIsAddingCategoria(true)}
-                      className="text-white h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
-                      style={{ backgroundColor: '#0f1419' }}
+                      className="text-ei-accent-foreground h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+                      style={{ backgroundColor: 'var(--ei-accent)' }}
                       data-test="botao-adicionar-categoria"
                     >
                       <Plus className="w-4 h-4" />
@@ -626,7 +626,7 @@ export default function ModalCadastrarItem({
                         <img
                           src={imagemPreview}
                           alt="Preview"
-                          className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded"
+                          className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded-md"
                         />
                         <span className="text-xs sm:text-sm text-foreground truncate">
                           Imagem selecionada
@@ -635,7 +635,7 @@ export default function ModalCadastrarItem({
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-all duration-200 cursor-pointer"
+                        className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-muted transition-all duration-200 cursor-pointer"
                         aria-label="Remover imagem"
                         data-test="botao-remover-imagem"
                       >
@@ -654,12 +654,12 @@ export default function ModalCadastrarItem({
                     onDrop={handleDrop}
                     className={`relative border-2 border-dashed rounded-md min-h-11 flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${
                       isDragging
-                        ? 'border-[#0f1419] bg-[#0f1419]/10'
+                        ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
                         : 'border-border bg-muted/40 hover:bg-muted hover:border-foreground/30'
                     }`}
                   >
                     <p className="text-center text-xs sm:text-sm">
-                      <span className="font-semibold text-[#0f1419]">
+                      <span className="font-semibold text-[var(--ei-accent)]">
                         Adicione ou arraste
                       </span>{' '}
                       <span className="text-muted-foreground">
@@ -706,7 +706,7 @@ export default function ModalCadastrarItem({
           </div>
 
           {/* Footer com ações */}
-          <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+          <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -721,8 +721,8 @@ export default function ModalCadastrarItem({
               <Button
                 type="submit"
                 disabled={isPending}
-                className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-                style={{ backgroundColor: '#0f1419' }}
+                className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+                style={{ backgroundColor: 'var(--ei-accent)' }}
                 data-test="botao-salvar"
               >
                 {isPending ? 'Salvando...' : 'Salvar'}
@@ -748,7 +748,7 @@ export default function ModalCadastrarItem({
           }}
         >
           <div
-            className="bg-card rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-md shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative p-4 sm:p-6 pb-0">
@@ -822,7 +822,7 @@ export default function ModalCadastrarItem({
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-lg">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
               <div className="flex gap-2 sm:gap-3">
                 <Button
                   type="button"
@@ -845,8 +845,8 @@ export default function ModalCadastrarItem({
                   type="button"
                   onClick={handleAddCategoria}
                   disabled={createCategoriaMutation.isPending}
-                  className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer text-sm sm:text-base"
-                  style={{ backgroundColor: '#0f1419' }}
+                  className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer text-sm sm:text-base"
+                  style={{ backgroundColor: 'var(--ei-accent)' }}
                   data-test="botao-criar-categoria"
                 >
                   {createCategoriaMutation.isPending ? 'Criando...' : 'Criar'}

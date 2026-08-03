@@ -4,7 +4,7 @@ type LogoEiProps = {
 
 export default function LogoEi({ logoSizeClassName = 'w-44' }: LogoEiProps) {
   return (
-    <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-[#151c25] via-[#0f1419] to-[#0e1318]  items-center justify-center overflow-hidden">
+    <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-[#1a1a1a] via-[#121212] to-[#0f0f0f]  items-center justify-center overflow-hidden">
       {/* Grid mais contrastado */}
       <div
         className="absolute inset-0 opacity-15"

@@ -325,7 +325,7 @@ export default function ModalEmprestarItem({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
           data-test="close-modal-button"
         >
           <X size={20} className="text-muted-foreground" />
@@ -342,7 +342,7 @@ export default function ModalEmprestarItem({
           <label className="block text-base font-medium text-foreground mb-1">
             Item
           </label>
-          <div className="w-full h-11 flex items-center px-3 border border-border rounded-sm bg-muted/50 text-muted-foreground">
+          <div className="w-full h-11 flex items-center px-3 border border-border rounded-md bg-muted/50 text-muted-foreground">
             {itemNome}
           </div>
         </div>
@@ -354,7 +354,7 @@ export default function ModalEmprestarItem({
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-sm text-left hover:border-[#0f1419]/40 transition-colors cursor-pointer"
+            className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-md text-left hover:border-[var(--ei-accent)]/40 transition-colors cursor-pointer"
           >
             <span
               className={
@@ -374,14 +374,14 @@ export default function ModalEmprestarItem({
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-hidden flex flex-col">
               <div className="p-3 border-b border-border bg-muted/50">
                 <input
                   type="text"
                   value={localizacaoPesquisa}
                   onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
                   placeholder="Pesquisar..."
-                  className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent"
+                  className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -403,7 +403,7 @@ export default function ModalEmprestarItem({
                           type="button"
                           className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
                             localizacaoSelecionada === loc._id
-                              ? 'bg-[#0f1419]/5 text-[#0f1419] font-medium'
+                              ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
                               : 'text-foreground'
                           }`}
                           onClick={() => {
@@ -417,7 +417,7 @@ export default function ModalEmprestarItem({
                           }}
                         >
                           <span className="truncate">{loc.nome}</span>
-                          <span className="text-sm px-2 py-0.5 rounded shrink-0 bg-muted/50 text-muted-foreground">
+                          <span className="text-sm px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-muted-foreground">
                             {estoque} disponível
                           </span>
                         </button>
@@ -452,7 +452,7 @@ export default function ModalEmprestarItem({
               setQuantidade(e.target.value);
               setErrors((prev) => ({ ...prev, quantidade: undefined }));
             }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Digite a quantidade"
           />
           {errors.quantidade && (
@@ -471,7 +471,7 @@ export default function ModalEmprestarItem({
               setSolicitanteNome(e.target.value);
               setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
             }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Nome da pessoa solicitante"
           />
           {errors.solicitanteNome && (
@@ -492,7 +492,7 @@ export default function ModalEmprestarItem({
               setSolicitanteEmail(e.target.value);
               setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
             }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="E-mail da pessoa solicitante (opcional)"
           />
           {errors.solicitanteEmail && (
@@ -513,7 +513,7 @@ export default function ModalEmprestarItem({
               setDataEmprestimo(e.target.value);
               setErrors((prev) => ({ ...prev, dataEmprestimo: undefined }));
             }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
           />
           <p className="mt-1 text-sm text-muted-foreground">
             Deixe em branco para usar o momento atual. Use para registrar um
@@ -537,7 +537,7 @@ export default function ModalEmprestarItem({
               setDataPrevista(e.target.value);
               setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
             }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
           />
           {errors.dataPrevista && (
             <p className="mt-1 text-sm text-destructive">
@@ -553,7 +553,7 @@ export default function ModalEmprestarItem({
           <textarea
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
-            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             rows={3}
             placeholder="Observações opcionais"
             maxLength={500}
@@ -561,7 +561,7 @@ export default function ModalEmprestarItem({
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             variant="outline"
@@ -573,8 +573,8 @@ export default function ModalEmprestarItem({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="h-11 flex-1 text-white cursor-pointer hover:opacity-90"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             disabled={emprestimoMutation.isPending}
           >
             {emprestimoMutation.isPending

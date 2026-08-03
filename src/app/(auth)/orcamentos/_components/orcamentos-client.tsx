@@ -370,7 +370,7 @@ export default function PageOrcamentosContent({
           data-test="search-actions-bar"
         >
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar orçamentos..."
@@ -390,8 +390,8 @@ export default function PageOrcamentosContent({
             Filtros
           </Button>
           <Button
-            className="h-11 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             onClick={handleAdicionarClick}
             data-test="adicionar-button"
           >
@@ -405,7 +405,7 @@ export default function PageOrcamentosContent({
             <div className="flex flex-wrap items-center gap-2">
               {(valorMinFilter || valorMaxFilter) && (
                 <div
-                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
                   data-test="applied-filter-valor"
                 >
                   <span className="font-medium">Valor:</span>
@@ -428,7 +428,7 @@ export default function PageOrcamentosContent({
               )}
               {(dataInicioFilter || dataFimFilter) && (
                 <div
-                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                  className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
                   data-test="applied-filter-periodo"
                 >
                   <span className="font-medium">Período:</span>
@@ -454,7 +454,7 @@ export default function PageOrcamentosContent({
         )}
 
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0">
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0">
             Erro ao carregar orçamentos: {error.message}
           </div>
         )}
@@ -465,32 +465,32 @@ export default function PageOrcamentosContent({
           (isFetching && !isLoading) ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando orçamentos...
               </p>
             </div>
           ) : orcamentos.length > 0 ? (
             <div
-              className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col"
+              className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col"
               data-test="orcamentos-table"
             >
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm">
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
                         NOME
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
                         DESCRIÇÃO
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8 whitespace-nowrap">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8 whitespace-nowrap">
                         TOTAL
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-center px-8 whitespace-nowrap">
                         AÇÕES
                       </TableHead>
                     </TableRow>
@@ -501,7 +501,7 @@ export default function PageOrcamentosContent({
                         key={orcamento._id}
                         data-test="visualizar-button"
                         onClick={() => handleViewDetails(orcamento._id)}
-                        className="hover:bg-gray-50 border-b relative cursor-pointer"
+                        className="hover:bg-muted border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-8 py-2">
@@ -530,7 +530,7 @@ export default function PageOrcamentosContent({
                                 e.stopPropagation();
                                 handleEdit(orcamento._id);
                               }}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-[#0f1419] hover:bg-[#0f1419]/10 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar orçamento"
                               data-test="editar-button"
                             >
@@ -544,8 +544,8 @@ export default function PageOrcamentosContent({
                               disabled={pdfLoadingId === orcamento._id}
                               className={`p-1 sm:p-2 rounded-md transition-colors duration-200 ${
                                 pdfLoadingId === orcamento._id
-                                  ? 'text-gray-400 cursor-wait'
-                                  : 'text-gray-900 hover:text-green-600 hover:bg-green-50 cursor-pointer'
+                                  ? 'text-muted-foreground cursor-wait'
+                                  : 'text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 cursor-pointer'
                               }`}
                               title={
                                 pdfLoadingId === orcamento._id
@@ -565,7 +565,7 @@ export default function PageOrcamentosContent({
                                 e.stopPropagation();
                                 handleDelete(orcamento._id);
                               }}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir orçamento"
                               data-test="excluir-button"
                             >
@@ -579,8 +579,8 @@ export default function PageOrcamentosContent({
                 </table>
               </div>
               {paginationInfo.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 shrink-0">
-                  <p className="text-sm text-gray-600">
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-muted shrink-0">
+                  <p className="text-sm text-muted-foreground">
                     Página {paginationInfo.page} de {paginationInfo.totalPages}
                   </p>
                   <div className="flex items-center gap-1">
@@ -589,25 +589,25 @@ export default function PageOrcamentosContent({
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
                       disabled={!paginationInfo.hasPrevPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       aria-label="Página anterior"
                     >
-                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                      <ChevronLeft className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <button
                       onClick={() => setCurrentPage((prev) => prev + 1)}
                       disabled={!paginationInfo.hasNextPage || isFetching}
-                      className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       aria-label="Próxima página"
                     >
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={FileText}
                 title={

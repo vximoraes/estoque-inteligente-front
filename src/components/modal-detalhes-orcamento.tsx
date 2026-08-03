@@ -112,7 +112,7 @@ export default function ModalDetalhesOrcamento({
       <div className="relative p-6 border-b border-border flex-shrink-0">
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer z-10"
           title="Fechar"
           aria-label="Fechar modal"
           data-test="modal-detalhes-close"
@@ -139,7 +139,7 @@ export default function ModalDetalhesOrcamento({
             </div>
           )}
           <p
-            className="text-xl font-semibold text-[#0f1419]"
+            className="text-xl font-semibold text-[var(--ei-accent)]"
             data-test="modal-detalhes-total"
           >
             {isLoading
@@ -154,7 +154,7 @@ export default function ModalDetalhesOrcamento({
       {/* Conteúdo */}
       <div className="p-6 space-y-4 flex-1 overflow-y-auto">
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível carregar o orçamento
             </div>
@@ -167,7 +167,7 @@ export default function ModalDetalhesOrcamento({
           <div className="flex justify-center py-8" data-test="loading-spinner">
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
             </div>
           </div>
         ) : orcamento ? (
@@ -179,7 +179,7 @@ export default function ModalDetalhesOrcamento({
                   Itens ({orcamento.itens.length})
                 </label>
                 <div
-                  className="border border-border rounded-sm overflow-x-auto"
+                  className="border border-border rounded-md overflow-x-auto"
                   data-test="modal-detalhes-tabela"
                 >
                   <table className="w-full text-sm">

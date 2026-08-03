@@ -107,7 +107,7 @@ export default function ModalDetalhesFornecedor({
       <div className="relative p-6 border-b border-border flex-shrink-0">
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer z-10"
           title="Fechar"
         >
           <X size={20} />
@@ -124,7 +124,7 @@ export default function ModalDetalhesFornecedor({
             </p>
           )}
           {isLoading ? (
-            <p className="text-lg font-semibold text-[#306FCC]">
+            <p className="text-lg font-semibold text-[var(--ei-accent)]">
               Carregando...
             </p>
           ) : fornecedor?.url ? (
@@ -132,7 +132,7 @@ export default function ModalDetalhesFornecedor({
               href={fornecedor.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-lg font-semibold text-[#306FCC] hover:text-[#306FCC]/80 hover:underline max-w-full"
+              className="inline-flex items-center gap-2 text-lg font-semibold text-[var(--ei-accent)] hover:text-[var(--ei-accent)]/80 hover:underline max-w-full"
               title={fornecedor.url}
             >
               <span className="truncate">{fornecedor.url}</span>
@@ -150,7 +150,7 @@ export default function ModalDetalhesFornecedor({
       <div className="p-6 space-y-4 flex-1 overflow-y-auto">
         {/* Mensagem de erro */}
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível carregar o fornecedor
             </div>
@@ -163,7 +163,7 @@ export default function ModalDetalhesFornecedor({
           <div className="flex justify-center py-8">
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
             </div>
           </div>
         ) : fornecedor ? (
@@ -183,7 +183,7 @@ export default function ModalDetalhesFornecedor({
                   </p>
                   <button
                     onClick={() => handleCopy(fornecedor.contato!, 'contato')}
-                    className="relative p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors flex-shrink-0 cursor-pointer"
+                    className="relative p-1.5 text-foreground hover:bg-muted rounded-md transition-colors flex-shrink-0 cursor-pointer"
                     title="Copiar contato"
                   >
                     <span className="relative block w-4 h-4">

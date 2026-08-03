@@ -120,7 +120,7 @@ function RedefinirSenhaContent() {
   if (tokenValido === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <PulseLoader color="#0f1419" />
+        <PulseLoader color="var(--ei-accent)" />
       </div>
     );
   }
@@ -141,7 +141,7 @@ function RedefinirSenhaContent() {
               </p>
               <Button
                 onClick={() => router.push('/esqueci-senha')}
-                className="h-11 rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
+                className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
               >
                 Solicitar novo link
               </Button>
@@ -273,7 +273,7 @@ function RedefinirSenhaContent() {
 
               <Button
                 type="submit"
-                className="mt-6 h-11 w-full rounded-md bg-[#0f1419] text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1a2330] cursor-pointer dark:bg-[#306FCC] dark:hover:bg-[#2557a7]"
+                className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
                 disabled={isSubmitting}
                 data-test="botao-redefinir-senha"
               >
@@ -292,7 +292,7 @@ export default function RedefinirSenhaPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="#0f1419" />
+          <PulseLoader color="var(--ei-accent)" />
         </div>
       }
     >

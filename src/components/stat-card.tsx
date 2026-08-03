@@ -22,7 +22,7 @@ export default function StatCard({
 
   return (
     <div
-      className="flex flex-col gap-1 sm:gap-1.5 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5 bg-card border border-border rounded-sm flex-1 min-w-0"
+      className="flex flex-col gap-1 sm:gap-1.5 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5 bg-card border border-border rounded-md flex-1 min-w-0"
       data-test={dataTest}
       title={cardTitle}
     >

@@ -27,13 +27,13 @@ interface ModalDetalhesUsuarioProps {
 }
 
 const STATUS_BG: Record<'ativo' | 'aguardando', string> = {
-  ativo: 'oklch(0.986 0.010 145)',
-  aguardando: 'oklch(0.986 0.010 78)',
+  ativo: 'var(--status-success-bg)',
+  aguardando: 'var(--status-warning-bg)',
 };
 
 const STATUS_TEXT: Record<'ativo' | 'aguardando', string> = {
-  ativo: 'oklch(0.55 0.16 145)',
-  aguardando: 'oklch(0.58 0.14 78)',
+  ativo: 'var(--status-success-text)',
+  aguardando: 'var(--status-warning-text)',
 };
 
 export default function ModalDetalhesUsuario({
@@ -127,7 +127,7 @@ export default function ModalDetalhesUsuario({
         <button
           data-test="modal-detalhes-close"
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer z-10"
           title="Fechar"
         >
           <X size={20} />
@@ -142,7 +142,7 @@ export default function ModalDetalhesUsuario({
             <div className="flex justify-center mt-2">
               <span
                 data-test="modal-detalhes-status"
-                className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+                className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
                 style={{
                   color: STATUS_TEXT[usuario.ativo ? 'ativo' : 'aguardando'],
                   backgroundColor:
@@ -160,7 +160,7 @@ export default function ModalDetalhesUsuario({
       <div className="p-6 space-y-4 flex-1 overflow-y-auto">
         {/* Mensagem de erro */}
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível carregar o usuário
             </div>
@@ -173,7 +173,7 @@ export default function ModalDetalhesUsuario({
           <div className="flex justify-center py-8">
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
             </div>
           </div>
         ) : usuario ? (
@@ -194,7 +194,7 @@ export default function ModalDetalhesUsuario({
                 <button
                   data-test="modal-detalhes-copiar-email"
                   onClick={() => handleCopy(usuario.email, 'email')}
-                  className="p-1.5 text-muted-foreground hover:bg-muted rounded-sm transition-colors flex-shrink-0 cursor-pointer"
+                  className="p-1.5 text-muted-foreground hover:bg-muted rounded-md transition-colors flex-shrink-0 cursor-pointer"
                   title="Copiar e-mail"
                 >
                   {copiedField === 'email' ? (

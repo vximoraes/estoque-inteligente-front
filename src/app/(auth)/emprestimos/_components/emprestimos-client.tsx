@@ -123,7 +123,7 @@ export default function EmprestimosPageContent({
               placeholder="Pesquisar por item, solicitante ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#0f1419]/35 focus-visible:border-[#0f1419]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
             />
           </div>
 
@@ -138,8 +138,8 @@ export default function EmprestimosPageContent({
           </Button>
 
           <Button
-            className="h-11 px-4 flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="adicionar-button"
             onClick={() => setIsCadastrarModalOpen(true)}
           >
@@ -152,7 +152,7 @@ export default function EmprestimosPageContent({
           <div className="mb-4 shrink-0" data-test="applied-filters">
             <div className="flex flex-wrap items-center gap-2">
               <div
-                className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded text-xs border border-border font-medium"
+                className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
                 data-test="applied-filter-status"
               >
                 <span className="font-medium">Status:</span>
@@ -173,7 +173,7 @@ export default function EmprestimosPageContent({
         )}
 
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md">
             Erro ao carregar empréstimos: {error.message}
           </div>
         )}
@@ -182,38 +182,38 @@ export default function EmprestimosPageContent({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando empréstimos...
               </p>
             </div>
           ) : emprestimos.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[700px] caption-bottom text-xs sm:text-sm">
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b">
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
                         ITEM
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-left px-6">
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
                         SOLICITANTE
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
                         QTD. EMPRESTADA
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
                         DATA PREVISTA
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
                         STATUS
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-6">
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
                         AÇÕES
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center px-8">
+                      <TableHead className="font-semibold text-muted-foreground text-center px-8">
                         DEVOLVER
                       </TableHead>
                     </TableRow>
@@ -227,7 +227,7 @@ export default function EmprestimosPageContent({
                           setDetalhesEmprestimo(emp);
                           setIsDetalhesModalOpen(true);
                         }}
-                        className="hover:bg-gray-50 border-b cursor-pointer"
+                        className="hover:bg-muted border-b cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-6 py-3">
@@ -244,13 +244,21 @@ export default function EmprestimosPageContent({
                         </TableCell>
                         <TableCell className="text-center px-6 py-3">
                           <span
-                            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium text-center whitespace-nowrap ${
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium text-center whitespace-nowrap bg-muted text-muted-foreground"
+                            style={
                               emp.status === 'Ativo'
-                                ? 'bg-green-100 text-green-800'
+                                ? {
+                                    backgroundColor: 'var(--status-success-bg)',
+                                    color: 'var(--status-success-text)',
+                                  }
                                 : emp.status === 'Atrasado'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-gray-100 text-gray-800'
-                            }`}
+                                  ? {
+                                      backgroundColor:
+                                        'var(--status-danger-bg)',
+                                      color: 'var(--status-danger-text)',
+                                    }
+                                  : undefined
+                            }
                           >
                             {emp.status}
                           </span>
@@ -263,7 +271,7 @@ export default function EmprestimosPageContent({
                                 setEditarEmprestimo(emp);
                                 setIsEditarModalOpen(true);
                               }}
-                              className="p-1 sm:p-2 rounded-md transition-colors duration-200 text-gray-700 hover:text-[#0f1419] hover:bg-[#0f1419]/10 cursor-pointer"
+                              className="p-1 sm:p-2 rounded-md transition-colors duration-200 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 cursor-pointer"
                               title="Editar empréstimo"
                             >
                               <Pencil className="w-4 h-4" />
@@ -275,7 +283,7 @@ export default function EmprestimosPageContent({
                                 setExcluirEmprestimo(emp);
                                 setIsExcluirModalOpen(true);
                               }}
-                              className="p-1 sm:p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir empréstimo"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -292,8 +300,8 @@ export default function EmprestimosPageContent({
                             disabled={emp.quantidade_aberta <= 0}
                             className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
                               emp.quantidade_aberta <= 0
-                                ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed'
-                                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer'
+                                ? 'border-border text-muted-foreground bg-muted cursor-not-allowed'
+                                : 'border-border text-muted-foreground bg-card hover:bg-muted cursor-pointer'
                             }`}
                           >
                             Devolver
@@ -305,15 +313,15 @@ export default function EmprestimosPageContent({
                 </table>
               </div>
               {paginationInfo && paginationInfo.totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 shrink-0">
-                  <span className="text-sm text-gray-500">
+                <div className="flex items-center justify-between px-6 py-3 border-t border-border shrink-0">
+                  <span className="text-sm text-muted-foreground">
                     Página {currentPage} de {paginationInfo.totalPages}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={!paginationInfo.hasPrevPage}
-                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-1.5 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -324,7 +332,7 @@ export default function EmprestimosPageContent({
                         )
                       }
                       disabled={!paginationInfo.hasNextPage}
-                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-1.5 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -333,7 +341,7 @@ export default function EmprestimosPageContent({
               )}
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={Handshake}
                 title={

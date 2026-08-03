@@ -181,7 +181,7 @@ export default function ModalSelecionarItem({
         <div className="relative p-6 pb-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
@@ -234,7 +234,7 @@ export default function ModalSelecionarItem({
           <div className="overflow-y-auto max-h-[45vh] -mx-6 px-6">
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
-                <PulseLoader color="#0f1419" size={12} />
+                <PulseLoader color="var(--ei-accent)" size={12} />
               </div>
             ) : itensLista.length > 0 ? (
               <>
@@ -259,7 +259,7 @@ export default function ModalSelecionarItem({
                 <div ref={observerTarget} className="h-4 mt-4" />
                 {isFetchingNextPage && (
                   <div className="flex justify-center py-4">
-                    <PulseLoader color="#0f1419" size={8} />
+                    <PulseLoader color="var(--ei-accent)" size={8} />
                   </div>
                 )}
               </>
@@ -272,7 +272,7 @@ export default function ModalSelecionarItem({
         </div>
 
         {/* Footer com botões */}
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
           <div className="flex gap-3">
             <Button
               type="button"
@@ -288,8 +288,8 @@ export default function ModalSelecionarItem({
               disabled={
                 multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId
               }
-              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#0f1419' }}
+              className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
               data-test="botao-confirmar-selecao"
             >
               {multiSelect && tempSelectedIds.size > 0

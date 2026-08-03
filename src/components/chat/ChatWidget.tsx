@@ -47,9 +47,9 @@ export function ChatWidget() {
             fixed bottom-6 right-6 z-50
             flex items-center justify-center
             rounded-full shrink-0
-            bg-[#0f1419] border border-border
-            text-white shadow-lg cursor-pointer
-            hover:bg-[#1a2332] hover:shadow-xl
+            bg-[var(--ei-accent)] border border-border
+            text-ei-accent-foreground shadow-lg cursor-pointer
+            hover:bg-[var(--ei-accent-hover)] hover:shadow-xl
             transition-[background-color,box-shadow]
             animate-in fade-in-0 zoom-in-95 duration-200
           `}

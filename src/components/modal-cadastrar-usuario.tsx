@@ -118,7 +118,7 @@ export default function ModalCadastrarUsuario({
         <button
           data-test="modal-cadastrar-close"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
         >
           <X size={20} />
@@ -156,7 +156,7 @@ export default function ModalCadastrarUsuario({
             placeholder="Nome do usuário"
             maxLength={100}
             {...register('nome')}
-            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.nome ? 'border-destructive' : 'border-border'
             }`}
             disabled={isSubmitting || cadastrarMutation.isPending}
@@ -182,7 +182,7 @@ export default function ModalCadastrarUsuario({
             type="email"
             placeholder="E-mail do usuário"
             {...register('email')}
-            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.email ? 'border-destructive' : 'border-border'
             }`}
             disabled={isSubmitting || cadastrarMutation.isPending}
@@ -196,7 +196,7 @@ export default function ModalCadastrarUsuario({
 
         {/* Mensagem de erro da API */}
         {cadastrarMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível cadastrar o usuário
             </div>
@@ -210,7 +210,7 @@ export default function ModalCadastrarUsuario({
       </div>
 
       {/* Footer com ações */}
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             data-test="modal-cadastrar-cancelar"
@@ -225,8 +225,8 @@ export default function ModalCadastrarUsuario({
             data-test="modal-cadastrar-confirmar"
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting || cadastrarMutation.isPending}
-            className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
           >
             {isSubmitting || cadastrarMutation.isPending
               ? 'Cadastrando...'

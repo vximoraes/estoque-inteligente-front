@@ -146,7 +146,7 @@ export default function ModalEditarEmprestimo({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
         >
           <X size={20} className="text-muted-foreground" />
         </button>
@@ -162,7 +162,7 @@ export default function ModalEditarEmprestimo({
 
       <div className="p-6 space-y-5">
         {emprestimo.quantidade_aberta <= 0 && (
-          <div className="bg-muted/50 border border-border rounded-sm p-3 text-sm text-muted-foreground">
+          <div className="bg-muted/50 border border-border rounded-md p-3 text-sm text-muted-foreground">
             Este empréstimo já foi devolvido
             {emprestimo.data_devolucao_total
               ? ` em ${new Date(emprestimo.data_devolucao_total).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
@@ -180,7 +180,7 @@ export default function ModalEditarEmprestimo({
             type="text"
             value={solicitante}
             onChange={(e) => setSolicitante(e.target.value)}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
           />
         </div>
 
@@ -193,7 +193,7 @@ export default function ModalEditarEmprestimo({
             type="datetime-local"
             value={dataPrevista}
             onChange={(e) => setDataPrevista(e.target.value)}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
           />
         </div>
 
@@ -207,7 +207,7 @@ export default function ModalEditarEmprestimo({
             onChange={(e) => setObservacoes(e.target.value)}
             rows={3}
             maxLength={500}
-            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Observações opcionais"
           />
         </div>
@@ -222,7 +222,7 @@ export default function ModalEditarEmprestimo({
               onChange={(e) => setObservacoesDevolucao(e.target.value)}
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
               placeholder="Observações opcionais"
             />
           </div>
@@ -231,8 +231,8 @@ export default function ModalEditarEmprestimo({
         {/* Botão salvar */}
         <Button
           onClick={handleSalvar}
-          className="h-11 w-full text-white cursor-pointer hover:opacity-90"
-          style={{ backgroundColor: '#0f1419' }}
+          className="h-11 w-full text-ei-accent-foreground cursor-pointer hover:opacity-90"
+          style={{ backgroundColor: 'var(--ei-accent)' }}
           disabled={isPending}
         >
           {isPending ? 'Salvando...' : 'Salvar Alterações'}

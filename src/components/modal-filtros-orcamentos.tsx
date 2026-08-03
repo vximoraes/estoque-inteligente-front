@@ -315,7 +315,7 @@ export default function ModalFiltrosOrcamentos({
                   value={valorMin}
                   onChange={handleValorMinChange}
                   placeholder="0,00"
-                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419]"
+                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
                   data-test="filtro-valor-min-input"
                 />
               </div>
@@ -337,7 +337,7 @@ export default function ModalFiltrosOrcamentos({
                   value={valorMax}
                   onChange={handleValorMaxChange}
                   placeholder="0,00"
-                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419]"
+                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
                   data-test="filtro-valor-max-input"
                 />
               </div>
@@ -353,7 +353,7 @@ export default function ModalFiltrosOrcamentos({
           <div className="relative" data-dropdown>
             <button
               onClick={() => setPeriodoDropdownOpen(!periodoDropdownOpen)}
-              className="w-full h-11 flex items-center justify-between px-3 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419] transition-colors cursor-pointer"
+              className="w-full h-11 flex items-center justify-between px-3 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)] transition-colors cursor-pointer"
               data-test="filtro-periodo-dropdown"
             >
               <span
@@ -378,7 +378,7 @@ export default function ModalFiltrosOrcamentos({
                     onClick={() => handlePeriodoChange(option.value)}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       periodoSelecionado === option.value
-                        ? 'bg-[#0f1419]/10 text-[#0f1419]'
+                        ? 'bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
                         : 'text-foreground hover:bg-muted/40'
                     } cursor-pointer`}
                     data-test={`filtro-periodo-option-${option.value || 'todos'}`}
@@ -414,7 +414,7 @@ export default function ModalFiltrosOrcamentos({
                   type="date"
                   value={dataInicio}
                   onChange={(e) => setDataInicio(e.target.value)}
-                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419]"
+                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
                   data-test="filtro-data-inicio-input"
                 />
               </div>
@@ -430,7 +430,7 @@ export default function ModalFiltrosOrcamentos({
                   type="date"
                   value={dataFim}
                   onChange={(e) => setDataFim(e.target.value)}
-                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419]"
+                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
                   data-test="filtro-data-fim-input"
                 />
               </div>
@@ -440,7 +440,7 @@ export default function ModalFiltrosOrcamentos({
       </div>
 
       {/* Footer com ações */}
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             variant="outline"
@@ -452,8 +452,8 @@ export default function ModalFiltrosOrcamentos({
           </Button>
           <Button
             onClick={handleApplyFilters}
-            className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="aplicar-filtros-button"
           >
             Aplicar Filtros

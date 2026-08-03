@@ -70,7 +70,7 @@ export default function ModalLocalizacoes({
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer z-10"
           title="Fechar"
           data-test="modal-localizacoes-close"
         >
@@ -94,7 +94,7 @@ export default function ModalLocalizacoes({
             </p>
           )}
           <p
-            className="text-xl font-semibold text-[#0f1419]"
+            className="text-xl font-semibold text-[var(--ei-accent)]"
             data-test="modal-localizacoes-total"
           >
             {isLoading ? 'Carregando...' : totalQuantidade}
@@ -114,7 +114,7 @@ export default function ModalLocalizacoes({
           >
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 rounded-full border-4 border-border/30"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
             </div>
             <p className="mt-4 text-muted-foreground text-sm">
               Carregando localizações...
@@ -136,12 +136,12 @@ export default function ModalLocalizacoes({
             .map((estoque, index) => (
               <div
                 key={estoque._id}
-                className="border border-border rounded-sm p-4 bg-muted/50"
+                className="border border-border rounded-md p-4 bg-muted/50"
                 data-test={`localizacao-item-${index}`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2 min-w-0">
-                    <MapPin className="w-4 h-4 text-[#0f1419] shrink-0" />
+                    <MapPin className="w-4 h-4 text-[var(--ei-accent)] shrink-0" />
                     <span className="text-base text-muted-foreground shrink-0">
                       Localização:
                     </span>
@@ -154,7 +154,7 @@ export default function ModalLocalizacoes({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Package className="w-4 h-4 text-[#0f1419] shrink-0" />
+                    <Package className="w-4 h-4 text-[var(--ei-accent)] shrink-0" />
                     <span className="text-base text-muted-foreground shrink-0">
                       Quantidade:
                     </span>

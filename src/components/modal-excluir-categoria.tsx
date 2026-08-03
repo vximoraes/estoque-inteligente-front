@@ -110,7 +110,7 @@ export default function ModalExcluirCategoria({
         <button
           onClick={handleClose}
           disabled={inativarCategoriaMutation.isPending}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           title="Fechar"
         >
           <X size={20} />
@@ -136,7 +136,7 @@ export default function ModalExcluirCategoria({
         </div>
 
         {inativarCategoriaMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">Erro ao excluir categoria</div>
             <div className="text-destructive/80">
               {(inativarCategoriaMutation.error as any)?.response?.data

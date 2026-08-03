@@ -330,7 +330,7 @@ export default function ModalSaidaItem({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
           data-test="modal-saida-close"
         >
@@ -367,7 +367,7 @@ export default function ModalSaidaItem({
             value={quantidade}
             onChange={handleQuantidadeChange}
             maxLength={9}
-            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.quantidade ? 'border-destructive' : 'border-border'
             }`}
             disabled={saidaMutation.isPending || retirarTudo}
@@ -395,7 +395,7 @@ export default function ModalSaidaItem({
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                 errors.localizacao ? 'border-destructive' : 'border-border'
               }`}
               disabled={isLoadingLocalizacoes || saidaMutation.isPending}
@@ -412,7 +412,7 @@ export default function ModalSaidaItem({
                 </span>
                 {localizacaoSelecionada && (
                   <span
-                    className={`text-sm px-1.5 sm:px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
+                    className={`text-sm px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap ${
                       getQuantidadeDisponivel(localizacaoSelecionada) > 0
                         ? 'bg-muted/50 text-foreground'
                         : 'bg-muted/50 text-muted-foreground'
@@ -431,7 +431,7 @@ export default function ModalSaidaItem({
 
             {/* Dropdown */}
             {isDropdownOpen && !isLoadingLocalizacoes && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm z-50 max-h-60 overflow-hidden flex flex-col">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-hidden flex flex-col">
                 {/* Input de pesquisa */}
                 <div className="p-3 border-b border-border bg-muted/50">
                   <input
@@ -439,7 +439,7 @@ export default function ModalSaidaItem({
                     placeholder="Pesquisar..."
                     value={localizacaoPesquisa}
                     onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 focus:border-transparent"
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -457,7 +457,7 @@ export default function ModalSaidaItem({
                             key={localizacao._id}
                             className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
                               localizacaoSelecionada === localizacao._id
-                                ? 'bg-[#0f1419]/5'
+                                ? 'bg-[var(--ei-accent)]/5'
                                 : ''
                             }`}
                           >
@@ -468,7 +468,7 @@ export default function ModalSaidaItem({
                               }
                               className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
                                 localizacaoSelecionada === localizacao._id
-                                  ? 'text-[#0f1419] font-medium'
+                                  ? 'text-[var(--ei-accent)] font-medium'
                                   : 'text-foreground'
                               }`}
                               title={localizacao.nome}
@@ -477,7 +477,7 @@ export default function ModalSaidaItem({
                                 {localizacao.nome}
                               </span>
                               <span
-                                className={`text-sm px-2 py-0.5 rounded shrink-0 ${
+                                className={`text-sm px-2 py-0.5 rounded-md shrink-0 ${
                                   qtdDisponivel > 0
                                     ? 'bg-muted/50 text-foreground'
                                     : 'bg-muted/50 text-muted-foreground'
@@ -494,7 +494,7 @@ export default function ModalSaidaItem({
                                   setLocalizacaoToEdit(localizacao);
                                   setIsEditarLocalizacaoModalOpen(true);
                                 }}
-                                className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                                className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                 title="Editar localização"
                               >
                                 <Pencil className="w-4 h-4" />
@@ -506,7 +506,7 @@ export default function ModalSaidaItem({
                                   setLocalizacaoToEdit(localizacao);
                                   setIsExcluirLocalizacaoModalOpen(true);
                                 }}
-                                className="p-1.5 text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                                className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                                 title="Excluir localização"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -546,7 +546,7 @@ export default function ModalSaidaItem({
             checked={retirarTudo}
             onChange={handleRetirarTudoChange}
             disabled={!localizacaoSelecionada || saidaMutation.isPending}
-            className="w-4 h-4 accent-[#0f1419] cursor-pointer disabled:cursor-not-allowed"
+            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer disabled:cursor-not-allowed"
             data-test="modal-saida-retirar-tudo-checkbox"
           />
           Retirar quantidade total
@@ -554,7 +554,7 @@ export default function ModalSaidaItem({
 
         {/* Mensagem de erro da API */}
         {saidaMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível registrar a saída
             </div>
@@ -569,7 +569,7 @@ export default function ModalSaidaItem({
 
       {/* Footer com ações */}
       <div
-        className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm"
+        className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md"
         data-test="modal-saida-footer"
       >
         <div className="flex gap-3">
@@ -585,8 +585,8 @@ export default function ModalSaidaItem({
           <Button
             onClick={handleSubmit}
             disabled={saidaMutation.isPending}
-            className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="modal-saida-confirmar"
           >
             {saidaMutation.isPending ? 'Registrando...' : 'Registrar'}

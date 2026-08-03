@@ -29,7 +29,7 @@ export default function Card({
   }, []);
 
   return (
-    <div className="bg-card rounded-sm w-full border border-border overflow-hidden transition-colors hover:border-[#0f1419]/40">
+    <div className="bg-card rounded-md w-full border border-border overflow-hidden transition-colors hover:border-[var(--ei-accent)]/40">
       <div
         ref={cardRef}
         className={
@@ -58,10 +58,10 @@ export default function Card({
         </div>
       </div>
       <hr className="border-border" />
-      <div className="text-center p-3 text-[#306FCC] overflow-hidden">
+      <div className="text-center p-3 text-ei-accent overflow-hidden">
         <Link
           href={url}
-          className="inline-flex items-center group font-medium text-sm transition-all duration-300 hover:text-blue-700"
+          className="inline-flex items-center group font-medium text-sm transition-all duration-300 hover:text-ei-accent-hover"
         >
           Acessar
           <img

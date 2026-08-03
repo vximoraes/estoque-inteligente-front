@@ -205,7 +205,7 @@ export default function ModalFiltros({
                   }
                 }}
                 disabled={isLoadingCategorias}
-                className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 data-test="filtro-categoria-dropdown"
               >
                 <span
@@ -235,7 +235,7 @@ export default function ModalFiltros({
                       onChange={(e) => {
                         setCategoriaSearch(e.target.value);
                       }}
-                      className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419]"
+                      className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
                       onClick={(e) => e.stopPropagation()}
                       data-test="filtro-categoria-search-input"
                     />
@@ -255,7 +255,7 @@ export default function ModalFiltros({
                             }}
                             className={`w-full text-left px-4 py-2 transition-colors ${
                               selectedCategoria === option.value
-                                ? 'bg-[#0f1419]/10 text-[#0f1419]'
+                                ? 'bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
                                 : 'text-foreground hover:bg-muted/40'
                             } cursor-pointer`}
                             data-test={`filtro-categoria-option-${option.value || 'todas'}`}
@@ -290,7 +290,7 @@ export default function ModalFiltros({
                 setStatusDropdownOpen(!statusDropdownOpen);
                 setCategoriaDropdownOpen(false);
               }}
-              className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[#0f1419]/35 focus:border-[#0f1419] transition-colors cursor-pointer"
+              className="w-full h-11 flex items-center justify-between px-4 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)] transition-colors cursor-pointer"
               data-test="filtro-status-dropdown"
             >
               <span
@@ -316,7 +316,7 @@ export default function ModalFiltros({
                     }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       selectedStatus === option.value
-                        ? 'bg-[#0f1419]/10 text-[#0f1419]'
+                        ? 'bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
                         : 'text-foreground hover:bg-muted/40'
                     } cursor-pointer`}
                     data-test={`filtro-status-option-${option.value.toLowerCase().replace(/\s+/g, '-') || 'todos'}`}
@@ -331,7 +331,7 @@ export default function ModalFiltros({
       </div>
 
       {/* Footer com ações */}
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             variant="outline"
@@ -343,8 +343,8 @@ export default function ModalFiltros({
           </Button>
           <Button
             onClick={handleApplyFilters}
-            className="h-11 flex-1 text-white font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="aplicar-filtros-button"
           >
             Aplicar Filtros

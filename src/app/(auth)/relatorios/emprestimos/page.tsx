@@ -17,7 +17,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
-import { Search, Filter, Handshake, X } from 'lucide-react';
+import { Search, Filter, Handshake, X, FileDown } from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { toast, Slide } from 'react-toastify';
@@ -314,7 +314,7 @@ function RelatorioEmprestimosPageContent() {
               placeholder="Pesquisar por item, solicitante ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[#0f1419]/35 focus-visible:border-[#0f1419]"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
               data-test="search-input"
             />
           </div>
@@ -331,12 +331,16 @@ function RelatorioEmprestimosPageContent() {
 
           <Button
             disabled={selectedItems.size === 0}
-            className={`h-11 px-4 flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 transition-all ${
               selectedItems.size > 0
-                ? 'hover:opacity-90 cursor-pointer'
-                : 'opacity-50 cursor-not-allowed bg-gray-400'
+                ? 'text-ei-accent-foreground hover:opacity-90 cursor-pointer'
+                : 'text-muted-foreground opacity-50 cursor-not-allowed bg-muted'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: '#0f1419' } : {}}
+            style={
+              selectedItems.size > 0
+                ? { backgroundColor: 'var(--ei-accent)' }
+                : {}
+            }
             data-test="exportar-button"
             onClick={() => setIsExportarModalOpen(true)}
             title={
@@ -345,7 +349,7 @@ function RelatorioEmprestimosPageContent() {
                 : `Exportar ${selectedItems.size} empréstimo(s)`
             }
           >
-            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            <FileDown className="w-5 h-5" />
             Exportar
           </Button>
         </div>
@@ -379,7 +383,7 @@ function RelatorioEmprestimosPageContent() {
         {/* Mensagem de erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0"
             data-test="error-message"
           >
             Erro ao carregar empréstimos: {error.message}
@@ -394,8 +398,8 @@ function RelatorioEmprestimosPageContent() {
               data-test="loading-spinner"
             >
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
                 Carregando empréstimos...
@@ -403,7 +407,7 @@ function RelatorioEmprestimosPageContent() {
             </div>
           ) : emprestimosFiltrados.length > 0 ? (
             <div
-              className="border border-border rounded-lg bg-card flex-1 overflow-hidden flex flex-col"
+              className="border border-border rounded-md bg-card flex-1 overflow-hidden flex flex-col"
               data-test="emprestimos-table-container"
             >
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
@@ -424,7 +428,7 @@ function RelatorioEmprestimosPageContent() {
                             if (input) input.indeterminate = isSomeSelected;
                           }}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 accent-[#0f1419] cursor-pointer"
+                          className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                           data-test="checkbox-select-all"
                         />
                       </TableHead>
@@ -485,7 +489,7 @@ function RelatorioEmprestimosPageContent() {
                             type="checkbox"
                             checked={selectedItems.has(emp._id)}
                             onChange={() => handleSelectItem(emp._id)}
-                            className="w-4 h-4 accent-[#0f1419] cursor-pointer"
+                            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                             data-test={`checkbox-item-${emp._id}`}
                           />
                         </TableCell>
@@ -526,13 +530,21 @@ function RelatorioEmprestimosPageContent() {
                           data-test="emprestimo-status"
                         >
                           <span
-                            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium text-center whitespace-nowrap ${
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium text-center whitespace-nowrap bg-muted text-muted-foreground"
+                            style={
                               emp.status === 'Ativo'
-                                ? 'bg-green-100 text-green-800'
+                                ? {
+                                    backgroundColor: 'var(--status-success-bg)',
+                                    color: 'var(--status-success-text)',
+                                  }
                                 : emp.status === 'Atrasado'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-gray-100 text-gray-800'
-                            }`}
+                                  ? {
+                                      backgroundColor:
+                                        'var(--status-danger-bg)',
+                                      color: 'var(--status-danger-text)',
+                                    }
+                                  : undefined
+                            }
                             data-test={`badge-status-${emp.status.toLowerCase()}`}
                           >
                             {emp.status}
@@ -574,7 +586,7 @@ function RelatorioEmprestimosPageContent() {
                 >
                   {isFetchingNextPage && (
                     <PulseLoader
-                      color="#3b82f6"
+                      color="var(--ei-accent)"
                       size={5}
                       data-test="loading-next-page"
                     />
@@ -583,7 +595,7 @@ function RelatorioEmprestimosPageContent() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-card rounded-lg border border-border">
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
                 icon={Handshake}
                 title={
@@ -630,8 +642,8 @@ export default function RelatorioEmprestimosPage() {
           data-test="page-suspense-fallback"
         >
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-[#0f1419]/15"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-[#0f1419] border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
           </div>
           <p className="mt-4 text-muted-foreground font-medium">
             Carregando...

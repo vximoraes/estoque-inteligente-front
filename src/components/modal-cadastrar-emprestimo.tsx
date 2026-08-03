@@ -294,7 +294,7 @@ export default function ModalCadastrarEmprestimo({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
           data-test="modal-cadastrar-emprestimo-close"
         >
@@ -317,7 +317,7 @@ export default function ModalCadastrarEmprestimo({
             <button
               type="button"
               onClick={() => setIsItemDropdownOpen(!isItemDropdownOpen)}
-              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 transition-colors cursor-pointer ${
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 transition-colors cursor-pointer ${
                 errors.item ? 'border-destructive' : 'border-border'
               }`}
               data-test="modal-cadastrar-emprestimo-item-dropdown"
@@ -335,14 +335,14 @@ export default function ModalCadastrarEmprestimo({
             </button>
 
             {isItemDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
                 <div className="p-2 border-b border-border bg-muted/50">
                   <input
                     type="text"
                     placeholder="Pesquisar item..."
                     value={itemPesquisa}
                     onChange={(e) => setItemPesquisa(e.target.value)}
-                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
                     onClick={(e) => e.stopPropagation()}
                     data-test="modal-cadastrar-emprestimo-item-pesquisa"
                   />
@@ -365,7 +365,7 @@ export default function ModalCadastrarEmprestimo({
                         }
                         className={`w-full text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer truncate ${
                           itemSelecionado?._id === item._id
-                            ? 'bg-[#0f1419]/5 text-[#0f1419] font-medium'
+                            ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
                             : 'text-foreground'
                         }`}
                         title={item.nome}
@@ -399,7 +399,7 @@ export default function ModalCadastrarEmprestimo({
                 setIsLocalizacaoDropdownOpen(!isLocalizacaoDropdownOpen)
               }
               disabled={!itemSelecionado || isLoadingLocalizacoes}
-              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-sm hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                 errors.localizacao ? 'border-destructive' : 'border-border'
               }`}
               data-test="modal-cadastrar-emprestimo-localizacao-dropdown"
@@ -416,7 +416,7 @@ export default function ModalCadastrarEmprestimo({
                         'Selecionar localização'}
                 </span>
                 {localizacaoSelecionada && (
-                  <span className="text-xs px-2 py-0.5 rounded shrink-0 bg-muted/50 text-foreground whitespace-nowrap">
+                  <span className="text-xs px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-foreground whitespace-nowrap">
                     {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
                   </span>
                 )}
@@ -429,14 +429,14 @@ export default function ModalCadastrarEmprestimo({
             </button>
 
             {isLocalizacaoDropdownOpen && !isLoadingLocalizacoes && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
                 <div className="p-2 border-b border-border bg-muted/50">
                   <input
                     type="text"
                     placeholder="Pesquisar localização..."
                     value={localizacaoPesquisa}
                     onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -449,12 +449,12 @@ export default function ModalCadastrarEmprestimo({
                         onClick={() => handleLocalizacaoSelect(localizacao)}
                         className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2 hover:bg-muted/50 transition-colors cursor-pointer ${
                           localizacaoSelecionada === localizacao._id
-                            ? 'bg-[#0f1419]/5 text-[#0f1419] font-medium'
+                            ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
                             : 'text-foreground'
                         }`}
                       >
                         <span className="truncate">{localizacao.nome}</span>
-                        <span className="text-xs px-2 py-0.5 rounded shrink-0 bg-muted/50 text-foreground">
+                        <span className="text-xs px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-foreground">
                           {getQuantidadeDisponivel(localizacao._id)} disponível
                         </span>
                       </button>
@@ -486,7 +486,7 @@ export default function ModalCadastrarEmprestimo({
             value={quantidade}
             onChange={handleQuantidadeChange}
             maxLength={9}
-            className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50 ${
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
               errors.quantidade ? 'border-destructive' : 'border-border'
             }`}
             data-test="modal-cadastrar-emprestimo-quantidade"
@@ -515,7 +515,7 @@ export default function ModalCadastrarEmprestimo({
               }
             }}
             maxLength={120}
-            className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50 ${
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
               errors.solicitanteNome ? 'border-destructive' : 'border-border'
             }`}
             data-test="modal-cadastrar-emprestimo-solicitante"
@@ -545,7 +545,7 @@ export default function ModalCadastrarEmprestimo({
                 }));
               }
             }}
-            className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50 ${
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
               errors.solicitanteEmail ? 'border-destructive' : 'border-border'
             }`}
             data-test="modal-cadastrar-emprestimo-email"
@@ -571,7 +571,7 @@ export default function ModalCadastrarEmprestimo({
                 setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
               }
             }}
-            className={`w-full h-11 px-3 text-base md:text-sm border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50 ${
+            className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
               errors.dataPrevista ? 'border-destructive' : 'border-border'
             }`}
             data-test="modal-cadastrar-emprestimo-data-prevista"
@@ -593,14 +593,14 @@ export default function ModalCadastrarEmprestimo({
             onChange={(e) => setObservacoes(e.target.value)}
             rows={3}
             maxLength={500}
-            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-sm outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Observações opcionais"
             data-test="modal-cadastrar-emprestimo-observacoes"
           />
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             type="button"
@@ -616,8 +616,8 @@ export default function ModalCadastrarEmprestimo({
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="modal-cadastrar-emprestimo-salvar"
           >
             {isPending ? 'Registrando...' : 'Registrar'}

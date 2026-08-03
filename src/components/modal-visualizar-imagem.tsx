@@ -90,7 +90,7 @@ export default function ModalVisualizarImagem({
         <img
           src={imagemUrl}
           alt={nomeItem}
-          className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto duration-300 ${
+          className={`max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto duration-300 ${
             isClosing
               ? 'animate-out fade-out-0 zoom-out-95'
               : 'animate-in fade-in-0 zoom-in-95'

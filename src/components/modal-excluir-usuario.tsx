@@ -92,7 +92,7 @@ export default function ModalExcluirUsuario({
         <button
           data-test="modal-excluir-close"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
         >
           <X size={20} />
@@ -121,7 +121,7 @@ export default function ModalExcluirUsuario({
 
         {/* Mensagem de erro da API */}
         {excluirMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível excluir o usuário
             </div>
@@ -135,7 +135,7 @@ export default function ModalExcluirUsuario({
       </div>
 
       {/* Footer com ações */}
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             data-test="modal-excluir-cancelar"

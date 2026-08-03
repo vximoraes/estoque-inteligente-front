@@ -135,7 +135,7 @@ export default function ModalEditarLocalizacao({
         <button
           onClick={handleClose}
           disabled={updateLocalizacaoMutation.isPending}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           title="Fechar"
         >
           <X size={20} />
@@ -182,7 +182,7 @@ export default function ModalEditarLocalizacao({
         </div>
 
         {updateLocalizacaoMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Erro ao atualizar localização
             </div>
@@ -209,7 +209,7 @@ export default function ModalEditarLocalizacao({
             type="submit"
             disabled={isSubmitting || updateLocalizacaoMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
-            style={{ backgroundColor: '#0f1419' }}
+            style={{ backgroundColor: 'var(--ei-accent)' }}
           >
             {isSubmitting || updateLocalizacaoMutation.isPending
               ? 'Salvando...'

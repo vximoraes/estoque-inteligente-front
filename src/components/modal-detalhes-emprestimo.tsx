@@ -12,15 +12,15 @@ interface ModalDetalhesEmprestimoProps {
 }
 
 const STATUS_BG: Record<string, string> = {
-  Ativo: 'oklch(0.986 0.010 145)',
-  Atrasado: 'oklch(0.986 0.010 25)',
-  Devolvido: 'oklch(0.97 0 0)',
+  Ativo: 'var(--status-success-bg)',
+  Atrasado: 'var(--status-danger-bg)',
+  Devolvido: 'var(--muted)',
 };
 
 const STATUS_TEXT: Record<string, string> = {
-  Ativo: 'oklch(0.55 0.16 145)',
-  Atrasado: 'oklch(0.58 0.18 25)',
-  Devolvido: 'oklch(0.45 0 0)',
+  Ativo: 'var(--status-success-text)',
+  Atrasado: 'var(--status-danger-text)',
+  Devolvido: 'var(--muted-foreground)',
 };
 
 function formatarData(data?: string | null) {
@@ -79,7 +79,7 @@ export default function ModalDetalhesEmprestimo({
       <div className="relative p-6 border-b border-border shrink-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
         >
           <X size={20} />
@@ -90,7 +90,7 @@ export default function ModalDetalhesEmprestimo({
           </h2>
           <div className="flex justify-center mt-2">
             <span
-              className="inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] border border-current/30 text-xs font-medium whitespace-nowrap"
+              className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
               style={{
                 color: STATUS_TEXT[emprestimo.status],
                 backgroundColor: STATUS_BG[emprestimo.status],
@@ -105,35 +105,35 @@ export default function ModalDetalhesEmprestimo({
       {/* Conteúdo */}
       <div className="p-6 space-y-5 flex-1 overflow-y-auto">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+          <div className="min-w-0">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Localização
             </label>
-            <p className="text-base text-foreground">
+            <p className="text-base text-foreground break-words">
               {emprestimo.localizacao?.nome || '-'}
             </p>
           </div>
-          <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+          <div className="min-w-0">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Solicitante
             </label>
-            <p className="text-base text-foreground">
+            <p className="text-base text-foreground break-words">
               {emprestimo.solicitante_nome || '-'}
             </p>
           </div>
-          <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+          <div className="min-w-0">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               E-mail do solicitante
             </label>
-            <p className="text-base text-foreground">
+            <p className="text-base text-foreground break-words">
               {emprestimo.solicitante_email || '-'}
             </p>
           </div>
-          <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+          <div className="min-w-0">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Responsável pelo registro
             </label>
-            <p className="text-base text-foreground">
+            <p className="text-base text-foreground break-words">
               {emprestimo.usuario_responsavel?.nome || '-'}
             </p>
           </div>
@@ -141,7 +141,7 @@ export default function ModalDetalhesEmprestimo({
 
         <div className="pt-4 border-t grid grid-cols-3 gap-4">
           <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Qtd. emprestada
             </label>
             <p className="text-base text-foreground">
@@ -149,7 +149,7 @@ export default function ModalDetalhesEmprestimo({
             </p>
           </div>
           <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Qtd. devolvida
             </label>
             <p className="text-base text-foreground">
@@ -157,7 +157,7 @@ export default function ModalDetalhesEmprestimo({
             </p>
           </div>
           <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Qtd. em aberto
             </label>
             <p className="text-base text-foreground">
@@ -168,7 +168,7 @@ export default function ModalDetalhesEmprestimo({
 
         <div className="pt-4 border-t grid grid-cols-2 gap-4">
           <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Data do empréstimo
             </label>
             <p className="text-base text-foreground">
@@ -176,7 +176,7 @@ export default function ModalDetalhesEmprestimo({
             </p>
           </div>
           <div>
-            <label className="text-lg font-semibold text-foreground block mb-2">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
               Data prevista de devolução
             </label>
             <p className="text-base text-foreground">
@@ -185,7 +185,7 @@ export default function ModalDetalhesEmprestimo({
           </div>
           {emprestimo.data_devolucao_total && (
             <div>
-              <label className="text-lg font-semibold text-foreground block mb-2">
+              <label className="text-base font-medium text-muted-foreground block mb-2">
                 Data da devolução total
               </label>
               <p className="text-base text-foreground">
@@ -196,7 +196,7 @@ export default function ModalDetalhesEmprestimo({
         </div>
 
         <div className="pt-4 border-t">
-          <label className="text-lg font-semibold text-foreground block mb-2">
+          <label className="text-base font-medium text-muted-foreground block mb-2">
             Observações do empréstimo
           </label>
           <p className="text-base text-foreground">
@@ -205,7 +205,7 @@ export default function ModalDetalhesEmprestimo({
         </div>
 
         <div>
-          <label className="text-lg font-semibold text-foreground block mb-2">
+          <label className="text-base font-medium text-muted-foreground block mb-2">
             Observações da devolução
           </label>
           <p className="text-base text-foreground">

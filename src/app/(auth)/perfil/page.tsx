@@ -1,7 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Camera, User, Eye, EyeOff, Pencil } from 'lucide-react';
+import {
+  X,
+  Camera,
+  User,
+  Eye,
+  EyeOff,
+  Pencil,
+  Sun,
+  Moon,
+  Monitor,
+} from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cabecalho from '@/components/cabecalho';
@@ -19,6 +30,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
+
+const temaOpcoes = [
+  { value: 'light', label: 'Claro', icon: Sun },
+  { value: 'dark', label: 'Escuro', icon: Moon },
+  { value: 'system', label: 'Sistema', icon: Monitor },
+] as const;
 
 interface PasswordRequirement {
   text: string;
@@ -78,6 +95,8 @@ interface NotificacoesApiResponse {
 
 export default function HomePage() {
   const { user } = useSession();
+  const { theme, setTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [isEditingNome, setIsEditingNome] = useState(false);
   const [isEditingSenha, setIsEditingSenha] = useState(false);
@@ -107,6 +126,10 @@ export default function HomePage() {
     totalMovimentacoes: 0,
     totalOrcamentos: 0,
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -639,7 +662,7 @@ export default function HomePage() {
         <div className="flex flex-col gap-6 flex-1 overflow-y-auto pb-2">
           {/* Card resumo da conta */}
           <div
-            className="bg-card rounded-sm border border-border p-4 flex items-center justify-between gap-4"
+            className="bg-card rounded-md border border-border p-4 flex items-center justify-between gap-4"
             data-test="perfil-conta-card"
           >
             <div className="flex items-center gap-4 min-w-0">
@@ -668,7 +691,7 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => setIsEditingFoto(true)}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white bg-ei-accent hover:bg-ei-accent-hover transition-colors cursor-pointer"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-ei-accent-foreground bg-ei-accent hover:bg-ei-accent-hover transition-colors cursor-pointer"
                   title="Editar foto"
                   data-test="edit-avatar-button"
                 >
@@ -696,7 +719,7 @@ export default function HomePage() {
 
           {/* Card Informações pessoais */}
           <div
-            className="p-6 bg-card rounded-sm border border-border"
+            className="p-6 bg-card rounded-md border border-border"
             data-test="perfil-info-section"
           >
             <h3 className="text-lg font-semibold mb-3 tracking-wide">
@@ -738,7 +761,7 @@ export default function HomePage() {
                       !editedNome.trim() ||
                       editedNome.trim() === userData.nome
                     }
-                    className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                    className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-ei-accent-foreground shadow-sm cursor-pointer hover:opacity-95"
                     style={{ backgroundColor: 'var(--ei-accent)' }}
                     data-test="save-perfil-button"
                   >
@@ -959,7 +982,7 @@ export default function HomePage() {
                     <Button
                       type="submit"
                       disabled={alterarSenhaMutation.isPending}
-                      className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-white shadow-sm cursor-pointer hover:opacity-95"
+                      className="h-11 min-w-20 sm:min-w-[120px] px-4 text-sm font-semibold tracking-tight text-ei-accent-foreground shadow-sm cursor-pointer hover:opacity-95"
                       style={{ backgroundColor: 'var(--ei-accent)' }}
                       data-test="save-senha-button"
                     >
@@ -1023,9 +1046,54 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Card Aparência */}
+          <div
+            className="p-6 bg-card rounded-md border border-border"
+            data-test="perfil-aparencia-section"
+          >
+            <h3 className="text-lg font-semibold mb-3 tracking-wide">
+              Aparência
+            </h3>
+            <div className="w-full border-t border-border mb-4"></div>
+
+            <div className="flex flex-col gap-1.5 max-w-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                Tema
+              </p>
+              <div
+                className="flex gap-2"
+                role="radiogroup"
+                aria-label="Tema"
+                data-test="tema-opcoes"
+              >
+                {temaOpcoes.map(({ value, label, icon: Icon }) => {
+                  const isSelected = isMounted && theme === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => setTheme(value)}
+                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-md border px-3 py-3 text-xs font-medium transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'border-ei-accent bg-ei-accent/10 text-ei-accent'
+                          : 'border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                      }`}
+                      data-test={`tema-opcao-${value}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* Estatísticas de uso */}
           <div
-            className="p-6 bg-card rounded-sm border border-border flex flex-col w-full"
+            className="p-6 bg-card rounded-md border border-border flex flex-col w-full"
             data-test="estatisticas-section"
           >
             <h3 className="text-lg font-semibold mb-3 tracking-wide">
@@ -1043,8 +1111,8 @@ export default function HomePage() {
                     key={i}
                     className="flex flex-col justify-center px-6 py-8 gap-3 animate-pulse"
                   >
-                    <div className="h-3 bg-muted-foreground/20 rounded-sm w-24"></div>
-                    <div className="h-9 bg-muted-foreground/20 rounded-sm w-16"></div>
+                    <div className="h-3 bg-muted-foreground/20 rounded-md w-24"></div>
+                    <div className="h-9 bg-muted-foreground/20 rounded-md w-16"></div>
                   </div>
                 ))}
               </div>
@@ -1103,7 +1171,7 @@ export default function HomePage() {
 
           {/* Notificações */}
           <div
-            className="p-6 bg-card rounded-sm border border-border w-full"
+            className="p-6 bg-card rounded-md border border-border w-full"
             data-test="notificacoes-section"
           >
             <div className="flex items-center justify-between mb-3">
@@ -1143,8 +1211,8 @@ export default function HomePage() {
                       <div className="flex items-start gap-2">
                         <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full shrink-0 mt-1.5"></div>
                         <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-muted rounded-sm w-3/4"></div>
-                          <div className="h-3 bg-muted rounded-sm w-1/4"></div>
+                          <div className="h-4 bg-muted rounded-md w-3/4"></div>
+                          <div className="h-3 bg-muted rounded-md w-1/4"></div>
                         </div>
                       </div>
                     </div>
@@ -1206,7 +1274,7 @@ export default function HomePage() {
                               onClick={(e) =>
                                 excluirNotificacao(notificacao._id, e)
                               }
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded-sm cursor-pointer"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded-md cursor-pointer"
                               title="Excluir notificação"
                               data-test="notificacao-excluir-button"
                             >
@@ -1260,14 +1328,14 @@ export default function HomePage() {
           data-test="modal-edit-foto"
         >
           <div
-            className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-md border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
             <div className="relative p-6 pb-0">
               <button
                 onClick={handleCancelarEdicaoFoto}
-                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
                 title="Fechar"
                 data-test="modal-edit-foto-close-button"
               >
@@ -1316,7 +1384,7 @@ export default function HomePage() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`relative border-2 border-dashed rounded-sm p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                  className={`relative border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
                     isDragging
                       ? 'border-ei-accent bg-ei-accent/5'
                       : 'border-border bg-muted/50 hover:bg-muted hover:border-muted-foreground/40'
@@ -1348,7 +1416,7 @@ export default function HomePage() {
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -1377,7 +1445,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleSalvarFoto}
                     disabled={uploadFotoMutation.isPending}
-                    className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
+                    className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
                     style={{ backgroundColor: 'var(--ei-accent)' }}
                     data-test="save-foto-button"
                   >
@@ -1402,7 +1470,7 @@ export default function HomePage() {
           data-test="modal-confirm-remove-foto"
         >
           <div
-            className="bg-card rounded-sm border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-card rounded-md border border-border shadow-none max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
           >
@@ -1411,7 +1479,7 @@ export default function HomePage() {
               <button
                 onClick={() => setIsConfirmRemoveOpen(false)}
                 disabled={deleteFotoMutation.isPending}
-                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Fechar"
                 data-test="modal-confirm-remove-foto-close-button"
               >
@@ -1436,7 +1504,7 @@ export default function HomePage() {
               {/* Mensagem de erro da API */}
               {deleteFotoMutation.error && (
                 <div
-                  className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive"
+                  className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive"
                   data-test="remove-foto-error-message"
                 >
                   <div className="font-medium mb-1">
@@ -1453,7 +1521,7 @@ export default function HomePage() {
             </div>
 
             {/* Footer com ações */}
-            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+            <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
               <div className="flex gap-3">
                 <Button
                   variant="outline"

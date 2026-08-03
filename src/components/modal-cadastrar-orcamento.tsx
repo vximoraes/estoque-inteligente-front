@@ -336,7 +336,7 @@ export default function ModalCadastrarOrcamento({
         <button
           data-test="modal-cadastrar-orcamento-close"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
         >
           <X size={20} />
@@ -496,7 +496,7 @@ export default function ModalCadastrarOrcamento({
                                     handleOpenFornecedorDropdown(index);
                                   }
                                 }}
-                                className="w-full h-9 flex items-center justify-between px-2 bg-card border border-border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50 text-xs cursor-pointer"
+                                className="w-full h-9 flex items-center justify-between px-2 bg-card border border-border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 text-xs cursor-pointer"
                                 data-test="select-fornecedor"
                               >
                                 <span
@@ -516,7 +516,7 @@ export default function ModalCadastrarOrcamento({
                                 onClick={() =>
                                   handleQuantidadeChange(index, -1)
                                 }
-                                className="p-1 hover:bg-muted rounded cursor-pointer"
+                                className="p-1 hover:bg-muted rounded-md cursor-pointer"
                                 disabled={comp.quantidade <= 1}
                                 data-test="botao-decrementar"
                               >
@@ -543,7 +543,7 @@ export default function ModalCadastrarOrcamento({
                               <button
                                 type="button"
                                 onClick={() => handleQuantidadeChange(index, 1)}
-                                className="p-1 hover:bg-muted rounded cursor-pointer"
+                                className="p-1 hover:bg-muted rounded-md cursor-pointer"
                                 data-test="botao-incrementar"
                               >
                                 <Plus className="w-3.5 h-3.5" />
@@ -607,7 +607,7 @@ export default function ModalCadastrarOrcamento({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
           <div className="flex gap-3">
             <Button
               type="button"
@@ -622,8 +622,8 @@ export default function ModalCadastrarOrcamento({
             <Button
               type="submit"
               disabled={createOrcamentoMutation.isPending}
-              className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#0f1419' }}
+              className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
               data-test="botao-salvar"
             >
               {createOrcamentoMutation.isPending ? 'Salvando...' : 'Salvar'}
@@ -663,7 +663,7 @@ export default function ModalCadastrarOrcamento({
                 placeholder="Pesquisar..."
                 value={fornecedorPesquisa}
                 onChange={(e) => setFornecedorPesquisa(e.target.value)}
-                className="w-full h-9 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f1419]/50"
+                className="w-full h-9 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
                 onClick={(e) => e.stopPropagation()}
                 data-test="dropdown-search-input"
               />
@@ -672,8 +672,8 @@ export default function ModalCadastrarOrcamento({
               {isLoadingFornecedores ? (
                 <div className="flex justify-center py-4">
                   <div className="relative w-6 h-6">
-                    <div className="absolute inset-0 rounded-full border-2 border-[#0f1419]/15"></div>
-                    <div className="absolute inset-0 rounded-full border-2 border-[#0f1419] border-r-transparent animate-spin"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-[var(--ei-accent)]/15"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
                   </div>
                 </div>
               ) : fornecedoresError ? (
@@ -704,8 +704,8 @@ export default function ModalCadastrarOrcamento({
                   {isFetchingNextPageFornecedores && (
                     <div className="flex justify-center py-2">
                       <div className="relative w-4 h-4">
-                        <div className="absolute inset-0 rounded-full border-2 border-[#0f1419]/15"></div>
-                        <div className="absolute inset-0 rounded-full border-2 border-[#0f1419] border-r-transparent animate-spin"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[var(--ei-accent)]/15"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
                       </div>
                     </div>
                   )}

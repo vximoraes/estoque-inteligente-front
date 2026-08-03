@@ -77,7 +77,7 @@ export default function ModalExcluirEmprestimo({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
         >
           <X size={20} />
@@ -100,7 +100,7 @@ export default function ModalExcluirEmprestimo({
         </div>
 
         {excluirMutation.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
             <div className="font-medium mb-1">
               Não foi possível excluir o empréstimo
             </div>
@@ -112,7 +112,7 @@ export default function ModalExcluirEmprestimo({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
         <div className="flex gap-3">
           <Button
             variant="outline"

@@ -97,7 +97,7 @@ export default function ModalExportarRelatorio({
                 value="pdf"
                 checked={format === 'pdf'}
                 onChange={(e) => setFormat(e.target.value)}
-                className="w-4 h-4 text-[#0f1419] cursor-pointer"
+                className="w-4 h-4 text-[var(--ei-accent)] cursor-pointer"
                 data-test="format-radio-pdf"
               />
               <span className="text-foreground">.pdf</span>
@@ -112,7 +112,7 @@ export default function ModalExportarRelatorio({
                 value="csv"
                 checked={format === 'csv'}
                 onChange={(e) => setFormat(e.target.value)}
-                className="w-4 h-4 text-[#0f1419] cursor-pointer"
+                className="w-4 h-4 text-[var(--ei-accent)] cursor-pointer"
                 data-test="format-radio-csv"
               />
               <span className="text-foreground">.csv</span>
@@ -123,7 +123,7 @@ export default function ModalExportarRelatorio({
 
       {/* Footer */}
       <div
-        className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/20 rounded-b-lg"
+        className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/20 rounded-b-md"
         data-test="modal-exportar-footer"
       >
         <Button
@@ -137,12 +137,12 @@ export default function ModalExportarRelatorio({
         <Button
           onClick={handleExport}
           disabled={!fileName.trim()}
-          className={`h-11 text-white transition-all ${
+          className={`h-11 transition-all ${
             fileName.trim()
-              ? 'hover:opacity-90 cursor-pointer'
-              : 'opacity-50 cursor-not-allowed bg-gray-400'
+              ? 'text-ei-accent-foreground hover:opacity-90 cursor-pointer'
+              : 'text-muted-foreground opacity-50 cursor-not-allowed bg-muted'
           }`}
-          style={fileName.trim() ? { backgroundColor: '#0f1419' } : {}}
+          style={fileName.trim() ? { backgroundColor: 'var(--ei-accent)' } : {}}
           data-test="modal-exportar-export-button"
         >
           Exportar

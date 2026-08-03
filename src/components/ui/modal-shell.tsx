@@ -44,7 +44,7 @@ export function ModalShell({
         >
           <motion.div
             className={cn(
-              'bg-card rounded-sm border border-border w-full',
+              'bg-card rounded-md border border-border w-full',
               contentClassName,
             )}
             onClick={(e) => e.stopPropagation()}

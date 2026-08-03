@@ -6,7 +6,7 @@ const features = [
 
 export default function AuthLeftPanel() {
   return (
-    <div className="relative hidden overflow-hidden md:my-6 md:ml-6 md:mr-0 md:flex md:min-h-[calc(100vh-3rem)] md:self-center md:rounded-2xl">
+    <div className="relative hidden overflow-hidden md:my-6 md:ml-6 md:mr-0 md:flex md:min-h-[calc(100vh-3rem)] md:self-center md:rounded-md">
       {/* Background image */}
       <img
         src="/aurora-gradient-1774906689788.png"

@@ -93,7 +93,7 @@ export default function ModalExcluirItem({
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
           data-test="modal-excluir-close"
         >
@@ -130,7 +130,7 @@ export default function ModalExcluirItem({
         {/* Mensagem de erro da API */}
         {excluirMutation.error && (
           <div
-            className="p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-sm text-destructive"
+            className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive"
             data-test="modal-excluir-erro"
           >
             <div className="font-medium mb-1">
@@ -147,7 +147,7 @@ export default function ModalExcluirItem({
 
       {/* Footer com ações */}
       <div
-        className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-sm"
+        className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md"
         data-test="modal-excluir-footer"
       >
         <div className="flex gap-3">
