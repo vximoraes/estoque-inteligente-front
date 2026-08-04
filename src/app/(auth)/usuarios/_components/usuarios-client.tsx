@@ -333,7 +333,7 @@ export default function PageUsuariosContent({
                                 usuario.ativo ||
                                 reenviarConviteId === usuario._id
                               }
-                              className="p-1 sm:p-2 text-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-muted-foreground disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="p-1 sm:p-2 text-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer disabled:text-muted-foreground disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
                               title={
                                 usuario.ativo
                                   ? 'Usuário já ativo'
