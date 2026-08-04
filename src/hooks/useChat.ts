@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchData } from '@/lib/fetchData';
+import { authClient } from '@/lib/auth-client';
 import type {
   Conversa,
   ConversaResumo,
@@ -61,24 +62,52 @@ export interface SendMessageCallbacks {
   onError: (err: string) => void;
 }
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === 'AbortError';
+}
+
 export async function sendMessage(
   conversaId: string,
   content: string,
   callbacks: SendMessageCallbacks,
+  signal?: AbortSignal,
 ): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const response = await fetch(
-    `${apiUrl}/ia/conversas/${conversaId}/mensagens`,
-    {
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}/ia/conversas/${conversaId}/mensagens`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // cookie de sessão Better Auth
       body: JSON.stringify({ content }),
-    },
-  );
+      signal,
+    });
+  } catch (err) {
+    if (isAbortError(err)) return;
+    callbacks.onError('Erro ao conectar com o assistente.');
+    return;
+  }
 
-  if (!response.ok || !response.body) {
+  if (!response.ok) {
+    if (
+      (response.status === 401 || response.status === 498) &&
+      typeof window !== 'undefined'
+    ) {
+      await authClient.signOut().catch(() => {});
+      window.location.href = '/login';
+      return;
+    }
+
+    const mensagem = await response
+      .json()
+      .then((data) => data?.message as string | undefined)
+      .catch(() => undefined);
+    callbacks.onError(mensagem ?? 'Erro ao conectar com o assistente.');
+    return;
+  }
+
+  if (!response.body) {
     callbacks.onError('Erro ao conectar com o assistente.');
     return;
   }
@@ -88,7 +117,14 @@ export async function sendMessage(
   let buffer = '';
 
   while (true) {
-    const { done, value } = await reader.read();
+    let done: boolean;
+    let value: Uint8Array | undefined;
+    try {
+      ({ done, value } = await reader.read());
+    } catch (err) {
+      if (isAbortError(err)) return;
+      throw err;
+    }
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
