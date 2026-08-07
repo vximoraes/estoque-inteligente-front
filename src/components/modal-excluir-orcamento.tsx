@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 
 interface ModalExcluirOrcamentoProps {
   isOpen: boolean;
@@ -70,14 +71,6 @@ export default function ModalExcluirOrcamento({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const handleExcluir = () => {
     if (!orcamentoId) {
       return;
@@ -87,93 +80,86 @@ export default function ModalExcluirOrcamento({
   };
 
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndex={99999}
       data-test="modal-excluir"
+      contentClassName="max-w-lg overflow-visible"
     >
-      <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Botão de fechar */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-            title="Fechar"
-            data-test="modal-excluir-close"
+      {/* Botão de fechar */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+          title="Fechar"
+          data-test="modal-excluir-close"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Conteúdo */}
+      <div className="px-6 pb-6 space-y-6">
+        <div className="text-center pt-4 px-8">
+          <h2
+            className="text-xl font-semibold text-foreground mb-2"
+            data-test="modal-excluir-titulo"
           >
-            <X size={20} />
-          </button>
+            Excluir orçamento
+          </h2>
+          <div className="max-h-[120px] overflow-y-auto">
+            <p className="text-muted-foreground break-words">
+              Tem certeza que deseja excluir o orçamento{' '}
+              <span
+                className="font-semibold"
+                data-test="modal-excluir-nome-orcamento"
+              >
+                {orcamentoNome}
+              </span>
+              ?
+            </p>
+          </div>
         </div>
 
-        {/* Conteúdo */}
-        <div className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4 px-8">
-            <h2
-              className="text-xl font-semibold text-gray-900 mb-2"
-              data-test="modal-excluir-titulo"
-            >
-              Excluir orçamento
-            </h2>
-            <div className="max-h-[120px] overflow-y-auto">
-              <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o orçamento{' '}
-                <span
-                  className="font-semibold"
-                  data-test="modal-excluir-nome-orcamento"
-                >
-                  {orcamentoNome}
-                </span>
-                ?
-              </p>
+        {excluirMutation.error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
+            <div className="font-medium mb-1">
+              Não foi possível excluir o orçamento
+            </div>
+            <div className="text-destructive/80">
+              {(excluirMutation.error as any)?.response?.data?.message ||
+                (excluirMutation.error as any)?.message ||
+                'Erro desconhecido'}
             </div>
           </div>
+        )}
+      </div>
 
-          {excluirMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">
-                Não foi possível excluir o orçamento
-              </div>
-              <div className="text-red-500">
-                {(excluirMutation.error as any)?.response?.data?.message ||
-                  (excluirMutation.error as any)?.message ||
-                  'Erro desconhecido'}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={excluirMutation.isPending}
-              className="flex-1 cursor-pointer"
-              data-test="modal-excluir-cancelar"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleExcluir}
-              disabled={excluirMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#DC2626' }}
-              data-test="modal-excluir-confirmar"
-            >
-              {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}
-            </Button>
-          </div>
+      {/* Footer com ações */}
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={excluirMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+            data-test="modal-excluir-cancelar"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleExcluir}
+            disabled={excluirMutation.isPending}
+            className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: '#DC2626' }}
+            data-test="modal-excluir-confirmar"
+          >
+            {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 
   return typeof window !== 'undefined'

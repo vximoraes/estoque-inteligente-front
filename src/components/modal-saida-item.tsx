@@ -1,44 +1,17 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown, Edit, Trash2 } from 'lucide-react';
-import {
-  useQuery,
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { X, ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
 import ModalExcluirLocalizacao from './modal-excluir-localizacao';
-import { PulseLoader } from 'react-spinners';
 
 interface Localizacao {
   _id: string;
   nome: string;
-  ativo: boolean;
-  usuario: string;
-  __v: number;
-}
-
-interface LocalizacoesApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Localizacao[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
 }
 
 interface EstoqueData {
@@ -98,41 +71,22 @@ export default function ModalSaidaItem({
     useState(false);
   const [localizacaoToEdit, setLocalizacaoToEdit] =
     useState<Localizacao | null>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const [retirarTudo, setRetirarTudo] = useState(false);
 
-  const {
-    data: localizacoesData,
-    isLoading: isLoadingLocalizacoes,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['localizacoes-infinite'],
-    queryFn: async ({ pageParam = 1 }) => {
-      return await get<LocalizacoesApiResponse>(
-        `/localizacoes?limit=20&page=${pageParam}`,
-      );
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
-    enabled: isOpen,
-  });
-
-  const { data: estoquesData } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques', itemId],
-    queryFn: async () => {
-      return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
-    },
-    enabled: isOpen && !!itemId,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
+  const { data: estoquesData, isLoading: isLoadingLocalizacoes } =
+    useQuery<EstoqueApiResponse>({
+      queryKey: ['estoques', itemId],
+      queryFn: async () => {
+        return await get<EstoqueApiResponse>(`/estoques/item/${itemId}`);
+      },
+      enabled: isOpen && !!itemId,
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes('Falha na autenticação')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    });
 
   const saidaMutation = useMutation({
     mutationFn: async (data: MovimentacaoRequest) => {
@@ -150,6 +104,7 @@ export default function ModalSaidaItem({
       setQuantidade('');
       setLocalizacaoSelecionada('');
       setErrors({});
+      setRetirarTudo(false);
       onSuccess?.();
       onClose();
     },
@@ -185,7 +140,7 @@ export default function ModalSaidaItem({
         console.log('mensagem final do toast:', errorMessage);
 
         toast.error(errorMessage, {
-          position: 'top-right',
+          position: 'bottom-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -194,7 +149,7 @@ export default function ModalSaidaItem({
         });
       } else {
         toast.error('Não foi possível registrar a saída.', {
-          position: 'top-right',
+          position: 'bottom-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -256,34 +211,14 @@ export default function ModalSaidaItem({
       setLocalizacaoSelecionada('');
       setErrors({});
       setIsDropdownOpen(false);
+      setRetirarTudo(false);
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!observerTarget.current || !isDropdownOpen) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 },
-    );
-
-    observer.observe(observerTarget.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  if (!isOpen) return null;
-
-  const localizacoes = localizacoesData?.pages
-    ? localizacoesData.pages.flatMap((page) => page.data.docs)
-    : [];
   const estoques = estoquesData?.data?.docs || [];
+  const localizacoes = estoques
+    .filter((e) => e.quantidade > 0)
+    .map((e) => e.localizacao);
   const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
     loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase()),
   );
@@ -294,12 +229,6 @@ export default function ModalSaidaItem({
   const getQuantidadeDisponivel = (localizacaoId: string): number => {
     const estoque = estoques.find((e) => e.localizacao._id === localizacaoId);
     return estoque?.quantidade || 0;
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
   };
 
   const handleQuantidadeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,6 +248,22 @@ export default function ModalSaidaItem({
     if (errors.localizacao) {
       setErrors((prev) => ({ ...prev, localizacao: undefined }));
     }
+    if (retirarTudo) {
+      const disponivel = getQuantidadeDisponivel(localizacao._id);
+      setQuantidade(disponivel > 0 ? String(disponivel) : '');
+    }
+  };
+
+  const handleRetirarTudoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setRetirarTudo(checked);
+    if (checked && localizacaoSelecionada) {
+      const disponivel = getQuantidadeDisponivel(localizacaoSelecionada);
+      setQuantidade(disponivel > 0 ? String(disponivel) : '');
+    }
+    if (errors.quantidade) {
+      setErrors((prev) => ({ ...prev, quantidade: undefined }));
+    }
   };
 
   const validateForm = () => {
@@ -326,6 +271,11 @@ export default function ModalSaidaItem({
 
     if (!quantidade || quantidade === '0') {
       newErrors.quantidade = 'Quantidade deve ser maior que 0';
+    } else if (
+      localizacaoSelecionada &&
+      Number(quantidade) > getQuantidadeDisponivel(localizacaoSelecionada)
+    ) {
+      newErrors.quantidade = 'Quantidade maior que a disponível em estoque';
     }
 
     if (!localizacaoSelecionada) {
@@ -367,285 +317,283 @@ export default function ModalSaidaItem({
   };
 
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       data-test="modal-saida-backdrop"
+      zIndex={99999}
+      contentClassName="max-w-lg max-h-[80vh] overflow-visible"
+      role="dialog"
+      contentDataTest="modal-saida"
     >
-      <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        data-test="modal-saida"
-      >
-        {/* Botão de fechar */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-            title="Fechar"
-            data-test="modal-saida-close"
-          >
-            <X size={20} />
-          </button>
+      {/* Botão de fechar */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+          title="Fechar"
+          data-test="modal-saida-close"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Conteúdo do Modal */}
+      <div className="px-6 pb-6 space-y-6" data-test="modal-saida-content">
+        <div className="text-center pt-4 px-8">
+          <div className="max-h-[100px] overflow-y-auto">
+            <h2
+              className="text-xl font-semibold text-foreground mb-1 wrap-break-word"
+              data-test="modal-saida-titulo"
+            >
+              Registrar saída de {itemNome}
+            </h2>
+          </div>
         </div>
 
-        {/* Conteúdo do Modal */}
-        <div className="px-6 pb-6 space-y-6" data-test="modal-saida-content">
-          <div className="text-center pt-4 px-8">
-            <div className="max-h-[100px] overflow-y-auto">
-              <h2
-                className="text-xl font-semibold text-gray-900 mb-1 break-words"
-                data-test="modal-saida-titulo"
-              >
-                Registrar saída de {itemNome}
-              </h2>
-            </div>
-          </div>
-
-          {/* Campo Quantidade */}
-          <div
-            className="space-y-2"
-            data-test="modal-saida-quantidade-container"
+        {/* Campo Quantidade */}
+        <div className="space-y-2" data-test="modal-saida-quantidade-container">
+          <label
+            htmlFor="quantidade"
+            className="block text-base font-medium text-foreground"
           >
-            <div className="flex justify-between items-center">
-              <label
-                htmlFor="quantidade"
-                className="block text-base font-medium text-gray-700"
-              >
-                Quantidade <span className="text-red-500">*</span>
-              </label>
-              <span className="text-sm text-gray-500">
-                {quantidade.length}/9
-              </span>
-            </div>
-            <input
-              id="quantidade"
-              name="quantidade"
-              type="text"
-              placeholder="Digite a quantidade"
-              value={quantidade}
-              onChange={handleQuantidadeChange}
-              maxLength={9}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.quantidade ? 'border-red-500' : 'border-gray-300'
-              }`}
-              disabled={saidaMutation.isPending}
-              data-test="modal-saida-quantidade-input"
-            />
-            {errors.quantidade && (
-              <p
-                className="text-red-500 text-sm mt-1"
-                data-test="modal-saida-quantidade-erro"
-              >
-                {errors.quantidade}
-              </p>
-            )}
-          </div>
-
-          {/* Campo Localização */}
-          <div
-            className="space-y-2"
-            data-test="modal-saida-localizacao-container"
-          >
-            <label className="block text-base font-medium text-gray-700">
-              Localização <span className="text-red-500">*</span>
-            </label>
-            <div className="relative" data-dropdown>
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                  errors.localizacao ? 'border-red-500' : 'border-gray-300'
-                }`}
-                disabled={isLoadingLocalizacoes || saidaMutation.isPending}
-                data-test="modal-saida-localizacao-dropdown"
-              >
-                <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
-                  <span
-                    className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}
-                  >
-                    {isLoadingLocalizacoes
-                      ? 'Carregando...'
-                      : localizacaoSelecionadaObj?.nome ||
-                        'Selecionar localização'}
-                  </span>
-                  {localizacaoSelecionada && (
-                    <span
-                      className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${
-                        getQuantidadeDisponivel(localizacaoSelecionada) > 0
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {getQuantidadeDisponivel(localizacaoSelecionada)}{' '}
-                      disponível
-                    </span>
-                  )}
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
-                    isDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {/* Dropdown */}
-              {isDropdownOpen && !isLoadingLocalizacoes && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                  {/* Input de pesquisa */}
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <input
-                      type="text"
-                      placeholder="Pesquisar..."
-                      value={localizacaoPesquisa}
-                      onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-
-                  {/* Lista de localizações */}
-                  <div className="overflow-y-auto">
-                    {localizacoesFiltradas.length > 0 ? (
-                      <>
-                        {localizacoesFiltradas.map((localizacao) => {
-                          const qtdDisponivel = getQuantidadeDisponivel(
-                            localizacao._id,
-                          );
-                          return (
-                            <div
-                              key={localizacao._id}
-                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${
-                                localizacaoSelecionada === localizacao._id
-                                  ? 'bg-blue-50'
-                                  : ''
-                              }`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleLocalizacaoSelect(localizacao)
-                                }
-                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
-                                  localizacaoSelecionada === localizacao._id
-                                    ? 'text-blue-600 font-medium'
-                                    : 'text-gray-900'
-                                }`}
-                                title={localizacao.nome}
-                              >
-                                <span className="truncate">
-                                  {localizacao.nome}
-                                </span>
-                                <span
-                                  className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${
-                                    qtdDisponivel > 0
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-500'
-                                  }`}
-                                >
-                                  {qtdDisponivel} disponível
-                                </span>
-                              </button>
-                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setLocalizacaoToEdit(localizacao);
-                                    setIsEditarLocalizacaoModalOpen(true);
-                                  }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                  title="Editar localização"
-                                >
-                                  <Edit size={20} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setLocalizacaoToEdit(localizacao);
-                                    setIsExcluirLocalizacaoModalOpen(true);
-                                  }}
-                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                  title="Excluir localização"
-                                >
-                                  <Trash2 size={20} />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {/* Infinite scroll trigger */}
-                        <div ref={observerTarget} className="h-1" />
-                        {/* Loading indicator */}
-                        {isFetchingNextPage && (
-                          <div className="flex justify-center py-4">
-                            <PulseLoader color="#306FCC" size={8} />
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                        Nenhuma localização encontrada
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.localizacao && (
-              <p className="text-red-500 text-sm mt-1">{errors.localizacao}</p>
-            )}
-          </div>
-
-          {/* Mensagem de erro da API */}
-          {saidaMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">
-                Não foi possível registrar a saída
-              </div>
-              <div className="text-red-500">
-                {(saidaMutation.error as any)?.response?.data?.message ||
-                  (saidaMutation.error as any)?.message ||
-                  'Erro desconhecido'}
-              </div>
-            </div>
+            Quantidade <span className="text-destructive">*</span>
+          </label>
+          <input
+            id="quantidade"
+            name="quantidade"
+            type="text"
+            placeholder="Digite a quantidade"
+            value={quantidade}
+            onChange={handleQuantidadeChange}
+            maxLength={9}
+            className={`w-full h-11 px-3 text-base md:text-sm bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              errors.quantidade ? 'border-destructive' : 'border-border'
+            }`}
+            disabled={saidaMutation.isPending || retirarTudo}
+            data-test="modal-saida-quantidade-input"
+          />
+          {errors.quantidade && (
+            <p
+              className="text-destructive text-sm mt-1"
+              data-test="modal-saida-quantidade-erro"
+            >
+              {errors.quantidade}
+            </p>
           )}
         </div>
 
-        {/* Footer com ações */}
+        {/* Campo Localização */}
         <div
-          className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg"
-          data-test="modal-saida-footer"
+          className="space-y-2"
+          data-test="modal-saida-localizacao-container"
         >
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={saidaMutation.isPending}
-              className="flex-1 cursor-pointer"
-              data-test="modal-saida-cancelar"
+          <label className="block text-base font-medium text-foreground">
+            Localização <span className="text-destructive">*</span>
+          </label>
+          <div className="relative" data-dropdown>
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`w-full h-11 flex items-center justify-between px-3 bg-background border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                errors.localizacao ? 'border-destructive' : 'border-border'
+              }`}
+              disabled={isLoadingLocalizacoes || saidaMutation.isPending}
+              data-test="modal-saida-localizacao-dropdown"
             >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={saidaMutation.isPending}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
-              data-test="modal-saida-confirmar"
-            >
-              {saidaMutation.isPending ? 'Registrando...' : 'Registrar'}
-            </Button>
+              <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
+                <span
+                  className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-foreground' : 'text-muted-foreground'}`}
+                >
+                  {isLoadingLocalizacoes
+                    ? 'Carregando...'
+                    : localizacaoSelecionadaObj?.nome ||
+                      'Selecionar localização'}
+                </span>
+                {localizacaoSelecionada && (
+                  <span
+                    className={`text-sm px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap ${
+                      getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                        ? 'bg-muted/50 text-foreground'
+                        : 'bg-muted/50 text-muted-foreground'
+                    }`}
+                  >
+                    {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
+                  </span>
+                )}
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
+                  isDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {/* Dropdown */}
+            {isDropdownOpen && !isLoadingLocalizacoes && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-hidden flex flex-col">
+                {/* Input de pesquisa */}
+                <div className="p-3 border-b border-border bg-muted/50">
+                  <input
+                    type="text"
+                    placeholder="Pesquisar..."
+                    value={localizacaoPesquisa}
+                    onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                    className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+
+                {/* Lista de localizações */}
+                <div className="overflow-y-auto">
+                  {localizacoesFiltradas.length > 0 ? (
+                    <>
+                      {localizacoesFiltradas.map((localizacao) => {
+                        const qtdDisponivel = getQuantidadeDisponivel(
+                          localizacao._id,
+                        );
+                        return (
+                          <div
+                            key={localizacao._id}
+                            className={`flex items-center justify-between px-4 py-2 hover:bg-muted/50 transition-colors group ${
+                              localizacaoSelecionada === localizacao._id
+                                ? 'bg-[var(--ei-accent)]/5'
+                                : ''
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleLocalizacaoSelect(localizacao)
+                              }
+                              className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${
+                                localizacaoSelecionada === localizacao._id
+                                  ? 'text-[var(--ei-accent)] font-medium'
+                                  : 'text-foreground'
+                              }`}
+                              title={localizacao.nome}
+                            >
+                              <span className="truncate">
+                                {localizacao.nome}
+                              </span>
+                              <span
+                                className={`text-sm px-2 py-0.5 rounded-md shrink-0 ${
+                                  qtdDisponivel > 0
+                                    ? 'bg-muted/50 text-foreground'
+                                    : 'bg-muted/50 text-muted-foreground'
+                                }`}
+                              >
+                                {qtdDisponivel} disponível
+                              </span>
+                            </button>
+                            <div className="flex items-center gap-1 shrink-0 ml-1">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLocalizacaoToEdit(localizacao);
+                                  setIsEditarLocalizacaoModalOpen(true);
+                                }}
+                                className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                                title="Editar localização"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLocalizacaoToEdit(localizacao);
+                                  setIsExcluirLocalizacaoModalOpen(true);
+                                }}
+                                className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                                title="Excluir localização"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                      Nenhuma localização encontrada
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+          {errors.localizacao && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.localizacao}
+            </p>
+          )}
+        </div>
+
+        {/* Retirar tudo */}
+        <label
+          className={`flex items-center gap-2 text-sm text-muted-foreground ml-2 ${
+            !localizacaoSelecionada || saidaMutation.isPending
+              ? 'opacity-50 cursor-not-allowed'
+              : 'cursor-pointer'
+          }`}
+          data-test="modal-saida-retirar-tudo-container"
+        >
+          <input
+            type="checkbox"
+            checked={retirarTudo}
+            onChange={handleRetirarTudoChange}
+            disabled={!localizacaoSelecionada || saidaMutation.isPending}
+            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer disabled:cursor-not-allowed"
+            data-test="modal-saida-retirar-tudo-checkbox"
+          />
+          Retirar quantidade total
+        </label>
+
+        {/* Mensagem de erro da API */}
+        {saidaMutation.error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
+            <div className="font-medium mb-1">
+              Não foi possível registrar a saída
+            </div>
+            <div className="text-destructive/80">
+              {(saidaMutation.error as any)?.response?.data?.message ||
+                (saidaMutation.error as any)?.message ||
+                'Erro desconhecido'}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer com ações */}
+      <div
+        className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md"
+        data-test="modal-saida-footer"
+      >
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={saidaMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+            data-test="modal-saida-cancelar"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={saidaMutation.isPending}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="modal-saida-confirmar"
+          >
+            {saidaMutation.isPending ? 'Registrando...' : 'Registrar'}
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 
   return (

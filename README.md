@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Estoque Inteligente — Front-end
 
-## Getting Started
+Front-end em Next.js 15 (App Router, React 19, TypeScript) do sistema "Estoque Inteligente" — TCC de gestão de estoque com itens, fornecedores, empréstimos, orçamentos, usuários e relatórios. Consome a API separada [`estoque-inteligente-api`](../estoque-inteligente-api) via HTTP, com autenticação por sessão (cookie) via [Better Auth](https://better-auth.com).
 
-First, run the development server:
+## Tecnologias
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 15** (App Router, Turbopack) + **React 19** + **TypeScript**
+- **Better Auth** — sessão de cookie, OAuth Google
+- **TanStack React Query** — cache/fetch de dados remotos
+- **react-hook-form** + **Zod** — formulários e validação
+- **shadcn/ui** (style `new-york`) + **Tailwind v4**
+- **Cypress** — suíte de testes E2E
+
+## Configuração
+
+Variáveis de ambiente (ver `.env.example`):
+
+```env
+# URL da API para o navegador (client-side)
+NEXT_PUBLIC_API_URL=http://localhost:3010
+
+# URL da API para chamadas server-side (SSR) — no Docker, use o nome do
+# serviço da API em vez de localhost
+API_URL=http://localhost:3010
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Para rodar a suíte Cypress, configure também `cypress.env.json` (ver `cypress.env.example.json`): `FRONTEND_URL`, `API_URL` e credenciais de um usuário de teste (`TEST_USER_EMAIL`/`TEST_USER_PASSWORD`) já existente na API.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Executando
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev              # servidor de desenvolvimento (Turbopack), porta 3000
+npm run build             # build de produção
+npm run start              # servidor de produção (após build)
+```
 
-## Learn More
+Requer a API (`estoque-inteligente-api`) rodando e acessível em `NEXT_PUBLIC_API_URL`/`API_URL`.
 
-To learn more about Next.js, take a look at the following resources:
+### Docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker build -t estoque-inteligente-front .
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Testes
 
-## Deploy on Vercel
+Não há testes unitários — a suíte inteira é E2E via [Cypress](https://www.cypress.io), rodando contra um app real e uma API real.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run test                                                                    # roda tudo (cypress run)
+npx cypress open                                                                # modo interativo
+npx cypress run --spec "cypress/e2e/itens/01-listagem-pesquisa-filtros.cy.ts"   # uma spec
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Specs organizadas por domínio em `cypress/e2e/<dominio>/NN-descricao.cy.ts` — o prefixo numérico indica ordem lógica de fluxo (listagem → cadastro/edição → exclusão → casos específicos). Domínios cobertos: `itens`, `notificacoes`, `orcamentos`, `perfil`, `relatorios/{itens,movimentacoes,orcamentos}`, `usuarios`.
+
+## Estrutura do projeto
+
+```
+estoque-inteligente-front/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/          # área logada: itens, fornecedores, emprestimos,
+│   │   │                    # orcamentos, usuarios, perfil, relatorios
+│   │   └── (no-auth)/       # login, cadastro, ativar-conta, esqueci-senha,
+│   │                        # redefinir-senha
+│   ├── middleware.ts        # gate de autenticação (valida sessão na API)
+│   ├── lib/
+│   │   ├── fetchData.ts     # client HTTP client-side (get/post/put/patch/del)
+│   │   ├── serverFetch.ts   # client HTTP server-side (Server Components)
+│   │   └── auth-client.ts   # cliente Better Auth
+│   ├── hooks/                # use-session, use-permissions, useFormApiErrors...
+│   ├── schemas/               # validação Zod por domínio
+│   ├── types/                  # tipos de resposta da API por domínio
+│   ├── components/
+│   │   ├── ui/                  # shadcn/ui
+│   │   └── modal-*.tsx           # modais de domínio (fora de subpastas)
+│   ├── contexts/                  # ChatContext, SidebarContext
+│   └── providers/                  # queryProvider (React Query)
+├── cypress/
+│   ├── e2e/<dominio>/NN-descricao.cy.ts
+│   └── support/commands.ts, helpers.ts
+├── components.json          # config shadcn/ui
+├── Dockerfile
+└── package.json
+```
+
+Cada rota de listagem segue o padrão `page.tsx` (Server Component, busca inicial via `serverFetch`) → `_components/*-client.tsx` (Client Component, React Query para refetch/mutations). Veja `CLAUDE.md` para detalhes de arquitetura.

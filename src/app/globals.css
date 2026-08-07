@@ -1,13 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-ei-sidebar-bg: var(--ei-sidebar-bg);
+  --color-ei-sidebar-surface: var(--ei-sidebar-surface);
+  --color-ei-sidebar-surface-hover: var(--ei-sidebar-surface-hover);
+  --color-ei-sidebar-divider: var(--ei-sidebar-divider);
+  --color-ei-sidebar-avatar-bg: var(--ei-sidebar-avatar-bg);
+  --color-ei-sidebar-text-strong: var(--ei-sidebar-text-strong);
+  --color-ei-sidebar-text: var(--ei-sidebar-text);
+  --color-ei-sidebar-text-soft: var(--ei-sidebar-text-soft);
+  --color-ei-sidebar-chevron: var(--ei-sidebar-chevron);
+  --color-ei-stat-title: var(--ei-stat-title);
+  --color-ei-stat-value: var(--ei-stat-value);
+  --color-ei-accent: var(--ei-accent);
+  --color-ei-accent-hover: var(--ei-accent-hover);
+  --color-ei-accent-foreground: var(--ei-accent-foreground);
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-sans: var(--font-plus-jakarta-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -42,28 +58,59 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-dot-pulse: dot-pulse 1.4s ease-in-out infinite;
+  @keyframes dot-pulse {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 }
 
 :root {
+  font-size: 16px;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --ei-sidebar-bg: oklch(1 0 0);
+  --ei-sidebar-surface: oklch(0.96 0 0);
+  --ei-sidebar-surface-hover: oklch(0.93 0 0);
+  --ei-sidebar-divider: oklch(0.9 0 0);
+  --ei-sidebar-avatar-bg: oklch(0.92 0 0);
+  --ei-sidebar-text-strong: oklch(0.15 0 0);
+  --ei-sidebar-text: oklch(0.4 0 0);
+  --ei-sidebar-text-soft: oklch(0.58 0 0);
+  --ei-sidebar-chevron: oklch(0.45 0 0);
+  --ei-stat-title: oklch(0.62 0 0);
+  --ei-stat-value: oklch(0.4 0 0);
+  --ei-accent: #0f1419;
+  --ei-accent-hover: #1a2332;
+  --ei-accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.975 0 0);
+  --foreground: oklch(0.13 0 0);
+  --card: oklch(0.99 0 0);
+  --card-foreground: oklch(0.13 0 0);
+  --popover: oklch(0.993 0 0);
+  --popover-foreground: oklch(0.13 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.968 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted: oklch(0.968 0 0);
+  --muted-foreground: oklch(0.555 0 0);
+  --accent: oklch(0.968 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.915 0 0);
+  --input: oklch(0.915 0 0);
+  --ring: oklch(0.52 0 0);
+  --status-success-bg: oklch(0.962 0.044 156.743);
+  --status-success-text: oklch(0.448 0.119 151.328);
+  --status-warning-bg: oklch(0.962 0.059 95.617);
+  --status-warning-text: oklch(0.473 0.137 46.201);
+  --status-danger-bg: oklch(0.936 0.032 17.717);
+  --status-danger-text: oklch(0.444 0.177 26.899);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -79,25 +126,57 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+@media only screen and (min-width: 769px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media only screen and (min-width: 1280px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
 .dark {
-  --background: oklch(0.145 0 0);
+  --ei-sidebar-bg: oklch(0.18 0 0);
+  --ei-sidebar-surface: oklch(0.24 0 0);
+  --ei-sidebar-surface-hover: oklch(0.22 0 0);
+  --ei-sidebar-divider: oklch(0.3 0 0);
+  --ei-sidebar-avatar-bg: oklch(0.29 0 0);
+  --ei-sidebar-text-strong: oklch(0.9 0 0);
+  --ei-sidebar-text: oklch(0.78 0 0);
+  --ei-sidebar-text-soft: oklch(0.64 0 0);
+  --ei-sidebar-chevron: oklch(0.88 0 0);
+  --ei-stat-title: oklch(0.74 0 0);
+  --ei-stat-value: oklch(0.9 0 0);
+  --ei-accent: oklch(0.92 0 0);
+  --ei-accent-hover: oklch(0.82 0 0);
+  --ei-accent-foreground: oklch(0.205 0 0);
+  --background: oklch(0.148 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.21 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.21 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.27 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --muted: oklch(0.27 0 0);
+  --muted-foreground: oklch(0.71 0 0);
+  --accent: oklch(0.27 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --status-success-bg: oklch(0.27 0.06 155 / 40%);
+  --status-success-text: oklch(0.75 0.14 155);
+  --status-warning-bg: oklch(0.27 0.07 85 / 40%);
+  --status-warning-text: oklch(0.78 0.15 85);
+  --status-danger-bg: oklch(0.27 0.07 22 / 40%);
+  --status-danger-text: oklch(0.78 0.16 22);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -116,36 +195,42 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: var(--font-sans), sans-serif !important;
   }
 }
 
 /* Estilos responsivos para Toastify */
 .Toastify__toast-container {
-  width: 420px !important;
-  max-width: 420px !important;
+  width: 380px !important;
+  max-width: 380px !important;
   padding: 8px !important;
 }
 
 .Toastify__toast {
   border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  font-family: 'Poppins', sans-serif !important;
-  padding: 20px 24px !important;
+  font-family: var(--font-sans), sans-serif !important;
+  padding: 18px 22px !important;
   margin-bottom: 8px !important;
-  height: 72px !important;
-  min-height: 72px !important;
-  max-height: 72px !important;
+  height: 65px !important;
+  min-height: 65px !important;
+  max-height: 65px !important;
   display: flex !important;
   align-items: center !important;
 }
 
 .Toastify__toast-body {
   padding: 0 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1.4 !important;
   display: flex !important;
   align-items: center !important;

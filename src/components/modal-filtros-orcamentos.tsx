@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 
 interface ModalFiltrosOrcamentosProps {
   isOpen: boolean;
@@ -117,14 +118,6 @@ export default function ModalFiltrosOrcamentos({
       document.removeEventListener('click', handleClickOutside);
     };
   }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleCloseModal();
-    }
-  };
 
   const calcularDatasPeriodo = (periodo: string) => {
     const hoje = new Date();
@@ -277,202 +270,197 @@ export default function ModalFiltrosOrcamentos({
   };
 
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={handleCloseModal}
       data-test="modal-filtros-orcamentos-backdrop"
+      zIndex={99999}
+      contentClassName="shadow-none max-w-lg max-h-[80vh] overflow-visible"
+      contentDataTest="modal-filtros-orcamentos-content"
     >
-      <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-        data-test="modal-filtros-orcamentos-content"
-      >
-        {/* Botão de fechar */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={handleCloseModal}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-            title="Fechar"
-            data-test="modal-filtros-orcamentos-close-button"
-          >
-            <X size={20} />
-          </button>
+      {/* Botão de fechar */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={handleCloseModal}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+          title="Fechar"
+          data-test="modal-filtros-orcamentos-close-button"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Conteúdo dos Filtros */}
+      <div className="px-6 pb-6 space-y-6">
+        {/* Filtro por Valor */}
+        <div className="space-y-2 pt-4" data-test="filtro-valor-container">
+          <label className="block text-sm font-semibold text-foreground tracking-tight">
+            Faixa de valor
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="valorMin"
+                className="block text-sm text-muted-foreground mb-1"
+              >
+                Valor mínimo
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  R$
+                </span>
+                <input
+                  id="valorMin"
+                  type="text"
+                  value={valorMin}
+                  onChange={handleValorMinChange}
+                  placeholder="0,00"
+                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
+                  data-test="filtro-valor-min-input"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="valorMax"
+                className="block text-sm text-muted-foreground mb-1"
+              >
+                Valor máximo
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  R$
+                </span>
+                <input
+                  id="valorMax"
+                  type="text"
+                  value={valorMax}
+                  onChange={handleValorMaxChange}
+                  placeholder="0,00"
+                  className="w-full h-11 pl-9 pr-4 border border-border rounded-md bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
+                  data-test="filtro-valor-max-input"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Conteúdo dos Filtros */}
-        <div className="px-6 pb-6 space-y-6">
-          {/* Filtro por Valor */}
-          <div className="space-y-2 pt-4" data-test="filtro-valor-container">
-            <label className="block text-base font-medium text-gray-700">
-              Faixa de valor
+        {/* Filtro por Período */}
+        <div className="space-y-2" data-test="filtro-periodo-container">
+          <label className="block text-sm font-semibold text-foreground tracking-tight">
+            Período
+          </label>
+          <div className="relative" data-dropdown>
+            <button
+              onClick={() => setPeriodoDropdownOpen(!periodoDropdownOpen)}
+              className="w-full h-11 flex items-center justify-between px-3 bg-card border border-border rounded-md hover:bg-muted/35 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)] transition-colors cursor-pointer"
+              data-test="filtro-periodo-dropdown"
+            >
+              <span
+                className={
+                  periodoSelecionado
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                }
+              >
+                {getPeriodoLabel()}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-muted-foreground transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {periodoDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                {periodoOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handlePeriodoChange(option.value)}
+                    className={`w-full text-left px-4 py-2 transition-colors ${
+                      periodoSelecionado === option.value
+                        ? 'bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
+                        : 'text-foreground hover:bg-muted/40'
+                    } cursor-pointer`}
+                    data-test={`filtro-periodo-option-${option.value || 'todos'}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Datas personalizadas */}
+        {(mostrarDatasPersonalizadas ||
+          periodoSelecionado === 'personalizado') && (
+          <div
+            className="space-y-2"
+            data-test="filtro-datas-personalizadas-container"
+          >
+            <label className="block text-sm font-semibold text-foreground tracking-tight">
+              Selecione o período
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label
-                  htmlFor="valorMin"
-                  className="block text-sm text-gray-600 mb-1"
+                  htmlFor="dataInicio"
+                  className="block text-sm text-muted-foreground mb-1"
                 >
-                  Valor mínimo
+                  Data inicial
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    R$
-                  </span>
-                  <input
-                    id="valorMin"
-                    type="text"
-                    value={valorMin}
-                    onChange={handleValorMinChange}
-                    placeholder="0,00"
-                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    data-test="filtro-valor-min-input"
-                  />
-                </div>
+                <input
+                  id="dataInicio"
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
+                  data-test="filtro-data-inicio-input"
+                />
               </div>
               <div>
                 <label
-                  htmlFor="valorMax"
-                  className="block text-sm text-gray-600 mb-1"
+                  htmlFor="dataFim"
+                  className="block text-sm text-muted-foreground mb-1"
                 >
-                  Valor máximo
+                  Data final
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    R$
-                  </span>
-                  <input
-                    id="valorMax"
-                    type="text"
-                    value={valorMax}
-                    onChange={handleValorMaxChange}
-                    placeholder="0,00"
-                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    data-test="filtro-valor-max-input"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Filtro por Período */}
-          <div className="space-y-2" data-test="filtro-periodo-container">
-            <label className="block text-base font-medium text-gray-700">
-              Período
-            </label>
-            <div className="relative" data-dropdown>
-              <button
-                onClick={() => setPeriodoDropdownOpen(!periodoDropdownOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
-                data-test="filtro-periodo-dropdown"
-              >
-                <span
-                  className={
-                    periodoSelecionado ? 'text-gray-900' : 'text-gray-500'
-                  }
-                >
-                  {getPeriodoLabel()}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${periodoDropdownOpen ? 'rotate-180' : ''}`}
+                <input
+                  id="dataFim"
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                  className="w-full h-11 px-3 border border-border rounded-md bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/35 focus:border-[var(--ei-accent)]"
+                  data-test="filtro-data-fim-input"
                 />
-              </button>
-
-              {periodoDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                  {periodoOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handlePeriodoChange(option.value)}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                        periodoSelecionado === option.value
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-900'
-                      } cursor-pointer`}
-                      data-test={`filtro-periodo-option-${option.value || 'todos'}`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Datas personalizadas */}
-          {(mostrarDatasPersonalizadas ||
-            periodoSelecionado === 'personalizado') && (
-            <div
-              className="space-y-2"
-              data-test="filtro-datas-personalizadas-container"
-            >
-              <label className="block text-base font-medium text-gray-700">
-                Selecione o período
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="dataInicio"
-                    className="block text-sm text-gray-600 mb-1"
-                  >
-                    Data inicial
-                  </label>
-                  <input
-                    id="dataInicio"
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    data-test="filtro-data-inicio-input"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="dataFim"
-                    className="block text-sm text-gray-600 mb-1"
-                  >
-                    Data final
-                  </label>
-                  <input
-                    id="dataFim"
-                    type="date"
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    data-test="filtro-data-fim-input"
-                  />
-                </div>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              className="flex-1 cursor-pointer"
-              data-test="limpar-filtros-button"
-            >
-              Limpar Filtros
-            </Button>
-            <Button
-              onClick={handleApplyFilters}
-              className="flex-1 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
-              data-test="aplicar-filtros-button"
-            >
-              Aplicar Filtros
-            </Button>
           </div>
+        )}
+      </div>
+
+      {/* Footer com ações */}
+      <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-md">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="h-11 flex-1 border-border bg-card text-foreground hover:bg-muted/60 cursor-pointer"
+            data-test="limpar-filtros-button"
+          >
+            Limpar Filtros
+          </Button>
+          <Button
+            onClick={handleApplyFilters}
+            className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="aplicar-filtros-button"
+          >
+            Aplicar Filtros
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 
   return typeof window !== 'undefined'

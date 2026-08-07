@@ -1,13 +1,10 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
   subtitle?: string;
-  value: number;
-  icon: LucideIcon;
-  iconColor: string;
-  iconBgColor: string;
+  value: number | string;
+  valueColor?: string;
   'data-test'?: string;
   hoverTitle?: string;
 }
@@ -16,9 +13,7 @@ export default function StatCard({
   title,
   subtitle,
   value,
-  icon: Icon,
-  iconColor,
-  iconBgColor,
+  valueColor,
   'data-test': dataTest,
   hoverTitle,
 }: StatCardProps) {
@@ -27,22 +22,20 @@ export default function StatCard({
 
   return (
     <div
-      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+      className="flex flex-col gap-1 sm:gap-1.5 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5 bg-card border border-border rounded-md flex-1 min-w-0"
       data-test={dataTest}
       title={cardTitle}
     >
-      <div className="flex items-center w-full">
-        <div className={`p-2 ${iconBgColor} rounded-lg flex-shrink-0`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
-        </div>
-        <div className="ml-3 flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          {subtitle && (
-            <p className="text-sm font-medium text-gray-600">{subtitle}</p>
-          )}
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-        </div>
-      </div>
+      <span
+        className="text-lg sm:text-xl lg:text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value truncate"
+        style={valueColor ? { color: valueColor } : undefined}
+      >
+        {value}
+      </span>
+      <p className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none truncate">
+        {title}
+        {subtitle ? ` ${subtitle}` : ''}
+      </p>
     </div>
   );
 }

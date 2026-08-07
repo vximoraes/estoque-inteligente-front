@@ -4,15 +4,15 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Check, X } from 'lucide-react';
-import LogoEi from '@/components/logo-ei';
+import { Eye, EyeOff } from 'lucide-react';
+import AuthLeftPanel from '@/components/auth-left-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PulseLoader } from 'react-spinners';
+import { authClient } from '@/lib/auth-client';
 import { redefinirSenhaSchema, type RedefinirSenhaFormData } from '@/schemas';
 
 interface PasswordRequirement {
@@ -27,7 +27,7 @@ const passwordRequirements: PasswordRequirement[] = [
   { text: 'Um número', regex: /\d/ },
   {
     text: 'Um caractere especial (@, #, $, %, etc.)',
-    regex: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    regex: /[@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   },
 ];
 
@@ -67,11 +67,8 @@ function RedefinirSenhaContent() {
     }
   }, [token]);
 
-  const checkPasswordRequirement = (
-    requirement: PasswordRequirement,
-  ): boolean => {
-    return requirement.regex.test(senhaAtual);
-  };
+  const checkPasswordRequirement = (req: PasswordRequirement): boolean =>
+    req.regex.test(senhaAtual);
 
   const onSubmit = async (data: RedefinirSenhaFormData) => {
     if (!token) {
@@ -87,231 +84,206 @@ function RedefinirSenhaContent() {
       return;
     }
 
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/redefinir-senha?token=${token}`,
-        {
-          senha: data.senha,
-        },
-      );
+    const { error } = await authClient.resetPassword({
+      newPassword: data.senha,
+      token,
+    });
 
-      if (response.data.error === false) {
-        toast.success(
-          'Senha redefinida com sucesso! Redirecionando para o login...',
-          {
-            position: 'bottom-right',
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            transition: Slide,
-          },
-        );
-
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
-
-        toast.error(
-          errorData.message || 'Ocorreu um erro ao redefinir sua senha.',
-          {
-            position: 'bottom-right',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            transition: Slide,
-          },
-        );
-      } else {
-        toast.error('Ocorreu um erro inesperado. Tente novamente.', {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          transition: Slide,
-        });
-      }
+    if (error) {
+      toast.error(error.message || 'Ocorreu um erro ao redefinir sua senha.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      return;
     }
+
+    toast.success(
+      'Senha redefinida com sucesso! Redirecionando para o login...',
+      {
+        position: 'bottom-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      },
+    );
+    setTimeout(() => router.push('/login'), 2000);
   };
 
   if (tokenValido === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <PulseLoader color="#306FCC" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <PulseLoader color="var(--ei-accent)" />
       </div>
     );
   }
 
   if (tokenValido === false) {
     return (
-      <div className="min-h-screen flex">
-        <ToastContainer />
-        <LogoEi />
-        <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4">
-              Token Inválido
-            </h2>
-            <p className="text-zinc-600 mb-6 text-sm md:text-base">
-              O link de recuperação de senha é inválido ou expirou.
-            </p>
-            <Button
-              onClick={() => router.push('/esqueci-senha')}
-              className="bg-[#306FCC] hover:bg-[#2557a7] text-sm md:text-base"
-            >
-              Solicitar Novo Link
-            </Button>
+      <>
+        <ToastContainer position="bottom-right" />
+        <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+          <AuthLeftPanel />
+          <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+            <div className="w-full max-w-sm" data-test="token-invalido">
+              <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
+                Link inválido
+              </h2>
+              <p className="text-sm font-medium text-muted-foreground mb-6">
+                O link de recuperação de senha é inválido ou expirou.
+              </p>
+              <Button
+                onClick={() => router.push('/esqueci-senha')}
+                className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
+              >
+                Solicitar novo link
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex">
-      <ToastContainer />
-      <LogoEi />
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-2">
-              Redefinir senha
-            </h2>
-            <p className="text-zinc-600 text-sm md:text-base">
-              Digite sua nova senha abaixo.
-            </p>
-          </div>
+    <>
+      <ToastContainer position="bottom-right" />
+      <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+        <AuthLeftPanel />
+        <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+          <div className="w-full max-w-sm">
+            <div className="mb-8">
+              <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
+                Redefinir senha
+              </h1>
+              <p className="mt-2 text-sm font-medium text-muted-foreground">
+                Digite sua nova senha abaixo.
+              </p>
+            </div>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
-                Nova senha<span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  className={`p-3 md:p-5 w-full pr-12 text-sm md:text-base ${errors.senha ? 'border-red-500' : ''}`}
-                  type={showPassword ? 'text' : 'password'}
-                  id="senha"
-                  placeholder="Digite sua nova senha"
-                  {...register('senha')}
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={isSubmitting}
-                >
-                  {showPassword ? (
-                    <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
-                  ) : (
-                    <img
-                      src="/eye-off.png"
-                      alt=""
-                      className="w-5 h-5 opacity-60"
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-1.5">
+                  <Label
+                    className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                    htmlFor="senha"
+                  >
+                    Nova senha
+                  </Label>
+                  <div className="relative w-full">
+                    <Input
+                      aria-invalid={!!errors.senha}
+                      className="w-full h-11 pr-11"
+                      type={showPassword ? 'text' : 'password'}
+                      id="senha"
+                      placeholder="••••••••"
+                      {...register('senha')}
+                      disabled={isSubmitting}
+                      data-test="senha-input"
                     />
+                    <button
+                      type="button"
+                      aria-label={
+                        showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                      }
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                      disabled={isSubmitting}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.senha && (
+                    <p className="text-xs text-destructive">
+                      {errors.senha.message}
+                    </p>
                   )}
-                </button>
-              </div>
-              {errors.senha && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
-                  {errors.senha.message}
-                </p>
-              )}
-
-              {/* Validação visual da senha em tempo real */}
-              {senhaAtual && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                  <ul className="space-y-1.5">
-                    {passwordRequirements.map((requirement, index) => {
-                      const isValid = checkPasswordRequirement(requirement);
-                      return (
-                        <li
-                          key={index}
-                          className={`text-sm flex items-center gap-2 transition-colors duration-200 ${
-                            isValid ? 'text-green-600' : 'text-gray-600'
-                          }`}
-                        >
-                          {isValid ? (
-                            <Check className="flex-shrink-0 w-4 h-4" />
-                          ) : (
-                            <X className="flex-shrink-0 w-4 h-4" />
-                          )}
-                          <span>{requirement.text}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  {senhaAtual && (
+                    <div className="mt-1 grid grid-cols-1 gap-1">
+                      {passwordRequirements.map((req, i) => {
+                        const met = checkPasswordRequirement(req);
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
+                          >
+                            <div
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                            />
+                            {req.text}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="mt-3 md:mt-4">
-              <Label
-                className="pb-2 text-sm md:text-base"
-                htmlFor="confirmarSenha"
-              >
-                Confirmar nova senha<span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  className={`p-3 md:p-5 w-full pr-12 text-sm md:text-base ${errors.confirmarSenha ? 'border-red-500' : ''}`}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmarSenha"
-                  placeholder="Confirme sua nova senha"
-                  {...register('confirmarSenha')}
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  aria-label={
-                    showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
-                  }
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={isSubmitting}
-                >
-                  {showConfirmPassword ? (
-                    <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
-                  ) : (
-                    <img
-                      src="/eye-off.png"
-                      alt=""
-                      className="w-5 h-5 opacity-60"
+                <div className="flex flex-col gap-1.5">
+                  <Label
+                    className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                    htmlFor="confirmarSenha"
+                  >
+                    Confirmar nova senha
+                  </Label>
+                  <div className="relative w-full">
+                    <Input
+                      aria-invalid={!!errors.confirmarSenha}
+                      className="w-full h-11 pr-11"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmarSenha"
+                      placeholder="••••••••"
+                      {...register('confirmarSenha')}
+                      disabled={isSubmitting}
+                      data-test="confirmar-senha-input"
                     />
+                    <button
+                      type="button"
+                      aria-label={
+                        showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
+                      }
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                      disabled={isSubmitting}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmarSenha && (
+                    <p className="text-xs text-destructive">
+                      {errors.confirmarSenha.message}
+                    </p>
                   )}
-                </button>
+                </div>
               </div>
-              {errors.confirmarSenha && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
-                  {errors.confirmarSenha.message}
-                </p>
-              )}
-            </div>
 
-            <div className="mt-4 md:mt-6">
               <Button
                 type="submit"
-                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
+                className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
                 disabled={isSubmitting}
+                data-test="botao-redefinir-senha"
               >
-                {isSubmitting ? 'Redefinindo...' : 'Redefinir Senha'}
+                {isSubmitting ? 'Redefinindo...' : 'Redefinir senha'}
               </Button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -319,8 +291,8 @@ export default function RedefinirSenhaPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <PulseLoader color="#306FCC" />
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <PulseLoader color="var(--ei-accent)" />
         </div>
       }
     >

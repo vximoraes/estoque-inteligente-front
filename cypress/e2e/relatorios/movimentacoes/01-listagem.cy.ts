@@ -4,16 +4,7 @@ describe('Movimentações — Listagem', () => {
   const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
-    cy.session('login-admin', () => {
-      cy.visit(`${frontendUrl}/login`);
-
-      cy.get('#email').should('be.visible').type(email);
-      cy.get('#senha').should('be.visible').type(senha);
-
-      cy.contains('button', 'Entrar').should('be.visible').click();
-
-      cy.url({ timeout: 15000 }).should('not.include', '/login');
-    });
+    cy.login(email, senha);
 
     cy.visit(`${frontendUrl}/relatorios/movimentacoes`);
 

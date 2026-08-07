@@ -142,7 +142,10 @@ export const verificarCardComponente = (
   });
 };
 
-export const waitForAPIRequests = (aliases: string[], timeout = 10000) => {
+export const waitForAPIRequests = (
+  aliases: `@${string}`[],
+  timeout = 10000,
+) => {
   aliases.forEach((alias) => {
     cy.wait(alias, { timeout });
   });
@@ -151,12 +154,10 @@ export const waitForAPIRequests = (aliases: string[], timeout = 10000) => {
 export const limparComponenteTeste = (itemId: string) => {
   const apiUrl = Cypress.env('API_URL');
 
+  // cy.request reenvia o cookie de sessão do cy.login() automaticamente.
   cy.request({
     method: 'PATCH',
     url: `${apiUrl}/itens/${itemId}/inativar`,
-    headers: {
-      Authorization: `Bearer ${window.localStorage.getItem('token')}`,
-    },
     failOnStatusCode: false,
   }).then(() => {
     cy.log(`Componente ${itemId} removido`);

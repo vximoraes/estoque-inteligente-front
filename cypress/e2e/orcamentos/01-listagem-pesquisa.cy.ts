@@ -11,11 +11,11 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   before(() => {
     cy.request({
       method: 'POST',
-      url: `${apiUrl}/login`,
-      body: { email, senha },
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
-      authToken = response.body.data.user.accesstoken;
+      authToken = response.body.token;
 
       cy.request({
         method: 'GET',
@@ -91,12 +91,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   beforeEach(() => {
     cy.intercept('GET', '**/orcamentos*').as('getOrcamentos');
 
-    cy.visit(`${frontendUrl}/login`);
-    cy.getByData('email-input').should('be.visible').clear().type(email);
-    cy.getByData('senha-input').should('be.visible').clear().type(senha);
-    cy.getByData('botao-entrar').click();
-
-    cy.url({ timeout: 30000 }).should('include', '/itens');
+    cy.login(email, senha);
 
     cy.visit(`${frontendUrl}/orcamentos`, { failOnStatusCode: false });
     cy.wait('@getOrcamentos', { timeout: 30000 });
@@ -173,7 +168,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').should('exist');
+                cy.root().should('have.class', 'cursor-pointer');
                 cy.getByData('editar-button').should('exist');
                 cy.getByData('excluir-button').should('exist');
               });
@@ -284,12 +279,12 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
   });
 
   describe('Navegação', () => {
-    it('redireciona para adicionar orçamento', () => {
+    it('abre modal de cadastro ao clicar em Adicionar', () => {
       cy.getByData('adicionar-button').click();
-      cy.url().should('include', '/orcamentos/adicionar');
+      cy.get('[data-test="modal-cadastrar-orcamento"]').should('be.visible');
     });
 
-    it('redireciona para editar orçamento ao clicar no botão editar', () => {
+    it('abre modal de edição ao clicar no botão editar', () => {
       cy.get('body').then(($body) => {
         if ($body.find('[data-test="orcamentos-table"]').length > 0) {
           cy.getByData('orcamentos-table').within(() => {
@@ -299,7 +294,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
                 cy.getByData('editar-button').click();
               });
           });
-          cy.url().should('include', '/orcamentos/editar/');
+          cy.get('[data-test="modal-editar-orcamento"]').should('be.visible');
         } else {
           cy.log('Tabela não disponível - teste ignorado');
         }

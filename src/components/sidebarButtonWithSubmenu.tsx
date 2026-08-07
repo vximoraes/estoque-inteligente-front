@@ -3,16 +3,15 @@
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, type LucideIcon } from 'lucide-react';
 
 type SubMenuItem = {
   name: string;
   route: string;
 };
 
-type SidebarMenuButtonWithSubmenu = {
-  src: string;
-  srcHover: string;
+type SidebarMenuButtonWithSubmenuProps = {
+  icon: LucideIcon;
   name: string;
   'data-test'?: string;
   subItems: SubMenuItem[];
@@ -22,81 +21,80 @@ type SidebarMenuButtonWithSubmenu = {
 };
 
 export default function SidebarButtonWithSubmenu({
-  src,
-  srcHover,
+  icon: Icon,
   name,
   'data-test': dataTest,
   subItems,
   path,
   onItemClick,
   collapsed = false,
-}: SidebarMenuButtonWithSubmenu) {
-  const [isHover, setIsHover] = useState<string>(src);
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+}: SidebarMenuButtonWithSubmenuProps) {
   const router = useRouter();
+  const slug = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const isActive = !!path?.startsWith('/' + slug);
+  const [isOpen, setIsOpen] = useState(isActive);
 
   useEffect(() => {
-    const normalizedName = name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-    const isCurrentlyActive = path?.startsWith('/' + normalizedName);
-
-    setIsActive(!!isCurrentlyActive);
-    setIsHover(isCurrentlyActive ? srcHover : src);
-    setIsOpen(!!isCurrentlyActive);
-  }, [path, name, src, srcHover]);
+    if (isActive) setIsOpen(true);
+  }, [isActive]);
 
   function handleToggle() {
-    setIsOpen(!isOpen);
+    setIsOpen((v) => !v);
   }
 
   function handleSubItemClick(route: string) {
     router.push(route);
-    if (onItemClick) {
-      onItemClick();
-    }
+    onItemClick?.();
   }
 
   if (collapsed) {
     return (
       <div className="w-full flex flex-col items-center">
         <SidebarMenuButton
-          className={`flex justify-center items-center h-[50px] w-[80px] cursor-pointer relative transition-all duration-300 ease-in-out rounded-lg ${
-            isActive
-              ? 'bg-white hover:bg-[rgba(255,255,255,1)]! shadow-md'
-              : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!'
-          }`}
           onClick={handleToggle}
+          className={`flex justify-center items-center h-10 w-10 mx-auto cursor-pointer rounded-md border transition-colors duration-150 ${
+            isActive
+              ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+              : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
+          }`}
           data-test={dataTest || 'sidebar-menu-button'}
           title={name}
         >
-          <img src={isHover} alt={name} className="w-[24px] h-[24px]" />
+          <Icon
+            className={`w-[18px] h-[18px] ${
+              isActive
+                ? 'text-ei-sidebar-text-strong'
+                : 'text-ei-sidebar-text-soft'
+            }`}
+          />
         </SidebarMenuButton>
 
-        {/* Submenu colapsado - mostra primeira letra */}
         <div
-          className={`overflow-hidden transition-all duration-300 w-full flex flex-col items-center ${
-            isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          className={`grid transition-all duration-200 w-full ${
+            isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
           }`}
         >
-          <div className="mt-0.5 space-y-1 flex flex-col items-center">
-            {subItems.map((item) => (
-              <button
-                key={item.route}
-                onClick={() => handleSubItemClick(item.route)}
-                className={`w-[50px] h-[50px] flex items-center justify-center text-[16px] font-medium rounded-lg transition-all duration-200 cursor-pointer ${
-                  path === item.route
-                    ? 'bg-[rgba(255,255,255,0.12)] text-white'
-                    : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
-                }`}
-                data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
-                title={item.name}
-              >
-                {item.name.charAt(0).toUpperCase()}
-              </button>
-            ))}
+          <div className="overflow-hidden">
+            <div className="pt-1 pb-1 flex flex-col items-center gap-0.5">
+              {subItems.map((item) => (
+                <button
+                  key={item.route}
+                  onClick={() => handleSubItemClick(item.route)}
+                  className={`w-11 h-11 flex items-center justify-center text-[11px] font-semibold tracking-widest uppercase rounded-md border transition-colors duration-150 cursor-pointer ${
+                    path === item.route
+                      ? 'bg-ei-sidebar-surface text-ei-sidebar-text border-ei-sidebar-divider'
+                      : 'border-transparent text-ei-sidebar-text-soft hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text'
+                  }`}
+                  data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
+                  title={item.name}
+                >
+                  {item.name.slice(0, 2)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -104,50 +102,69 @@ export default function SidebarButtonWithSubmenu({
   }
 
   return (
-    <>
+    <div className="w-[250px]">
       <SidebarMenuButton
-        className={`text-[17px] pl-[20px] h-[50px] w-[250px] cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group ${
-          isActive
-            ? 'bg-white hover:bg-[rgba(255,255,255,1)]! shadow-md'
-            : 'hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!'
-        }`}
         onClick={handleToggle}
+        className={`w-[250px] h-10 pl-4 pr-3 flex gap-3 items-center cursor-pointer rounded-md border transition-colors duration-150 ${
+          isActive
+            ? 'bg-ei-sidebar-surface! border-ei-sidebar-divider'
+            : 'border-transparent hover:bg-ei-sidebar-surface-hover!'
+        }`}
         data-test={dataTest || 'sidebar-menu-button'}
       >
-        <img src={isHover} alt="" className="w-[22px] h-[22px]" />
+        <Icon
+          className={`w-[18px] h-[18px] shrink-0 ${
+            isActive ? 'text-ei-sidebar-text-strong' : 'text-ei-sidebar-text'
+          }`}
+        />
         <span
-          className={`text-[16px] font-medium flex-1 ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+          className={`text-[13px] tracking-wide flex-1 ${
+            isActive
+              ? 'text-ei-sidebar-text-strong font-semibold'
+              : 'text-ei-sidebar-text font-medium'
+          }`}
         >
           {name}
         </span>
         <ChevronDown
-          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '!rotate-180' : ''} ${
-            isActive || isOpen ? 'opacity-100' : 'opacity-0'
-          } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+          className={`w-3.5 h-3.5 mr-1 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : 'rotate-0'
+          } ${
+            isActive || isOpen
+              ? 'text-ei-sidebar-chevron opacity-95'
+              : 'text-ei-sidebar-text opacity-80'
+          }`}
         />
       </SidebarMenuButton>
 
-      {/* Sub-menu expandido */}
-      {isOpen && (
-        <div className="transition-all duration-300 mt-0.5 pr-4">
-          <div className="ml-[34px] space-y-1">
+      <div
+        className={`grid transition-all duration-200 ${
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="pt-0.5 pb-1 flex flex-col gap-0.5">
             {subItems.map((item) => (
               <button
                 key={item.route}
                 onClick={() => handleSubItemClick(item.route)}
-                className={`w-full text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
+                className={`w-[250px] h-10 pl-4 pr-3 flex items-center gap-3 text-left rounded-md border transition-colors duration-150 cursor-pointer ${
                   path === item.route
-                    ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
-                    : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+                    ? 'bg-ei-sidebar-surface text-ei-sidebar-text font-medium border-ei-sidebar-divider'
+                    : 'border-transparent text-ei-sidebar-text hover:bg-ei-sidebar-surface-hover hover:text-ei-sidebar-text-strong'
                 }`}
                 data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
               >
-                {item.name}
+                <span
+                  className="w-[18px] h-[18px] shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-[13px] tracking-wide">{item.name}</span>
               </button>
             ))}
           </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }

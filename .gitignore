@@ -61,3 +61,8 @@ cypress/reports
 # Configmap
 *secret*
 
+# GitHub
+.github
+
+# Claude Code personal overrides
+CLAUDE.local.md

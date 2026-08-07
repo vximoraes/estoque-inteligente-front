@@ -1,5 +1,4 @@
 describe('Componentes - Listagem, Pesquisa e Filtros', () => {
-  const frontendUrl = Cypress.env('FRONTEND_URL');
   const apiUrl = Cypress.env('API_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
@@ -11,11 +10,11 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
   before(() => {
     cy.request({
       method: 'POST',
-      url: `${apiUrl}/login`,
-      body: { email, senha },
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
-      authToken = response.body.data.user.accesstoken;
+      authToken = response.body.token;
 
       cy.request({
         method: 'GET',
@@ -45,18 +44,8 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     cy.intercept('GET', '**/itens*').as('getComponentes');
     cy.intercept('GET', '**/categorias*').as('getCategorias');
 
-    cy.visit(`${frontendUrl}/login`);
-    cy.get('[data-test="email-input"]')
-      .should('be.visible')
-      .clear()
-      .type(email);
-    cy.get('[data-test="senha-input"]')
-      .should('be.visible')
-      .clear()
-      .type(senha);
-    cy.get('[data-test="botao-entrar"]').click();
+    cy.login(email, senha);
 
-    cy.url({ timeout: 30000 }).should('include', '/itens');
     cy.get('[data-test="itens-page"]', { timeout: 30000 }).should('exist');
     cy.wait('@getComponentes');
   });
@@ -76,20 +65,12 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
           .should('exist')
           .invoke('text')
           .should('match', /Em Estoque|Baixo Estoque|Indisponível/);
-        cy.get('[data-test="quantity"]').should('contain.text', 'Qtd:');
+        cy.get('[data-test="quantity"]').should('contain.text', 'Qtd');
         cy.get('[data-test="edit-button"]').should('exist');
         cy.get('[data-test="delete-button"]').should('exist');
         cy.get('[data-test="entrada-icon"]').should('exist');
         cy.get('[data-test="saida-icon"]').should('exist');
       });
-    });
-
-    it('exibe estatísticas de itens', () => {
-      cy.viewport(1280, 720);
-      cy.get('[data-test="stat-total-itens"]').should('exist');
-      cy.get('[data-test="stat-em-estoque"]').should('exist');
-      cy.get('[data-test="stat-baixo-estoque"]').should('exist');
-      cy.get('[data-test="stat-indisponiveis"]').should('exist');
     });
   });
 
@@ -113,9 +94,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.get('[data-test="empty-state"]', { timeout: 15000 }).should(
         'be.visible',
       );
-      cy.contains('Nenhum item encontrado para sua pesquisa.').should(
-        'be.visible',
-      );
+      cy.contains('Nenhum resultado').should('be.visible');
     });
 
     it('restaura listagem ao limpar busca', () => {
@@ -140,7 +119,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     it('aplica filtro de status Em Estoque', () => {
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-status-dropdown"]').click();
-      cy.contains('Em Estoque').click();
+      cy.get('[data-test="filtro-status-option-em-estoque"]').click();
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
@@ -153,7 +132,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     it('aplica filtro de status Baixo Estoque', () => {
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-status-dropdown"]').click();
-      cy.contains('Baixo Estoque').click();
+      cy.get('[data-test="filtro-status-option-baixo-estoque"]').click();
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
@@ -167,7 +146,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-status-dropdown"]').click();
       cy.wait(200);
-      cy.contains('button', 'Indisponível').click({ force: true });
+      cy.get('[data-test="filtro-status-option-indisponível"]').click();
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
@@ -180,7 +159,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     it('remove filtro ao clicar no X', () => {
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-status-dropdown"]').click();
-      cy.contains('Em Estoque').click();
+      cy.get('[data-test="filtro-status-option-em-estoque"]').click();
       cy.intercept('GET', '**/itens*').as('filterRequest');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterRequest');
@@ -199,7 +178,9 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
       cy.wait('@getCategorias');
       cy.get('[data-test="filtro-categoria-dropdown"]').click();
       cy.wait(300);
-      cy.contains(primeiraCategoria.nome).click();
+      cy.get(
+        `[data-test="filtro-categoria-option-${primeiraCategoria._id}"]`,
+      ).click();
       cy.intercept('GET', '**/itens*').as('filterCategoria');
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.wait('@filterCategoria');
@@ -212,7 +193,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     it('limpa filtros pelo modal', () => {
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-status-dropdown"]').click();
-      cy.contains('Em Estoque').click();
+      cy.get('[data-test="filtro-status-option-em-estoque"]').click();
       cy.get('[data-test="aplicar-filtros-button"]').click();
       cy.get('[data-test="applied-filters"]').should('be.visible');
       cy.get('[data-test="filtros-button"]').click();
@@ -229,16 +210,16 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
   });
 
   describe('Navegação', () => {
-    it('redireciona para adicionar item', () => {
+    it('abre modal de cadastro ao clicar em Adicionar', () => {
       cy.get('[data-test="adicionar-button"]').click();
-      cy.url().should('include', '/itens/adicionar');
+      cy.get('[data-test="modal-cadastrar-item"]').should('be.visible');
     });
 
-    it('redireciona para editar item ao clicar no botão editar', () => {
+    it('abre modal de edição ao clicar no botão editar', () => {
       cy.get('[data-test="item-card-0"]').within(() => {
-        cy.get('[data-test="edit-button"]').click();
+        cy.get('[data-test="edit-button"]').click({ force: true });
       });
-      cy.url().should('include', '/itens/editar/');
+      cy.get('[data-test="modal-editar-item"]').should('be.visible');
     });
   });
 

@@ -9,8 +9,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'],
+        heading: ['Barlow Condensed', 'sans-serif'],
+        sans: ['Overpass', 'sans-serif'],
       },
       screens: {
         '3xl': '1800px',

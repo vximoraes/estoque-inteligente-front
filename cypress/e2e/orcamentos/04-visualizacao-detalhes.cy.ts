@@ -10,11 +10,11 @@ describe('Orçamentos - Visualização de Detalhes', () => {
   before(() => {
     cy.request({
       method: 'POST',
-      url: `${apiUrl}/login`,
-      body: { email, senha },
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
-      authToken = response.body.data.user.accesstoken;
+      authToken = response.body.token;
 
       cy.request({
         method: 'GET',
@@ -46,7 +46,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -65,7 +65,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -87,7 +87,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -108,7 +108,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -129,7 +129,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -149,7 +149,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -167,7 +167,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -195,7 +195,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -216,7 +216,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -237,7 +237,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -260,7 +260,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -282,7 +282,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -302,7 +302,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -322,7 +322,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -360,7 +360,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -389,7 +389,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -418,7 +418,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -449,7 +449,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -480,7 +480,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
         cy.get('tbody tr')
           .first()
           .within(() => {
-            cy.getByData('visualizar-button').click();
+            cy.root().click();
           });
       });
 
@@ -533,7 +533,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -554,7 +554,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -581,7 +581,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -607,7 +607,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -631,7 +631,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -661,7 +661,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -683,7 +683,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -701,7 +701,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -719,7 +719,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -736,7 +736,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -756,7 +756,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -778,7 +778,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 
@@ -807,7 +807,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             cy.get('tbody tr')
               .first()
               .within(() => {
-                cy.getByData('visualizar-button').click();
+                cy.root().click();
               });
           });
 

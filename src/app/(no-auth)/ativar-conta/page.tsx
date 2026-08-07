@@ -4,17 +4,17 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { ToastContainer, Slide } from 'react-toastify';
+import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Check, X } from 'lucide-react';
-import LogoEi from '@/components/logo-ei';
+import { Eye, EyeOff } from 'lucide-react';
+import AuthLeftPanel from '@/components/auth-left-panel';
+import GoogleIcon from '@/components/google-icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PulseLoader } from 'react-spinners';
 import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
 import { ativarContaSchema, type AtivarContaFormData } from '@/schemas';
 
 interface PasswordRequirement {
@@ -29,7 +29,7 @@ const passwordRequirements: PasswordRequirement[] = [
   { text: 'Um número', regex: /\d/ },
   {
     text: 'Um caractere especial (@, #, $, %, etc.)',
-    regex: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    regex: /[@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   },
 ];
 
@@ -37,6 +37,7 @@ function AtivarContaContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenValido, setTokenValido] = useState<boolean | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -69,11 +70,8 @@ function AtivarContaContent() {
     }
   }, [token]);
 
-  const checkPasswordRequirement = (
-    requirement: PasswordRequirement,
-  ): boolean => {
-    return requirement.regex.test(senhaAtual);
-  };
+  const checkPasswordRequirement = (req: PasswordRequirement): boolean =>
+    req.regex.test(senhaAtual);
 
   const onSubmit = async (data: AtivarContaFormData) => {
     if (!token) {
@@ -90,14 +88,18 @@ function AtivarContaContent() {
     }
 
     try {
-      const response = await axios.post(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/ativar-conta?token=${token}`,
         {
-          senha: data.senha,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senha: data.senha }),
         },
       );
+      const responseData = await res.json();
+      if (!res.ok) throw responseData;
 
-      if (response.data.error === false) {
+      if (responseData.error === false) {
         toast.success(
           'Conta ativada com sucesso! Redirecionando para o login...',
           {
@@ -110,15 +112,11 @@ function AtivarContaContent() {
             transition: Slide,
           },
         );
-
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
+        setTimeout(() => router.push('/login'), 2000);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
-
+      if (!(error instanceof Error)) {
+        const errorData = error as { message?: string };
         toast.error(
           errorData.message || 'Ocorreu um erro ao ativar sua conta.',
           {
@@ -145,182 +143,218 @@ function AtivarContaContent() {
     }
   };
 
-  if (tokenValido === false) {
+  const handleGoogleContinuar = async () => {
+    setGoogleLoading(true);
+
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/itens',
+    });
+
+    if (error) {
+      toast.error('Erro ao continuar com Google. Tente novamente.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      setGoogleLoading(false);
+    }
+  };
+
+  if (tokenValido === null) {
     return (
-      <div className="min-h-screen flex">
-        <LogoEi />
-        <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md text-center">
-            <div className="mb-6">
-              <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <X className="w-8 h-8 text-red-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Token Inválido
-              </h2>
-              <p className="text-gray-600">
-                O link de convite é inválido ou expirou. Entre em contato com o
-                administrador para solicitar um novo convite.
-              </p>
-            </div>
-            <Button
-              onClick={() => router.push('/login')}
-              className="bg-[#306FCC] hover:bg-[#2557a7]"
-            >
-              Ir para Login
-            </Button>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <PulseLoader color="var(--ei-accent)" size={15} />
       </div>
     );
   }
 
+  if (tokenValido === false) {
+    return (
+      <>
+        <ToastContainer position="bottom-right" />
+        <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+          <AuthLeftPanel />
+          <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+            <div className="w-full max-w-sm">
+              <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
+                Link inválido
+              </h2>
+              <p className="text-sm font-medium text-muted-foreground mb-6">
+                O link de convite é inválido ou expirou. Entre em contato com o
+                administrador para solicitar um novo convite.
+              </p>
+              <Button
+                onClick={() => router.push('/login')}
+                className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
+              >
+                Ir para acesso
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex">
-      <LogoEi />
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-2">
+    <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+      <AuthLeftPanel />
+      <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
               Ativação de conta
-            </h2>
-            <p className="text-zinc-600 text-sm md:text-base mt-2">
+            </h1>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">
               Crie uma senha segura para ativar sua conta e começar a utilizar o
               sistema.
             </p>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="pt-3 md:pt-4">
-              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
-                Senha <span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  className={`p-3 md:p-5 w-full pr-12 text-sm md:text-base ${
-                    errors.senha ? 'border-red-500' : ''
-                  }`}
-                  type={showPassword ? 'text' : 'password'}
-                  id="senha"
-                  placeholder="Insira sua senha"
-                  {...register('senha')}
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                >
-                  {showPassword ? (
-                    <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
-                  ) : (
-                    <img
-                      src="/eye-off.png"
-                      alt=""
-                      className="w-5 h-5 opacity-60"
-                    />
-                  )}
-                </button>
-              </div>
-              {errors.senha && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.senha.message}
-                </p>
-              )}
 
-              {/* Validação visual da senha em tempo real */}
-              {senhaAtual && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                  <ul className="space-y-1.5">
-                    {passwordRequirements.map((requirement, index) => {
-                      const isValid = checkPasswordRequirement(requirement);
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <Label
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  htmlFor="senha"
+                >
+                  Senha
+                </Label>
+                <div className="relative w-full">
+                  <Input
+                    aria-invalid={!!errors.senha}
+                    className="w-full h-11 pr-11"
+                    type={showPassword ? 'text' : 'password'}
+                    id="senha"
+                    placeholder="••••••••"
+                    {...register('senha')}
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.senha && (
+                  <p className="text-xs text-destructive">
+                    {errors.senha.message}
+                  </p>
+                )}
+                {senhaAtual && (
+                  <div className="mt-1 grid grid-cols-1 gap-1">
+                    {passwordRequirements.map((req, i) => {
+                      const met = checkPasswordRequirement(req);
                       return (
-                        <li
-                          key={index}
-                          className={`text-sm flex items-center gap-2 transition-colors duration-200 ${
-                            isValid ? 'text-green-600' : 'text-gray-600'
-                          }`}
+                        <div
+                          key={i}
+                          className={`flex items-center gap-2 text-xs transition-colors duration-150 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}
                         >
-                          {isValid ? (
-                            <Check className="flex-shrink-0 w-4 h-4" />
-                          ) : (
-                            <X className="flex-shrink-0 w-4 h-4" />
-                          )}
-                          <span>{requirement.text}</span>
-                        </li>
+                          <div
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${met ? 'bg-emerald-500' : 'bg-border'}`}
+                          />
+                          {req.text}
+                        </div>
                       );
                     })}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-3 md:pt-4">
-              <Label
-                className="pb-2 text-sm md:text-base"
-                htmlFor="confirmarSenha"
-              >
-                Confirmar senha <span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  className={`p-3 md:p-5 w-full pr-12 text-sm md:text-base ${
-                    errors.confirmarSenha ? 'border-red-500' : ''
-                  }`}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmarSenha"
-                  placeholder="Confirme sua senha"
-                  {...register('confirmarSenha')}
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  aria-label={
-                    showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
-                  }
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                >
-                  {showConfirmPassword ? (
-                    <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
-                  ) : (
-                    <img
-                      src="/eye-off.png"
-                      alt=""
-                      className="w-5 h-5 opacity-60"
-                    />
-                  )}
-                </button>
+                  </div>
+                )}
               </div>
-              {errors.confirmarSenha && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.confirmarSenha.message}
-                </p>
-              )}
+
+              <div className="flex flex-col gap-1.5">
+                <Label
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  htmlFor="confirmarSenha"
+                >
+                  Confirmar senha
+                </Label>
+                <div className="relative w-full">
+                  <Input
+                    aria-invalid={!!errors.confirmarSenha}
+                    className="w-full h-11 pr-11"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="confirmarSenha"
+                    placeholder="••••••••"
+                    {...register('confirmarSenha')}
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmarSenha && (
+                  <p className="text-xs text-destructive">
+                    {errors.confirmarSenha.message}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="mt-4 md:mt-6">
-              <Button
-                type="submit"
-                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Ativando conta...' : 'Ativar conta'}
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Ativando conta...' : 'Ativar conta'}
+            </Button>
           </form>
 
-          <div className="text-center mt-6">
-            <p className="text-zinc-600 text-sm md:text-base">
-              Já tem uma conta ativa?{' '}
-              <Link
-                href="/login"
-                className="text-[#306FCC] hover:text-[#2557a7] underline font-medium"
-              >
-                Entrar
-              </Link>
-            </p>
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ou
+            </span>
+            <div className="h-px flex-1 bg-border" />
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full gap-2 cursor-pointer"
+            onClick={handleGoogleContinuar}
+            disabled={googleLoading || isSubmitting}
+          >
+            {!googleLoading && <GoogleIcon />}
+            {googleLoading ? 'Redirecionando...' : 'Continuar com Google'}
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Use o mesmo e-mail para o qual o convite foi enviado.
+          </p>
+
+          <p className="mt-6 text-sm font-medium text-muted-foreground">
+            Já tem uma conta ativa?{' '}
+            <Link
+              href="/login"
+              className="text-[var(--ei-accent)] transition-colors hover:text-[var(--ei-accent-hover)]"
+            >
+              Acessar sistema
+            </Link>
+          </p>
         </div>
       </div>
       <ToastContainer
@@ -340,8 +374,8 @@ export default function AtivarContaPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <PulseLoader color="#306FCC" size={15} />
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <PulseLoader color="var(--ei-accent)" size={15} />
         </div>
       }
     >

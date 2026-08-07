@@ -3,6 +3,7 @@ import StatCard from '@/components/stat-card';
 import Cabecalho from '@/components/cabecalho';
 import ModalFiltros from '@/components/modal-filtros';
 import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
+import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,17 +16,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import {
-  Search,
-  Filter,
-  Package,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  X,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { Search, Filter, Package, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
@@ -39,6 +30,13 @@ interface CategoriasApiResponse {
   };
 }
 
+interface ItensGlobaisStats {
+  totalItens: number;
+  emEstoque: number;
+  baixoEstoque: number;
+  indisponiveis: number;
+}
+
 function RelatorioItensPageContent() {
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +44,6 @@ function RelatorioItensPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -63,7 +60,7 @@ function RelatorioItensPageContent() {
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20');
+      params.append('limite', '20');
       params.append('page', page.toString());
 
       if (categoriaFilter) {
@@ -114,6 +111,39 @@ function RelatorioItensPageContent() {
 
   const todosEstoques = data?.pages.flatMap((page) => page.data.docs) || [];
 
+  const { data: globalStats } = useQuery<ItensGlobaisStats>({
+    queryKey: ['itens-relatorio-global-stats', categoriaFilter, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (categoriaFilter) {
+        params.append('categoria', categoriaFilter);
+      }
+      if (statusFilter) {
+        params.append('status', statusFilter);
+      }
+
+      const response = await get<{ data: ItensGlobaisStats }>(
+        `/itens/stats?${params.toString()}`,
+      );
+
+      return (
+        response?.data ?? {
+          totalItens: 0,
+          emEstoque: 0,
+          baixoEstoque: 0,
+          indisponiveis: 0,
+        }
+      );
+    },
+    staleTime: 30_000,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
   // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
   const estoquesFiltrados = todosEstoques
     .filter((estoque) => {
@@ -145,24 +175,38 @@ function RelatorioItensPageContent() {
     });
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
-  const totalItens = new Set(
-    estoquesFiltrados.filter((e) => e?.item?._id).map((e) => e.item._id),
-  ).size;
-  const emEstoque = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Em Estoque',
+  const itensUnicosLocal = new Map<
+    string,
+    (typeof estoquesFiltrados)[number]['item']
+  >();
+  estoquesFiltrados.forEach((e) => {
+    if (e?.item?._id) {
+      itensUnicosLocal.set(e.item._id, e.item);
+    }
+  });
+  const itensLocal = Array.from(itensUnicosLocal.values());
+
+  const totalItens = itensLocal.length;
+  const emEstoqueLocal = itensLocal.filter(
+    (item) => item.status === 'Em Estoque',
   ).length;
-  const baixoEstoque = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Baixo Estoque',
+  const baixoEstoqueLocal = itensLocal.filter(
+    (item) => item.status === 'Baixo Estoque',
   ).length;
-  const indisponiveis = estoquesFiltrados.filter(
-    (e) => e?.item?.status === 'Indisponível',
+  const indisponiveisLocal = itensLocal.filter(
+    (item) => item.status === 'Indisponível',
   ).length;
+
+  const totalItensGlobal = globalStats?.totalItens ?? totalItens;
+  const emEstoque = globalStats?.emEstoque ?? emEstoqueLocal;
+  const baixoEstoque = globalStats?.baixoEstoque ?? baixoEstoqueLocal;
+  const indisponiveis = globalStats?.indisponiveis ?? indisponiveisLocal;
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limit=9999');
+      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -307,69 +351,35 @@ function RelatorioItensPageContent() {
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
       data-test="relatorio-itens-page"
     >
-      <Cabecalho pagina="Relatórios" acao="Componentes" />
+      <Cabecalho pagina="Relatórios" acao="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
-        {/* Stats Cards - Colapsável no mobile */}
         <div className="shrink-0 mb-6">
-          {/* Botão para mobile */}
-          <button
-            onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-700">Estatísticas</span>
-            </div>
-            {isStatsOpen ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
-
-          {/* Cards - Sempre visível no desktop, colapsável no mobile */}
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
             data-test="stats-grid"
           >
             <StatCard
-              title="Total de"
-              subtitle="itens"
-              value={totalItens}
-              icon={Package}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
+              title="Total de itens"
+              value={totalItensGlobal}
               data-test="stat-total-itens"
-              hoverTitle={`Total de itens cadastrados: ${totalItens}`}
+              hoverTitle={`Total de itens cadastrados: ${totalItensGlobal}`}
             />
-
             <StatCard
               title="Em estoque"
               value={emEstoque}
-              icon={CheckCircle}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
               data-test="stat-em-estoque"
               hoverTitle={`Itens disponíveis em estoque: ${emEstoque}`}
             />
-
             <StatCard
               title="Baixo estoque"
               value={baixoEstoque}
-              icon={AlertTriangle}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
               data-test="stat-baixo-estoque"
               hoverTitle={`Itens com baixo estoque: ${baixoEstoque}`}
             />
-
             <StatCard
               title="Indisponível"
               value={indisponiveis}
-              icon={XCircle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
               data-test="stat-indisponiveis"
               hoverTitle={`Itens indisponíveis: ${indisponiveis}`}
             />
@@ -378,23 +388,23 @@ function RelatorioItensPageContent() {
 
         {/* Barra de Pesquisa e Botões */}
         <div
-          className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0"
+          className="flex flex-col sm:flex-row gap-3 mb-4 shrink-0"
           data-test="search-actions-bar"
         >
           <div className="relative flex-1" data-test="search-container">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
               placeholder="Pesquisar itens..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
               data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2 cursor-pointer"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
@@ -403,12 +413,16 @@ function RelatorioItensPageContent() {
           </Button>
           <Button
             disabled={selectedItems.size === 0}
-            className={`flex items-center gap-2 text-white transition-all ${
+            className={`h-11 px-4 flex items-center gap-2 transition-all ${
               selectedItems.size > 0
-                ? 'hover:opacity-90 cursor-pointer'
-                : 'opacity-50 cursor-not-allowed bg-gray-400'
+                ? 'text-ei-accent-foreground hover:opacity-90 cursor-pointer'
+                : 'text-muted-foreground opacity-50 cursor-not-allowed bg-muted'
             }`}
-            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            style={
+              selectedItems.size > 0
+                ? { backgroundColor: 'var(--ei-accent)' }
+                : {}
+            }
             data-test="exportar-button"
             onClick={handleOpenExportarModal}
             title={
@@ -417,7 +431,7 @@ function RelatorioItensPageContent() {
                 : `Exportar ${selectedItems.size} item(ns)`
             }
           >
-            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            <FileDown className="w-5 h-5" />
             Exportar
           </Button>
         </div>
@@ -432,7 +446,7 @@ function RelatorioItensPageContent() {
               {categoriaFilter && (
                 <div
                   data-test="filter-tag-categoria"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                 >
                   <span className="font-medium">Categoria:</span>
                   <span>
@@ -442,28 +456,28 @@ function RelatorioItensPageContent() {
                   </span>
                   <button
                     onClick={() => setCategoriaFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de categoria"
                     data-test="remove-categoria-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {statusFilter && (
                 <div
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
                   data-test="filter-tag-status"
                 >
                   <span className="font-medium">Status:</span>
                   <span>{statusFilter}</span>
                   <button
                     onClick={() => setStatusFilter('')}
-                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     title="Remover filtro de status"
                     data-test="remove-status-filter"
                   >
-                    <X size={12} />
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -474,7 +488,7 @@ function RelatorioItensPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -487,21 +501,21 @@ function RelatorioItensPageContent() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-muted-foreground font-medium">
                 Carregando itens...
               </p>
             </div>
           ) : estoquesFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border border-border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
+                  <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
+                    <TableRow className="bg-muted border-b">
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center w-[50px] px-8"
                         data-test="table-head-checkbox"
                       >
                         <input
@@ -513,7 +527,7 @@ function RelatorioItensPageContent() {
                             }
                           }}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 cursor-pointer"
+                          className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                           title={
                             isAllSelected
                               ? 'Desmarcar todos'
@@ -523,31 +537,31 @@ function RelatorioItensPageContent() {
                         />
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-codigo"
                       >
                         CÓDIGO
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-left px-8"
                         data-test="table-head-item"
                       >
                         COMPONENTE
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-quantidade"
                       >
                         QUANTIDADE
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-center px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-status"
                       >
                         STATUS
                       </TableHead>
                       <TableHead
-                        className="font-semibold text-gray-700 bg-gray-50 text-left px-8"
+                        className="font-semibold text-muted-foreground bg-muted text-center px-8"
                         data-test="table-head-localizacao"
                       >
                         LOCALIZAÇÃO
@@ -559,15 +573,19 @@ function RelatorioItensPageContent() {
                       <TableRow
                         data-test="item-row"
                         key={estoque._id}
-                        className="hover:bg-gray-50 border-b"
+                        className="hover:bg-muted/35 border-b border-border cursor-pointer"
                         style={{ height: '60px' }}
+                        onClick={() => handleSelectItem(estoque._id)}
                       >
-                        <TableCell className="text-center px-8 py-3 align-middle">
+                        <TableCell
+                          className="text-center px-8 py-3 align-middle"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
                             onChange={() => handleSelectItem(estoque._id)}
-                            className="w-4 h-4 cursor-pointer"
+                            className="w-4 h-4 accent-[var(--ei-accent)] cursor-pointer"
                             data-test="checkbox-select-item"
                           />
                         </TableCell>
@@ -605,25 +623,33 @@ function RelatorioItensPageContent() {
                             data-test="item-status"
                           >
                             <span
-                              className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
-                                estoque.item.status === 'Em Estoque'
-                                  ? 'bg-green-100 text-green-800'
-                                  : estoque.item.status === 'Baixo Estoque'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                              }`}
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
                               title={estoque.item.status}
+                              style={{
+                                color:
+                                  estoque.item.status === 'Em Estoque'
+                                    ? 'var(--status-success-text)'
+                                    : estoque.item.status === 'Baixo Estoque'
+                                      ? 'var(--status-warning-text)'
+                                      : 'var(--status-danger-text)',
+                                backgroundColor:
+                                  estoque.item.status === 'Em Estoque'
+                                    ? 'var(--status-success-bg)'
+                                    : estoque.item.status === 'Baixo Estoque'
+                                      ? 'var(--status-warning-bg)'
+                                      : 'var(--status-danger-bg)',
+                              }}
                             >
                               {estoque.item.status}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell
-                          className="text-left px-8 py-3 font-medium"
+                          className="text-center px-8 py-3 font-medium"
                           data-test="item-localizacao"
                         >
                           <span
-                            className="truncate block max-w-[200px]"
+                            className="truncate inline-block max-w-[200px]"
                             title={estoque.localizacao.nome}
                           >
                             {estoque.localizacao.nome}
@@ -641,7 +667,7 @@ function RelatorioItensPageContent() {
                 >
                   {isFetchingNextPage && (
                     <PulseLoader
-                      color="#3b82f6"
+                      color="var(--ei-accent)"
                       size={5}
                       speedMultiplier={0.8}
                     />
@@ -650,20 +676,18 @@ function RelatorioItensPageContent() {
               </div>
             </div>
           ) : (
-            <div
-              className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border"
-              data-test="empty-state"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Package className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500 text-lg">
-                  {searchTerm
-                    ? 'Nenhum item encontrado para sua pesquisa.'
-                    : 'Não há itens cadastrados...'}
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
+              <EmptyState
+                icon={Package}
+                title={
+                  searchTerm ? 'Nenhum resultado' : 'Nenhum item encontrado'
+                }
+                subtitle={
+                  searchTerm
+                    ? 'Tente ajustar sua pesquisa.'
+                    : 'Não há itens para exibir no relatório.'
+                }
+              />
             </div>
           )}
         </div>
@@ -695,10 +719,12 @@ export default function RelatorioItensPage() {
       fallback={
         <div className="w-full h-screen flex flex-col items-center justify-center">
           <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
           </div>
-          <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+          <p className="mt-4 text-muted-foreground font-medium">
+            Carregando...
+          </p>
         </div>
       }
     >

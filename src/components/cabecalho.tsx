@@ -6,7 +6,6 @@ import { useSidebarContext } from '@/contexts/SidebarContext';
 import { Bell, Menu, ChevronLeft } from 'lucide-react';
 import { get, patch } from '@/lib/fetchData';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSession } from 'next-auth/react';
 
 type NotificationItem = {
   _id: string;
@@ -59,8 +58,8 @@ export default function Cabecalho({
     queryFn: async () =>
       await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
     enabled: !!user?.id,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
     refetchInterval: sseConnected ? false : 15000,
   });
 
@@ -75,17 +74,8 @@ export default function Cabecalho({
     const maxReconnectAttempts = 5;
 
     const connectSSE = async () => {
-      const session = await getSession();
-      const token = session?.user?.accessToken;
-
-      if (!token) {
-        return;
-      }
-
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      if (!API_URL) {
-        return;
-      }
+      if (!API_URL) return;
 
       abortController = new AbortController();
 
@@ -93,10 +83,8 @@ export default function Cabecalho({
 
       try {
         const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'text/event-stream',
-          },
+          headers: { Accept: 'text/event-stream' },
+          credentials: 'include',
           signal: abortController.signal,
         });
 
@@ -212,12 +200,7 @@ export default function Cabecalho({
       }
     } else {
       try {
-        const naoVisualizadas = notifications.filter((n) => !n.visualizada);
-        await Promise.all(
-          naoVisualizadas.map((notif) =>
-            patch(`/notificacoes/${notif._id}/visualizar`, {}),
-          ),
-        );
+        await patch(`/notificacoes/visualizar-todas`, {});
         queryClient.invalidateQueries({
           queryKey: ['notificacoes-header', user?.id],
         });
@@ -244,61 +227,60 @@ export default function Cabecalho({
   }
 
   return (
-    <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
-      <div className="flex items-center gap-[12px] md:gap-[20px]">
-        {/*  menu */}
+    <div className="flex justify-between w-full px-6 md:px-6 pt-[30px] md:pt-10 pb-2.5 md:pb-5">
+      <div className="flex items-center gap-3 md:gap-5">
         <button
           onClick={handleMenuClick}
-          className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-md hover:bg-gray-100 transition-all duration-200"
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
           aria-label="Menu"
         >
-          <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
+          <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
         </button>
 
-        {/* Botão de voltar */}
         {showBackButton && onBackClick && (
           <button
             onClick={onBackClick}
-            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-card border border-border hover:bg-muted transition-colors cursor-pointer"
             aria-label="Voltar"
             title="Voltar"
           >
             <ChevronLeft
-              className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700"
+              className="w-5 h-5 md:w-6 md:h-6 text-foreground"
               strokeWidth={2}
             />
           </button>
         )}
 
-        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">
+        <h1 className="text-[18px] md:text-[20px] font-bold text-foreground">
           {pagina}
           {acao && (
-            <span className="text-[#6b7280] font-medium ml-2">• {acao}</span>
+            <span className="text-muted-foreground font-semibold ml-2">
+              &gt; {acao}
+            </span>
           )}
         </h1>
         {descricao && (
-          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
+          <span className="text-[14px] md:text-[16px] text-muted-foreground font-medium hidden sm:inline">
             {descricao}
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-[10px] md:gap-[14px]">
-        {/* Notificações */}
+      <div className="flex items-center gap-2.5 md:gap-3.5">
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
-            className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer"
+            className="relative w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-border hover:bg-muted/45 transition-colors duration-200 cursor-pointer"
             aria-label="Notificações"
             data-test="botao-notificacoes"
           >
             <Bell
-              className="w-[22px] h-[22px] text-gray-700"
+              className="w-[22px] h-[22px] text-foreground"
               strokeWidth={2.3}
             />
             {notifications.some((n) => !n.visualizada) && (
               <span
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center"
+                className="absolute -top-1 -right-1 bg-destructive text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-card"
                 data-test="contador-notificacoes"
               >
                 {notifications.filter((n) => !n.visualizada).length}
@@ -307,13 +289,13 @@ export default function Cabecalho({
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
-              <div className="p-3 flex items-center justify-between border-b border-gray-100 gap-2">
-                <span className="font-medium text-sm sm:text-base">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-card border border-border rounded-md z-50 overflow-hidden">
+              <div className="px-4 py-3 flex items-center justify-between border-b border-border gap-2 bg-muted/20">
+                <span className="font-semibold text-sm sm:text-base text-foreground tracking-tight">
                   Notificações
                 </span>
                 <button
-                  className="text-xs sm:text-sm text-blue-600 hover:underline cursor-pointer whitespace-nowrap"
+                  className="text-xs sm:text-sm text-[var(--ei-accent)] hover:text-[var(--ei-accent-hover)] transition-colors cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
                   data-test="botao-marcar-todas-visualizadas"
                 >
@@ -327,7 +309,7 @@ export default function Cabecalho({
               >
                 {notifications.length === 0 ? (
                   <div
-                    className="p-4 text-center text-sm text-gray-500"
+                    className="p-6 text-center text-sm text-muted-foreground"
                     data-test="notificacoes-vazio"
                   >
                     Sem notificações
@@ -337,21 +319,21 @@ export default function Cabecalho({
                     <div
                       key={n._id}
                       data-test="item-notificacao"
-                      className={`p-3 cursor-pointer hover:bg-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 ${
-                        n.visualizada ? 'bg-white' : 'bg-gray-50'
+                      className={`px-4 py-3 cursor-pointer border-b last:border-b-0 border-border/70 hover:bg-muted/45 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 ${
+                        n.visualizada ? 'bg-card' : 'bg-muted/40'
                       }`}
                       onClick={() => !n.visualizada && markAsRead(n._id)}
                     >
                       <div className="flex items-start gap-2 flex-1 min-w-0">
                         {!n.visualizada && (
                           <div
-                            className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"
+                            className="w-1.5 h-1.5 bg-[var(--ei-accent)] rounded-full shrink-0 mt-1.5"
                             data-test="indicador-nao-lida"
                           ></div>
                         )}
                         <div className="flex-1 min-w-0">
                           <p
-                            className={`text-sm text-gray-800 wrap-break-word ${!n.visualizada ? 'font-medium' : ''}`}
+                            className={`text-sm text-foreground wrap-break-word leading-snug ${!n.visualizada ? 'font-semibold' : 'font-medium'}`}
                             data-test="mensagem-notificacao"
                           >
                             {n.mensagem}
@@ -359,7 +341,7 @@ export default function Cabecalho({
                         </div>
                       </div>
                       <div
-                        className="text-xs text-gray-400 sm:ml-2 shrink-0 pl-3.5 sm:pl-0"
+                        className="text-xs text-muted-foreground sm:ml-2 shrink-0 pl-3.5 sm:pl-0"
                         data-test="data-notificacao"
                       >
                         {formatTempoRelativo(n.data_hora)}

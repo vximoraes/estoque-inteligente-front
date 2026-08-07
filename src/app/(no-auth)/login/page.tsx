@@ -1,21 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { authClient } from '@/lib/auth-client';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import LogoEi from '@/components/logo-ei';
+import { Eye, EyeOff } from 'lucide-react';
+import { PulseLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import AuthLeftPanel from '@/components/auth-left-panel';
+import GoogleIcon from '@/components/google-icon';
 import { loginSchema, type LoginFormData } from '@/schemas';
 
-export default function LoginPage() {
+const ERROS_GOOGLE: Record<string, string> = {
+  'google-nao-convidado':
+    'Nenhum convite encontrado para essa conta Google. Peça a um administrador para te convidar.',
+};
+
+function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const erro = searchParams.get('erro');
+    if (erro && ERROS_GOOGLE[erro]) {
+      setError(ERROS_GOOGLE[erro]);
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -29,114 +48,212 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      let retryAfter: string | null = null;
+
+      const { error } = await authClient.signIn.email({
         email: data.email,
-        senha: data.senha,
-        redirect: false,
+        password: data.senha,
+        rememberMe,
+        fetchOptions: {
+          credentials: 'include',
+          onError: (context) => {
+            retryAfter = context.response.headers.get('X-Retry-After');
+          },
+        },
       });
 
-      if (result?.error) {
-        setError('E-mail ou senha incorretos.');
-      } else if (result?.ok) {
+      if (error) {
+        if (error.status === 429) {
+          setError(
+            retryAfter
+              ? `Muitas tentativas. Aguarde ${retryAfter} segundos e tente novamente.`
+              : 'Muitas tentativas. Aguarde alguns segundos e tente novamente.',
+          );
+        } else {
+          setError('E-mail ou senha incorretos.');
+        }
+      } else {
         router.push('/itens');
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao fazer login. Tente novamente.');
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError('');
+    setGoogleLoading(true);
+
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/itens',
+    });
+
+    if (error) {
+      setError('Erro ao entrar com Google. Tente novamente.');
+      setGoogleLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex">
-      <LogoEi></LogoEi>
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-2">
-              Bem-vindo ao Estoque Inteligente!
-            </h2>
+    <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+      <AuthLeftPanel />
+
+      <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h1 className="text-[1.625rem] font-semibold leading-tight text-foreground">
+              Acesso ao sistema
+            </h1>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">
+              Informe suas credenciais para continuar.
+            </p>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <Label className="pb-2 text-sm md:text-base" htmlFor="email">
-                E-mail<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                className="p-3 md:p-5 w-full text-sm md:text-base"
-                type="email"
-                id="email"
-                placeholder="Insira seu endereço de e-mail"
-                {...register('email')}
-                disabled={isSubmitting}
-                data-test="email-input"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-            <div className="pt-3 md:pt-4">
-              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
-                Senha<span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  className="p-3 md:p-5 w-full pr-12 text-sm md:text-base"
-                  type={showPassword ? 'text' : 'password'}
-                  id="senha"
-                  placeholder="Insira sua senha"
-                  {...register('senha')}
-                  disabled={isSubmitting}
-                  data-test="senha-input"
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={isSubmitting}
+
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <Label
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  htmlFor="email"
                 >
-                  {showPassword ? (
-                    <img src="eye.png" alt="" className="w-5 h-5 opacity-60" />
-                  ) : (
-                    <img
-                      src="eye-off.png"
-                      alt=""
-                      className="w-5 h-5 opacity-60"
-                    />
-                  )}
-                </button>
+                  E-mail
+                </Label>
+                <Input
+                  className="h-11"
+                  aria-invalid={!!errors.email}
+                  type="email"
+                  id="email"
+                  placeholder="seu@email.com"
+                  {...register('email')}
+                  disabled={isSubmitting}
+                  data-test="email-input"
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
-              {errors.senha && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.senha.message}
-                </p>
-              )}
+
+              <div className="flex flex-col gap-1.5">
+                <Label
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
+                  htmlFor="senha"
+                >
+                  Senha
+                </Label>
+                <div className="relative w-full">
+                  <Input
+                    aria-invalid={!!errors.senha}
+                    className="w-full h-11 pr-11"
+                    type={showPassword ? 'text' : 'password'}
+                    id="senha"
+                    placeholder="••••••••"
+                    {...register('senha')}
+                    disabled={isSubmitting}
+                    data-test="senha-input"
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.senha && (
+                  <p className="text-xs text-destructive">
+                    {errors.senha.message}
+                  </p>
+                )}
+              </div>
             </div>
-            <Link
-              href="/esqueci-senha"
-              className="mt-2 md:mt-3 text-zinc-600 text-sm md:text-base underline cursor-pointer inline-block hover:text-zinc-800 transition-colors"
-            >
-              Esqueci minha senha
-            </Link>
-            {error && (
-              <div className="mt-3 md:mt-4 p-2 md:p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm md:text-base">
-                {error}
+
+            <div className="mt-5 flex items-center justify-between">
+              <div className="flex items-center gap-2 ml-2">
+                <Checkbox
+                  id="lembrar-me"
+                  className="cursor-pointer"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  disabled={isSubmitting}
+                  data-test="lembrar-me-checkbox"
+                />
+                <Label
+                  htmlFor="lembrar-me"
+                  className="text-sm font-normal text-muted-foreground cursor-pointer"
+                >
+                  Lembrar-me
+                </Label>
               </div>
-            )}
-            <div className="mt-4 md:mt-6">
-              <Button
-                type="submit"
-                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isSubmitting}
-                data-test="botao-entrar"
+              <Link
+                href="/esqueci-senha"
+                className="text-sm text-[var(--ei-accent)] transition-colors hover:text-[var(--ei-accent-hover)]"
               >
-                {isSubmitting ? 'Entrando...' : 'Entrar'}
-              </Button>
+                Esqueci minha senha
+              </Link>
             </div>
+
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
+
+            <Button
+              type="submit"
+              className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
+              disabled={isSubmitting}
+              data-test="botao-entrar"
+            >
+              {isSubmitting ? 'Entrando...' : 'Entrar'}
+            </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ou
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full gap-2 cursor-pointer"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || isSubmitting}
+            data-test="botao-google"
+          >
+            {!googleLoading && <GoogleIcon />}
+            {googleLoading ? 'Redirecionando...' : 'Entrar com Google'}
+          </Button>
+
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            © 2026 Estoque Inteligente
+          </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <PulseLoader color="var(--ei-accent)" size={15} />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

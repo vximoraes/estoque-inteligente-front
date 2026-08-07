@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { categoriaSchema, type CategoriaFormData } from '@/schemas';
@@ -85,7 +86,7 @@ export default function ModalEditarCategoria({
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] });
       toast.success('Categoria atualizada com sucesso!', {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -101,7 +102,7 @@ export default function ModalEditarCategoria({
         error?.message ||
         'Erro ao atualizar categoria';
       toast.error(errorMessage, {
-        position: 'top-right',
+        position: 'bottom-right',
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -118,116 +119,101 @@ export default function ModalEditarCategoria({
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
-
   const onSubmit = (data: CategoriaFormData) => {
     updateCategoriaMutation.mutate(data);
   };
 
-  if (!isOpen) return null;
-
   const modalContent = (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-      onClick={handleBackdropClick}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={handleClose}
+      zIndex={99999}
+      contentClassName="max-w-md overflow-visible"
     >
-      <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Botão de fechar */}
-        <div className="relative p-6 pb-0">
-          <button
-            onClick={handleClose}
-            disabled={updateCategoriaMutation.isPending}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Fechar"
-          >
-            <X size={20} />
-          </button>
+      {/* Botão de fechar */}
+      <div className="relative p-6 pb-0">
+        <button
+          onClick={handleClose}
+          disabled={updateCategoriaMutation.isPending}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Fechar"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Conteúdo do Modal */}
+      <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
+        <div className="text-center pt-4">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
+            Editar categoria
+          </h2>
+          <p className="text-muted-foreground">Atualize o nome da categoria</p>
         </div>
 
-        {/* Conteúdo do Modal */}
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Editar categoria
-            </h2>
-            <p className="text-gray-600">Atualize o nome da categoria</p>
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <Label
+              htmlFor="nome"
+              className="text-sm font-medium text-foreground"
+            >
+              Nome da categoria <span className="text-destructive">*</span>
+            </Label>
+            <span className="text-sm text-muted-foreground">
+              {nomeValue.length}/100
+            </span>
           </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <Label
-                htmlFor="nome"
-                className="text-sm font-medium text-gray-900"
-              >
-                Nome da categoria <span className="text-red-500">*</span>
-              </Label>
-              <span className="text-sm text-gray-500">
-                {nomeValue.length}/100
-              </span>
-            </div>
-            <Input
-              id="nome"
-              type="text"
-              placeholder="Digite o nome da categoria"
-              {...register('nome')}
-              maxLength={100}
-              className={errors.nome ? 'border-red-500' : ''}
-              disabled={isSubmitting || updateCategoriaMutation.isPending}
-            />
-            {errors.nome && (
-              <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
-            )}
-          </div>
-
-          {updateCategoriaMutation.error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">
-                Erro ao atualizar categoria
-              </div>
-              <div className="text-red-500">
-                {(updateCategoriaMutation.error as any)?.response?.data
-                  ?.message ||
-                  (updateCategoriaMutation.error as any)?.message ||
-                  'Erro desconhecido'}
-              </div>
-            </div>
+          <Input
+            id="nome"
+            type="text"
+            placeholder="Digite o nome da categoria"
+            {...register('nome')}
+            maxLength={100}
+            className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
+            disabled={isSubmitting || updateCategoriaMutation.isPending}
+          />
+          {errors.nome && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.nome.message}
+            </p>
           )}
+        </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || updateCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || updateCategoriaMutation.isPending}
-              className="flex-1 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
-            >
-              {isSubmitting || updateCategoriaMutation.isPending
-                ? 'Salvando...'
-                : 'Salvar'}
-            </Button>
+        {updateCategoriaMutation.error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-sm text-destructive">
+            <div className="font-medium mb-1">Erro ao atualizar categoria</div>
+            <div className="text-destructive/80">
+              {(updateCategoriaMutation.error as any)?.response?.data
+                ?.message ||
+                (updateCategoriaMutation.error as any)?.message ||
+                'Erro desconhecido'}
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting || updateCategoriaMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting || updateCategoriaMutation.isPending}
+            className="h-11 flex-1 cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+          >
+            {isSubmitting || updateCategoriaMutation.isPending
+              ? 'Salvando...'
+              : 'Salvar'}
+          </Button>
+        </div>
+      </form>
+    </ModalShell>
   );
 
   return createPortal(modalContent, document.body);

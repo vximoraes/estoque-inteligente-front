@@ -1,18 +1,24 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import Header from '@/components/header/header';
 import { QueryProvider } from '@/providers/queryProvider';
-import { SessionProvider } from '@/providers/sessionProvider';
+import { ThemeProvider } from '@/providers/themeProvider';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta-sans',
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
   title: 'Estoque Inteligente',
   description: 'Sistema de gerenciamento inteligente de estoque',
   icons: {
-    icon: '/ei.png',
-    shortcut: '/ei.png',
-    apple: '/ei.png',
+    icon: '/estoque-inteligente-logo.png',
+    shortcut: '/estoque-inteligente-logo.png',
+    apple: '/estoque-inteligente-logo.png',
   },
 };
 
@@ -22,18 +28,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html
+      lang="pt-BR"
+      className={plusJakartaSans.variable}
+      suppressHydrationWarning
+    >
       <body className="flex justify-center">
-        <SessionProvider>
+        <ThemeProvider>
           <SidebarProvider>
-            <Header />
-            <main className="w-full max-w-full overflow-hidden">
-              <NuqsAdapter>
-                <QueryProvider>{children}</QueryProvider>
-              </NuqsAdapter>
-            </main>
+            <NuqsAdapter>
+              <QueryProvider>
+                <Header />
+                <main className="w-full max-w-full overflow-hidden">
+                  {children}
+                </main>
+              </QueryProvider>
+            </NuqsAdapter>
           </SidebarProvider>
-        </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
