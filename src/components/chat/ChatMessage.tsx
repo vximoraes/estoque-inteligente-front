@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Copy, Check } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
 
 interface ChatMessageProps {
@@ -15,6 +17,19 @@ export function ChatMessage({
 }: ChatMessageProps) {
   const isUser = mensagem.role === 'user';
   const isError = mensagem.role === 'error';
+  const [copiado, setCopiado] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(mensagem.content);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      // clipboard indisponível (permissão/contexto não seguro), ignora silenciosamente
+    }
+  };
+
+  const podeCopiar = !isStreaming && mensagem.content.length > 0;
 
   if (isError) {
     return (
@@ -27,7 +42,9 @@ export function ChatMessage({
   }
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
+    <div
+      className={`group/msg flex flex-col ${isUser ? 'items-end' : 'items-start'} mb-3`}
+    >
       <div
         className={`
           ${isUser ? 'max-w-[80%]' : 'max-w-[90%]'} px-3.5 py-2.5 text-base leading-relaxed
@@ -98,6 +115,36 @@ export function ChatMessage({
           </div>
         )}
       </div>
+      {podeCopiar && (
+        <button
+          onClick={handleCopy}
+          aria-label="Copiar mensagem"
+          title="Copiar"
+          data-test="chat-copiar-mensagem"
+          className="
+            relative mt-1 p-1.5 rounded-md flex-shrink-0
+            text-foreground opacity-0 group-hover/msg:opacity-100
+            hover:bg-muted transition-all duration-200 ease-out cursor-pointer
+          "
+        >
+          <span className="relative block w-4 h-4">
+            <Copy
+              className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                copiado
+                  ? 'opacity-0 scale-50 -rotate-45'
+                  : 'opacity-100 scale-100 rotate-0'
+              }`}
+            />
+            <Check
+              className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                copiado
+                  ? 'opacity-100 scale-100 rotate-0'
+                  : 'opacity-0 scale-50 rotate-45'
+              }`}
+            />
+          </span>
+        </button>
+      )}
     </div>
   );
 }

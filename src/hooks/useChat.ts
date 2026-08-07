@@ -115,6 +115,7 @@ export async function sendMessage(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let finalizado = false;
 
   while (true) {
     let done: boolean;
@@ -140,13 +141,19 @@ export async function sendMessage(
         if (event.type === 'token') {
           callbacks.onToken(event.content);
         } else if (event.type === 'done') {
+          finalizado = true;
           callbacks.onDone();
         } else if (event.type === 'error') {
+          finalizado = true;
           callbacks.onError(event.message ?? 'Erro no assistente.');
         }
       } catch (err) {
         console.error('Erro ao processar evento SSE:', err);
       }
     }
+  }
+
+  if (!finalizado) {
+    callbacks.onDone();
   }
 }

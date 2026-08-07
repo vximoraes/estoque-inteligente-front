@@ -97,6 +97,24 @@ export function ChatPanel() {
     }
   };
 
+  const marcarVazioComoErro = (mensagemErro: string) => {
+    setMensagensLocais((prev) => {
+      if (prev.length === 0) return prev;
+      const last = prev[prev.length - 1];
+      if (last.role !== 'assistant' || last.content.trim()) return prev;
+      return [
+        ...prev.slice(0, -1),
+        { ...last, role: 'error' as const, content: mensagemErro },
+      ];
+    });
+  };
+
+  const handleStop = () => {
+    abortRef.current?.abort();
+    setIsStreaming(false);
+    marcarVazioComoErro('Resposta cancelada.');
+  };
+
   const handleSend = async (overrideContent?: string) => {
     const content = (overrideContent ?? inputValue).trim();
     if (!content || isStreaming) return;
@@ -131,19 +149,9 @@ export function ChatPanel() {
       }
     } catch {
       setIsStreaming(false);
-      setMensagensLocais((prev) => {
-        const last = prev[prev.length - 1];
-        if (!last || last.role !== 'assistant') return prev;
-        return [
-          ...prev.slice(0, -1),
-          {
-            ...last,
-            role: 'error' as const,
-            content:
-              'Não foi possível processar sua mensagem. Tente novamente.',
-          },
-        ];
-      });
+      marcarVazioComoErro(
+        'Não foi possível processar sua mensagem. Tente novamente.',
+      );
       return;
     }
 
@@ -168,6 +176,9 @@ export function ChatPanel() {
           },
           onDone: () => {
             setIsStreaming(false);
+            marcarVazioComoErro(
+              'Não foi possível gerar uma resposta. Tente novamente.',
+            );
             queryClient.invalidateQueries({
               queryKey: ['conversa', targetId],
             });
@@ -365,6 +376,7 @@ export function ChatPanel() {
                 value={inputValue}
                 onChange={setInputValue}
                 onSend={handleSend}
+                onStop={handleStop}
                 isStreaming={isStreaming}
               />
             </>
