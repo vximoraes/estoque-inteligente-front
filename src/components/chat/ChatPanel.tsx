@@ -45,6 +45,11 @@ export function ChatPanel() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isStreamingRef = useRef(false);
   const loadedConversaIdRef = useRef<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const { data: conversasData, isLoading: loadingConversas } = useConversas();
   const { data: conversaCarregada } = useConversa(conversaAtiva?._id ?? null);
@@ -92,6 +97,24 @@ export function ChatPanel() {
     }
   };
 
+  const marcarVazioComoErro = (mensagemErro: string) => {
+    setMensagensLocais((prev) => {
+      if (prev.length === 0) return prev;
+      const last = prev[prev.length - 1];
+      if (last.role !== 'assistant' || last.content.trim()) return prev;
+      return [
+        ...prev.slice(0, -1),
+        { ...last, role: 'error' as const, content: mensagemErro },
+      ];
+    });
+  };
+
+  const handleStop = () => {
+    abortRef.current?.abort();
+    setIsStreaming(false);
+    marcarVazioComoErro('Resposta cancelada.');
+  };
+
   const handleSend = async (overrideContent?: string) => {
     const content = (overrideContent ?? inputValue).trim();
     if (!content || isStreaming) return;
@@ -126,53 +149,56 @@ export function ChatPanel() {
       }
     } catch {
       setIsStreaming(false);
-      setMensagensLocais((prev) => {
-        const last = prev[prev.length - 1];
-        if (!last || last.role !== 'assistant') return prev;
-        return [
-          ...prev.slice(0, -1),
-          {
-            ...last,
-            role: 'error' as const,
-            content:
-              'Não foi possível processar sua mensagem. Tente novamente.',
-          },
-        ];
-      });
+      marcarVazioComoErro(
+        'Não foi possível processar sua mensagem. Tente novamente.',
+      );
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      await sendMessage(targetId, content, {
-        onToken: (chunk) => {
-          setMensagensLocais((prev) => {
-            if (prev.length === 0) return prev;
-            const last = prev[prev.length - 1];
-            if (last.role !== 'assistant') return prev;
-            return [
-              ...prev.slice(0, -1),
-              { ...last, content: last.content + chunk },
-            ];
-          });
+      await sendMessage(
+        targetId,
+        content,
+        {
+          onToken: (chunk) => {
+            setMensagensLocais((prev) => {
+              if (prev.length === 0) return prev;
+              const last = prev[prev.length - 1];
+              if (last.role !== 'assistant') return prev;
+              return [
+                ...prev.slice(0, -1),
+                { ...last, content: last.content + chunk },
+              ];
+            });
+          },
+          onDone: () => {
+            setIsStreaming(false);
+            marcarVazioComoErro(
+              'Não foi possível gerar uma resposta. Tente novamente.',
+            );
+            queryClient.invalidateQueries({
+              queryKey: ['conversa', targetId],
+            });
+            queryClient.invalidateQueries({ queryKey: ['conversas'] });
+          },
+          onError: (err) => {
+            setIsStreaming(false);
+            setMensagensLocais((prev) => {
+              if (prev.length === 0) return prev;
+              const last = prev[prev.length - 1];
+              if (last.role !== 'assistant') return prev;
+              return [
+                ...prev.slice(0, -1),
+                { ...last, role: 'error' as const, content: err },
+              ];
+            });
+          },
         },
-        onDone: () => {
-          setIsStreaming(false);
-          queryClient.invalidateQueries({ queryKey: ['conversa', targetId] });
-          queryClient.invalidateQueries({ queryKey: ['conversas'] });
-        },
-        onError: (err) => {
-          setIsStreaming(false);
-          setMensagensLocais((prev) => {
-            if (prev.length === 0) return prev;
-            const last = prev[prev.length - 1];
-            if (last.role !== 'assistant') return prev;
-            return [
-              ...prev.slice(0, -1),
-              { ...last, role: 'error' as const, content: err },
-            ];
-          });
-        },
-      });
+        controller.signal,
+      );
     } catch {
       setIsStreaming(false);
     }
@@ -350,6 +376,7 @@ export function ChatPanel() {
                 value={inputValue}
                 onChange={setInputValue}
                 onSend={handleSend}
+                onStop={handleStop}
                 isStreaming={isStreaming}
               />
             </>
