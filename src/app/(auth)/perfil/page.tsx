@@ -94,7 +94,7 @@ interface NotificacoesApiResponse {
 }
 
 export default function HomePage() {
-  const { user } = useSession();
+  const { user, refetch: refetchSession } = useSession();
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isEditingFoto, setIsEditingFoto] = useState(false);
@@ -176,6 +176,7 @@ export default function HomePage() {
         window.dispatchEvent(new Event('userFotoUpdated'));
       }
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] });
+      await refetchSession();
       toast.success('Foto atualizada com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,
@@ -212,6 +213,7 @@ export default function HomePage() {
       }
       window.dispatchEvent(new Event('userFotoUpdated'));
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] });
+      await refetchSession();
       toast.success('Foto removida com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,
