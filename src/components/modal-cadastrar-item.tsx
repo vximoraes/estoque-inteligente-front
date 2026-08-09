@@ -620,8 +620,8 @@ export default function ModalCadastrarItem({
                   Imagem
                 </Label>
                 {imagemPreview ? (
-                  <div className="relative border-2 border-dashed border-border rounded-md min-h-11 flex items-center px-4 sm:px-5 bg-muted">
-                    <div className="flex items-center gap-3 sm:gap-4 w-full">
+                  <div className="relative border-2 border-dashed border-border rounded-md min-h-11 flex items-center px-2 sm:px-3 bg-muted">
+                    <div className="flex items-center gap-2 sm:gap-3 w-full">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <img
                           src={imagemPreview}
@@ -635,12 +635,12 @@ export default function ModalCadastrarItem({
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-muted transition-all duration-200 cursor-pointer"
+                        className="shrink-0 flex items-center justify-center cursor-pointer"
                         aria-label="Remover imagem"
                         data-test="botao-remover-imagem"
                       >
                         <X
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground"
+                          className="w-4 h-4 text-muted-foreground"
                           strokeWidth={2}
                         />
                       </button>
