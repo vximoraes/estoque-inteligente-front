@@ -58,10 +58,8 @@ export function ChatWidget() {
         </button>
       )}
 
-      {/* Chat panel — centered modal on mobile, fixed bottom-right on desktop */}
       {renderPanel && (
         <>
-          {/* Backdrop — only on mobile */}
           <div
             className={`fixed inset-0 z-50 bg-black/50 sm:hidden transition-opacity duration-200 ${
               visible ? 'opacity-100' : 'opacity-0'
@@ -70,7 +68,7 @@ export function ChatWidget() {
             aria-hidden="true"
           />
           <div
-            className={`fixed z-50 inset-x-4 top-1/2 -translate-y-1/2 sm:inset-x-auto sm:translate-y-0 sm:top-auto sm:bottom-6 sm:right-6 transition-opacity duration-200 ${
+            className={`fixed z-50 inset-x-4 bottom-4 sm:inset-x-auto sm:bottom-6 sm:right-6 transition-opacity duration-200 ${
               visible ? 'opacity-100' : 'opacity-0'
             }`}
           >
