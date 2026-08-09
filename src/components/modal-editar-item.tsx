@@ -720,9 +720,9 @@ export default function ModalEditarItem({
                     Imagem
                   </Label>
                   {imagemPreview ? (
-                    <div className="relative border-2 border-dashed border-border rounded-md min-h-11 flex items-center px-3 sm:px-4 bg-muted">
-                      <div className="flex items-center gap-2 sm:gap-3 w-full">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="relative border-2 border-dashed border-border rounded-md min-h-11 flex items-center px-4 sm:px-5 bg-muted">
+                      <div className="flex items-center gap-3 sm:gap-4 w-full">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <img
                             src={
                               imagemPreview.startsWith('data:')
