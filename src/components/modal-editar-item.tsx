@@ -615,6 +615,7 @@ export default function ModalEditarItem({
                                               : 'text-foreground'
                                           }`}
                                           title={categoria.nome}
+                                          data-test="categoria-option"
                                         >
                                           {categoria.nome}
                                         </button>

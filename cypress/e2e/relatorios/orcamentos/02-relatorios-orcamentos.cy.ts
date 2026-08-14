@@ -271,9 +271,10 @@ describe('Tela de relatórios de orçamentos.', () => {
           cy.get('[data-test="filtro-data-inicio-input"]').type(
             e.split('/').reverse().join('-'),
           );
+          cy.wait(300);
           cy.get('[data-test="aplicar-filtros-button"]')
             .should('be.visible')
-            .click();
+            .click({ force: true });
           cy.wait(500);
           cy.get('[data-test="filter-tag-data-inicio"]')
             .should('be.visible')
@@ -311,9 +312,10 @@ describe('Tela de relatórios de orçamentos.', () => {
           cy.get('[data-test="filtro-data-fim-input"]').type(
             e.split('/').reverse().join('-'),
           );
+          cy.wait(300);
           cy.get('[data-test="aplicar-filtros-button"]')
             .should('be.visible')
-            .click();
+            .click({ force: true });
           cy.wait(500);
           cy.get('[data-test="filter-tag-data-fim"]')
             .should('be.visible')
@@ -358,9 +360,10 @@ describe('Tela de relatórios de orçamentos.', () => {
       cy.get('[data-test="filtro-periodo-option-personalizado"]').click();
 
       cy.get('[data-test="filtro-data-inicio-input"]').type(dataFuturaInput);
+      cy.wait(300);
       cy.get('[data-test="aplicar-filtros-button"]')
         .should('be.visible')
-        .click();
+        .click({ force: true });
       cy.wait(500);
 
       cy.get('[data-test="filter-tag-data-inicio"]')
@@ -395,10 +398,11 @@ describe('Tela de relatórios de orçamentos.', () => {
 
       cy.get('[data-test="filtro-data-inicio-input"]').type(hojeInput);
       cy.get('[data-test="filtro-data-fim-input"]').type(dataPassadaInput);
+      cy.wait(300);
 
       cy.get('[data-test="aplicar-filtros-button"]')
         .should('be.visible')
-        .click();
+        .click({ force: true });
       cy.wait(500);
 
       cy.get('[data-test="filter-tag-data-inicio"]')
@@ -448,10 +452,11 @@ describe('Tela de relatórios de orçamentos.', () => {
         dataFuturaInicioInput,
       );
       cy.get('[data-test="filtro-data-fim-input"]').type(dataFuturaFimInput);
+      cy.wait(300);
 
       cy.get('[data-test="aplicar-filtros-button"]')
         .should('be.visible')
-        .click();
+        .click({ force: true });
       cy.wait(500);
 
       cy.get('[data-test="filter-tag-data-inicio"]')

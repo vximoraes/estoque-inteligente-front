@@ -56,7 +56,7 @@ function RelatorioItensPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<EstoqueApiResponse>({
-    queryKey: ['estoques-relatorio', searchTerm, categoriaFilter, statusFilter],
+    queryKey: ['estoques-relatorio', categoriaFilter, statusFilter],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();

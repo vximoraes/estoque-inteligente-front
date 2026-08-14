@@ -109,6 +109,7 @@ export default function ModalDevolverItem({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
+          data-test="modal-devolver-item-close"
         >
           <X size={20} className="text-muted-foreground" />
         </button>
@@ -153,6 +154,7 @@ export default function ModalDevolverItem({
             }}
             className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Digite a quantidade"
+            data-test="modal-devolver-item-quantidade"
           />
           {quantidadeError && (
             <p className="mt-1 text-sm text-destructive">{quantidadeError}</p>
@@ -170,6 +172,7 @@ export default function ModalDevolverItem({
             maxLength={500}
             className="w-full px-3 py-2 border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Observações opcionais"
+            data-test="modal-devolver-item-observacoes"
           />
         </div>
       </div>
@@ -181,6 +184,7 @@ export default function ModalDevolverItem({
             onClick={onClose}
             className="h-11 flex-1 cursor-pointer"
             disabled={devolucaoMutation.isPending}
+            data-test="modal-devolver-item-cancelar"
           >
             Cancelar
           </Button>
@@ -189,6 +193,7 @@ export default function ModalDevolverItem({
             className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
             style={{ backgroundColor: 'var(--ei-accent)' }}
             disabled={devolucaoMutation.isPending}
+            data-test="modal-devolver-item-confirmar"
           >
             {devolucaoMutation.isPending
               ? 'Registrando...'

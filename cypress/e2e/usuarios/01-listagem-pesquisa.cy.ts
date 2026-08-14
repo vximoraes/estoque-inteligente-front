@@ -157,7 +157,7 @@ describe('Usuários - Listagem e Pesquisa', () => {
           cy.getByData('cadastrar-usuario-button').should('be.visible');
           cy.getByData('cadastrar-usuario-button').should(
             'contain',
-            'Cadastrar',
+            'Adicionar',
           );
         } else {
           cy.log('Botão cadastrar usuário não encontrado');

@@ -12,6 +12,7 @@ describe('Orçamentos - Listagem e Pesquisa', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: frontendUrl },
       body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);

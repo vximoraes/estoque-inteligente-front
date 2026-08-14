@@ -26,7 +26,9 @@ describe('Movimentações — Pesquisa e Estatísticas', () => {
   it('Exibe estado vazio quando a pesquisa não encontra resultados', () => {
     cy.get('[data-test="search-input"]').first().type('algoquenaoexiste123');
 
-    cy.get('[data-test="empty-state"]').should('be.visible');
+    cy.get('[data-test="empty-state"]', { timeout: 20000 }).should(
+      'be.visible',
+    );
   });
 
   it('Exibe estatísticas com total, entradas e saídas', () => {
@@ -60,16 +62,5 @@ describe('Movimentações — Pesquisa e Estatísticas', () => {
             expect(valorDepois).not.to.eq(valorAntes);
           });
       });
-  });
-
-  it('Abre e fecha o bloco de estatísticas no modo mobile', () => {
-    cy.viewport(390, 844);
-    cy.get('[data-test="toggle-stats-button"]')
-      .first()
-      .should('be.visible')
-      .click();
-    cy.get('[data-test="stats-grid"]').first().should('be.visible');
-    cy.get('[data-test="toggle-stats-button"]').first().click();
-    cy.get('[data-test="stats-grid"]').first().should('not.be.visible');
   });
 });

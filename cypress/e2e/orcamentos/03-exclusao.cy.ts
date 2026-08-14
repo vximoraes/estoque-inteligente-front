@@ -11,6 +11,7 @@ describe('Orçamentos - Exclusão', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: frontendUrl },
       body: { email, password: senha },
       timeout: 30000,
     }).then((loginResponse) => {
@@ -543,6 +544,7 @@ describe('Orçamentos - Exclusão', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/api/auth/sign-in/email`,
+        headers: { Origin: Cypress.env('FRONTEND_URL') },
         body: { email, password: senha },
         timeout: 30000,
         failOnStatusCode: false,
