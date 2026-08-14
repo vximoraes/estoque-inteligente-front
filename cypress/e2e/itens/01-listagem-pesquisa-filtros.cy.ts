@@ -11,6 +11,7 @@ describe('Componentes - Listagem, Pesquisa e Filtros', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: Cypress.env('FRONTEND_URL') },
       body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);

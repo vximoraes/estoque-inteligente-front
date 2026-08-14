@@ -19,7 +19,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
   describe('Entrada de Componente', () => {
     it('Deve abrir modal de entrada ao clicar em Entrada', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -36,7 +36,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve exibir campos obrigatórios no modal de entrada', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -55,7 +55,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve carregar localizações no dropdown', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -73,7 +73,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve validar localização obrigatória', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -94,7 +94,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve validar quantidade obrigatória e maior que 0', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -122,7 +122,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve validar quantidade máxima de 999.999.999', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -140,7 +140,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve registrar entrada com sucesso', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -180,7 +180,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve atualizar quantidade total do item após entrada', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -220,7 +220,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve exibir loading no card durante atualização', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -247,7 +247,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve recalcular status após entrada (Indisponível → Baixo Estoque ou Em Estoque)', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemIndisponivel = itens.find(
@@ -286,7 +286,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve atualizar estatísticas após entrada', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const statsAntes = interception.response?.body?.stats;
         const itens = interception.response?.body?.data?.docs || [];
 
@@ -332,7 +332,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
 
   describe('Saída de Componente', () => {
     it('Deve abrir modal de saída ao clicar em Saída', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -353,7 +353,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve carregar apenas localizações com estoque disponível', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -375,7 +375,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve validar estoque suficiente antes de permitir saída', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -416,7 +416,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve registrar saída com sucesso', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade >= 5);
@@ -464,7 +464,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve diminuir quantidade total após saída', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade >= 5);
@@ -509,7 +509,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Deve recalcular status após saída (Em Estoque → Baixo Estoque ou Indisponível)', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemEmEstoque = itens.find(
@@ -552,7 +552,7 @@ describe('Componentes - Movimentações (Entrada e Saída)', () => {
     });
 
     it('Não deve permitir saída maior que estoque disponível', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);

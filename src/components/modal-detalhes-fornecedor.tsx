@@ -102,6 +102,7 @@ export default function ModalDetalhesFornecedor({
       onClose={handleClose}
       zIndex={99999}
       contentClassName="max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+      data-test="modal-detalhes-fornecedor"
     >
       {/* Header */}
       <div className="relative p-6 border-b border-border flex-shrink-0">
@@ -109,6 +110,7 @@ export default function ModalDetalhesFornecedor({
           onClick={handleClose}
           className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer z-10"
           title="Fechar"
+          data-test="modal-detalhes-fornecedor-close"
         >
           <X size={20} />
         </button>
@@ -185,6 +187,7 @@ export default function ModalDetalhesFornecedor({
                     onClick={() => handleCopy(fornecedor.contato!, 'contato')}
                     className="relative p-1.5 text-foreground hover:bg-muted rounded-md transition-colors flex-shrink-0 cursor-pointer"
                     title="Copiar contato"
+                    data-test="modal-detalhes-fornecedor-copiar-contato"
                   >
                     <span className="relative block w-4 h-4">
                       <Copy

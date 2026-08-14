@@ -55,6 +55,12 @@ export default function PageUsuariosContent({
 }) {
   const router = useRouter();
   const { user } = useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
@@ -190,7 +196,7 @@ export default function PageUsuariosContent({
   };
 
   const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
-    (usuario) => usuario._id !== user?.id,
+    (usuario) => !mounted || usuario._id !== user?.id,
   );
 
   return (

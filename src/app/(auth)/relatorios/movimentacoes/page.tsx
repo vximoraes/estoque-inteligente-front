@@ -55,11 +55,11 @@ function RelatorioMovimentacoesPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<MovimentacoesApiResponse>({
-    queryKey: ['movimentacoes-relatorio', searchTerm, tipoFilter],
+    queryKey: ['movimentacoes-relatorio', tipoFilter],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20');
+      params.append('limite', '20');
       params.append('page', page.toString());
 
       if (tipoFilter) {
@@ -108,7 +108,7 @@ function RelatorioMovimentacoesPageContent() {
     data?.pages.flatMap((page) => page.data.docs) || [];
 
   const { data: globalStats } = useQuery<MovimentacoesGlobaisStats>({
-    queryKey: ['movimentacoes-relatorio-global-stats', searchTerm, tipoFilter],
+    queryKey: ['movimentacoes-relatorio-global-stats', tipoFilter],
     queryFn: async () => {
       const limit = 500;
       let page = 1;
@@ -117,7 +117,7 @@ function RelatorioMovimentacoesPageContent() {
 
       while (hasNextPage) {
         const params = new URLSearchParams();
-        params.append('limit', String(limit));
+        params.append('limite', String(limit));
         params.append('page', String(page));
 
         if (tipoFilter) {

@@ -13,6 +13,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: frontendUrl },
       body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
@@ -656,7 +657,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
 
     it('Total deve ser recalculado após remover item', () => {
       cy.getByData('botao-adicionar-item').click();
-      cy.wait('@getComponentes');
+      cy.getByData('modal-selecionar-itens').should('be.visible');
 
       cy.getByData('modal-selecionar-itens').within(() => {
         cy.getByData('item-selecao-card-1').click();
@@ -1022,6 +1023,7 @@ describe('Orçamentos - Cadastro e Edição', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/api/auth/sign-in/email`,
+        headers: { Origin: Cypress.env('FRONTEND_URL') },
         body: { email, password: senha },
       }).then((loginResponse) => {
         const token = loginResponse.body.token;

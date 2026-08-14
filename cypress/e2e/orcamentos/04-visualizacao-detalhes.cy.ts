@@ -11,6 +11,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: frontendUrl },
       body: { email, password: senha },
     }).then((response) => {
       expect(response.status).to.eq(200);
@@ -136,7 +137,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
           cy.getByData('modal-detalhes-orcamento').within(() => {
             cy.getByData('modal-detalhes-total')
               .invoke('text')
-              .should('match', /R\$\s*\d+[,\.]\d{2}|\d+[,\.]\d{2}/);
+              .should('match', /R\$\s*\d+[,.]\d{2}|\d+[,.]\d{2}/);
           });
         }
       });
@@ -398,7 +399,7 @@ describe('Orçamentos - Visualização de Detalhes', () => {
           cy.get('tbody tr')
             .first()
             .within(() => {
-              cy.get('td').eq(1).should('match', /\d+/);
+              cy.get('td').eq(1).invoke('text').should('match', /\d+/);
             });
         });
       });
@@ -429,7 +430,8 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             .within(() => {
               cy.get('td')
                 .eq(2)
-                .should('match', /R\$\s*\d+[,\.]\d{2}/);
+                .invoke('text')
+                .should('match', /R\$\s*\d+[,.]\d{2}/);
             });
         });
       });
@@ -460,7 +462,8 @@ describe('Orçamentos - Visualização de Detalhes', () => {
             .within(() => {
               cy.get('td')
                 .eq(3)
-                .should('match', /R\$\s*\d+[,\.]\d{2}/);
+                .invoke('text')
+                .should('match', /R\$\s*\d+[,.]\d{2}/);
             });
         });
       });

@@ -141,12 +141,14 @@ export default function ModalEditarEmprestimo({
       onClose={onClose}
       zIndex={99999}
       contentClassName="max-w-lg max-h-[90vh] overflow-y-auto"
+      data-test="modal-editar-emprestimo"
     >
       {/* Header */}
       <div className="relative p-6 pb-0">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
+          data-test="modal-editar-emprestimo-close"
         >
           <X size={20} className="text-muted-foreground" />
         </button>
@@ -181,6 +183,7 @@ export default function ModalEditarEmprestimo({
             value={solicitante}
             onChange={(e) => setSolicitante(e.target.value)}
             className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            data-test="modal-editar-emprestimo-solicitante"
           />
         </div>
 
@@ -194,6 +197,7 @@ export default function ModalEditarEmprestimo({
             value={dataPrevista}
             onChange={(e) => setDataPrevista(e.target.value)}
             className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            data-test="modal-editar-emprestimo-data-prevista"
           />
         </div>
 
@@ -209,6 +213,7 @@ export default function ModalEditarEmprestimo({
             maxLength={500}
             className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             placeholder="Observações opcionais"
+            data-test="modal-editar-emprestimo-observacoes"
           />
         </div>
 
@@ -224,6 +229,7 @@ export default function ModalEditarEmprestimo({
               maxLength={500}
               className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
               placeholder="Observações opcionais"
+              data-test="modal-editar-emprestimo-observacoes-devolucao"
             />
           </div>
         )}
@@ -234,6 +240,7 @@ export default function ModalEditarEmprestimo({
           className="h-11 w-full text-ei-accent-foreground cursor-pointer hover:opacity-90"
           style={{ backgroundColor: 'var(--ei-accent)' }}
           disabled={isPending}
+          data-test="modal-editar-emprestimo-salvar"
         >
           {isPending ? 'Salvando...' : 'Salvar Alterações'}
         </Button>
@@ -243,6 +250,7 @@ export default function ModalEditarEmprestimo({
           onClick={onClose}
           className="h-11 w-full cursor-pointer"
           disabled={isPending}
+          data-test="modal-editar-emprestimo-cancelar"
         >
           Cancelar
         </Button>
@@ -254,6 +262,7 @@ export default function ModalEditarEmprestimo({
                 variant="outline"
                 onClick={() => setShowConfirmDesfazer(true)}
                 className="h-11 w-full cursor-pointer text-destructive border-destructive/40 hover:bg-destructive/10"
+                data-test="modal-editar-emprestimo-desfazer-devolucao"
               >
                 Desfazer devolução
               </Button>
@@ -269,6 +278,7 @@ export default function ModalEditarEmprestimo({
                     onClick={() => setShowConfirmDesfazer(false)}
                     className="h-11 flex-1 cursor-pointer"
                     disabled={desfazerDevolucaoMutation.isPending}
+                    data-test="modal-editar-emprestimo-desfazer-devolucao-cancelar"
                   >
                     Cancelar
                   </Button>
@@ -276,6 +286,7 @@ export default function ModalEditarEmprestimo({
                     onClick={() => desfazerDevolucaoMutation.mutate()}
                     className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
                     disabled={desfazerDevolucaoMutation.isPending}
+                    data-test="modal-editar-emprestimo-desfazer-devolucao-confirmar"
                   >
                     {desfazerDevolucaoMutation.isPending
                       ? 'Desfazendo...'

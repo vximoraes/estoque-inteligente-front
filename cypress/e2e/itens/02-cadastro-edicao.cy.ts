@@ -332,6 +332,7 @@ describe('Componentes - Cadastro e Edição', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/api/auth/sign-in/email`,
+        headers: { Origin: Cypress.env('FRONTEND_URL') },
         body: { email, password: senha },
       }).then((loginResponse) => {
         const token = loginResponse.body.token;

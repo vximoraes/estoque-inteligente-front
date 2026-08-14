@@ -1,9 +1,72 @@
 import path from 'path';
 
 describe('Tela de relatórios de itens.', () => {
+  const frontendUrl = Cypress.env('FRONTEND_URL');
+  const apiUrl = Cypress.env('API_URL');
   const email = Cypress.env('TEST_USER_EMAIL');
   const senha = Cypress.env('TEST_USER_PASSWORD');
   const status = ['Em Estoque', 'Baixo Estoque', 'Indisponível'];
+
+  let categoriaTesteId: string;
+  let categoriaTesteNome: string;
+  let itemTesteNome: string;
+
+  before(() => {
+    cy.request({
+      method: 'POST',
+      url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: frontendUrl },
+      body: { email, password: senha },
+    }).then((response) => {
+      const token = response.body.token;
+      const unique = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+      categoriaTesteNome = `Categoria Relatorio Itens ${unique}`;
+      itemTesteNome = `Item Relatorio Itens ${unique}`;
+
+      cy.request({
+        method: 'POST',
+        url: `${apiUrl}/categorias`,
+        headers: { Authorization: `Bearer ${token}` },
+        body: { nome: categoriaTesteNome },
+      }).then((categoriaResponse) => {
+        categoriaTesteId = categoriaResponse.body.data._id;
+
+        cy.request({
+          method: 'POST',
+          url: `${apiUrl}/localizacoes`,
+          headers: { Authorization: `Bearer ${token}` },
+          body: { nome: `Localizacao Relatorio Itens ${unique}` },
+        }).then((localizacaoResponse) => {
+          const localizacao = localizacaoResponse.body.data._id;
+
+          cy.request({
+            method: 'POST',
+            url: `${apiUrl}/itens`,
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+              nome: itemTesteNome,
+              categoria: categoriaTesteId,
+              estoque_minimo: '5',
+            },
+          }).then((itemResponse) => {
+            const item = itemResponse.body.data._id;
+
+            cy.request({
+              method: 'POST',
+              url: `${apiUrl}/movimentacoes`,
+              headers: { Authorization: `Bearer ${token}` },
+              body: {
+                tipo: 'entrada',
+                quantidade: '20',
+                item,
+                localizacao,
+              },
+            });
+          });
+        });
+      });
+    });
+  });
 
   beforeEach(() => {
     cy.login(email, senha);
@@ -55,12 +118,14 @@ describe('Tela de relatórios de itens.', () => {
       cy.get('[data-test="item-row"]').should('have.length.greaterThan', 0);
 
       cy.get('[data-test="item-row"]').each((row) => {
-        cy.wrap(row).within(() => {
-          cy.get('[data-test="item-codigo"]').should('be.visible');
-          cy.get('[data-test="item-nome"]').should('be.visible');
-          cy.get('[data-test="item-quantidade"]').should('be.visible');
-          cy.get('[data-test="item-localizacao"]').should('be.visible');
-        });
+        cy.wrap(row)
+          .scrollIntoView()
+          .within(() => {
+            cy.get('[data-test="item-codigo"]').should('be.visible');
+            cy.get('[data-test="item-nome"]').should('be.visible');
+            cy.get('[data-test="item-quantidade"]').should('be.visible');
+            cy.get('[data-test="item-localizacao"]').should('be.visible');
+          });
       });
     });
   });
@@ -141,25 +206,28 @@ describe('Tela de relatórios de itens.', () => {
     it('Deve realizar uma pesquisa pelo filtro baseado na categoria.', () => {
       cy.get('[data-test="sidebar-btn-relatorios"]').click();
       cy.get('[data-test="sidebar-btn-relatorios-subitem-itens"]').click();
+      cy.get('[data-test="item-row"]').should('exist');
       cy.get('[data-test="filtros-button"]').should('be.visible');
       cy.get('[data-test="filtros-button"]').click();
       cy.get('[data-test="filtro-categoria-dropdown"]').should('be.visible');
       cy.get('[data-test="filtro-categoria-dropdown"]').click();
-      cy.get('[data-test="filtro-categoria-dropdown"]')
-        .parent()
-        .find('div')
-        .first()
-        .find('button')
-        .then((e) => {
-          const cabos = e.get()[1].textContent;
-          cy.contains(cabos).should('be.visible');
-          cy.contains(cabos).click();
-          cy.get('[data-test="aplicar-filtros-button"]').should('be.visible');
-          cy.get('[data-test="aplicar-filtros-button"]').click();
-          cy.get('[data-test="item-row"]').should('exist');
-          cy.get('[data-test="item-row"]').should('be.visible');
-          cy.get('[data-test="filter-tag-categoria"]').contains(cabos);
-        });
+      cy.get('[data-test="filtro-categoria-search-input"]').type(
+        categoriaTesteNome,
+      );
+      cy.get(`[data-test="filtro-categoria-option-${categoriaTesteId}"]`)
+        .should('be.visible')
+        .click();
+      cy.get('[data-test="aplicar-filtros-button"]').should('be.visible');
+      cy.get('[data-test="aplicar-filtros-button"]').click();
+      cy.get('[data-test="item-row"]').should('exist');
+      cy.get('[data-test="item-row"]').should('be.visible');
+      cy.contains('[data-test="item-nome"]', itemTesteNome).should(
+        'be.visible',
+      );
+      cy.get('[data-test="filter-tag-categoria"]').should(
+        'contain',
+        categoriaTesteNome,
+      );
     });
   });
 

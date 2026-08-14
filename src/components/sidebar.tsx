@@ -163,6 +163,14 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(() => Date.now());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const displayName = mounted ? user?.name : undefined;
+  const displayEmail = mounted ? user?.email : undefined;
 
   useEffect(() => {
     setImageError(false);
@@ -247,7 +255,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   onClick={handleProfileClick}
                   className={`flex items-center gap-3 p-2 rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer ${collapsed ? 'w-fit mx-auto justify-center' : 'w-full'}`}
                 >
-                  {user?.fotoPerfil && !imageError ? (
+                  {mounted && user?.fotoPerfil && !imageError ? (
                     <img
                       src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                       alt="Foto de perfil"
@@ -264,15 +272,15 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     <div className="flex-1 min-w-0 text-left">
                       <p
                         className="text-ei-sidebar-text-strong text-[13px] font-medium tracking-wide truncate"
-                        title={user?.name}
+                        title={displayName}
                       >
-                        {user?.name}
+                        {displayName}
                       </p>
                       <p
                         className="text-ei-sidebar-text-soft text-[11px] truncate"
-                        title={user?.email}
+                        title={displayEmail}
                       >
-                        {user?.email}
+                        {displayEmail}
                       </p>
                     </div>
                   )}
@@ -417,7 +425,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               onClick={handleProfileClick}
               className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-ei-sidebar-surface-hover transition-colors duration-150 cursor-pointer"
             >
-              {user?.fotoPerfil && !imageError ? (
+              {mounted && user?.fotoPerfil && !imageError ? (
                 <img
                   src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                   alt="Foto de perfil"
@@ -432,15 +440,15 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               <div className="flex-1 min-w-0 text-left">
                 <p
                   className="text-ei-sidebar-text-strong text-[13px] font-medium tracking-wide truncate"
-                  title={user?.name}
+                  title={displayName}
                 >
-                  {user?.name}
+                  {displayName}
                 </p>
                 <p
                   className="text-ei-sidebar-text-soft text-[11px] truncate"
-                  title={user?.email}
+                  title={displayEmail}
                 >
-                  {user?.email}
+                  {displayEmail}
                 </p>
               </div>
             </button>

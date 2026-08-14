@@ -63,6 +63,7 @@ Cypress.Commands.add('loginViaAPI', (email: string, senha: string) => {
   cy.request({
     method: 'POST',
     url: `${apiUrl}/api/auth/sign-in/email`,
+    headers: { Origin: Cypress.env('FRONTEND_URL') },
     body: {
       email,
       password: senha,
