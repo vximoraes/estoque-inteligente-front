@@ -27,8 +27,6 @@ Repositórios do projeto no grupo GitLab [`estoque-inteligente`](https://gitlab.
 
 ## Capturas de tela
 
-<div align="center">
-
 **Login**
 ![Login](docs/screenshots/login.png)
 
@@ -43,8 +41,6 @@ Repositórios do projeto no grupo GitLab [`estoque-inteligente`](https://gitlab.
 
 **Perfil**
 ![Perfil](docs/screenshots/perfil.png)
-
-</div>
 
 ## Funcionalidades
 
