@@ -293,7 +293,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
               <SidebarMenu className="flex-1" data-test="sidebar-menu">
                 <SidebarMenuItem
-                  className="items-center gap-0.5 flex flex-col"
+                  className="items-center gap-2 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
                   <SidebarButtonMenu
@@ -457,7 +457,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
-            <div className="flex flex-col gap-0.5 flex-1 mb-6">
+            <div className="flex flex-col gap-2 flex-1 mb-6">
               <MobileMenuItem
                 icon={Package}
                 name="Itens"
