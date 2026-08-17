@@ -2,6 +2,7 @@
   "name": "estoque-inteligente-front",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "clear && next dev --turbopack",
     "build": "next build --turbopack",
