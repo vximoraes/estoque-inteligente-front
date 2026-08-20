@@ -14,7 +14,7 @@ import { get, post } from '@/lib/fetchData';
 import { Search, Plus, Trash2, Mail, Loader2, Users } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,6 +22,7 @@ import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario';
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario';
 import ModalDetalhesUsuario from '@/components/modal-detalhes-usuario';
 import { useSession } from '@/hooks/use-session';
+import { usePermissions } from '@/hooks/use-permissions';
 import { PulseLoader } from 'react-spinners';
 
 interface Usuario {
@@ -53,8 +54,8 @@ export default function PageUsuariosContent({
 }: {
   initialData?: UsuarioApiResponse;
 }) {
-  const router = useRouter();
   const { user } = useSession();
+  const { canManageUsers, loading: permissoesLoading } = usePermissions();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function PageUsuariosContent({
     initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    enabled: !permissoesLoading && canManageUsers(),
     placeholderData: initialData
       ? { pages: [initialData], pageParams: [1] }
       : undefined,
@@ -198,6 +200,14 @@ export default function PageUsuariosContent({
   const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
     (usuario) => !mounted || usuario._id !== user?.id,
   );
+
+  if (permissoesLoading) {
+    return null;
+  }
+
+  if (!canManageUsers()) {
+    notFound();
+  }
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">

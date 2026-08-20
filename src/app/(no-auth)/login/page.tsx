@@ -16,10 +16,7 @@ import AuthLeftPanel from '@/components/auth-left-panel';
 import GoogleIcon from '@/components/google-icon';
 import { loginSchema, type LoginFormData } from '@/schemas';
 
-const ERROS_GOOGLE: Record<string, string> = {
-  'google-nao-convidado':
-    'Nenhum convite encontrado para essa conta Google. Peça a um administrador para te convidar.',
-};
+const ERRO_GOOGLE_PADRAO = 'Erro ao fazer login. Tente novamente.';
 
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,9 +27,8 @@ function LoginContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const erro = searchParams.get('erro');
-    if (erro && ERROS_GOOGLE[erro]) {
-      setError(ERROS_GOOGLE[erro]);
+    if (searchParams.get('error')) {
+      setError(ERRO_GOOGLE_PADRAO);
     }
   }, [searchParams]);
 
@@ -86,7 +82,7 @@ function LoginContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/itens',
+      callbackURL: `${window.location.origin}/itens`,
     });
 
     if (error) {
