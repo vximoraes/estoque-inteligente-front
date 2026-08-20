@@ -57,7 +57,7 @@ Repositórios do projeto no grupo GitLab [`estoque-inteligente`](https://gitlab.
 
 ## Assistente de IA no front
 
-- **Histórico de conversas**:  busca e paginação das conversas do usuário, exibidas numa barra lateral dentro do painel do chat.
+- **Histórico de conversas**: busca e paginação das conversas do usuário, exibidas numa barra lateral dentro do painel do chat.
 - **Streaming token a token**: `sendMessage` abre um `fetch` contra `POST /ia/conversas/:id/mensagens` e consome a resposta como Server-Sent Events, atualizando a última mensagem do assistente a cada chunk recebido em vez de esperar a resposta inteira.
 - **Cancelamento**: cada envio guarda um `AbortController`; o botão "Cancelar" interrompe o stream em andamento sem derrubar a conversa.
 - **Renderização Markdown**: `ChatMessage` usa `react-markdown` + `remark-gfm`, então tabelas, listas e negrito retornados pelo modelo aparecem formatados, com botão de copiar a resposta.
