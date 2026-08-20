@@ -159,4 +159,4 @@ Cada rota de listagem segue o padrão `page.tsx` (Server Component, busca inicia
 
 ## Licença
 
-[MIT](LICENSE).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
