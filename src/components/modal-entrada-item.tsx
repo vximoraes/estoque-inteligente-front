@@ -90,6 +90,7 @@ export default function ModalEntradaItem({
   const [localizacaoToEdit, setLocalizacaoToEdit] =
     useState<Localizacao | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const autoSelecionouLocalizacao = useRef(false);
 
   const {
     data: localizacoesData,
@@ -269,8 +270,29 @@ export default function ModalEntradaItem({
       setLocalizacaoSelecionada('');
       setErrors({});
       setIsDropdownOpen(false);
+      autoSelecionouLocalizacao.current = false;
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || autoSelecionouLocalizacao.current) return;
+    if (estoquesData === undefined) return;
+
+    autoSelecionouLocalizacao.current = true;
+
+    const estoques = (estoquesData?.data?.docs || []).filter(
+      (e: any) => e.localizacao?.ativo !== false && e.quantidade > 0,
+    );
+    if (estoques.length === 0) return;
+
+    const estoqueComMaisQuantidade = [...estoques].sort(
+      (a: any, b: any) => (b.quantidade || 0) - (a.quantidade || 0),
+    )[0];
+
+    if (estoqueComMaisQuantidade?.localizacao?._id) {
+      setLocalizacaoSelecionada(estoqueComMaisQuantidade.localizacao._id);
+    }
+  }, [isOpen, estoquesData]);
 
   useEffect(() => {
     if (!observerTarget.current || !isDropdownOpen) return;
