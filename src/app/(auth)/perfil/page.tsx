@@ -1,18 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import {
-  X,
-  Camera,
-  User,
-  Eye,
-  EyeOff,
-  Pencil,
-  Sun,
-  Moon,
-  Monitor,
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { X, Camera, User, Eye, EyeOff, Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cabecalho from '@/components/cabecalho';
@@ -30,12 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
-
-const temaOpcoes = [
-  { value: 'light', label: 'Claro', icon: Sun },
-  { value: 'dark', label: 'Escuro', icon: Moon },
-  { value: 'system', label: 'Sistema', icon: Monitor },
-] as const;
 
 interface PasswordRequirement {
   text: string;
@@ -95,8 +78,6 @@ interface NotificacoesApiResponse {
 
 export default function HomePage() {
   const { user, refetch: refetchSession } = useSession();
-  const { theme, setTheme } = useTheme();
-  const [isMounted, setIsMounted] = useState(false);
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [isEditingNome, setIsEditingNome] = useState(false);
   const [isEditingSenha, setIsEditingSenha] = useState(false);
@@ -126,10 +107,6 @@ export default function HomePage() {
     totalMovimentacoes: 0,
     totalOrcamentos: 0,
   });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -1045,51 +1022,6 @@ export default function HomePage() {
                     userData.createdAt,
                 )}
               </p>
-            </div>
-          </div>
-
-          {/* Card Aparência */}
-          <div
-            className="p-6 bg-card rounded-md border border-border"
-            data-test="perfil-aparencia-section"
-          >
-            <h3 className="text-lg font-semibold mb-3 tracking-wide">
-              Aparência
-            </h3>
-            <div className="w-full border-t border-border mb-4"></div>
-
-            <div className="flex flex-col gap-1.5 max-w-sm">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                Tema
-              </p>
-              <div
-                className="flex gap-2"
-                role="radiogroup"
-                aria-label="Tema"
-                data-test="tema-opcoes"
-              >
-                {temaOpcoes.map(({ value, label, icon: Icon }) => {
-                  const isSelected = isMounted && theme === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={isSelected}
-                      onClick={() => setTheme(value)}
-                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-md border px-3 py-3 text-xs font-medium transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'border-ei-accent bg-ei-accent/10 text-ei-accent'
-                          : 'border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-                      }`}
-                      data-test={`tema-opcao-${value}`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
 
