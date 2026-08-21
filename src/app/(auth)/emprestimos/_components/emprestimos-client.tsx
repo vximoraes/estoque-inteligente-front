@@ -114,7 +114,7 @@ export default function EmprestimosPageContent({
     >
       <Cabecalho pagina="Empréstimos" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1">
         <div className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />

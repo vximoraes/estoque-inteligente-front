@@ -340,7 +340,7 @@ export default function ItensPageContent({
       <Cabecalho pagina="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-1 pl-1 pb-4">
           <div
             className="flex flex-col sm:flex-row gap-3 mb-4"
             data-test="search-actions-bar"

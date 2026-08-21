@@ -166,7 +166,7 @@ export default function PageFornecedoresContent({
     >
       <Cabecalho pagina="Fornecedores" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">
         <div
           className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"
