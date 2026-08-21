@@ -49,7 +49,7 @@ function buildParams(
   params.append('page', page.toString());
   params.append('limite', limit.toString());
 
-  if (searchTerm) params.append('solicitante_nome', searchTerm);
+  if (searchTerm) params.append('busca', searchTerm);
   if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
   if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
 

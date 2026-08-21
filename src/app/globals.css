@@ -70,6 +70,10 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   font-size: 16px;
   --radius: 0.625rem;

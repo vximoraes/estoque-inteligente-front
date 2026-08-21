@@ -81,7 +81,7 @@ export default function EmprestimosPageContent({
       params.append('page', currentPage.toString());
       params.append('limite', '20');
 
-      if (searchTerm) params.append('solicitante_nome', searchTerm);
+      if (searchTerm) params.append('busca', searchTerm);
       if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
       if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
 
@@ -197,30 +197,30 @@ export default function EmprestimosPageContent({
             <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table
-                  className="w-full min-w-[700px] caption-bottom text-xs sm:text-sm"
+                  className="w-full min-w-[700px] table-fixed caption-bottom text-xs sm:text-sm"
                   data-test="emprestimos-table"
                 >
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
-                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                      <TableHead className="w-[22%] font-semibold text-muted-foreground text-left px-6">
                         ITEM
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                      <TableHead className="w-[18%] font-semibold text-muted-foreground text-left px-6">
                         SOLICITANTE
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                      <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
                         QTD. EMPRESTADA
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                      <TableHead className="w-[16%] font-semibold text-muted-foreground text-center px-6">
                         DATA PREVISTA
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                      <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
                         STATUS
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                      <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-6">
                         AÇÕES
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground text-center px-8">
+                      <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-8">
                         DEVOLVER
                       </TableHead>
                     </TableRow>
@@ -238,10 +238,16 @@ export default function EmprestimosPageContent({
                         className="hover:bg-muted border-b cursor-pointer"
                         style={{ height: '60px' }}
                       >
-                        <TableCell className="font-medium text-left px-6 py-3">
+                        <TableCell
+                          className="font-medium text-left px-6 py-3 truncate"
+                          title={emp.item?.nome || '-'}
+                        >
                           {emp.item?.nome || '-'}
                         </TableCell>
-                        <TableCell className="text-left px-6 py-3">
+                        <TableCell
+                          className="text-left px-6 py-3 truncate"
+                          title={emp.solicitante_nome}
+                        >
                           {emp.solicitante_nome}
                         </TableCell>
                         <TableCell className="text-center px-6 py-3">
