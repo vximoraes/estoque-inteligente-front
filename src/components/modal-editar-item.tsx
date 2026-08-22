@@ -41,6 +41,7 @@ interface CategoriasApiResponse {
 interface ItemData {
   _id: string;
   nome: string;
+  tipo: 'consumo' | 'permanente';
   categoria: {
     _id: string;
     nome: string;
@@ -491,6 +492,22 @@ export default function ModalEditarItem({
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="p-6 space-y-4 sm:space-y-6">
+              {/* Tipo do item (somente leitura — imutável após a criação) */}
+              <div
+                className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/60"
+                data-test="tipo-item-readonly"
+              >
+                <span className="text-sm font-semibold text-foreground tracking-tight">
+                  Tipo:
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {itemData?.data?.tipo === 'permanente'
+                    ? 'Bem permanente'
+                    : 'Material de consumo'}{' '}
+                  (não pode ser alterado)
+                </span>
+              </div>
+
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
@@ -685,35 +702,36 @@ export default function ModalEditarItem({
 
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
-                {/* Estoque mínimo */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <Label
-                      htmlFor="estoqueMinimo"
-                      className="text-sm font-semibold text-foreground tracking-tight"
-                    >
-                      Estoque mínimo
-                    </Label>
-                    <span className="text-xs sm:text-sm text-muted-foreground">
-                      {estoqueMinimo.length}/9
-                    </span>
+                {itemData?.data?.tipo !== 'permanente' && (
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <Label
+                        htmlFor="estoqueMinimo"
+                        className="text-sm font-semibold text-foreground tracking-tight"
+                      >
+                        Estoque mínimo
+                      </Label>
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {estoqueMinimo.length}/9
+                      </span>
+                    </div>
+                    <Input
+                      id="estoqueMinimo"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={estoqueMinimo}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length <= 9) {
+                          setEstoqueMinimo(value);
+                        }
+                      }}
+                      className="w-full h-11"
+                      data-test="input-estoque-minimo"
+                    />
                   </div>
-                  <Input
-                    id="estoqueMinimo"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={estoqueMinimo}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.length <= 9) {
-                        setEstoqueMinimo(value);
-                      }
-                    }}
-                    className="w-full h-11"
-                    data-test="input-estoque-minimo"
-                  />
-                </div>
+                )}
 
                 {/* Imagem */}
                 <div>

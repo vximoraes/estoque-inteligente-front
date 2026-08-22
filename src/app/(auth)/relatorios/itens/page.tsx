@@ -4,6 +4,7 @@ import Cabecalho from '@/components/cabecalho';
 import ModalFiltros from '@/components/modal-filtros';
 import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
 import EmptyState from '@/components/empty-state';
+import StatusBadge from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -351,7 +352,11 @@ function RelatorioItensPageContent() {
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
       data-test="relatorio-itens-page"
     >
-      <Cabecalho pagina="Relatórios" acao="Itens" />
+      <Cabecalho
+        pagina="Relatórios"
+        acao="Itens"
+        descricao="Cobre apenas itens de material de consumo. Bens permanentes (patrimônio) têm relatório próprio."
+      />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div className="shrink-0 mb-6">
@@ -622,26 +627,7 @@ function RelatorioItensPageContent() {
                             className="flex justify-center"
                             data-test="item-status"
                           >
-                            <span
-                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-current/30 text-xs font-medium whitespace-nowrap"
-                              title={estoque.item.status}
-                              style={{
-                                color:
-                                  estoque.item.status === 'Em Estoque'
-                                    ? 'var(--status-success-text)'
-                                    : estoque.item.status === 'Baixo Estoque'
-                                      ? 'var(--status-warning-text)'
-                                      : 'var(--status-danger-text)',
-                                backgroundColor:
-                                  estoque.item.status === 'Em Estoque'
-                                    ? 'var(--status-success-bg)'
-                                    : estoque.item.status === 'Baixo Estoque'
-                                      ? 'var(--status-warning-bg)'
-                                      : 'var(--status-danger-bg)',
-                              }}
-                            >
-                              {estoque.item.status}
-                            </span>
+                            <StatusBadge status={estoque.item.status} />
                           </div>
                         </TableCell>
                         <TableCell

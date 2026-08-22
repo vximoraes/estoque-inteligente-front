@@ -337,6 +337,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     subItems={[
                       { name: 'Itens', route: '/relatorios/itens' },
                       {
+                        name: 'Patrimônio',
+                        route: '/relatorios/patrimonio',
+                      },
+                      {
                         name: 'Movimentações',
                         route: '/relatorios/movimentacoes',
                       },
@@ -552,6 +556,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 }}
                 subItems={[
                   { name: 'Itens', route: '/relatorios/itens' },
+                  { name: 'Patrimônio', route: '/relatorios/patrimonio' },
                   { name: 'Movimentações', route: '/relatorios/movimentacoes' },
                   { name: 'Orçamentos', route: '/relatorios/orcamentos' },
                   { name: 'Empréstimos', route: '/relatorios/emprestimos' },

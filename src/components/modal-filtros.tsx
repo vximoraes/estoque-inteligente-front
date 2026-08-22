@@ -37,10 +37,18 @@ interface ModalFiltrosProps {
   onClose: () => void;
   categoriaFilter: string;
   statusFilter: string;
-  onFiltersChange: (categoria: string, status: string) => void;
+  onFiltersChange: (categoria: string, status: string, tipo?: string) => void;
   statusOptions?: Array<{ value: string; label: string }>;
   showCategoria?: boolean;
+  showTipo?: boolean;
+  tipoFilter?: string;
 }
+
+const tipoOptions = [
+  { value: '', label: 'Todos os tipos' },
+  { value: 'consumo', label: 'Consumo' },
+  { value: 'permanente', label: 'Permanente' },
+];
 
 const defaultStatusOptions = [
   { value: '', label: 'Todos os status' },
@@ -57,9 +65,12 @@ export default function ModalFiltros({
   onFiltersChange,
   statusOptions = defaultStatusOptions,
   showCategoria = true,
+  showTipo = false,
+  tipoFilter = '',
 }: ModalFiltrosProps) {
   const [selectedCategoria, setSelectedCategoria] = useState(categoriaFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
+  const [selectedTipo, setSelectedTipo] = useState(tipoFilter);
   const [categoriaDropdownOpen, setCategoriaDropdownOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoriaSearch, setCategoriaSearch] = useState('');
@@ -75,7 +86,8 @@ export default function ModalFiltros({
   useEffect(() => {
     setSelectedCategoria(categoriaFilter);
     setSelectedStatus(statusFilter);
-  }, [categoriaFilter, statusFilter]);
+    setSelectedTipo(tipoFilter);
+  }, [categoriaFilter, statusFilter, tipoFilter]);
 
   useEffect(() => {
     if (isOpen) {
@@ -125,14 +137,15 @@ export default function ModalFiltros({
   }, [isOpen]);
 
   const handleApplyFilters = () => {
-    onFiltersChange(selectedCategoria, selectedStatus);
+    onFiltersChange(selectedCategoria, selectedStatus, selectedTipo);
     handleCloseModal();
   };
 
   const handleClearFilters = () => {
     setSelectedCategoria('');
     setSelectedStatus('');
-    onFiltersChange('', '');
+    setSelectedTipo('');
+    onFiltersChange('', '', '');
     handleCloseModal();
   };
 
@@ -328,6 +341,32 @@ export default function ModalFiltros({
             )}
           </div>
         </div>
+
+        {/* Filtro por Tipo — só na listagem de itens (patrimônio x consumo) */}
+        {showTipo && (
+          <div className="space-y-2" data-test="filtro-tipo-container">
+            <label className="block text-sm font-semibold text-foreground tracking-tight">
+              Tipo
+            </label>
+            <div className="flex gap-2">
+              {tipoOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSelectedTipo(option.value)}
+                  className={`flex-1 h-11 px-3 rounded-md border text-sm font-medium transition-colors cursor-pointer ${
+                    selectedTipo === option.value
+                      ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
+                      : 'border-border text-foreground hover:bg-muted/40'
+                  }`}
+                  data-test={`filtro-tipo-option-${option.value || 'todos'}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer com ações */}

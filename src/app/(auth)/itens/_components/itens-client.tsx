@@ -9,6 +9,7 @@ import ModalEmprestarItem from '@/components/modal-emprestar-item';
 import ModalExcluirItem from '@/components/modal-excluir-item';
 import ModalCadastrarItem from '@/components/modal-cadastrar-item';
 import ModalEditarItem from '@/components/modal-editar-item';
+import SheetUnidadesItem from '@/components/sheet-unidades-item';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,8 @@ export default function ItensPageContent({
   const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
+  const [isUnidadesSheetOpen, setIsUnidadesSheetOpen] = useState(false);
+  const [unidadesItemId, setUnidadesItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,6 +69,9 @@ export default function ItensPageContent({
     defaultValue: '',
   });
   const [statusFilter, setStatusFilter] = useQueryState('status', {
+    defaultValue: '',
+  });
+  const [tipoFilter, setTipoFilter] = useQueryState('tipo', {
     defaultValue: '',
   });
 
@@ -97,6 +103,7 @@ export default function ItensPageContent({
         searchTerm,
         categoriaFilter,
         statusFilter,
+        tipoFilter,
         currentPage,
         itemsPerPage,
       ],
@@ -105,6 +112,7 @@ export default function ItensPageContent({
         if (searchTerm) params.append('nome', searchTerm);
         if (categoriaFilter) params.append('categoria', categoriaFilter);
         if (statusFilter) params.append('status', statusFilter);
+        if (tipoFilter) params.append('tipo', tipoFilter);
         params.append('limite', itemsPerPage.toString());
         params.append('page', currentPage.toString());
 
@@ -185,6 +193,11 @@ export default function ItensPageContent({
   };
 
   const handleItemClick = (id: string) => {
+    const itemClicado = itens.find((c) => c._id === id);
+    if (itemClicado?.tipo === 'permanente') {
+      handleVerUnidades(id);
+      return;
+    }
     setSelectedItemId(id);
     setIsModalOpen(true);
   };
@@ -192,6 +205,18 @@ export default function ItensPageContent({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setTimeout(() => setSelectedItemId(null), 300);
+  };
+
+  const handleVerUnidades = (id: string) => {
+    setUnidadesItemId(id);
+    setIsUnidadesSheetOpen(true);
+  };
+
+  const handleCloseUnidadesSheet = (open: boolean) => {
+    setIsUnidadesSheetOpen(open);
+    if (!open) {
+      setTimeout(() => setUnidadesItemId(null), 300);
+    }
   };
 
   const handleOpenFiltrosModal = () => {
@@ -202,9 +227,14 @@ export default function ItensPageContent({
     setIsFiltrosModalOpen(false);
   };
 
-  const handleFiltersChange = (categoria: string, status: string) => {
+  const handleFiltersChange = (
+    categoria: string,
+    status: string,
+    tipo?: string,
+  ) => {
     setCategoriaFilter(categoria);
     setStatusFilter(status);
+    setTipoFilter(tipo ?? '');
   };
 
   const handleEntrada = (id: string) => {
@@ -244,6 +274,16 @@ export default function ItensPageContent({
   };
 
   const handleEmprestar = (id: string) => {
+    // ModalEmprestarItem só sabe emprestar por quantidade — abrir para
+    // patrimônio quebraria a suposição do modal (não há noção de unidade
+    // ali). Provisório até a fase de escrita ter um
+    // modal-emprestar-unidade.tsx: redireciona para o drawer, onde o
+    // empréstimo por unidade poderá ser feito quando implementado.
+    const itemAlvo = itens.find((c) => c._id === id);
+    if (itemAlvo?.tipo === 'permanente') {
+      handleVerUnidades(id);
+      return;
+    }
     setEmprestimoItemId(id);
     setIsEmprestimoModalOpen(true);
   };
@@ -317,7 +357,7 @@ export default function ItensPageContent({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoriaFilter, statusFilter, itemsPerPage]);
+  }, [searchTerm, categoriaFilter, statusFilter, tipoFilter, itemsPerPage]);
 
   const itens = data?.data?.docs || [];
   const paginationInfo = data?.data || {
@@ -376,7 +416,7 @@ export default function ItensPageContent({
             </Button>
           </div>
 
-          {(categoriaFilter || statusFilter) && (
+          {(categoriaFilter || statusFilter || tipoFilter) && (
             <div className="mb-4" data-test="applied-filters">
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
@@ -414,6 +454,25 @@ export default function ItensPageContent({
                       className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                       title="Remover filtro de status"
                       data-test="applied-filter-status-remover"
+                    >
+                      <X size={12} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
+                {tipoFilter && (
+                  <div
+                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
+                    data-test="applied-filter-tipo"
+                  >
+                    <span className="font-medium">Tipo:</span>
+                    <span data-test="applied-filter-tipo-nome">
+                      {tipoFilter === 'permanente' ? 'Permanente' : 'Consumo'}
+                    </span>
+                    <button
+                      onClick={() => setTipoFilter('')}
+                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                      title="Remover filtro de tipo"
+                      data-test="applied-filter-tipo-remover"
                     >
                       <X size={12} strokeWidth={2.5} />
                     </button>
@@ -461,7 +520,9 @@ export default function ItensPageContent({
                   id={item._id}
                   nome={item.nome}
                   categoria={item.categoria.nome}
+                  tipo={item.tipo}
                   quantidade={item.quantidade}
+                  quantidadeDisponivel={item.quantidade_disponivel}
                   estoqueMinimo={item.estoque_minimo}
                   status={item.status}
                   imagem={item.imagem}
@@ -480,12 +541,12 @@ export default function ItensPageContent({
             <EmptyState
               icon={Package}
               title={
-                searchTerm || categoriaFilter || statusFilter
+                searchTerm || categoriaFilter || statusFilter || tipoFilter
                   ? 'Nenhum resultado'
                   : 'Nenhum item cadastrado'
               }
               subtitle={
-                searchTerm || categoriaFilter || statusFilter
+                searchTerm || categoriaFilter || statusFilter || tipoFilter
                   ? 'Tente ajustar sua pesquisa ou remover os filtros.'
                   : 'Comece adicionando o primeiro item ao estoque.'
               }
@@ -620,11 +681,20 @@ export default function ItensPageContent({
         />
       )}
 
+      <SheetUnidadesItem
+        itemId={unidadesItemId}
+        itemNome={itens.find((c) => c._id === unidadesItemId)?.nome}
+        open={isUnidadesSheetOpen}
+        onOpenChange={handleCloseUnidadesSheet}
+      />
+
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
         onClose={handleCloseFiltrosModal}
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
+        tipoFilter={tipoFilter}
+        showTipo
         onFiltersChange={handleFiltersChange}
       />
 

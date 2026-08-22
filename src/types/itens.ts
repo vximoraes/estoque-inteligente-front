@@ -1,7 +1,9 @@
 export interface ItemEstoqueData {
   _id: string;
   nome: string;
+  tipo: 'consumo' | 'permanente';
   quantidade: number;
+  quantidade_disponivel: number;
   estoque_minimo: number;
   descricao: string;
   imagem: string;
@@ -15,6 +17,28 @@ export interface ItemEstoqueData {
   usuario: string;
   status: string;
   __v: number;
+}
+
+// Formato de envelope paginado (mongoose-paginate-v2) comum a todas as
+// listagens da API. `EstoqueApiResponse`/`ApiResponse` abaixo são casos
+// concretos deste formato — reaproveite para novos tipos em vez de copiar.
+export interface ApiEnvelope<T> {
+  error: boolean;
+  code: number;
+  message: string;
+  data: {
+    docs: T[];
+    totalDocs: number;
+    limit: number;
+    totalPages: number;
+    page: number;
+    pagingCounter: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    prevPage: number | null;
+    nextPage: number | null;
+  };
+  errors: any[];
 }
 
 export interface Localizacao {
@@ -48,40 +72,6 @@ export interface EstoqueData {
   __v: number;
 }
 
-export interface EstoqueApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: EstoqueData[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
-}
+export type EstoqueApiResponse = ApiEnvelope<EstoqueData>;
 
-export interface ApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: ItemEstoqueData[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
-}
+export type ApiResponse = ApiEnvelope<ItemEstoqueData>;
