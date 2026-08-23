@@ -213,7 +213,7 @@ export default function PageUsuariosContent({
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
       <Cabecalho pagina="Usuários" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">
         <div
           className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"

@@ -9,14 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ModalExcluirFornecedor from '@/components/modal-excluir-fornecedor';
-import ModalDetalhesFornecedor from '@/components/modal-detalhes-fornecedor';
-import ModalCadastrarFornecedor from '@/components/modal-cadastrar-fornecedor';
-import ModalEditarFornecedor from '@/components/modal-editar-fornecedor';
+import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
+import ModalCadastrarCategoria from '@/components/modal-cadastrar-categoria';
+import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { FornecedorApiResponse } from '@/types/fornecedores';
-import { Search, Truck, Plus, Pencil, Trash2 } from 'lucide-react';
+import { CategoriaApiResponse } from '@/types/categorias';
+import { Search, Tag, Plus, Pencil, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
@@ -24,32 +23,29 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
 
-export default function PageFornecedoresContent({
+export default function PageCategoriasContent({
   initialData,
 }: {
-  initialData?: FornecedorApiResponse;
+  initialData?: CategoriaApiResponse;
 }) {
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
-  const [excluirFornecedorId, setExcluirFornecedorId] = useState<string | null>(
+  const [excluirCategoriaId, setExcluirCategoriaId] = useState<string | null>(
     null,
   );
-  const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
-  const [detalhesFornecedorId, setDetalhesFornecedorId] = useState<
-    string | null
-  >(null);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
-  const [editarFornecedorId, setEditarFornecedorId] = useState<string | null>(
+  const [editarCategoriaId, setEditarCategoriaId] = useState<string | null>(
     null,
   );
-  const [atualizandoFornecedorId, setAtualizandoFornecedorId] = useState<
+  const [atualizandoCategoriaId, setAtualizandoCategoriaId] = useState<
     string | null
   >(null);
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] =
+    useState(false);
 
   const {
     data,
@@ -60,8 +56,8 @@ export default function PageFornecedoresContent({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<FornecedorApiResponse>({
-    queryKey: ['fornecedores', searchTerm],
+  } = useInfiniteQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', searchTerm],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
@@ -70,9 +66,9 @@ export default function PageFornecedoresContent({
       params.append('page', page.toString());
 
       const queryString = params.toString();
-      const url = `/fornecedores${queryString ? `?${queryString}` : ''}`;
+      const url = `/categorias${queryString ? `?${queryString}` : ''}`;
 
-      return await get<FornecedorApiResponse>(url);
+      return await get<CategoriaApiResponse>(url);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -105,10 +101,10 @@ export default function PageFornecedoresContent({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
-    if (!isFetching && atualizandoFornecedorId) {
-      setAtualizandoFornecedorId(null);
+    if (!isFetching && atualizandoCategoriaId) {
+      setAtualizandoCategoriaId(null);
     }
-  }, [isFetching, atualizandoFornecedorId]);
+  }, [isFetching, atualizandoCategoriaId]);
 
   const handleAdicionarClick = () => {
     setIsCadastrarModalOpen(true);
@@ -119,26 +115,26 @@ export default function PageFornecedoresContent({
   };
 
   const handleEditarSuccess = () => {
-    if (editarFornecedorId) {
-      setAtualizandoFornecedorId(editarFornecedorId);
+    if (editarCategoriaId) {
+      setAtualizandoCategoriaId(editarCategoriaId);
     }
     refetch();
   };
 
   const handleEdit = (id: string) => {
-    setEditarFornecedorId(id);
+    setEditarCategoriaId(id);
     setIsEditarModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    setExcluirFornecedorId(id);
+    setExcluirCategoriaId(id);
     setIsExcluirModalOpen(true);
   };
 
   const handleExcluirSuccess = async () => {
     setIsRefetchingAfterDelete(true);
 
-    toast.success('Fornecedor excluído com sucesso!', {
+    toast.success('Categoria excluída com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
       hideProgressBar: false,
@@ -152,19 +148,14 @@ export default function PageFornecedoresContent({
     setIsRefetchingAfterDelete(false);
   };
 
-  const handleViewDetails = (id: string) => {
-    setDetalhesFornecedorId(id);
-    setIsDetalhesModalOpen(true);
-  };
-
-  const fornecedores = data?.pages.flatMap((page) => page.data.docs) || [];
+  const categorias = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
     <div
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
-      data-test="fornecedores-page"
+      data-test="categorias-page"
     >
-      <Cabecalho pagina="Fornecedores" />
+      <Cabecalho pagina="Categorias" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">
         <div
@@ -175,7 +166,7 @@ export default function PageFornecedoresContent({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
-              placeholder="Pesquisar fornecedores..."
+              placeholder="Pesquisar categorias..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-11 pl-10"
@@ -195,7 +186,7 @@ export default function PageFornecedoresContent({
 
         {error && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md shrink-0">
-            Erro ao carregar fornecedores: {error.message}
+            Erro ao carregar categorias: {error.message}
           </div>
         )}
 
@@ -210,28 +201,22 @@ export default function PageFornecedoresContent({
                 <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
-                Carregando fornecedores...
+                Carregando categorias...
               </p>
             </div>
-          ) : fornecedores.length > 0 ? (
+          ) : categorias.length > 0 ? (
             <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table
-                  className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm"
-                  data-test="fornecedores-table"
+                  className="w-full min-w-[600px] caption-bottom text-xs sm:text-sm"
+                  data-test="categorias-table"
                 >
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
-                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8 whitespace-nowrap">
                         NOME
                       </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
-                        URL
-                      </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
-                        CONTATO
-                      </TableHead>
-                      <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
+                      <TableHead className="font-semibold text-muted-foreground bg-muted text-center px-8 w-full">
                         DESCRIÇÃO
                       </TableHead>
                       <TableHead className="font-semibold text-muted-foreground bg-muted text-center px-8 whitespace-nowrap">
@@ -240,15 +225,14 @@ export default function PageFornecedoresContent({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {fornecedores.map((fornecedor, index) => (
+                    {categorias.map((categoria, index) => (
                       <TableRow
-                        key={fornecedor._id}
-                        data-test={`fornecedor-row-${index}`}
-                        onClick={() => handleViewDetails(fornecedor._id)}
-                        className="hover:bg-muted border-b relative cursor-pointer"
+                        key={categoria._id}
+                        data-test={`categoria-row-${index}`}
+                        className="hover:bg-muted border-b relative"
                         style={{ height: '60px' }}
                       >
-                        {atualizandoFornecedorId === fornecedor._id &&
+                        {atualizandoCategoriaId === categoria._id &&
                           isFetching && (
                             <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center z-10">
                               <div className="flex flex-col items-center">
@@ -265,63 +249,33 @@ export default function PageFornecedoresContent({
                         <TableCell className="font-medium text-left px-8 py-2">
                           <span
                             className="truncate block max-w-[200px]"
-                            title={fornecedor.nome}
+                            title={categoria.nome}
                           >
-                            {fornecedor.nome}
+                            {categoria.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-2">
-                          {fornecedor.url ? (
-                            <a
-                              href={fornecedor.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-ei-accent hover:text-ei-accent-hover hover:underline truncate block max-w-[200px]"
-                              title={fornecedor.url}
-                            >
-                              {fornecedor.url}
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-left px-8 py-2">
+                        <TableCell className="text-center px-8 py-2">
                           <span
-                            className="truncate block max-w-[150px]"
-                            title={fornecedor.contato || '-'}
+                            className="truncate block max-w-[300px] mx-auto"
+                            title={categoria.descricao || '-'}
                           >
-                            {fornecedor.contato || '-'}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-left px-8 py-2">
-                          <span
-                            className="truncate block max-w-[200px]"
-                            title={fornecedor.descricao || '-'}
-                          >
-                            {fornecedor.descricao || '-'}
+                            {categoria.descricao || '-'}
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(fornecedor._id);
-                              }}
+                              onClick={() => handleEdit(categoria._id)}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Editar fornecedor"
+                              title="Editar categoria"
                               data-test="edit-button"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(fornecedor._id);
-                              }}
+                              onClick={() => handleDelete(categoria._id)}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Excluir fornecedor"
+                              title="Excluir categoria"
                               data-test="delete-button"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -351,16 +305,14 @@ export default function PageFornecedoresContent({
           ) : (
             <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
               <EmptyState
-                icon={Truck}
+                icon={Tag}
                 title={
-                  searchTerm
-                    ? 'Nenhum resultado'
-                    : 'Nenhum fornecedor cadastrado'
+                  searchTerm ? 'Nenhum resultado' : 'Nenhuma categoria cadastrada'
                 }
                 subtitle={
                   searchTerm
                     ? 'Tente ajustar sua pesquisa.'
-                    : 'Comece adicionando o primeiro fornecedor.'
+                    : 'Comece adicionando a primeira categoria.'
                 }
               />
             </div>
@@ -378,46 +330,41 @@ export default function PageFornecedoresContent({
         transition={Slide}
       />
 
-      {excluirFornecedorId && (
-        <ModalExcluirFornecedor
+      {excluirCategoriaId && (
+        <ModalExcluirCategoria
           isOpen={isExcluirModalOpen}
           onClose={() => {
             setIsExcluirModalOpen(false);
-            setTimeout(() => setExcluirFornecedorId(null), 300);
+            setTimeout(() => setExcluirCategoriaId(null), 300);
           }}
           onSuccess={handleExcluirSuccess}
-          fornecedorId={excluirFornecedorId}
-          fornecedorNome={
-            fornecedores.find((f) => f._id === excluirFornecedorId)?.nome || ''
+          categoriaId={excluirCategoriaId}
+          categoriaNome={
+            categorias.find((c) => c._id === excluirCategoriaId)?.nome || ''
           }
         />
       )}
 
-      {detalhesFornecedorId && (
-        <ModalDetalhesFornecedor
-          isOpen={isDetalhesModalOpen}
-          onClose={() => {
-            setIsDetalhesModalOpen(false);
-            setTimeout(() => setDetalhesFornecedorId(null), 300);
-          }}
-          fornecedorId={detalhesFornecedorId}
-        />
-      )}
-
-      <ModalCadastrarFornecedor
+      <ModalCadastrarCategoria
         isOpen={isCadastrarModalOpen}
         onClose={() => setIsCadastrarModalOpen(false)}
         onSuccess={handleCadastrarSuccess}
       />
 
-      {editarFornecedorId && (
-        <ModalEditarFornecedor
+      {editarCategoriaId && (
+        <ModalEditarCategoria
           isOpen={isEditarModalOpen}
           onClose={() => {
             setIsEditarModalOpen(false);
-            setTimeout(() => setEditarFornecedorId(null), 300);
+            setTimeout(() => setEditarCategoriaId(null), 300);
           }}
-          fornecedorId={editarFornecedorId}
+          categoriaId={editarCategoriaId}
+          categoriaNome={
+            categorias.find((c) => c._id === editarCategoriaId)?.nome || ''
+          }
+          categoriaDescricao={
+            categorias.find((c) => c._id === editarCategoriaId)?.descricao
+          }
           onSuccess={handleEditarSuccess}
         />
       )}

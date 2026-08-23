@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,8 @@ import ModalExcluirLocalizacao from './modal-excluir-localizacao';
 interface Localizacao {
   _id: string;
   nome: string;
+  ativo?: boolean;
+  descricao?: string;
 }
 
 interface EstoqueData {
@@ -19,6 +21,7 @@ interface EstoqueData {
   localizacao: {
     _id: string;
     nome: string;
+    ativo?: boolean;
   };
   item: string;
   quantidade: number;
@@ -72,6 +75,7 @@ export default function ModalSaidaItem({
   const [localizacaoToEdit, setLocalizacaoToEdit] =
     useState<Localizacao | null>(null);
   const [retirarTudo, setRetirarTudo] = useState(false);
+  const autoSelecionouLocalizacao = useRef(false);
 
   const { data: estoquesData, isLoading: isLoadingLocalizacoes } =
     useQuery<EstoqueApiResponse>({
@@ -212,13 +216,34 @@ export default function ModalSaidaItem({
       setErrors({});
       setIsDropdownOpen(false);
       setRetirarTudo(false);
+      autoSelecionouLocalizacao.current = false;
     }
   }, [isOpen]);
 
-  const estoques = estoquesData?.data?.docs || [];
+  const estoques = (estoquesData?.data?.docs || []).filter(
+    (e) => e.localizacao?.ativo !== false,
+  );
   const localizacoes = estoques
     .filter((e) => e.quantidade > 0)
     .map((e) => e.localizacao);
+
+  useEffect(() => {
+    if (!isOpen || autoSelecionouLocalizacao.current) return;
+    if (estoquesData === undefined) return;
+
+    autoSelecionouLocalizacao.current = true;
+
+    const estoquesComSaldo = estoques.filter((e) => e.quantidade > 0);
+    if (estoquesComSaldo.length === 0) return;
+
+    const estoqueComMaisQuantidade = [...estoquesComSaldo].sort(
+      (a, b) => (b.quantidade || 0) - (a.quantidade || 0),
+    )[0];
+
+    if (estoqueComMaisQuantidade?.localizacao?._id) {
+      setLocalizacaoSelecionada(estoqueComMaisQuantidade.localizacao._id);
+    }
+  }, [isOpen, estoquesData]);
   const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
     loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase()),
   );
@@ -610,6 +635,7 @@ export default function ModalSaidaItem({
             }}
             localizacaoId={localizacaoToEdit._id}
             localizacaoNome={localizacaoToEdit.nome}
+            localizacaoDescricao={localizacaoToEdit.descricao}
             onSuccess={onClose}
           />
           <ModalExcluirLocalizacao

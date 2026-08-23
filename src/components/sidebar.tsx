@@ -9,8 +9,15 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { useState, useEffect, useCallback } from 'react';
+import { useTheme } from 'next-themes';
 import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {
@@ -21,8 +28,14 @@ import {
   FileText,
   Handshake,
   Truck,
+  Tag,
+  MapPin,
   Users,
   LogOut,
+  Sun,
+  Moon,
+  Monitor,
+  Check,
   type LucideIcon,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -33,9 +46,41 @@ interface CustomSidebarProps {
   children?: React.ReactNode;
 }
 
+const temaOpcoes = [
+  { value: 'light', label: 'Claro', icon: Sun },
+  { value: 'dark', label: 'Escuro', icon: Moon },
+  { value: 'system', label: 'Sistema', icon: Monitor },
+] as const;
+
 interface PathRouter {
   path: string;
   collapsed?: boolean;
+}
+
+function SidebarSectionLabel({
+  label,
+  collapsed,
+  first = false,
+}: {
+  label: string;
+  collapsed?: boolean;
+  first?: boolean;
+}) {
+  if (collapsed) {
+    return (
+      <div
+        className={`w-8 border-b border-ei-sidebar-divider ${first ? 'mt-1 mb-2' : 'my-2'}`}
+      />
+    );
+  }
+
+  return (
+    <p
+      className={`w-full px-4 text-[11px] font-semibold tracking-wider text-ei-sidebar-text-soft/70 uppercase ${first ? 'mt-0 mb-1' : 'mt-3 mb-1'}`}
+    >
+      {label}
+    </p>
+  );
 }
 
 interface MobileMenuItemProps {
@@ -164,10 +209,18 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
   const [imageError, setImageError] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const temaAtual = mounted ? (theme ?? 'system') : 'system';
+  const IconeTemaAtual =
+    temaAtual === 'light' ? Sun : temaAtual === 'dark' ? Moon : Monitor;
+  const temaLabelAtual = temaOpcoes.find(
+    (opcao) => opcao.value === temaAtual,
+  )?.label;
 
   const displayName = mounted ? user?.name : undefined;
   const displayEmail = mounted ? user?.email : undefined;
@@ -296,6 +349,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   className="items-center gap-2 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
+                  <SidebarSectionLabel
+                    label="Operações"
+                    collapsed={collapsed}
+                    first
+                  />
                   <SidebarButtonMenu
                     icon={Package}
                     name="Itens"
@@ -311,6 +369,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     data-test="sidebar-btn-relatorios"
                     subItems={[
                       { name: 'Itens', route: '/relatorios/itens' },
+                      {
+                        name: 'Patrimônio',
+                        route: '/relatorios/patrimonio',
+                      },
                       {
                         name: 'Movimentações',
                         route: '/relatorios/movimentacoes',
@@ -343,6 +405,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
+                  <SidebarSectionLabel label="Cadastros" collapsed={collapsed} />
                   <SidebarButtonMenu
                     icon={Truck}
                     name="Fornecedores"
@@ -352,16 +415,40 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
+                  <SidebarButtonMenu
+                    icon={Tag}
+                    name="Categorias"
+                    route="/categorias"
+                    data-test="sidebar-btn-categorias"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarButtonMenu
+                    icon={MapPin}
+                    name="Localizações"
+                    route="/localizacoes"
+                    data-test="sidebar-btn-localizacoes"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
                   {canManageUsers() && (
-                    <SidebarButtonMenu
-                      icon={Users}
-                      name="Usuários"
-                      route="/usuarios"
-                      data-test="sidebar-btn-usuarios"
-                      path={path}
-                      onItemClick={handleItemClick}
-                      collapsed={collapsed}
-                    />
+                    <>
+                      <SidebarSectionLabel
+                        label="Administração"
+                        collapsed={collapsed}
+                      />
+                      <SidebarButtonMenu
+                        icon={Users}
+                        name="Usuários"
+                        route="/usuarios"
+                        data-test="sidebar-btn-usuarios"
+                        path={path}
+                        onItemClick={handleItemClick}
+                        collapsed={collapsed}
+                      />
+                    </>
                   )}
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -374,6 +461,56 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   className={`border-b border-ei-sidebar-divider mb-6 transition-all duration-300`}
                   data-test="sidebar-divider-bottom"
                 />
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    {collapsed ? (
+                      <button
+                        type="button"
+                        className="flex justify-center items-center h-10 w-10 mx-auto mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                        title="Tema"
+                        data-test="sidebar-tema-toggle-collapsed"
+                      >
+                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 h-10 w-full pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                        data-test="sidebar-tema-toggle"
+                      >
+                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                        <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                          Tema: {temaLabelAtual}
+                        </span>
+                      </button>
+                    )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align={collapsed ? 'center' : 'end'}
+                    className={
+                      collapsed
+                        ? undefined
+                        : 'w-[var(--radix-dropdown-menu-trigger-width)]'
+                    }
+                    data-test="sidebar-tema-menu"
+                  >
+                    {temaOpcoes.map(({ value, label, icon: Icon }) => (
+                      <DropdownMenuItem
+                        key={value}
+                        onClick={() => setTheme(value)}
+                        className="cursor-pointer"
+                        data-test={`sidebar-tema-opcao-${value}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                        {temaAtual === value && (
+                          <Check className="w-4 h-4 ml-auto" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <SidebarMenuButton
                   className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-md' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-md'}`}
@@ -458,6 +595,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-2 flex-1 mb-6">
+              <SidebarSectionLabel label="Operações" first />
               <MobileMenuItem
                 icon={Package}
                 name="Itens"
@@ -477,6 +615,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 }}
                 subItems={[
                   { name: 'Itens', route: '/relatorios/itens' },
+                  { name: 'Patrimônio', route: '/relatorios/patrimonio' },
                   { name: 'Movimentações', route: '/relatorios/movimentacoes' },
                   { name: 'Orçamentos', route: '/relatorios/orcamentos' },
                   { name: 'Empréstimos', route: '/relatorios/emprestimos' },
@@ -500,6 +639,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick();
                 }}
               />
+              <SidebarSectionLabel label="Cadastros" />
               <MobileMenuItem
                 icon={Truck}
                 name="Fornecedores"
@@ -509,22 +649,78 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick();
                 }}
               />
+              <MobileMenuItem
+                icon={Tag}
+                name="Categorias"
+                route="/categorias"
+                isActive={path?.startsWith('/categorias')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
+              <MobileMenuItem
+                icon={MapPin}
+                name="Localizações"
+                route="/localizacoes"
+                isActive={path?.startsWith('/localizacoes')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
               {canManageUsers() && (
-                <MobileMenuItem
-                  icon={Users}
-                  name="Usuários"
-                  route="/usuarios"
-                  isActive={path?.startsWith('/usuarios')}
-                  onClick={() => {
-                    handleItemClick();
-                  }}
-                />
+                <>
+                  <SidebarSectionLabel label="Administração" />
+                  <MobileMenuItem
+                    icon={Users}
+                    name="Usuários"
+                    route="/usuarios"
+                    isActive={path?.startsWith('/usuarios')}
+                    onClick={() => {
+                      handleItemClick();
+                    }}
+                  />
+                </>
               )}
             </div>
 
             {/* Botão de Sair Mobile */}
             <div className="mt-auto mb-6">
               <div className="border-b border-ei-sidebar-divider mb-6" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-3 h-10 pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150 w-full"
+                    data-test="sidebar-tema-toggle-mobile"
+                  >
+                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                      Tema: {temaLabelAtual}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  data-test="sidebar-tema-menu-mobile"
+                >
+                  {temaOpcoes.map(({ value, label, icon: Icon }) => (
+                    <DropdownMenuItem
+                      key={value}
+                      onClick={() => setTheme(value)}
+                      className="cursor-pointer"
+                      data-test={`sidebar-tema-opcao-mobile-${value}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                      {temaAtual === value && (
+                        <Check className="w-4 h-4 ml-auto" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <button
                 onClick={() => {

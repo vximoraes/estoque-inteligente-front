@@ -13,34 +13,12 @@ import { toast } from 'react-toastify';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
 import { ModalShell } from '@/components/ui/modal-shell';
-
-interface Categoria {
-  _id: string;
-  nome: string;
-}
-
-interface CategoriasApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Categoria[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
-}
+import type { Categoria, CategoriaApiResponse } from '@/types/categorias';
 
 interface ItemData {
   _id: string;
   nome: string;
+  tipo: 'consumo' | 'permanente';
   categoria: {
     _id: string;
     nome: string;
@@ -79,6 +57,7 @@ export default function ModalEditarItem({
   const [imagemParaDeletar, setImagemParaDeletar] = useState(false);
   const [isAddingCategoria, setIsAddingCategoria] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState('');
+  const [novaCategoriaDescricao, setNovaCategoriaDescricao] = useState('');
   const [isCategoriaDropdownOpen, setIsCategoriaDropdownOpen] = useState(false);
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('');
   const [errors, setErrors] = useState<{
@@ -108,7 +87,7 @@ export default function ModalEditarItem({
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(`/categorias?limite=100&page=1`);
     },
     enabled: isOpen,
   });
@@ -138,6 +117,7 @@ export default function ModalEditarItem({
       setErrors({});
       setIsAddingCategoria(false);
       setNovaCategoria('');
+      setNovaCategoriaDescricao('');
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -164,13 +144,14 @@ export default function ModalEditarItem({
   }, [isOpen, onClose]);
 
   const createCategoriaMutation = useMutation({
-    mutationFn: async (nomeCategoria: string) => {
-      return await post('/categorias', { nome: nomeCategoria });
+    mutationFn: async (dados: { nome: string; descricao?: string }) => {
+      return await post('/categorias', dados);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       setCategoriaId(data.data._id);
       setNovaCategoria('');
+      setNovaCategoriaDescricao('');
       setIsAddingCategoria(false);
       setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
       toast.success('Categoria criada com sucesso!', {
@@ -394,7 +375,10 @@ export default function ModalEditarItem({
       return;
     }
     setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
-    createCategoriaMutation.mutate(novaCategoria);
+    createCategoriaMutation.mutate({
+      nome: novaCategoria,
+      descricao: novaCategoriaDescricao.trim() || undefined,
+    });
   };
 
   const handleCategoriaSelect = (categoria: Categoria) => {
@@ -491,6 +475,22 @@ export default function ModalEditarItem({
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="p-6 space-y-4 sm:space-y-6">
+              {/* Tipo do item (somente leitura — imutável após a criação) */}
+              <div
+                className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/60"
+                data-test="tipo-item-readonly"
+              >
+                <span className="text-sm font-semibold text-foreground tracking-tight">
+                  Tipo:
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {itemData?.data?.tipo === 'permanente'
+                    ? 'Bem permanente'
+                    : 'Material de consumo'}{' '}
+                  (não pode ser alterado)
+                </span>
+              </div>
+
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
@@ -685,35 +685,36 @@ export default function ModalEditarItem({
 
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
-                {/* Estoque mínimo */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <Label
-                      htmlFor="estoqueMinimo"
-                      className="text-sm font-semibold text-foreground tracking-tight"
-                    >
-                      Estoque mínimo
-                    </Label>
-                    <span className="text-xs sm:text-sm text-muted-foreground">
-                      {estoqueMinimo.length}/9
-                    </span>
+                {itemData?.data?.tipo !== 'permanente' && (
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <Label
+                        htmlFor="estoqueMinimo"
+                        className="text-sm font-semibold text-foreground tracking-tight"
+                      >
+                        Estoque mínimo
+                      </Label>
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {estoqueMinimo.length}/9
+                      </span>
+                    </div>
+                    <Input
+                      id="estoqueMinimo"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={estoqueMinimo}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length <= 9) {
+                          setEstoqueMinimo(value);
+                        }
+                      }}
+                      className="w-full h-11"
+                      data-test="input-estoque-minimo"
+                    />
                   </div>
-                  <Input
-                    id="estoqueMinimo"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={estoqueMinimo}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.length <= 9) {
-                        setEstoqueMinimo(value);
-                      }
-                    }}
-                    className="w-full h-11"
-                    data-test="input-estoque-minimo"
-                  />
-                </div>
+                )}
 
                 {/* Imagem */}
                 <div>
@@ -850,6 +851,7 @@ export default function ModalEditarItem({
             if (e.target === e.currentTarget) {
               setIsAddingCategoria(false);
               setNovaCategoria('');
+              setNovaCategoriaDescricao('');
               setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
             }
           }}
@@ -863,6 +865,7 @@ export default function ModalEditarItem({
                 onClick={() => {
                   setIsAddingCategoria(false);
                   setNovaCategoria('');
+                  setNovaCategoriaDescricao('');
                   setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
                 }}
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
@@ -927,6 +930,30 @@ export default function ModalEditarItem({
                   </p>
                 )}
               </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="novaCategoriaDescricao"
+                    className="block text-sm font-semibold text-foreground tracking-tight"
+                  >
+                    Descrição
+                  </label>
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                    {novaCategoriaDescricao.length}/200
+                  </span>
+                </div>
+                <input
+                  id="novaCategoriaDescricao"
+                  type="text"
+                  placeholder="Breve descrição da categoria (opcional)"
+                  value={novaCategoriaDescricao}
+                  onChange={(e) => setNovaCategoriaDescricao(e.target.value)}
+                  maxLength={200}
+                  className="w-full h-11 px-3 bg-card border border-border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors"
+                  data-test="input-nova-categoria-descricao"
+                />
+              </div>
             </div>
 
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
@@ -937,6 +964,7 @@ export default function ModalEditarItem({
                   onClick={() => {
                     setIsAddingCategoria(false);
                     setNovaCategoria('');
+                    setNovaCategoriaDescricao('');
                     setErrors((prev) => ({
                       ...prev,
                       novaCategoria: undefined,
@@ -975,6 +1003,7 @@ export default function ModalEditarItem({
             }}
             categoriaId={categoriaToEdit._id}
             categoriaNome={categoriaToEdit.nome}
+            categoriaDescricao={categoriaToEdit.descricao}
             onSuccess={() => setIsCategoriaDropdownOpen(false)}
           />
           <ModalExcluirCategoria
