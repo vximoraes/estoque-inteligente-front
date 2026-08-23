@@ -11,6 +11,9 @@ import { get, post } from '@/lib/fetchData';
 import { toast } from 'react-toastify';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
+import ModalCadastrarLocalizacao from '@/components/modal-cadastrar-localizacao';
+import ModalEditarLocalizacao from '@/components/modal-editar-localizacao';
+import ModalExcluirLocalizacao from '@/components/modal-excluir-localizacao';
 import { ModalShell } from '@/components/ui/modal-shell';
 import type { Localizacao } from '@/types/itens';
 import type { Categoria, CategoriaApiResponse } from '@/types/categorias';
@@ -75,6 +78,13 @@ export default function ModalCadastrarItem({
   const [categoriaToEdit, setCategoriaToEdit] = useState<Categoria | null>(
     null,
   );
+  const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
+  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] =
+    useState(false);
+  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] =
+    useState(false);
+  const [localizacaoToEdit, setLocalizacaoToEdit] =
+    useState<Localizacao | null>(null);
 
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
@@ -113,6 +123,7 @@ export default function ModalCadastrarItem({
     setCategoriaPesquisa('');
     setIsLocalizacaoDropdownOpen(false);
     setLocalizacaoPesquisa('');
+    setIsAddingLocalizacao(false);
     setErrors({});
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -573,6 +584,7 @@ export default function ModalCadastrarItem({
                         type="button"
                         onClick={() => {
                           setIsCategoriaDropdownOpen(!isCategoriaDropdownOpen);
+                          setIsLocalizacaoDropdownOpen(false);
                           if (errors.categoria) {
                             setErrors((prev) => ({
                               ...prev,
@@ -748,99 +760,170 @@ export default function ModalCadastrarItem({
                       Localização das unidades{' '}
                       <span className="text-destructive">*</span>
                     </Label>
-                    <div
-                      className="relative"
-                      data-localizacao-dropdown
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsLocalizacaoDropdownOpen(
-                            !isLocalizacaoDropdownOpen,
-                          );
-                          if (errors.localizacaoInicial) {
-                            setErrors((prev) => ({
-                              ...prev,
-                              localizacaoInicial: undefined,
-                            }));
-                          }
-                        }}
-                        className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors cursor-pointer ${
-                          errors.localizacaoInicial
-                            ? 'border-destructive'
-                            : 'border-border'
-                        }`}
-                        disabled={isLoadingLocalizacoes}
-                        data-test="botao-selecionar-localizacao"
+                    <div className="flex gap-2">
+                      <div
+                        className="relative flex-1 min-w-0"
+                        data-localizacao-dropdown
                       >
-                        <span
-                          className={`truncate ${
-                            localizacaoInicial
-                              ? 'text-foreground'
-                              : 'text-muted-foreground'
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsLocalizacaoDropdownOpen(
+                              !isLocalizacaoDropdownOpen,
+                            );
+                            setIsCategoriaDropdownOpen(false);
+                            if (errors.localizacaoInicial) {
+                              setErrors((prev) => ({
+                                ...prev,
+                                localizacaoInicial: undefined,
+                              }));
+                            }
+                          }}
+                          className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors cursor-pointer ${
+                            errors.localizacaoInicial
+                              ? 'border-destructive'
+                              : 'border-border'
                           }`}
+                          disabled={isLoadingLocalizacoes}
+                          data-test="botao-selecionar-localizacao"
                         >
-                          {isLoadingLocalizacoes
-                            ? 'Carregando...'
-                            : localizacoesData?.data?.docs?.find(
-                                (loc) => loc._id === localizacaoInicial,
-                              )?.nome || 'Selecione a localização'}
-                        </span>
-                        <ChevronDown
-                          className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
-                            isLocalizacaoDropdownOpen ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
+                          <span
+                            className={`truncate ${
+                              localizacaoInicial
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            }`}
+                          >
+                            {isLoadingLocalizacoes
+                              ? 'Carregando...'
+                              : localizacoesData?.data?.docs?.find(
+                                  (loc) => loc._id === localizacaoInicial,
+                                )?.nome || 'Selecione a localização'}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
+                              isLocalizacaoDropdownOpen ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
 
-                      {isLocalizacaoDropdownOpen && !isLoadingLocalizacoes && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                          <div className="p-2 sm:p-3 border-b border-border bg-muted">
-                            <input
-                              type="text"
-                              placeholder="Pesquisar..."
-                              value={localizacaoPesquisa}
-                              onChange={(e) =>
-                                setLocalizacaoPesquisa(e.target.value)
-                              }
-                              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                          <div className="overflow-y-auto">
-                            {(localizacoesData?.data?.docs ?? [])
-                              .filter((loc) =>
-                                loc.nome
-                                  .toLowerCase()
-                                  .includes(
-                                    localizacaoPesquisa.toLowerCase(),
-                                  ),
-                              )
-                              .map((loc) => (
-                                <button
-                                  key={loc._id}
-                                  type="button"
-                                  onClick={() => {
-                                    setLocalizacaoInicial(loc._id);
-                                    setIsLocalizacaoDropdownOpen(false);
-                                    setLocalizacaoPesquisa('');
-                                    setErrors((prev) => ({
-                                      ...prev,
-                                      localizacaoInicial: undefined,
-                                    }));
-                                  }}
-                                  className={`w-full text-left px-3 sm:px-4 py-2 hover:bg-muted transition-colors cursor-pointer text-sm sm:text-base truncate ${
-                                    localizacaoInicial === loc._id
-                                      ? 'text-[var(--ei-accent)] font-medium bg-[var(--ei-accent)]/10'
-                                      : 'text-foreground'
-                                  }`}
-                                >
-                                  {loc.nome}
-                                </button>
-                              ))}
-                          </div>
-                        </div>
-                      )}
+                        {isLocalizacaoDropdownOpen &&
+                          !isLoadingLocalizacoes && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                              <div className="p-2 sm:p-3 border-b border-border bg-muted">
+                                <input
+                                  type="text"
+                                  placeholder="Pesquisar..."
+                                  value={localizacaoPesquisa}
+                                  onChange={(e) =>
+                                    setLocalizacaoPesquisa(e.target.value)
+                                  }
+                                  className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
+                                  onClick={(e) => e.stopPropagation()}
+                                  data-test="input-pesquisa-localizacao"
+                                />
+                              </div>
+                              <div className="overflow-y-auto">
+                                {(localizacoesData?.data?.docs ?? []).filter(
+                                  (loc) =>
+                                    loc.nome
+                                      .toLowerCase()
+                                      .includes(
+                                        localizacaoPesquisa.toLowerCase(),
+                                      ),
+                                ).length > 0 ? (
+                                  (localizacoesData?.data?.docs ?? [])
+                                    .filter((loc) =>
+                                      loc.nome
+                                        .toLowerCase()
+                                        .includes(
+                                          localizacaoPesquisa.toLowerCase(),
+                                        ),
+                                    )
+                                    .map((loc) => (
+                                      <div
+                                        key={loc._id}
+                                        className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
+                                          localizacaoInicial === loc._id
+                                            ? 'bg-[var(--ei-accent)]/10'
+                                            : ''
+                                        }`}
+                                      >
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setLocalizacaoInicial(loc._id);
+                                            setIsLocalizacaoDropdownOpen(
+                                              false,
+                                            );
+                                            setLocalizacaoPesquisa('');
+                                            setErrors((prev) => ({
+                                              ...prev,
+                                              localizacaoInicial: undefined,
+                                            }));
+                                          }}
+                                          className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${
+                                            localizacaoInicial === loc._id
+                                              ? 'text-[var(--ei-accent)] font-medium'
+                                              : 'text-foreground'
+                                          }`}
+                                          title={loc.nome}
+                                          data-test="localizacao-option"
+                                        >
+                                          {loc.nome}
+                                        </button>
+                                        <div className="flex items-center gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setLocalizacaoToEdit(loc);
+                                              setIsEditarLocalizacaoModalOpen(
+                                                true,
+                                              );
+                                            }}
+                                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                                            title="Editar localização"
+                                            data-test="botao-editar-localizacao"
+                                          >
+                                            <Pencil className="w-4 h-4" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setLocalizacaoToEdit(loc);
+                                              setIsExcluirLocalizacaoModalOpen(
+                                                true,
+                                              );
+                                            }}
+                                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                                            title="Excluir localização"
+                                            data-test="botao-excluir-localizacao"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))
+                                ) : (
+                                  <div className="px-4 py-6 sm:py-8 text-center text-muted-foreground text-xs sm:text-sm">
+                                    Nenhuma localização encontrada
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setIsAddingLocalizacao(true)}
+                        className="text-ei-accent-foreground h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+                        style={{ backgroundColor: 'var(--ei-accent)' }}
+                        data-test="botao-adicionar-localizacao"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
                     </div>
                     {errors.localizacaoInicial && (
                       <p className="text-destructive text-xs sm:text-sm mt-1">
@@ -1042,155 +1125,136 @@ export default function ModalCadastrarItem({
       </ModalShell>
 
       {/* Modal para adicionar categoria */}
-      {isAddingCategoria && (
-        <div
-          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-3 sm:p-4 bg-black/20 backdrop-blur-sm"
-          style={{
-            zIndex: 100000,
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
+      <ModalShell
+        isOpen={isAddingCategoria}
+        onClose={() => {
+          setIsAddingCategoria(false);
+          setNovaCategoria('');
+          setNovaCategoriaDescricao('');
+          setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
+        }}
+        data-test="modal-adicionar-categoria"
+        zIndex={100000}
+        contentClassName="max-w-md overflow-visible"
+      >
+        <div className="relative p-6 pb-0">
+          <button
+            onClick={() => {
               setIsAddingCategoria(false);
               setNovaCategoria('');
               setNovaCategoriaDescricao('');
               setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
-            }
-          }}
-        >
-          <div
-            className="bg-card rounded-md shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
-            onClick={(e) => e.stopPropagation()}
+            }}
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+            title="Fechar"
+            data-test="botao-fechar-modal-categoria"
           >
-            <div className="relative p-4 sm:p-6 pb-0">
-              <button
-                onClick={() => {
-                  setIsAddingCategoria(false);
-                  setNovaCategoria('');
-                  setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
-                }}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
-                title="Fechar"
-                data-test="botao-fechar-modal-categoria"
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="px-6 pb-6 space-y-6">
+          <div className="text-center pt-4">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Cadastrar categoria
+            </h2>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <Label htmlFor="novaCategoria" className="text-sm font-medium">
+                Nome <span className="text-destructive">*</span>
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {novaCategoria.length}/50
+              </span>
+            </div>
+            <Input
+              id="novaCategoria"
+              type="text"
+              placeholder="Nome da categoria"
+              value={novaCategoria}
+              onChange={(e) => {
+                setNovaCategoria(e.target.value);
+                if (errors.novaCategoria) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    novaCategoria: undefined,
+                  }));
+                }
+              }}
+              maxLength={50}
+              className={`h-11 ${errors.novaCategoria ? 'border-destructive' : ''}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddCategoria();
+                }
+              }}
+              data-test="input-nova-categoria"
+            />
+            {errors.novaCategoria && (
+              <p className="text-destructive text-xs mt-1">
+                {errors.novaCategoria}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <Label
+                htmlFor="novaCategoriaDescricao"
+                className="text-sm font-medium"
               >
-                <X size={18} className="sm:w-5 sm:h-5" />
-              </button>
+                Descrição
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {novaCategoriaDescricao.length}/200
+              </span>
             </div>
+            <textarea
+              id="novaCategoriaDescricao"
+              placeholder="Breve descrição da categoria..."
+              value={novaCategoriaDescricao}
+              onChange={(e) => setNovaCategoriaDescricao(e.target.value)}
+              maxLength={200}
+              className="w-full px-3 py-2 text-sm bg-card border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors resize-none min-h-[100px]"
+              data-test="input-nova-categoria-descricao"
+            />
+          </div>
 
-            <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4 sm:space-y-6">
-              <div className="text-center pt-2 sm:pt-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-1">
-                  Nova Categoria
-                </h2>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label
-                    htmlFor="novaCategoria"
-                    className="block text-sm font-semibold text-foreground tracking-tight"
-                  >
-                    Nome da Categoria{' '}
-                    <span className="text-destructive">*</span>
-                  </label>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    {novaCategoria.length}/100
-                  </span>
-                </div>
-                <input
-                  id="novaCategoria"
-                  type="text"
-                  placeholder="Digite o nome da categoria"
-                  value={novaCategoria}
-                  onChange={(e) => {
-                    setNovaCategoria(e.target.value);
-                    if (errors.novaCategoria) {
-                      setErrors((prev) => ({
-                        ...prev,
-                        novaCategoria: undefined,
-                      }));
-                    }
-                  }}
-                  maxLength={100}
-                  className={`w-full h-11 px-3 bg-card border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors ${
-                    errors.novaCategoria
-                      ? 'border-destructive'
-                      : 'border-border'
-                  }`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddCategoria();
-                    }
-                  }}
-                  data-test="input-nova-categoria"
-                />
-                {errors.novaCategoria && (
-                  <p className="text-destructive text-xs sm:text-sm">
-                    {errors.novaCategoria}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label
-                    htmlFor="novaCategoriaDescricao"
-                    className="block text-sm font-semibold text-foreground tracking-tight"
-                  >
-                    Descrição
-                  </label>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    {novaCategoriaDescricao.length}/200
-                  </span>
-                </div>
-                <input
-                  id="novaCategoriaDescricao"
-                  type="text"
-                  placeholder="Breve descrição da categoria (opcional)"
-                  value={novaCategoriaDescricao}
-                  onChange={(e) => setNovaCategoriaDescricao(e.target.value)}
-                  maxLength={200}
-                  className="w-full h-11 px-3 bg-card border border-border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors"
-                  data-test="input-nova-categoria-descricao"
-                />
-              </div>
-            </div>
-
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
-              <div className="flex gap-2 sm:gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsAddingCategoria(false);
-                    setNovaCategoria('');
-                    setNovaCategoriaDescricao('');
-                    setErrors((prev) => ({
-                      ...prev,
-                      novaCategoria: undefined,
-                    }));
-                  }}
-                  disabled={createCategoriaMutation.isPending}
-                  className="h-11 flex-1 cursor-pointer text-sm sm:text-base"
-                  data-test="botao-cancelar-modal-categoria"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleAddCategoria}
-                  disabled={createCategoriaMutation.isPending}
-                  className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer text-sm sm:text-base"
-                  style={{ backgroundColor: 'var(--ei-accent)' }}
-                  data-test="botao-criar-categoria"
-                >
-                  {createCategoriaMutation.isPending ? 'Criando...' : 'Criar'}
-                </Button>
-              </div>
-            </div>
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsAddingCategoria(false);
+                setNovaCategoria('');
+                setNovaCategoriaDescricao('');
+                setErrors((prev) => ({
+                  ...prev,
+                  novaCategoria: undefined,
+                }));
+              }}
+              disabled={createCategoriaMutation.isPending}
+              className="h-11 flex-1 cursor-pointer"
+              data-test="botao-cancelar-modal-categoria"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAddCategoria}
+              disabled={createCategoriaMutation.isPending}
+              className="h-11 flex-1 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
+              data-test="botao-criar-categoria"
+            >
+              {createCategoriaMutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
           </div>
         </div>
-      )}
+      </ModalShell>
 
       {/* Modais de Categoria */}
       {categoriaToEdit && (
@@ -1215,6 +1279,40 @@ export default function ModalCadastrarItem({
             categoriaId={categoriaToEdit._id}
             categoriaNome={categoriaToEdit.nome}
             onSuccess={() => setIsCategoriaDropdownOpen(false)}
+          />
+        </>
+      )}
+
+      {/* Modal para adicionar localização */}
+      <ModalCadastrarLocalizacao
+        isOpen={isAddingLocalizacao}
+        onClose={() => setIsAddingLocalizacao(false)}
+        onSuccess={() => setIsAddingLocalizacao(false)}
+      />
+
+      {/* Modais de Localização */}
+      {localizacaoToEdit && (
+        <>
+          <ModalEditarLocalizacao
+            isOpen={isEditarLocalizacaoModalOpen}
+            onClose={() => {
+              setIsEditarLocalizacaoModalOpen(false);
+              setLocalizacaoToEdit(null);
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            localizacaoDescricao={localizacaoToEdit.descricao}
+            onSuccess={() => setIsLocalizacaoDropdownOpen(false)}
+          />
+          <ModalExcluirLocalizacao
+            isOpen={isExcluirLocalizacaoModalOpen}
+            onClose={() => {
+              setIsExcluirLocalizacaoModalOpen(false);
+              setLocalizacaoToEdit(null);
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={() => setIsLocalizacaoDropdownOpen(false)}
           />
         </>
       )}
