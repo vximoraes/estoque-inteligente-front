@@ -251,7 +251,7 @@ export default function SheetUnidadesItem({
                   <TableRow>
                     <TableHead>Nº Patrimônio</TableHead>
                     <TableHead>Localização</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                     <TableHead className="w-8" />
                   </TableRow>
@@ -269,7 +269,7 @@ export default function SheetUnidadesItem({
                         {unidade.numero_patrimonio}
                       </TableCell>
                       <TableCell>{unidade.localizacao?.nome ?? '—'}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <StatusBadge status={unidade.status} size="sm" />
                       </TableCell>
                       <TableCell

@@ -270,7 +270,7 @@ export default function Cabecalho({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
-            className="relative w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-border hover:bg-muted/45 transition-colors duration-200 cursor-pointer"
+            className="relative w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted transition-colors cursor-pointer"
             aria-label="Notificações"
             data-test="botao-notificacoes"
           >
