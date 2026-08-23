@@ -46,8 +46,11 @@ export interface Localizacao {
   nome: string;
   ativo: boolean;
   usuario: string;
+  descricao?: string;
   __v: number;
 }
+
+export type LocalizacaoApiResponse = ApiEnvelope<Localizacao>;
 
 export interface EstoqueData {
   _id: string;

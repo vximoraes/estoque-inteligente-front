@@ -28,6 +28,8 @@ import {
   FileText,
   Handshake,
   Truck,
+  Tag,
+  MapPin,
   Users,
   LogOut,
   Sun,
@@ -53,6 +55,32 @@ const temaOpcoes = [
 interface PathRouter {
   path: string;
   collapsed?: boolean;
+}
+
+function SidebarSectionLabel({
+  label,
+  collapsed,
+  first = false,
+}: {
+  label: string;
+  collapsed?: boolean;
+  first?: boolean;
+}) {
+  if (collapsed) {
+    return (
+      <div
+        className={`w-8 border-b border-ei-sidebar-divider ${first ? 'mt-1 mb-2' : 'my-2'}`}
+      />
+    );
+  }
+
+  return (
+    <p
+      className={`w-full px-4 text-[11px] font-semibold tracking-wider text-ei-sidebar-text-soft/70 uppercase ${first ? 'mt-0 mb-1' : 'mt-3 mb-1'}`}
+    >
+      {label}
+    </p>
+  );
 }
 
 interface MobileMenuItemProps {
@@ -321,6 +349,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   className="items-center gap-2 flex flex-col"
                   data-test="sidebar-menu-item"
                 >
+                  <SidebarSectionLabel
+                    label="Operações"
+                    collapsed={collapsed}
+                    first
+                  />
                   <SidebarButtonMenu
                     icon={Package}
                     name="Itens"
@@ -372,6 +405,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
+                  <SidebarSectionLabel label="Cadastros" collapsed={collapsed} />
                   <SidebarButtonMenu
                     icon={Truck}
                     name="Fornecedores"
@@ -381,16 +415,40 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
+                  <SidebarButtonMenu
+                    icon={Tag}
+                    name="Categorias"
+                    route="/categorias"
+                    data-test="sidebar-btn-categorias"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarButtonMenu
+                    icon={MapPin}
+                    name="Localizações"
+                    route="/localizacoes"
+                    data-test="sidebar-btn-localizacoes"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
                   {canManageUsers() && (
-                    <SidebarButtonMenu
-                      icon={Users}
-                      name="Usuários"
-                      route="/usuarios"
-                      data-test="sidebar-btn-usuarios"
-                      path={path}
-                      onItemClick={handleItemClick}
-                      collapsed={collapsed}
-                    />
+                    <>
+                      <SidebarSectionLabel
+                        label="Administração"
+                        collapsed={collapsed}
+                      />
+                      <SidebarButtonMenu
+                        icon={Users}
+                        name="Usuários"
+                        route="/usuarios"
+                        data-test="sidebar-btn-usuarios"
+                        path={path}
+                        onItemClick={handleItemClick}
+                        collapsed={collapsed}
+                      />
+                    </>
                   )}
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -537,6 +595,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-2 flex-1 mb-6">
+              <SidebarSectionLabel label="Operações" first />
               <MobileMenuItem
                 icon={Package}
                 name="Itens"
@@ -580,6 +639,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick();
                 }}
               />
+              <SidebarSectionLabel label="Cadastros" />
               <MobileMenuItem
                 icon={Truck}
                 name="Fornecedores"
@@ -589,16 +649,37 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick();
                 }}
               />
+              <MobileMenuItem
+                icon={Tag}
+                name="Categorias"
+                route="/categorias"
+                isActive={path?.startsWith('/categorias')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
+              <MobileMenuItem
+                icon={MapPin}
+                name="Localizações"
+                route="/localizacoes"
+                isActive={path?.startsWith('/localizacoes')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
               {canManageUsers() && (
-                <MobileMenuItem
-                  icon={Users}
-                  name="Usuários"
-                  route="/usuarios"
-                  isActive={path?.startsWith('/usuarios')}
-                  onClick={() => {
-                    handleItemClick();
-                  }}
-                />
+                <>
+                  <SidebarSectionLabel label="Administração" />
+                  <MobileMenuItem
+                    icon={Users}
+                    name="Usuários"
+                    route="/usuarios"
+                    isActive={path?.startsWith('/usuarios')}
+                    onClick={() => {
+                      handleItemClick();
+                    }}
+                  />
+                </>
               )}
             </div>
 

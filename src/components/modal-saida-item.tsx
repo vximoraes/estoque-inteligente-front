@@ -13,6 +13,7 @@ interface Localizacao {
   _id: string;
   nome: string;
   ativo?: boolean;
+  descricao?: string;
 }
 
 interface EstoqueData {
@@ -634,6 +635,7 @@ export default function ModalSaidaItem({
             }}
             localizacaoId={localizacaoToEdit._id}
             localizacaoNome={localizacaoToEdit.nome}
+            localizacaoDescricao={localizacaoToEdit.descricao}
             onSuccess={onClose}
           />
           <ModalExcluirLocalizacao

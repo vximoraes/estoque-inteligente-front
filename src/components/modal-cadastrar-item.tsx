@@ -13,35 +13,12 @@ import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
 import { ModalShell } from '@/components/ui/modal-shell';
 import type { Localizacao } from '@/types/itens';
-
-interface Categoria {
-  _id: string;
-  nome: string;
-}
+import type { Categoria, CategoriaApiResponse } from '@/types/categorias';
 
 interface LocalizacoesApiResponse {
   data: {
     docs: Localizacao[];
   };
-}
-
-interface CategoriasApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Categoria[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
 }
 
 interface ItemPost {
@@ -74,6 +51,7 @@ export default function ModalCadastrarItem({
   const [imagemPreview, setImagemPreview] = useState<string | null>(null);
   const [isAddingCategoria, setIsAddingCategoria] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState('');
+  const [novaCategoriaDescricao, setNovaCategoriaDescricao] = useState('');
   const [isCategoriaDropdownOpen, setIsCategoriaDropdownOpen] = useState(false);
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('');
   const [isLocalizacaoDropdownOpen, setIsLocalizacaoDropdownOpen] =
@@ -101,7 +79,7 @@ export default function ModalCadastrarItem({
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(`/categorias?limite=100&page=1`);
     },
     enabled: isOpen,
   });
@@ -130,6 +108,7 @@ export default function ModalCadastrarItem({
     setImagemPreview(null);
     setIsAddingCategoria(false);
     setNovaCategoria('');
+    setNovaCategoriaDescricao('');
     setIsCategoriaDropdownOpen(false);
     setCategoriaPesquisa('');
     setIsLocalizacaoDropdownOpen(false);
@@ -170,13 +149,14 @@ export default function ModalCadastrarItem({
   }, [isOpen, onClose]);
 
   const createCategoriaMutation = useMutation({
-    mutationFn: async (nomeCategoria: string) => {
-      return await post('/categorias', { nome: nomeCategoria });
+    mutationFn: async (dados: { nome: string; descricao?: string }) => {
+      return await post('/categorias', dados);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       setCategoriaId(data.data._id);
       setNovaCategoria('');
+      setNovaCategoriaDescricao('');
       setIsAddingCategoria(false);
       setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
       toast.success('Categoria criada com sucesso!', {
@@ -425,7 +405,10 @@ export default function ModalCadastrarItem({
       return;
     }
     setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
-    createCategoriaMutation.mutate(novaCategoria);
+    createCategoriaMutation.mutate({
+      nome: novaCategoria,
+      descricao: novaCategoriaDescricao.trim() || undefined,
+    });
   };
 
   const handleCategoriaSelect = (categoria: Categoria) => {
@@ -1069,6 +1052,7 @@ export default function ModalCadastrarItem({
             if (e.target === e.currentTarget) {
               setIsAddingCategoria(false);
               setNovaCategoria('');
+              setNovaCategoriaDescricao('');
               setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
             }
           }}
@@ -1146,6 +1130,30 @@ export default function ModalCadastrarItem({
                   </p>
                 )}
               </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="novaCategoriaDescricao"
+                    className="block text-sm font-semibold text-foreground tracking-tight"
+                  >
+                    Descrição
+                  </label>
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                    {novaCategoriaDescricao.length}/200
+                  </span>
+                </div>
+                <input
+                  id="novaCategoriaDescricao"
+                  type="text"
+                  placeholder="Breve descrição da categoria (opcional)"
+                  value={novaCategoriaDescricao}
+                  onChange={(e) => setNovaCategoriaDescricao(e.target.value)}
+                  maxLength={200}
+                  className="w-full h-11 px-3 bg-card border border-border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors"
+                  data-test="input-nova-categoria-descricao"
+                />
+              </div>
             </div>
 
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
@@ -1156,6 +1164,7 @@ export default function ModalCadastrarItem({
                   onClick={() => {
                     setIsAddingCategoria(false);
                     setNovaCategoria('');
+                    setNovaCategoriaDescricao('');
                     setErrors((prev) => ({
                       ...prev,
                       novaCategoria: undefined,
@@ -1194,6 +1203,7 @@ export default function ModalCadastrarItem({
             }}
             categoriaId={categoriaToEdit._id}
             categoriaNome={categoriaToEdit.nome}
+            categoriaDescricao={categoriaToEdit.descricao}
             onSuccess={() => setIsCategoriaDropdownOpen(false)}
           />
           <ModalExcluirCategoria

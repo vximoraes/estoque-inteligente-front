@@ -19,6 +19,7 @@ interface ModalEditarLocalizacaoProps {
   onClose: () => void;
   localizacaoId: string;
   localizacaoNome: string;
+  localizacaoDescricao?: string;
   onSuccess?: () => void;
 }
 
@@ -27,6 +28,7 @@ export default function ModalEditarLocalizacao({
   onClose,
   localizacaoId,
   localizacaoNome,
+  localizacaoDescricao,
   onSuccess,
 }: ModalEditarLocalizacaoProps) {
   const queryClient = useQueryClient();
@@ -41,14 +43,16 @@ export default function ModalEditarLocalizacao({
     resolver: zodResolver(localizacaoSchema),
     defaultValues: {
       nome: localizacaoNome,
+      descricao: localizacaoDescricao ?? '',
     },
   });
 
   const nomeValue = watch('nome', '');
+  const descricaoValue = watch('descricao', '');
 
   useEffect(() => {
-    reset({ nome: localizacaoNome });
-  }, [localizacaoNome, isOpen, reset]);
+    reset({ nome: localizacaoNome, descricao: localizacaoDescricao ?? '' });
+  }, [localizacaoNome, localizacaoDescricao, isOpen, reset]);
 
   useEffect(() => {
     if (isOpen) {
@@ -114,7 +118,7 @@ export default function ModalEditarLocalizacao({
 
   const handleClose = () => {
     if (!updateLocalizacaoMutation.isPending) {
-      reset({ nome: localizacaoNome });
+      reset({ nome: localizacaoNome, descricao: localizacaoDescricao ?? '' });
       onClose();
     }
   };
@@ -162,7 +166,7 @@ export default function ModalEditarLocalizacao({
               Nome da localização <span className="text-destructive">*</span>
             </Label>
             <span className="text-sm text-muted-foreground">
-              {nomeValue.length}/100
+              {nomeValue.length}/50
             </span>
           </div>
           <Input
@@ -170,13 +174,40 @@ export default function ModalEditarLocalizacao({
             type="text"
             placeholder="Digite o nome da localização"
             {...register('nome')}
-            maxLength={100}
+            maxLength={50}
             className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
             disabled={isSubmitting || updateLocalizacaoMutation.isPending}
           />
           {errors.nome && (
             <p className="text-destructive text-sm mt-1">
               {errors.nome.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <Label
+              htmlFor="descricao"
+              className="text-sm font-medium text-foreground"
+            >
+              Descrição
+            </Label>
+            <span className="text-sm text-muted-foreground">
+              {descricaoValue?.length || 0}/200
+            </span>
+          </div>
+          <textarea
+            id="descricao"
+            placeholder="Breve descrição da localização..."
+            maxLength={200}
+            {...register('descricao')}
+            disabled={isSubmitting || updateLocalizacaoMutation.isPending}
+            className="w-full px-3 py-2 text-sm bg-card border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors resize-none min-h-[100px] disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          {errors.descricao && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.descricao.message}
             </p>
           )}
         </div>
