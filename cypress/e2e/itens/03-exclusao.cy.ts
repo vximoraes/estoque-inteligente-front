@@ -10,6 +10,7 @@ describe('Componentes - Exclusão', () => {
     cy.request({
       method: 'POST',
       url: `${apiUrl}/api/auth/sign-in/email`,
+      headers: { Origin: Cypress.env('FRONTEND_URL') },
       body: { email, password: senha },
       timeout: 30000,
     }).then((loginResponse) => {
@@ -58,12 +59,12 @@ describe('Componentes - Exclusão', () => {
 
   describe('Modal de Confirmação de Exclusão', () => {
     it('Deve abrir modal de confirmação ao clicar em Excluir', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').should('be.visible');
@@ -73,14 +74,14 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve exibir o nome do item no modal', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           const item = itens[0];
 
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -94,12 +95,12 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve ter botões Cancelar e Excluir no modal', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -111,12 +112,12 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve ter botão Excluir em vermelho (destaque de ação destrutiva)', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -132,12 +133,12 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve fechar modal ao clicar em Cancelar', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -157,14 +158,14 @@ describe('Componentes - Exclusão', () => {
         return;
       }
 
-      cy.wait('@getComponentes');
+      cy.get('@getComponentes');
 
       cy.get('body').then(($body) => {
         if ($body.text().includes('Para Exclusão')) {
           cy.contains('Para Exclusão')
             .parents('[data-test^="item-card-"]')
             .within(() => {
-              cy.getByData('delete-button').click();
+              cy.getByData('delete-button').click({ force: true });
             });
 
           cy.getByData('modal-excluir').within(() => {
@@ -187,7 +188,7 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve atualizar listagem automaticamente após exclusão', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
         const totalAntes = itens.length;
 
@@ -195,7 +196,7 @@ describe('Componentes - Exclusão', () => {
           const itemNome = itens[0].nome;
 
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -215,13 +216,13 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve recalcular estatísticas após exclusão', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const statsAntes = interception.response?.body?.stats;
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -245,7 +246,7 @@ describe('Componentes - Exclusão', () => {
 
   describe('Paginação após Exclusão', () => {
     it('Deve ajustar paginação se era último item da página', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const paginationInfo = interception.response?.body?.data;
         const itens = paginationInfo?.docs || [];
 
@@ -253,7 +254,7 @@ describe('Componentes - Exclusão', () => {
           const paginaAtual = paginationInfo.page;
 
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -279,7 +280,7 @@ describe('Componentes - Exclusão', () => {
 
   describe('Exclusão Permanente', () => {
     it('Componente excluído não deve aparecer em nova busca', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -287,7 +288,7 @@ describe('Componentes - Exclusão', () => {
           const itemId = itens[0]._id;
 
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -306,13 +307,13 @@ describe('Componentes - Exclusão', () => {
 
   describe('Confirmação Obrigatória', () => {
     it('Não deve excluir sem confirmação', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
         const totalInicial = itens.length;
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -327,12 +328,12 @@ describe('Componentes - Exclusão', () => {
     });
 
     it('Deve exibir feedback apropriado após exclusão', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
           cy.getByData('item-card-0').within(() => {
-            cy.getByData('delete-button').click();
+            cy.getByData('delete-button').click({ force: true });
           });
 
           cy.getByData('modal-excluir').within(() => {
@@ -355,6 +356,7 @@ describe('Componentes - Exclusão', () => {
       cy.request({
         method: 'POST',
         url: `${apiUrl}/api/auth/sign-in/email`,
+        headers: { Origin: Cypress.env('FRONTEND_URL') },
         body: { email, password: senha },
         timeout: 30000,
         failOnStatusCode: false,

@@ -85,6 +85,7 @@ export default function ModalExcluirFornecedor({
       onClose={onClose}
       zIndex={99999}
       contentClassName="max-w-lg overflow-visible"
+      data-test="modal-excluir-fornecedor"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">
@@ -92,6 +93,7 @@ export default function ModalExcluirFornecedor({
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
+          data-test="modal-excluir-fornecedor-close"
         >
           <X size={20} />
         </button>
@@ -134,6 +136,7 @@ export default function ModalExcluirFornecedor({
             onClick={onClose}
             disabled={excluirMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
+            data-test="modal-excluir-fornecedor-cancelar"
           >
             Cancelar
           </Button>
@@ -142,6 +145,7 @@ export default function ModalExcluirFornecedor({
             disabled={excluirMutation.isPending}
             className="h-11 flex-1 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#DC2626' }}
+            data-test="modal-excluir-fornecedor-confirmar"
           >
             {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}
           </Button>

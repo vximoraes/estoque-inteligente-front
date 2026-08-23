@@ -369,6 +369,7 @@ export default function ModalCadastrarEmprestimo({
                             : 'text-foreground'
                         }`}
                         title={item.nome}
+                        data-test="modal-cadastrar-emprestimo-item-opcao"
                       >
                         {item.nome}
                       </button>
@@ -438,6 +439,7 @@ export default function ModalCadastrarEmprestimo({
                     onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
                     className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
                     onClick={(e) => e.stopPropagation()}
+                    data-test="modal-cadastrar-emprestimo-localizacao-pesquisa"
                   />
                 </div>
                 <div className="overflow-y-auto">
@@ -452,6 +454,7 @@ export default function ModalCadastrarEmprestimo({
                             ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
                             : 'text-foreground'
                         }`}
+                        data-test="modal-cadastrar-emprestimo-localizacao-opcao"
                       >
                         <span className="truncate">{localizacao.nome}</span>
                         <span className="text-xs px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-foreground">

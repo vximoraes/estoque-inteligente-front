@@ -12,29 +12,13 @@ import { toast } from 'react-toastify';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
 import { ModalShell } from '@/components/ui/modal-shell';
+import type { Localizacao } from '@/types/itens';
+import type { Categoria, CategoriaApiResponse } from '@/types/categorias';
 
-interface Categoria {
-  _id: string;
-  nome: string;
-}
-
-interface CategoriasApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
+interface LocalizacoesApiResponse {
   data: {
-    docs: Categoria[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
+    docs: Localizacao[];
   };
-  errors: any[];
 }
 
 interface ItemPost {
@@ -56,19 +40,30 @@ export default function ModalCadastrarItem({
   onSuccess,
 }: ModalCadastrarItemProps) {
   const [nome, setNome] = useState('');
+  const [tipo, setTipo] = useState<'consumo' | 'permanente'>('consumo');
   const [categoriaId, setCategoriaId] = useState('');
   const [estoqueMinimo, setEstoqueMinimo] = useState('0');
   const [descricao, setDescricao] = useState('');
+  const [localizacaoInicial, setLocalizacaoInicial] = useState('');
+  const [quantidadeUnidades, setQuantidadeUnidades] = useState('1');
+  const [prefixoPatrimonio, setPrefixoPatrimonio] = useState('');
   const [imagem, setImagem] = useState<File | null>(null);
   const [imagemPreview, setImagemPreview] = useState<string | null>(null);
   const [isAddingCategoria, setIsAddingCategoria] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState('');
+  const [novaCategoriaDescricao, setNovaCategoriaDescricao] = useState('');
   const [isCategoriaDropdownOpen, setIsCategoriaDropdownOpen] = useState(false);
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('');
+  const [isLocalizacaoDropdownOpen, setIsLocalizacaoDropdownOpen] =
+    useState(false);
+  const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
   const [errors, setErrors] = useState<{
     nome?: string;
     categoria?: string;
     novaCategoria?: string;
+    localizacaoInicial?: string;
+    quantidadeUnidades?: string;
+    prefixoPatrimonio?: string;
   }>({});
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,22 +79,40 @@ export default function ModalCadastrarItem({
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(`/categorias?limite=100&page=1`);
     },
     enabled: isOpen,
   });
 
+  const { data: localizacoesData, isLoading: isLoadingLocalizacoes } =
+    useQuery({
+      queryKey: ['localizacoes'],
+      queryFn: async () => {
+        return await get<LocalizacoesApiResponse>(
+          `/localizacoes?limite=100&page=1`,
+        );
+      },
+      enabled: isOpen && tipo === 'permanente',
+    });
+
   const resetForm = () => {
     setNome('');
+    setTipo('consumo');
     setCategoriaId('');
     setEstoqueMinimo('0');
     setDescricao('');
+    setLocalizacaoInicial('');
+    setQuantidadeUnidades('1');
+    setPrefixoPatrimonio('');
     setImagem(null);
     setImagemPreview(null);
     setIsAddingCategoria(false);
     setNovaCategoria('');
+    setNovaCategoriaDescricao('');
     setIsCategoriaDropdownOpen(false);
     setCategoriaPesquisa('');
+    setIsLocalizacaoDropdownOpen(false);
+    setLocalizacaoPesquisa('');
     setErrors({});
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -136,13 +149,14 @@ export default function ModalCadastrarItem({
   }, [isOpen, onClose]);
 
   const createCategoriaMutation = useMutation({
-    mutationFn: async (nomeCategoria: string) => {
-      return await post('/categorias', { nome: nomeCategoria });
+    mutationFn: async (dados: { nome: string; descricao?: string }) => {
+      return await post('/categorias', dados);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       setCategoriaId(data.data._id);
       setNovaCategoria('');
+      setNovaCategoriaDescricao('');
       setIsAddingCategoria(false);
       setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
       toast.success('Categoria criada com sucesso!', {
@@ -190,13 +204,49 @@ export default function ModalCadastrarItem({
     },
   });
 
+  // Cadastro em lote de unidades patrimoniais, disparado logo após a
+  // criação de um item `permanente`. Falha aqui não desfaz o item (já
+  // criado) — só avisa que as unidades precisam ser cadastradas depois
+  // pelo drawer de unidades.
+  const createPatrimonioLoteMutation = useMutation({
+    mutationFn: async (payload: {
+      item: string;
+      localizacao: string;
+      quantidade: number;
+      prefixo: string;
+      numero_inicial: number;
+    }) => {
+      return await post('/patrimonios/lote', payload);
+    },
+  });
+
   const createItemMutation = useMutation({
     mutationFn: async (data: any) => {
       return await post<ItemPost>('/itens', data);
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       const novoItemId = data.data._id;
       queryClient.invalidateQueries({ queryKey: ['itens'] });
+
+      if (tipo === 'permanente') {
+        try {
+          await createPatrimonioLoteMutation.mutateAsync({
+            item: novoItemId,
+            localizacao: localizacaoInicial,
+            quantidade: Number(quantidadeUnidades),
+            prefixo: prefixoPatrimonio.trim(),
+            numero_inicial: 1,
+          });
+          queryClient.invalidateQueries({ queryKey: ['itens'] });
+        } catch (error: any) {
+          toast.error(
+            `Item criado, mas as unidades não puderam ser cadastradas: ${
+              error?.message || 'erro desconhecido'
+            }. Cadastre-as manualmente pelo item.`,
+            { position: 'bottom-right', autoClose: 8000 },
+          );
+        }
+      }
 
       if (imagem) {
         sendItemImagem.mutate(novoItemId);
@@ -294,7 +344,13 @@ export default function ModalCadastrarItem({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: { nome?: string; categoria?: string } = {};
+    const newErrors: {
+      nome?: string;
+      categoria?: string;
+      localizacaoInicial?: string;
+      quantidadeUnidades?: string;
+      prefixoPatrimonio?: string;
+    } = {};
 
     if (!nome.trim()) {
       newErrors.nome = 'Nome é obrigatório';
@@ -304,6 +360,23 @@ export default function ModalCadastrarItem({
       newErrors.categoria = 'Selecione uma categoria';
     }
 
+    if (tipo === 'permanente') {
+      if (!localizacaoInicial) {
+        newErrors.localizacaoInicial = 'Selecione a localização das unidades';
+      }
+      const quantidadeNumero = Number(quantidadeUnidades);
+      if (
+        !quantidadeUnidades ||
+        !Number.isInteger(quantidadeNumero) ||
+        quantidadeNumero < 1
+      ) {
+        newErrors.quantidadeUnidades = 'Informe ao menos 1 unidade';
+      }
+      if (!prefixoPatrimonio.trim()) {
+        newErrors.prefixoPatrimonio = 'Prefixo é obrigatório';
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -311,8 +384,9 @@ export default function ModalCadastrarItem({
 
     const itemData: any = {
       nome: nome,
+      tipo,
       categoria: categoriaId,
-      estoque_minimo: estoqueMinimo,
+      estoque_minimo: tipo === 'permanente' ? '0' : estoqueMinimo,
     };
 
     if (descricao.trim()) {
@@ -331,7 +405,10 @@ export default function ModalCadastrarItem({
       return;
     }
     setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
-    createCategoriaMutation.mutate(novaCategoria);
+    createCategoriaMutation.mutate({
+      nome: novaCategoria,
+      descricao: novaCategoriaDescricao.trim() || undefined,
+    });
   };
 
   const handleCategoriaSelect = (categoria: Categoria) => {
@@ -349,6 +426,9 @@ export default function ModalCadastrarItem({
       if (!target.closest('[data-categoria-dropdown]')) {
         setIsCategoriaDropdownOpen(false);
       }
+      if (!target.closest('[data-localizacao-dropdown]')) {
+        setIsLocalizacaoDropdownOpen(false);
+      }
     };
 
     document.addEventListener('click', handleClickOutside);
@@ -365,7 +445,10 @@ export default function ModalCadastrarItem({
     (cat: Categoria) => cat._id === categoriaId,
   );
 
-  const isPending = createItemMutation.isPending || sendItemImagem.isPending;
+  const isPending =
+    createItemMutation.isPending ||
+    sendItemImagem.isPending ||
+    createPatrimonioLoteMutation.isPending;
 
   const modalContent = (
     <>
@@ -395,6 +478,49 @@ export default function ModalCadastrarItem({
 
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-4 sm:space-y-6">
+            {/* Tipo do item */}
+            <div>
+              <Label className="text-sm font-semibold text-foreground tracking-tight mb-2 block">
+                Tipo do item
+              </Label>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTipo('consumo')}
+                  className={`h-auto py-3 px-3 rounded-md border text-left transition-colors cursor-pointer ${
+                    tipo === 'consumo'
+                      ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
+                      : 'border-border hover:bg-muted/40'
+                  }`}
+                  data-test="tipo-consumo-button"
+                >
+                  <span className="block text-sm font-semibold text-foreground">
+                    Material de consumo
+                  </span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">
+                    Controlado por quantidade (ex.: parafusos, papel).
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipo('permanente')}
+                  className={`h-auto py-3 px-3 rounded-md border text-left transition-colors cursor-pointer ${
+                    tipo === 'permanente'
+                      ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
+                      : 'border-border hover:bg-muted/40'
+                  }`}
+                  data-test="tipo-permanente-button"
+                >
+                  <span className="block text-sm font-semibold text-foreground">
+                    Bem permanente
+                  </span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">
+                    Controlado por unidade (ex.: notebooks, projetores).
+                  </span>
+                </button>
+              </div>
+            </div>
+
             {/* Grid de 2 colunas */}
             <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
               {/* Nome */}
@@ -517,6 +643,7 @@ export default function ModalCadastrarItem({
                                             : 'text-foreground'
                                         }`}
                                         title={categoria.nome}
+                                        data-test="categoria-option"
                                       >
                                         {categoria.nome}
                                       </button>
@@ -584,35 +711,217 @@ export default function ModalCadastrarItem({
 
             {/* Grid de 2 colunas */}
             <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
-              {/* Estoque mínimo */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label
-                    htmlFor="estoqueMinimo"
-                    className="text-sm font-semibold text-foreground tracking-tight"
-                  >
-                    Estoque mínimo
-                  </Label>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    {estoqueMinimo.length}/9
-                  </span>
+              {tipo === 'consumo' ? (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label
+                      htmlFor="estoqueMinimo"
+                      className="text-sm font-semibold text-foreground tracking-tight"
+                    >
+                      Estoque mínimo
+                    </Label>
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      {estoqueMinimo.length}/9
+                    </span>
+                  </div>
+                  <Input
+                    id="estoqueMinimo"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={estoqueMinimo}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 9) {
+                        setEstoqueMinimo(value);
+                      }
+                    }}
+                    className="w-full h-11"
+                    data-test="input-estoque-minimo"
+                  />
                 </div>
-                <Input
-                  id="estoqueMinimo"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={estoqueMinimo}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 9) {
-                      setEstoqueMinimo(value);
-                    }
-                  }}
-                  className="w-full h-11"
-                  data-test="input-estoque-minimo"
-                />
-              </div>
+              ) : (
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Localização inicial das unidades */}
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground tracking-tight mb-2 block">
+                      Localização das unidades{' '}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <div
+                      className="relative"
+                      data-localizacao-dropdown
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLocalizacaoDropdownOpen(
+                            !isLocalizacaoDropdownOpen,
+                          );
+                          if (errors.localizacaoInicial) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              localizacaoInicial: undefined,
+                            }));
+                          }
+                        }}
+                        className={`w-full h-11 flex items-center justify-between px-3 bg-card border rounded-md hover:border-border focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors cursor-pointer ${
+                          errors.localizacaoInicial
+                            ? 'border-destructive'
+                            : 'border-border'
+                        }`}
+                        disabled={isLoadingLocalizacoes}
+                        data-test="botao-selecionar-localizacao"
+                      >
+                        <span
+                          className={`truncate ${
+                            localizacaoInicial
+                              ? 'text-foreground'
+                              : 'text-muted-foreground'
+                          }`}
+                        >
+                          {isLoadingLocalizacoes
+                            ? 'Carregando...'
+                            : localizacoesData?.data?.docs?.find(
+                                (loc) => loc._id === localizacaoInicial,
+                              )?.nome || 'Selecione a localização'}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2 ${
+                            isLocalizacaoDropdownOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+
+                      {isLocalizacaoDropdownOpen && !isLoadingLocalizacoes && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                          <div className="p-2 sm:p-3 border-b border-border bg-muted">
+                            <input
+                              type="text"
+                              placeholder="Pesquisar..."
+                              value={localizacaoPesquisa}
+                              onChange={(e) =>
+                                setLocalizacaoPesquisa(e.target.value)
+                              }
+                              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className="overflow-y-auto">
+                            {(localizacoesData?.data?.docs ?? [])
+                              .filter((loc) =>
+                                loc.nome
+                                  .toLowerCase()
+                                  .includes(
+                                    localizacaoPesquisa.toLowerCase(),
+                                  ),
+                              )
+                              .map((loc) => (
+                                <button
+                                  key={loc._id}
+                                  type="button"
+                                  onClick={() => {
+                                    setLocalizacaoInicial(loc._id);
+                                    setIsLocalizacaoDropdownOpen(false);
+                                    setLocalizacaoPesquisa('');
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      localizacaoInicial: undefined,
+                                    }));
+                                  }}
+                                  className={`w-full text-left px-3 sm:px-4 py-2 hover:bg-muted transition-colors cursor-pointer text-sm sm:text-base truncate ${
+                                    localizacaoInicial === loc._id
+                                      ? 'text-[var(--ei-accent)] font-medium bg-[var(--ei-accent)]/10'
+                                      : 'text-foreground'
+                                  }`}
+                                >
+                                  {loc.nome}
+                                </button>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {errors.localizacaoInicial && (
+                      <p className="text-destructive text-xs sm:text-sm mt-1">
+                        {errors.localizacaoInicial}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Quantidade de unidades */}
+                    <div>
+                      <Label
+                        htmlFor="quantidadeUnidades"
+                        className="text-sm font-semibold text-foreground tracking-tight mb-2 block"
+                      >
+                        Quantidade <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="quantidadeUnidades"
+                        type="number"
+                        min="1"
+                        placeholder="1"
+                        value={quantidadeUnidades}
+                        onChange={(e) => {
+                          setQuantidadeUnidades(e.target.value);
+                          if (errors.quantidadeUnidades) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              quantidadeUnidades: undefined,
+                            }));
+                          }
+                        }}
+                        className={`w-full h-11 ${errors.quantidadeUnidades ? 'border-destructive!' : ''}`}
+                        data-test="input-quantidade-unidades"
+                      />
+                      {errors.quantidadeUnidades && (
+                        <p className="text-destructive text-xs sm:text-sm mt-1">
+                          {errors.quantidadeUnidades}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Prefixo do número de patrimônio */}
+                    <div>
+                      <Label
+                        htmlFor="prefixoPatrimonio"
+                        className="text-sm font-semibold text-foreground tracking-tight mb-2 block"
+                      >
+                        Prefixo <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="prefixoPatrimonio"
+                        type="text"
+                        placeholder="NB"
+                        value={prefixoPatrimonio}
+                        onChange={(e) => {
+                          setPrefixoPatrimonio(e.target.value.toUpperCase());
+                          if (errors.prefixoPatrimonio) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              prefixoPatrimonio: undefined,
+                            }));
+                          }
+                        }}
+                        maxLength={10}
+                        className={`w-full h-11 ${errors.prefixoPatrimonio ? 'border-destructive!' : ''}`}
+                        data-test="input-prefixo-patrimonio"
+                      />
+                      {errors.prefixoPatrimonio && (
+                        <p className="text-destructive text-xs sm:text-sm mt-1">
+                          {errors.prefixoPatrimonio}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    As unidades serão numeradas {prefixoPatrimonio || 'PREFIXO'}
+                    -0001, {prefixoPatrimonio || 'PREFIXO'}-0002...
+                  </p>
+                </div>
+              )}
 
               {/* Imagem */}
               <div>
@@ -743,6 +1052,7 @@ export default function ModalCadastrarItem({
             if (e.target === e.currentTarget) {
               setIsAddingCategoria(false);
               setNovaCategoria('');
+              setNovaCategoriaDescricao('');
               setErrors((prev) => ({ ...prev, novaCategoria: undefined }));
             }
           }}
@@ -820,6 +1130,30 @@ export default function ModalCadastrarItem({
                   </p>
                 )}
               </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="novaCategoriaDescricao"
+                    className="block text-sm font-semibold text-foreground tracking-tight"
+                  >
+                    Descrição
+                  </label>
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                    {novaCategoriaDescricao.length}/200
+                  </span>
+                </div>
+                <input
+                  id="novaCategoriaDescricao"
+                  type="text"
+                  placeholder="Breve descrição da categoria (opcional)"
+                  value={novaCategoriaDescricao}
+                  onChange={(e) => setNovaCategoriaDescricao(e.target.value)}
+                  maxLength={200}
+                  className="w-full h-11 px-3 bg-card border border-border rounded-md hover:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors"
+                  data-test="input-nova-categoria-descricao"
+                />
+              </div>
             </div>
 
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted rounded-b-md">
@@ -830,6 +1164,7 @@ export default function ModalCadastrarItem({
                   onClick={() => {
                     setIsAddingCategoria(false);
                     setNovaCategoria('');
+                    setNovaCategoriaDescricao('');
                     setErrors((prev) => ({
                       ...prev,
                       novaCategoria: undefined,
@@ -868,6 +1203,7 @@ export default function ModalCadastrarItem({
             }}
             categoriaId={categoriaToEdit._id}
             categoriaNome={categoriaToEdit.nome}
+            categoriaDescricao={categoriaToEdit.descricao}
             onSuccess={() => setIsCategoriaDropdownOpen(false)}
           />
           <ModalExcluirCategoria

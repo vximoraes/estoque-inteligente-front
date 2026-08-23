@@ -17,7 +17,7 @@ describe('Componentes - Localizações e Status Automático', () => {
 
   describe('Visualizar Localizações', () => {
     it('Deve abrir modal de localizações ao clicar no card', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -38,7 +38,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir nome e descrição do item no modal', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -58,7 +58,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve listar todas as localizações com quantidades', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -94,7 +94,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir quantidade total no rodapé do modal', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -119,7 +119,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir mensagem apropriada quando não houver localizações', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemSemEstoque = itens.find((c: any) => c.quantidade === 0);
@@ -146,7 +146,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir loading durante carregamento de localizações', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -160,7 +160,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve fechar modal ao clicar no botão fechar', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -177,7 +177,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir dados corretos e atualizados', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -214,7 +214,7 @@ describe('Componentes - Localizações e Status Automático', () => {
 
   describe('Status Automático', () => {
     it('Deve calcular status "Indisponível" quando quantidade = 0', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemIndisponivel = itens.find((c: any) => c.quantidade === 0);
@@ -230,7 +230,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve calcular status "Baixo Estoque" quando 0 < quantidade < estoque_mínimo', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemBaixoEstoque = itens.find(
@@ -248,7 +248,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve calcular status "Em Estoque" quando quantidade >= estoque_mínimo', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemEmEstoque = itens.find(
@@ -266,7 +266,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve exibir badge com cor correta para cada status', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         itens.forEach((item: any, index: number) => {
@@ -330,7 +330,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve atualizar status após entrada de estoque', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemIndisponivel = itens.find(
@@ -374,7 +374,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve atualizar status após saída de estoque', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemEmEstoque = itens.find(
@@ -426,7 +426,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve atualizar status ao alterar estoque mínimo', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         const itemComEstoque = itens.find((c: any) => c.quantidade > 0);
@@ -471,7 +471,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve sincronizar status com estatísticas', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const stats = interception.response?.body?.stats;
         const itens = interception.response?.body?.data?.docs || [];
 
@@ -499,7 +499,7 @@ describe('Componentes - Localizações e Status Automático', () => {
 
   describe('Visual do Status', () => {
     it('Deve exibir cores intuitivas para cada status', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {
@@ -516,7 +516,7 @@ describe('Componentes - Localizações e Status Automático', () => {
     });
 
     it('Deve manter consistência visual em toda aplicação', () => {
-      cy.wait('@getComponentes').then((interception) => {
+      cy.get('@getComponentes').then((interception) => {
         const itens = interception.response?.body?.data?.docs || [];
 
         if (itens.length > 0) {

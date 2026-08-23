@@ -70,6 +70,10 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   font-size: 16px;
   --radius: 0.625rem;
@@ -103,7 +107,7 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.915 0 0);
-  --input: oklch(0.915 0 0);
+  --input: oklch(0.84 0 0);
   --ring: oklch(0.52 0 0);
   --status-success-bg: oklch(0.962 0.044 156.743);
   --status-success-text: oklch(0.448 0.119 151.328);

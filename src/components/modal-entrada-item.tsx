@@ -14,14 +14,7 @@ import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
 import ModalExcluirLocalizacao from './modal-excluir-localizacao';
 import { PulseLoader } from 'react-spinners';
-
-interface Localizacao {
-  _id: string;
-  nome: string;
-  ativo: boolean;
-  usuario: string;
-  __v: number;
-}
+import type { Localizacao } from '@/types/itens';
 
 interface LocalizacoesApiResponse {
   error: boolean;
@@ -83,6 +76,8 @@ export default function ModalEntradaItem({
   }>({});
   const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
   const [novaLocalizacao, setNovaLocalizacao] = useState('');
+  const [novaLocalizacaoDescricao, setNovaLocalizacaoDescricao] =
+    useState('');
   const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] =
     useState(false);
   const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] =
@@ -90,6 +85,7 @@ export default function ModalEntradaItem({
   const [localizacaoToEdit, setLocalizacaoToEdit] =
     useState<Localizacao | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const autoSelecionouLocalizacao = useRef(false);
 
   const {
     data: localizacoesData,
@@ -126,14 +122,15 @@ export default function ModalEntradaItem({
   });
 
   const createLocalizacaoMutation = useMutation({
-    mutationFn: async (nomeLocalizacao: string) => {
-      return await post('/localizacoes', { nome: nomeLocalizacao });
+    mutationFn: async (dados: { nome: string; descricao?: string }) => {
+      return await post('/localizacoes', dados);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] });
       queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] });
       setLocalizacaoSelecionada(data.data._id);
       setNovaLocalizacao('');
+      setNovaLocalizacaoDescricao('');
       setIsAddingLocalizacao(false);
       setErrors((prev) => ({ ...prev, novaLocalizacao: undefined }));
       toast.success('Localização criada com sucesso!', {
@@ -269,8 +266,29 @@ export default function ModalEntradaItem({
       setLocalizacaoSelecionada('');
       setErrors({});
       setIsDropdownOpen(false);
+      autoSelecionouLocalizacao.current = false;
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || autoSelecionouLocalizacao.current) return;
+    if (estoquesData === undefined) return;
+
+    autoSelecionouLocalizacao.current = true;
+
+    const estoques = (estoquesData?.data?.docs || []).filter(
+      (e: any) => e.localizacao?.ativo !== false && e.quantidade > 0,
+    );
+    if (estoques.length === 0) return;
+
+    const estoqueComMaisQuantidade = [...estoques].sort(
+      (a: any, b: any) => (b.quantidade || 0) - (a.quantidade || 0),
+    )[0];
+
+    if (estoqueComMaisQuantidade?.localizacao?._id) {
+      setLocalizacaoSelecionada(estoqueComMaisQuantidade.localizacao._id);
+    }
+  }, [isOpen, estoquesData]);
 
   useEffect(() => {
     if (!observerTarget.current || !isDropdownOpen) return;
@@ -342,7 +360,10 @@ export default function ModalEntradaItem({
       }));
       return;
     }
-    createLocalizacaoMutation.mutate(novaLocalizacao.trim());
+    createLocalizacaoMutation.mutate({
+      nome: novaLocalizacao.trim(),
+      descricao: novaLocalizacaoDescricao.trim() || undefined,
+    });
   };
 
   const validateForm = () => {
@@ -683,6 +704,7 @@ export default function ModalEntradaItem({
             if (e.target === e.currentTarget) {
               setIsAddingLocalizacao(false);
               setNovaLocalizacao('');
+              setNovaLocalizacaoDescricao('');
               setErrors((prev) => ({ ...prev, novaLocalizacao: undefined }));
             }
           }}
@@ -697,6 +719,7 @@ export default function ModalEntradaItem({
                 onClick={() => {
                   setIsAddingLocalizacao(false);
                   setNovaLocalizacao('');
+                  setNovaLocalizacaoDescricao('');
                   setErrors((prev) => ({
                     ...prev,
                     novaLocalizacao: undefined,
@@ -765,6 +788,32 @@ export default function ModalEntradaItem({
                   </p>
                 )}
               </div>
+
+              {/* Campo Descrição da Localização */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="novaLocalizacaoDescricao"
+                    className="block text-base font-medium text-foreground"
+                  >
+                    Descrição
+                  </label>
+                  <span className="text-sm text-muted-foreground">
+                    {novaLocalizacaoDescricao.length}/200
+                  </span>
+                </div>
+                <input
+                  id="novaLocalizacaoDescricao"
+                  type="text"
+                  placeholder="Breve descrição da localização (opcional)"
+                  value={novaLocalizacaoDescricao}
+                  onChange={(e) =>
+                    setNovaLocalizacaoDescricao(e.target.value)
+                  }
+                  maxLength={200}
+                  className="w-full h-11 px-3 text-base md:text-sm bg-background border border-border rounded-md hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors"
+                />
+              </div>
             </div>
 
             {/* Footer com ações */}
@@ -776,6 +825,7 @@ export default function ModalEntradaItem({
                   onClick={() => {
                     setIsAddingLocalizacao(false);
                     setNovaLocalizacao('');
+                    setNovaLocalizacaoDescricao('');
                     setErrors((prev) => ({
                       ...prev,
                       novaLocalizacao: undefined,
@@ -817,6 +867,7 @@ export default function ModalEntradaItem({
             }}
             localizacaoId={localizacaoToEdit._id}
             localizacaoNome={localizacaoToEdit.nome}
+            localizacaoDescricao={localizacaoToEdit.descricao}
             onSuccess={onClose}
           />
           <ModalExcluirLocalizacao

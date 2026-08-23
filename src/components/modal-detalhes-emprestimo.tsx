@@ -81,6 +81,7 @@ export default function ModalDetalhesEmprestimo({
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Fechar"
+          data-test="modal-detalhes-emprestimo-close"
         >
           <X size={20} />
         </button>

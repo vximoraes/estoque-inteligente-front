@@ -51,8 +51,9 @@ function RelatorioOrcamentosPageContent() {
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20'); // 20 itens por página
+      params.append('limite', '20'); // 20 itens por página
       params.append('page', page.toString());
+      if (searchTerm) params.append('nome', searchTerm);
 
       const queryString = params.toString();
       const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;

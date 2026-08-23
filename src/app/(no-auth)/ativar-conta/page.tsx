@@ -38,6 +38,7 @@ function AtivarContaContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenValido, setTokenValido] = useState<boolean | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -69,6 +70,12 @@ function AtivarContaContent() {
       setTokenValido(true);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (searchParams.get('error')) {
+      setGoogleError('Erro ao continuar com Google. Tente novamente.');
+    }
+  }, [searchParams]);
 
   const checkPasswordRequirement = (req: PasswordRequirement): boolean =>
     req.regex.test(senhaAtual);
@@ -148,19 +155,12 @@ function AtivarContaContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/itens',
+      callbackURL: `${window.location.origin}/itens`,
+      errorCallbackURL: `${window.location.origin}/ativar-conta?token=${token}`,
     });
 
     if (error) {
-      toast.error('Erro ao continuar com Google. Tente novamente.', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
+      setGoogleError('Erro ao continuar com Google. Tente novamente.');
       setGoogleLoading(false);
     }
   };
@@ -175,29 +175,26 @@ function AtivarContaContent() {
 
   if (tokenValido === false) {
     return (
-      <>
-        <ToastContainer position="bottom-right" />
-        <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
-          <AuthLeftPanel />
-          <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
-            <div className="w-full max-w-sm">
-              <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
-                Link inválido
-              </h2>
-              <p className="text-sm font-medium text-muted-foreground mb-6">
-                O link de convite é inválido ou expirou. Entre em contato com o
-                administrador para solicitar um novo convite.
-              </p>
-              <Button
-                onClick={() => router.push('/login')}
-                className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
-              >
-                Ir para acesso
-              </Button>
-            </div>
+      <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
+        <AuthLeftPanel />
+        <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
+          <div className="w-full max-w-sm">
+            <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
+              Link inválido
+            </h2>
+            <p className="text-sm font-medium text-muted-foreground mb-6">
+              O link de convite é inválido ou expirou. Entre em contato com o
+              administrador para solicitar um novo convite.
+            </p>
+            <Button
+              onClick={() => router.push('/login')}
+              className="h-11 rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
+            >
+              Ir para acesso
+            </Button>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -315,6 +312,10 @@ function AtivarContaContent() {
               </div>
             </div>
 
+            {googleError && (
+              <p className="mt-4 text-sm text-destructive">{googleError}</p>
+            )}
+
             <Button
               type="submit"
               className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
@@ -357,6 +358,13 @@ function AtivarContaContent() {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function AtivarContaPage() {
+  return (
+    <>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -366,20 +374,15 @@ function AtivarContaContent() {
         draggable={false}
         transition={Slide}
       />
-    </div>
-  );
-}
-
-export default function AtivarContaPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <PulseLoader color="var(--ei-accent)" size={15} />
-        </div>
-      }
-    >
-      <AtivarContaContent />
-    </Suspense>
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-background">
+            <PulseLoader color="var(--ei-accent)" size={15} />
+          </div>
+        }
+      >
+        <AtivarContaContent />
+      </Suspense>
+    </>
   );
 }

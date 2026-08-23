@@ -9,6 +9,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
+            staleTime: 30 * 1000,
             retry: (failureCount, error: any) => {
               if (error?.status === 401 || error?.status === 498) {
                 return false;

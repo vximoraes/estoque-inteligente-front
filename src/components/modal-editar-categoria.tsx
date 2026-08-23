@@ -19,6 +19,7 @@ interface ModalEditarCategoriaProps {
   onClose: () => void;
   categoriaId: string;
   categoriaNome: string;
+  categoriaDescricao?: string;
   onSuccess?: () => void;
 }
 
@@ -27,6 +28,7 @@ export default function ModalEditarCategoria({
   onClose,
   categoriaId,
   categoriaNome,
+  categoriaDescricao,
   onSuccess,
 }: ModalEditarCategoriaProps) {
   const queryClient = useQueryClient();
@@ -41,14 +43,16 @@ export default function ModalEditarCategoria({
     resolver: zodResolver(categoriaSchema),
     defaultValues: {
       nome: categoriaNome,
+      descricao: categoriaDescricao ?? '',
     },
   });
 
   const nomeValue = watch('nome', '');
+  const descricaoValue = watch('descricao', '');
 
   useEffect(() => {
-    reset({ nome: categoriaNome });
-  }, [categoriaNome, isOpen, reset]);
+    reset({ nome: categoriaNome, descricao: categoriaDescricao ?? '' });
+  }, [categoriaNome, categoriaDescricao, isOpen, reset]);
 
   useEffect(() => {
     if (isOpen) {
@@ -114,7 +118,7 @@ export default function ModalEditarCategoria({
 
   const handleClose = () => {
     if (!updateCategoriaMutation.isPending) {
-      reset({ nome: categoriaNome });
+      reset({ nome: categoriaNome, descricao: categoriaDescricao ?? '' });
       onClose();
     }
   };
@@ -160,7 +164,7 @@ export default function ModalEditarCategoria({
               Nome da categoria <span className="text-destructive">*</span>
             </Label>
             <span className="text-sm text-muted-foreground">
-              {nomeValue.length}/100
+              {nomeValue.length}/50
             </span>
           </div>
           <Input
@@ -168,13 +172,40 @@ export default function ModalEditarCategoria({
             type="text"
             placeholder="Digite o nome da categoria"
             {...register('nome')}
-            maxLength={100}
+            maxLength={50}
             className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
             disabled={isSubmitting || updateCategoriaMutation.isPending}
           />
           {errors.nome && (
             <p className="text-destructive text-sm mt-1">
               {errors.nome.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <Label
+              htmlFor="descricao"
+              className="text-sm font-medium text-foreground"
+            >
+              Descrição
+            </Label>
+            <span className="text-sm text-muted-foreground">
+              {descricaoValue?.length || 0}/200
+            </span>
+          </div>
+          <textarea
+            id="descricao"
+            placeholder="Breve descrição da categoria..."
+            maxLength={200}
+            {...register('descricao')}
+            disabled={isSubmitting || updateCategoriaMutation.isPending}
+            className="w-full px-3 py-2 text-sm bg-card border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors resize-none min-h-[100px] disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          {errors.descricao && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.descricao.message}
             </p>
           )}
         </div>

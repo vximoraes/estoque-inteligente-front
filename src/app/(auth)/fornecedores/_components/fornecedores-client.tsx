@@ -160,10 +160,13 @@ export default function PageFornecedoresContent({
   const fornecedores = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
+    <div
+      className="w-full max-w-full h-screen flex flex-col overflow-hidden"
+      data-test="fornecedores-page"
+    >
       <Cabecalho pagina="Fornecedores" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">
         <div
           className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"
@@ -176,12 +179,14 @@ export default function PageFornecedoresContent({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-11 pl-10"
+              data-test="search-input"
             />
           </div>
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
             onClick={handleAdicionarClick}
+            data-test="adicionar-button"
           >
             <Plus className="w-4 h-4" />
             Adicionar
@@ -196,7 +201,10 @@ export default function PageFornecedoresContent({
 
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading || isRefetchingAfterDelete ? (
-            <div className="flex flex-col items-center justify-center flex-1">
+            <div
+              className="flex flex-col items-center justify-center flex-1"
+              data-test="loading-spinner"
+            >
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
@@ -208,7 +216,10 @@ export default function PageFornecedoresContent({
           ) : fornecedores.length > 0 ? (
             <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
+                <table
+                  className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm"
+                  data-test="fornecedores-table"
+                >
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
                       <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
@@ -229,9 +240,10 @@ export default function PageFornecedoresContent({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {fornecedores.map((fornecedor) => (
+                    {fornecedores.map((fornecedor, index) => (
                       <TableRow
                         key={fornecedor._id}
+                        data-test={`fornecedor-row-${index}`}
                         onClick={() => handleViewDetails(fornecedor._id)}
                         className="hover:bg-muted border-b relative cursor-pointer"
                         style={{ height: '60px' }}
@@ -299,6 +311,7 @@ export default function PageFornecedoresContent({
                               }}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar fornecedor"
+                              data-test="edit-button"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -309,6 +322,7 @@ export default function PageFornecedoresContent({
                               }}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir fornecedor"
+                              data-test="delete-button"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

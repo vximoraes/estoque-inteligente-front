@@ -8,6 +8,8 @@ const PUBLIC_ROUTES = [
   '/redefinir-senha',
 ];
 
+const GUEST_ONLY_ROUTES = ['/login', '/cadastro'];
+
 const API_URL =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -18,8 +20,10 @@ export async function middleware(req: NextRequest) {
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname.startsWith(route),
   );
+  const isGuestOnlyRoute = GUEST_ONLY_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
 
-  // Valida sessão encaminhando o cookie Better Auth para a API
   let isAuth = false;
   try {
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
@@ -30,10 +34,10 @@ export async function middleware(req: NextRequest) {
       isAuth = !!session?.user?.id;
     }
   } catch {
-    // API indisponível → trata como não autenticado
+    isAuth = false;
   }
 
-  if (isPublicRoute && isAuth) {
+  if (isGuestOnlyRoute && isAuth) {
     return NextResponse.redirect(new URL('/itens', req.url));
   }
 
