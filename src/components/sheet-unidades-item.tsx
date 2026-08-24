@@ -6,7 +6,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, MoreHorizontal, Plus, Search, X } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Plus, Search } from 'lucide-react';
 import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
 import ModalPatrimonioStatus from '@/components/modal-patrimonio-status';
 import ModalPatrimonioTransferir from '@/components/modal-patrimonio-transferir';
@@ -35,6 +35,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/status-badge';
 import { get } from '@/lib/fetchData';
 import type { ItemEstoqueData } from '@/types/itens';
@@ -195,42 +196,46 @@ export default function SheetUnidadesItem({
         <div className="flex flex-col gap-3 px-4 pt-1 flex-1 overflow-hidden">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Buscar por número de patrimônio ou localização..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="h-9 pl-9 pr-3"
+                className="h-11 pl-11 pr-3"
                 data-test="sheet-unidades-busca"
               />
             </div>
-            <button
+            <Button
+              type="button"
               onClick={() => setModalAdicionarAberto(true)}
-              className="h-9 w-9 flex items-center justify-center bg-card dark:bg-input/30 border border-input rounded-md hover:bg-muted/40 transition-colors cursor-pointer shrink-0"
+              className="text-ei-accent-foreground h-11! w-11! p-0! flex items-center justify-center cursor-pointer hover:opacity-90 shrink-0"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
               title="Adicionar unidades"
               data-test="sheet-unidades-adicionar"
             >
-              <Plus size={16} />
-            </button>
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2" data-test="sheet-unidades-chips">
+          <div
+            className="grid grid-cols-4 gap-2"
+            data-test="sheet-unidades-chips"
+          >
             {STATUS_OPTIONS.map((opcao) => {
               const ativo = statusFiltro === opcao;
               return (
                 <button
                   key={opcao}
                   onClick={() => setStatusFiltro(ativo ? null : opcao)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border font-medium transition-colors cursor-pointer ${
+                  className={`h-[28px] px-2.5 flex items-center justify-center rounded-md text-xs border font-medium transition-colors cursor-pointer ${
                     ativo
-                      ? 'bg-muted text-foreground border-border'
-                      : 'text-muted-foreground border-border/60 hover:bg-muted/40'
+                      ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/15 text-[var(--ei-accent)]'
+                      : 'bg-muted border-border text-foreground hover:bg-muted/70'
                   }`}
                   data-test={`sheet-unidades-chip-${opcao}`}
                 >
                   {opcao}
-                  {ativo && <X size={11} strokeWidth={2.5} />}
                 </button>
               );
             })}
