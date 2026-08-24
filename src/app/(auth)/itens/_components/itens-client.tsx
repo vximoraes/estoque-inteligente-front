@@ -13,22 +13,15 @@ import SheetUnidadesItem from '@/components/sheet-unidades-item';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ApiResponse, EstoqueApiResponse } from '@/types/itens';
-import {
-  Search,
-  Filter,
-  Plus,
-  Package,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Filter, Plus, Package, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
 
 interface CategoriasApiResponse {
   data: {
@@ -62,8 +55,7 @@ export default function ItensPageContent({
   const [unidadesItemId, setUnidadesItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
     defaultValue: '',
@@ -75,56 +67,61 @@ export default function ItensPageContent({
     defaultValue: '',
   });
 
-  useEffect(() => {
-    const updateItemsPerPage = () => {
-      const width = window.innerWidth;
-      if (width >= 2560) {
-        setItemsPerPage(15);
-      } else if (width >= 1920) {
-        setItemsPerPage(15);
-      } else if (width >= 1024) {
-        setItemsPerPage(15);
-      } else if (width >= 768) {
-        setItemsPerPage(9);
-      } else {
-        setItemsPerPage(6);
-      }
-    };
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<ApiResponse>({
+    queryKey: ['itens', searchTerm, categoriaFilter, statusFilter, tipoFilter],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('nome', searchTerm);
+      if (categoriaFilter) params.append('categoria', categoriaFilter);
+      if (statusFilter) params.append('status', statusFilter);
+      if (tipoFilter) params.append('tipo', tipoFilter);
+      params.append('limite', '15');
+      params.append('page', page.toString());
 
-    updateItemsPerPage();
-    window.addEventListener('resize', updateItemsPerPage);
-    return () => window.removeEventListener('resize', updateItemsPerPage);
-  }, []);
+      const queryString = params.toString();
+      const url = `/itens${queryString ? `?${queryString}` : ''}`;
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>(
-    {
-      queryKey: [
-        'itens',
-        searchTerm,
-        categoriaFilter,
-        statusFilter,
-        tipoFilter,
-        currentPage,
-        itemsPerPage,
-      ],
-      queryFn: async () => {
-        const params = new URLSearchParams();
-        if (searchTerm) params.append('nome', searchTerm);
-        if (categoriaFilter) params.append('categoria', categoriaFilter);
-        if (statusFilter) params.append('status', statusFilter);
-        if (tipoFilter) params.append('tipo', tipoFilter);
-        params.append('limite', itemsPerPage.toString());
-        params.append('page', currentPage.toString());
-
-        const queryString = params.toString();
-        const url = `/itens${queryString ? `?${queryString}` : ''}`;
-
-        return await get<ApiResponse>(url);
-      },
-      refetchOnMount: true,
-      placeholderData: initialData,
+      return await get<ApiResponse>(url);
     },
-  );
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    placeholderData: initialData
+      ? { pages: [initialData], pageParams: [1] }
+      : undefined,
+  });
+
+  useEffect(() => {
+    if (!observerTarget.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const { data: estoquesData, isLoading: isLoadingEstoques } =
     useQuery<EstoqueApiResponse>({
@@ -324,9 +321,6 @@ export default function ItensPageContent({
   const handleExcluirSuccess = async () => {
     setIsRefetchingAfterDelete(true);
 
-    const isLastItemOnPage = itens.length === 1;
-    const shouldGoToPreviousPage = isLastItemOnPage && currentPage > 1;
-
     toast.success('Item excluído com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
@@ -336,10 +330,6 @@ export default function ItensPageContent({
       draggable: false,
       transition: Slide,
     });
-
-    if (shouldGoToPreviousPage) {
-      setCurrentPage((prev) => prev - 1);
-    }
 
     await refetch();
     setIsRefetchingAfterDelete(false);
@@ -355,22 +345,7 @@ export default function ItensPageContent({
     }
   }, [isFetching, updatingItemId]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, categoriaFilter, statusFilter, tipoFilter, itemsPerPage]);
-
-  const itens = data?.data?.docs || [];
-  const paginationInfo = data?.data || {
-    totalDocs: 0,
-    limit: 0,
-    totalPages: 0,
-    page: 1,
-    pagingCounter: 1,
-    hasPrevPage: false,
-    hasNextPage: false,
-    prevPage: null,
-    nextPage: null,
-  };
+  const itens = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
     <div
@@ -380,42 +355,42 @@ export default function ItensPageContent({
       <Cabecalho pagina="Itens" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-1 pl-1 pb-4">
-          <div
-            className="flex flex-col sm:flex-row gap-3 mb-4"
-            data-test="search-actions-bar"
-          >
-            <div className="relative flex-1" data-test="search-container">
-              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Pesquisar itens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
-                data-test="search-input"
-              />
-            </div>
-            <Button
-              variant="outline"
-              className="h-11 px-4 flex items-center gap-2 cursor-pointer"
-              data-test="filtros-button"
-              onClick={handleOpenFiltrosModal}
-            >
-              <Filter className="w-4 h-4" />
-              Filtros
-            </Button>
-            <Button
-              className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
-              style={{ backgroundColor: 'var(--ei-accent)' }}
-              data-test="adicionar-button"
-              onClick={handleAdicionarClick}
-            >
-              <Plus className="w-4 h-4" />
-              Adicionar
-            </Button>
+        <div
+          className="flex flex-col sm:flex-row gap-3 shrink-0 sticky top-0 z-10 -mx-6 px-6 py-2 bg-background/40 backdrop-blur-xl"
+          data-test="search-actions-bar"
+        >
+          <div className="relative flex-1" data-test="search-container">
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Pesquisar itens..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 bg-background/30 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
+              data-test="search-input"
+            />
           </div>
+          <Button
+            variant="outline"
+            className="h-11 px-4 flex items-center gap-2 cursor-pointer bg-background/30 hover:bg-background/50"
+            data-test="filtros-button"
+            onClick={handleOpenFiltrosModal}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          <Button
+            className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
+            style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="adicionar-button"
+            onClick={handleAdicionarClick}
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar
+          </Button>
+        </div>
 
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 pb-4">
           {(categoriaFilter || statusFilter || tipoFilter) && (
             <div className="mb-4" data-test="applied-filters">
               <div className="flex flex-wrap items-center gap-2">
@@ -552,108 +527,22 @@ export default function ItensPageContent({
               }
             />
           )}
-        </div>
 
-        {itens.length > 0 && paginationInfo.totalPages > 1 && (
-          <div
-            className="py-4 px-6 flex justify-center items-center shrink-0"
-            data-test="pagination-controls"
-          >
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={!paginationInfo.hasPrevPage || isFetching}
-                className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                data-test="prev-page-button"
-                aria-label="Página anterior"
-              >
-                <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-              </button>
-
-              {(() => {
-                const totalPages = paginationInfo.totalPages;
-                const current = paginationInfo.page;
-                const pages = [];
-
-                if (totalPages <= 7) {
-                  for (let i = 1; i <= totalPages; i++) {
-                    pages.push(i);
-                  }
-                } else {
-                  pages.push(1);
-
-                  if (current > 3) {
-                    pages.push('...');
-                  }
-
-                  const start = Math.max(2, current - 1);
-                  const end = Math.min(totalPages - 1, current + 1);
-
-                  for (let i = start; i <= end; i++) {
-                    if (!pages.includes(i)) {
-                      pages.push(i);
-                    }
-                  }
-
-                  if (current < totalPages - 2) {
-                    pages.push('...');
-                  }
-
-                  if (!pages.includes(totalPages)) {
-                    pages.push(totalPages);
-                  }
-                }
-
-                return pages.map((page, index) => {
-                  if (page === '...') {
-                    return (
-                      <span
-                        key={`ellipsis-${index}`}
-                        className="px-3 py-2 text-muted-foreground"
-                      >
-                        ...
-                      </span>
-                    );
-                  }
-
-                  const pageNum = page as number;
-                  const isActive = pageNum === current;
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      disabled={isFetching}
-                      className={`min-w-10 px-3 py-2 rounded-md transition-colors cursor-pointer text-sm ${
-                        isActive
-                          ? 'text-ei-accent-foreground font-semibold'
-                          : 'hover:bg-muted text-foreground'
-                      } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
-                      style={
-                        isActive
-                          ? { backgroundColor: 'var(--ei-accent)' }
-                          : undefined
-                      }
-                      data-test={`page-${pageNum}-button`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                });
-              })()}
-
-              <button
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={!paginationInfo.hasNextPage || isFetching}
-                className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                data-test="next-page-button"
-                aria-label="Próxima página"
-              >
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-              </button>
+          {itens.length > 0 && (
+            <div
+              ref={observerTarget}
+              className="h-10 flex items-center justify-center"
+            >
+              {isFetchingNextPage && (
+                <PulseLoader
+                  color="var(--ei-accent)"
+                  size={5}
+                  speedMultiplier={0.8}
+                />
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {selectedItemId && (

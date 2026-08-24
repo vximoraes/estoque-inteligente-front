@@ -268,8 +268,14 @@ export default function PageUsuariosContent({
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table
                   data-test="usuarios-table"
-                  className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm"
+                  className="w-full min-w-[800px] table-fixed caption-bottom text-xs sm:text-sm"
                 >
+                  <colgroup>
+                    <col className="w-[25%]" />
+                    <col className="w-[25%]" />
+                    <col className="w-[35%]" />
+                    <col className="w-[15%]" />
+                  </colgroup>
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
                       <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
@@ -296,18 +302,12 @@ export default function PageUsuariosContent({
                         style={{ height: '60px' }}
                       >
                         <TableCell className="font-medium text-left px-8 py-2">
-                          <span
-                            className="truncate block max-w-[200px]"
-                            title={usuario.nome}
-                          >
+                          <span className="truncate block" title={usuario.nome}>
                             {usuario.nome}
                           </span>
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
-                          <span
-                            className="truncate block max-w-[250px]"
-                            title={usuario.email}
-                          >
+                          <span className="truncate block" title={usuario.email}>
                             {usuario.email}
                           </span>
                         </TableCell>

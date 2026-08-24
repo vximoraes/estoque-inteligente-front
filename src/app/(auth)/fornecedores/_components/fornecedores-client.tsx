@@ -217,9 +217,16 @@ export default function PageFornecedoresContent({
             <div className="border rounded-md bg-card flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table
-                  className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm"
+                  className="w-full min-w-[900px] table-fixed caption-bottom text-xs sm:text-sm"
                   data-test="fornecedores-table"
                 >
+                  <colgroup>
+                    <col className="w-[22%]" />
+                    <col className="w-[22%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[28%]" />
+                    <col className="w-[12%]" />
+                  </colgroup>
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
                       <TableHead className="font-semibold text-muted-foreground bg-muted text-left px-8">
@@ -263,10 +270,7 @@ export default function PageFornecedoresContent({
                             </div>
                           )}
                         <TableCell className="font-medium text-left px-8 py-2">
-                          <span
-                            className="truncate block max-w-[200px]"
-                            title={fornecedor.nome}
-                          >
+                          <span className="truncate block" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </span>
                         </TableCell>
@@ -277,7 +281,7 @@ export default function PageFornecedoresContent({
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-ei-accent hover:text-ei-accent-hover hover:underline truncate block max-w-[200px]"
+                              className="text-ei-accent hover:text-ei-accent-hover hover:underline truncate block"
                               title={fornecedor.url}
                             >
                               {fornecedor.url}
@@ -288,7 +292,7 @@ export default function PageFornecedoresContent({
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
                           <span
-                            className="truncate block max-w-[150px]"
+                            className="truncate block"
                             title={fornecedor.contato || '-'}
                           >
                             {fornecedor.contato || '-'}
@@ -296,7 +300,7 @@ export default function PageFornecedoresContent({
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
                           <span
-                            className="truncate block max-w-[200px]"
+                            className="truncate block"
                             title={fornecedor.descricao || '-'}
                           >
                             {fornecedor.descricao || '-'}
