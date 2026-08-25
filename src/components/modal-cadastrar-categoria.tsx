@@ -14,17 +14,20 @@ import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { categoriaSchema, type CategoriaFormData } from '@/schemas';
 import { useFormApiErrors } from '@/hooks/useFormApiErrors';
+import type { ItemTipo } from '@/types/itens';
 
 interface ModalCadastrarCategoriaProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  tipo: ItemTipo;
 }
 
 export default function ModalCadastrarCategoria({
   isOpen,
   onClose,
   onSuccess,
+  tipo,
 }: ModalCadastrarCategoriaProps) {
   const queryClient = useQueryClient();
 
@@ -50,11 +53,10 @@ export default function ModalCadastrarCategoria({
 
   const cadastrarMutation = useMutation({
     mutationFn: async (data: CategoriaFormData) => {
-      return await post('/categorias', data);
+      return await post('/categorias', { ...data, tipo });
     },
     onSuccess: () => {
-      queryClient.resetQueries({ queryKey: ['categorias'] });
-      queryClient.resetQueries({ queryKey: ['categorias-infinite'] });
+      queryClient.resetQueries({ queryKey: ['categorias', tipo] });
       toast.success('Categoria criada com sucesso!', {
         position: 'bottom-right',
         autoClose: 5000,

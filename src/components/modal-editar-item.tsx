@@ -314,6 +314,7 @@ export default function ModalEditarItem({
                     setErrors((prev) => ({ ...prev, categoria: undefined }));
                   }
                 }}
+                tipo={tipo}
                 error={errors.categoria}
                 enabled={isOpen}
               />

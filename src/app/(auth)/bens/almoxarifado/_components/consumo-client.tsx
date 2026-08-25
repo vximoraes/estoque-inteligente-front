@@ -15,18 +15,13 @@ import { Input } from '@/components/ui/input';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ItemConsumoApiResponse, EstoqueApiResponse } from '@/types/itens';
+import type { CategoriaApiResponse } from '@/types/categorias';
 import { Search, Filter, Plus, Package, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
-
-interface CategoriasApiResponse {
-  data: {
-    docs: any[];
-  };
-}
 
 export default function ConsumoPageContent({
   initialData,
@@ -125,10 +120,12 @@ export default function ConsumoPageContent({
       enabled: !!selectedItemId,
     });
 
-  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
-    queryKey: ['categorias'],
+  const { data: categoriasData } = useQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', 'consumo'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
+      return await get<CategoriaApiResponse>(
+        '/categorias?tipo=consumo&limite=100&page=1',
+      );
     },
   });
 
@@ -514,6 +511,7 @@ export default function ConsumoPageContent({
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+        tipo="consumo"
       />
 
       <ModalCadastrarItemConsumo

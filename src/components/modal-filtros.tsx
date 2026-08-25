@@ -5,32 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-
-interface Categoria {
-  _id: string;
-  nome: string;
-  usuario: string;
-  __v: number;
-}
-
-interface CategoriasApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Categoria[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
-}
+import type { CategoriaApiResponse } from '@/types/categorias';
+import type { ItemTipo } from '@/types/itens';
 
 interface ModalFiltrosProps {
   isOpen: boolean;
@@ -40,6 +16,8 @@ interface ModalFiltrosProps {
   onFiltersChange: (categoria: string, status: string) => void;
   statusOptions?: Array<{ value: string; label: string }>;
   showCategoria?: boolean;
+  /** Domínio das categorias listadas — obrigatório quando `showCategoria` é true. */
+  tipo?: ItemTipo;
 }
 
 const defaultStatusOptions = [
@@ -57,6 +35,7 @@ export default function ModalFiltros({
   onFiltersChange,
   statusOptions = defaultStatusOptions,
   showCategoria = true,
+  tipo,
 }: ModalFiltrosProps) {
   const [selectedCategoria, setSelectedCategoria] = useState(categoriaFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
@@ -65,10 +44,13 @@ export default function ModalFiltros({
   const [categoriaSearch, setCategoriaSearch] = useState('');
 
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', tipo],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(
+        `/categorias?tipo=${tipo}&limite=100&page=1`,
+      );
     },
+    enabled: showCategoria && !!tipo,
     staleTime: 5 * 60 * 1000,
   });
 

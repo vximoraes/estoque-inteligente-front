@@ -309,6 +309,10 @@ export default function ModalSelecionarItem({
           setCategoriaFilter(categoria);
           setStatusFilter(status);
         }}
+        // Feed misto (itens de consumo e permanente juntos) — como
+        // categoria agora pertence a um único domínio, um filtro de
+        // categoria só faria sentido por tipo, o que este seletor não tem.
+        showCategoria={false}
       />
     </>
   );

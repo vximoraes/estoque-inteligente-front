@@ -12,10 +12,13 @@ import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
 import { ModalShell } from '@/components/ui/modal-shell';
 import type { Categoria, CategoriaApiResponse } from '@/types/categorias';
+import type { ItemTipo } from '@/types/itens';
 
 interface CampoCategoriaProps {
   value: string;
   onChange: (categoriaId: string) => void;
+  /** Domínio da categoria: 'consumo' (almoxarifado) ou 'permanente' (patrimônio). */
+  tipo: ItemTipo;
   error?: string;
   /** Controla o `enabled` da query de categorias — passe `isOpen` do modal pai. */
   enabled?: boolean;
@@ -25,9 +28,12 @@ interface CampoCategoriaProps {
 // Dropdown de categoria com busca, criação inline (nome + descrição) e
 // ações de editar/excluir por linha. Extraído de `modal-cadastrar-item.tsx`
 // para ser reaproveitado pelos formulários de consumo e de patrimônio.
+// A lista é restrita ao `tipo` do formulário — categoria de almoxarifado
+// nunca aparece no formulário de patrimônio, e vice-versa.
 export default function CampoCategoria({
   value,
   onChange,
+  tipo,
   error,
   enabled = true,
   'data-test': dataTest = 'botao-selecionar-categoria',
@@ -46,9 +52,11 @@ export default function CampoCategoria({
   const queryClient = useQueryClient();
 
   const { data: categoriasData, isLoading } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', tipo],
     queryFn: async () => {
-      return await get<CategoriaApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(
+        `/categorias?tipo=${tipo}&limite=100&page=1`,
+      );
     },
     enabled,
   });
@@ -66,10 +74,10 @@ export default function CampoCategoria({
 
   const createCategoriaMutation = useMutation({
     mutationFn: async (dados: { nome: string; descricao?: string }) => {
-      return await post('/categorias', dados);
+      return await post('/categorias', { ...dados, tipo });
     },
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      queryClient.invalidateQueries({ queryKey: ['categorias', tipo] });
       onChange(data.data._id);
       setNovaCategoria('');
       setNovaCategoriaDescricao('');

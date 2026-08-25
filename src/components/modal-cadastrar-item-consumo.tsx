@@ -215,6 +215,7 @@ export default function ModalCadastrarItemConsumo({
                   setErrors((prev) => ({ ...prev, categoria: undefined }));
                 }
               }}
+              tipo="consumo"
               error={errors.categoria}
               enabled={isOpen}
             />

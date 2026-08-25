@@ -286,6 +286,7 @@ export default function ModalCadastrarItemPatrimonio({
                     setErrors((prev) => ({ ...prev, categoria: undefined }));
                   }
                 }}
+                tipo="permanente"
                 error={errors.categoria}
                 enabled={isOpen}
               />

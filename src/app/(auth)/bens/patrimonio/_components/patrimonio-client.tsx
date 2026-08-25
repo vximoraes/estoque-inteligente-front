@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ItemPermanenteApiResponse } from '@/types/itens';
+import type { CategoriaApiResponse } from '@/types/categorias';
 import { Search, Filter, Plus, Boxes, ListChecks, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
@@ -20,12 +21,6 @@ import { useRouter } from 'next/navigation';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
-
-interface CategoriasApiResponse {
-  data: {
-    docs: any[];
-  };
-}
 
 // Item permanente nunca assume "Baixo Estoque" — o hook do backend calcula
 // o status a partir de `quantidade_disponivel`, não de estoque mínimo.
@@ -126,10 +121,12 @@ export default function PatrimonioPageContent({
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
-    queryKey: ['categorias'],
+  const { data: categoriasData } = useQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', 'permanente'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
+      return await get<CategoriaApiResponse>(
+        '/categorias?tipo=permanente&limite=100&page=1',
+      );
     },
   });
 
@@ -455,6 +452,7 @@ export default function PatrimonioPageContent({
         statusFilter={statusFilter}
         statusOptions={STATUS_OPTIONS_PERMANENTE}
         onFiltersChange={handleFiltersChange}
+        tipo="permanente"
       />
 
       <ModalCadastrarItemPatrimonio

@@ -15,6 +15,7 @@ import ModalEditarCategoria from '@/components/modal-editar-categoria';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { CategoriaApiResponse } from '@/types/categorias';
+import { ITEM_TIPO_LABEL_CURTO, type ItemTipo } from '@/types/itens';
 import { Search, Tag, Plus, Pencil, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
 import { useState, useEffect, useRef } from 'react';
@@ -31,6 +32,8 @@ export default function PageCategoriasContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
+  const [tipoRaw, setTipo] = useQueryState('tipo', { defaultValue: 'consumo' });
+  const tipo: ItemTipo = tipoRaw === 'permanente' ? 'permanente' : 'consumo';
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirCategoriaId, setExcluirCategoriaId] = useState<string | null>(
@@ -57,10 +60,11 @@ export default function PageCategoriasContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<CategoriaApiResponse>({
-    queryKey: ['categorias', searchTerm],
+    queryKey: ['categorias', tipo, searchTerm],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
+      params.append('tipo', tipo);
       if (searchTerm) params.append('nome', searchTerm);
       params.append('limite', '20');
       params.append('page', page.toString());
@@ -76,9 +80,12 @@ export default function PageCategoriasContent({
     initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    placeholderData: initialData
-      ? { pages: [initialData], pageParams: [1] }
-      : undefined,
+    // O SSR só faz prefetch da aba padrão (consumo/almoxarifado) — nas
+    // outras abas o placeholder ficaria com dados do domínio errado.
+    placeholderData:
+      initialData && tipo === 'consumo'
+        ? { pages: [initialData], pageParams: [1] }
+        : undefined,
   });
 
   useEffect(() => {
@@ -158,6 +165,27 @@ export default function PageCategoriasContent({
       <Cabecalho pagina="Categorias" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">
+        <div
+          className="flex gap-1 mb-4 shrink-0 border-b border-border"
+          data-test="categorias-tabs"
+        >
+          {(['consumo', 'permanente'] as const).map((opcaoTipo) => (
+            <button
+              key={opcaoTipo}
+              type="button"
+              onClick={() => setTipo(opcaoTipo)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                tipo === opcaoTipo
+                  ? 'border-[var(--ei-accent)] text-[var(--ei-accent)]'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+              data-test={`categorias-tab-${opcaoTipo}`}
+            >
+              {ITEM_TIPO_LABEL_CURTO[opcaoTipo]}
+            </button>
+          ))}
+        </div>
+
         <div
           className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0"
           data-test="search-actions-bar"
@@ -307,7 +335,9 @@ export default function PageCategoriasContent({
               <EmptyState
                 icon={Tag}
                 title={
-                  searchTerm ? 'Nenhum resultado' : 'Nenhuma categoria cadastrada'
+                  searchTerm
+                    ? 'Nenhum resultado'
+                    : `Nenhuma categoria de ${ITEM_TIPO_LABEL_CURTO[tipo].toLowerCase()} cadastrada`
                 }
                 subtitle={
                   searchTerm
@@ -349,6 +379,7 @@ export default function PageCategoriasContent({
         isOpen={isCadastrarModalOpen}
         onClose={() => setIsCadastrarModalOpen(false)}
         onSuccess={handleCadastrarSuccess}
+        tipo={tipo}
       />
 
       {editarCategoriaId && (

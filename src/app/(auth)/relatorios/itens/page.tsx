@@ -24,12 +24,7 @@ import { generateItensPDF } from '@/utils/pdfGenerator';
 import { generateItensCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
-
-interface CategoriasApiResponse {
-  data: {
-    docs: any[];
-  };
-}
+import type { CategoriaApiResponse } from '@/types/categorias';
 
 interface ItensGlobaisStats {
   totalItens: number;
@@ -208,10 +203,12 @@ function RelatorioItensPageContent() {
   const indisponiveis = globalStats?.indisponiveis ?? indisponiveisLocal;
 
   // Query para buscar categorias para mostrar o nome nos filtros
-  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
-    queryKey: ['categorias'],
+  const { data: categoriasData } = useQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', 'consumo'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
+      return await get<CategoriaApiResponse>(
+        '/categorias?tipo=consumo&limite=100&page=1',
+      );
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -690,6 +687,7 @@ function RelatorioItensPageContent() {
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+        tipo="consumo"
         data-test="modal-filtros"
       />
 
