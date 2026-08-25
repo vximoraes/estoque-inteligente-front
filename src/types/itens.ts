@@ -44,7 +44,7 @@ export const ITEM_TIPO_LABEL: Record<ItemTipo, string> = {
 
 export const ITEM_TIPO_LABEL_CURTO: Record<ItemTipo, string> = {
   consumo: 'Almoxarifado',
-  permanente: 'Permanente',
+  permanente: 'Patrimônio',
 };
 
 // Formato de envelope paginado (mongoose-paginate-v2) comum a todas as

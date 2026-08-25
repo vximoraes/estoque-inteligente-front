@@ -14,10 +14,11 @@ export const PATRIMONIO_STATUS_OPTIONS: PatrimonioStatus[] = [
 ];
 
 // Toda ação disponível sobre uma unidade de patrimônio, compartilhada entre
-// o drawer (`sheet-unidades-item.tsx`) e a página global de unidades.
+// o card da grade (`card-patrimonio.tsx`) e o detalhe da unidade.
 export type AcaoPatrimonio =
   | 'emprestar'
   | 'historico'
+  | 'editar'
   | 'manutencao'
   | 'retornarManutencao'
   | 'baixar'
@@ -31,6 +32,11 @@ export interface PatrimonioItemRef {
   tipo: 'consumo' | 'permanente';
 }
 
+export interface CampoPersonalizado {
+  chave: string;
+  valor: string;
+}
+
 export interface PatrimonioData {
   _id: string;
   item: PatrimonioItemRef;
@@ -39,6 +45,7 @@ export interface PatrimonioData {
   status: PatrimonioStatus;
   data_aquisicao?: string;
   observacoes?: string;
+  campos_personalizados: CampoPersonalizado[];
   ativo: boolean;
   usuario: string;
   createdAt: string;

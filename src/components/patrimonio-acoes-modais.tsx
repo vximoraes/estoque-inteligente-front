@@ -2,28 +2,24 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
+import ModalEditarPatrimonio from '@/components/modal-editar-patrimonio';
 import ModalPatrimonioStatus from '@/components/modal-patrimonio-status';
 import ModalPatrimonioTransferir from '@/components/modal-patrimonio-transferir';
 import ModalPatrimonioRemover from '@/components/modal-patrimonio-remover';
-import SheetHistoricoPatrimonio from '@/components/sheet-historico-patrimonio';
+import SheetDetalhePatrimonio from '@/components/sheet-detalhe-patrimonio';
 import type { AcaoPatrimonioContexto } from '@/hooks/use-acoes-patrimonio';
 
 interface PatrimonioAcoesModaisProps {
   contexto: AcaoPatrimonioContexto | null;
   onFechar: () => void;
-  /** "Voltar às unidades" a partir do histórico. Só o drawer precisa
-   * reabrir o Sheet pai; a página global apenas fecha o histórico. */
-  onVoltarHistorico?: () => void;
 }
 
-// Bundle dos modais de ação de uma unidade patrimonial (Emprestar/
-// Histórico/Manutenção/Transferir/Baixar/Reativar/Remover). Compartilhado
-// entre o drawer (`sheet-unidades-item.tsx`) e a página global de
-// unidades — cada um só fornece o `contexto` da ação em curso.
+// Bundle dos modais de ação de uma unidade patrimonial (Emprestar/Editar/
+// Detalhe/Manutenção/Transferir/Baixar/Reativar/Remover). Cada card da
+// grade só fornece o `contexto` da ação em curso.
 export default function PatrimonioAcoesModais({
   contexto,
   onFechar,
-  onVoltarHistorico,
 }: PatrimonioAcoesModaisProps) {
   const queryClient = useQueryClient();
 
@@ -45,16 +41,21 @@ export default function PatrimonioAcoesModais({
         />
       )}
 
-      <SheetHistoricoPatrimonio
+      {contexto?.tipo === 'editar' && (
+        <ModalEditarPatrimonio
+          isOpen
+          onClose={onFechar}
+          patrimonio={contexto.unidade}
+          itemId={contexto.itemId}
+        />
+      )}
+
+      <SheetDetalhePatrimonio
         open={contexto?.tipo === 'historico'}
         onOpenChange={(o) => {
           if (!o) onFechar();
         }}
-        patrimonioId={
-          contexto?.tipo === 'historico' ? contexto.unidade._id : null
-        }
-        numeroPatrimonio={contexto?.unidade.numero_patrimonio}
-        onVoltar={onVoltarHistorico ?? onFechar}
+        patrimonio={contexto?.tipo === 'historico' ? contexto.unidade : null}
       />
 
       {contexto?.tipo === 'manutencao' && (

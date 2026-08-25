@@ -14,7 +14,7 @@ import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { categoriaSchema, type CategoriaFormData } from '@/schemas';
 import { useFormApiErrors } from '@/hooks/useFormApiErrors';
-import type { ItemTipo } from '@/types/itens';
+import { ITEM_TIPO_LABEL_CURTO, type ItemTipo } from '@/types/itens';
 
 interface ModalCadastrarCategoriaProps {
   isOpen: boolean;
@@ -152,6 +152,9 @@ export default function ModalCadastrarCategoria({
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Cadastrar categoria
           </h2>
+          <p className="text-sm text-muted-foreground">
+            ({ITEM_TIPO_LABEL_CURTO[tipo]})
+          </p>
         </div>
 
         <div>

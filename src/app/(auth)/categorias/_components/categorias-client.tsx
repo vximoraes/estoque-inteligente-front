@@ -32,8 +32,10 @@ export default function PageCategoriasContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
-  const [tipoRaw, setTipo] = useQueryState('tipo', { defaultValue: 'consumo' });
-  const tipo: ItemTipo = tipoRaw === 'permanente' ? 'permanente' : 'consumo';
+  const [tipoRaw, setTipo] = useQueryState('tipo', {
+    defaultValue: 'permanente',
+  });
+  const tipo: ItemTipo = tipoRaw === 'consumo' ? 'consumo' : 'permanente';
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirCategoriaId, setExcluirCategoriaId] = useState<string | null>(
@@ -80,10 +82,10 @@ export default function PageCategoriasContent({
     initialPageParam: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    // O SSR só faz prefetch da aba padrão (consumo/almoxarifado) — nas
+    // O SSR só faz prefetch da aba padrão (permanente/patrimônio) — nas
     // outras abas o placeholder ficaria com dados do domínio errado.
     placeholderData:
-      initialData && tipo === 'consumo'
+      initialData && tipo === 'permanente'
         ? { pages: [initialData], pageParams: [1] }
         : undefined,
   });
@@ -169,7 +171,7 @@ export default function PageCategoriasContent({
           className="flex gap-1 mb-4 shrink-0 border-b border-border"
           data-test="categorias-tabs"
         >
-          {(['consumo', 'permanente'] as const).map((opcaoTipo) => (
+          {(['permanente', 'consumo'] as const).map((opcaoTipo) => (
             <button
               key={opcaoTipo}
               type="button"

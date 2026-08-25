@@ -1,94 +1,109 @@
 'use client';
-import CardItemPatrimonio from '@/components/card-item-patrimonio';
+
+// Grade de unidades patrimoniais — cada patrimônio físico (ACC-0001,
+// ACC-0002...) é um card próprio, não um contador agregado por modelo.
+// Clicar no card abre o detalhe da unidade; o menu "..." do card concentra
+// as ações (Editar/Emprestar/Manutenção/Transferir/Baixar/Remover).
+
+import CardPatrimonio from '@/components/card-patrimonio';
 import Cabecalho from '@/components/cabecalho';
 import ModalFiltros from '@/components/modal-filtros';
-import ModalExcluirItem from '@/components/modal-excluir-item';
-import ModalCadastrarItemPatrimonio from '@/components/modal-cadastrar-item-patrimonio';
-import ModalEditarItem from '@/components/modal-editar-item';
-import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
-import SheetUnidadesItem from '@/components/sheet-unidades-item';
+import ModalCadastrarPatrimonio from '@/components/modal-cadastrar-patrimonio';
+import PatrimonioAcoesModais from '@/components/patrimonio-acoes-modais';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { ItemPermanenteApiResponse } from '@/types/itens';
+import type { ApiEnvelope, Localizacao } from '@/types/itens';
 import type { CategoriaApiResponse } from '@/types/categorias';
-import { Search, Filter, Plus, Boxes, ListChecks, X } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import {
+  PATRIMONIO_STATUS_OPTIONS,
+  type AcaoPatrimonio,
+  type PatrimonioApiResponse,
+  type PatrimonioData,
+} from '@/types/patrimonios';
+import { Search, Filter, Plus, Boxes, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryState } from 'nuqs';
-import { useRouter } from 'next/navigation';
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
+import { useAcoesPatrimonio } from '@/hooks/use-acoes-patrimonio';
 
-// Item permanente nunca assume "Baixo Estoque" — o hook do backend calcula
-// o status a partir de `quantidade_disponivel`, não de estoque mínimo.
-const STATUS_OPTIONS_PERMANENTE = [
+const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
-  { value: 'Em Estoque', label: 'Em Estoque' },
-  { value: 'Indisponível', label: 'Indisponível' },
+  ...PATRIMONIO_STATUS_OPTIONS.map((status) => ({
+    value: status,
+    label: status,
+  })),
 ];
 
 export default function PatrimonioPageContent({
   initialData,
 }: {
-  initialData?: ItemPermanenteApiResponse;
+  initialData?: PatrimonioApiResponse;
 }) {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useQueryState('busca', {
+  const [busca, setBusca] = useQueryState('busca', { defaultValue: '' });
+  const [categoriaFiltro, setCategoriaFiltro] = useQueryState('categoria', {
     defaultValue: '',
   });
+  const [statusFiltro, setStatusFiltro] = useQueryState('status', {
+    defaultValue: '',
+  });
+  const [localizacaoFiltro, setLocalizacaoFiltro] = useQueryState(
+    'localizacao',
+    { defaultValue: '' },
+  );
+  const observerTarget = useRef<HTMLDivElement>(null);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
-  const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
-  const [editarItemId, setEditarItemId] = useState<string | null>(null);
-  const [isEmprestimoModalOpen, setIsEmprestimoModalOpen] = useState(false);
-  const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(null);
-  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
-  const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
-  const [isUnidadesSheetOpen, setIsUnidadesSheetOpen] = useState(false);
-  const [unidadesItemId, setUnidadesItemId] = useState<string | null>(null);
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
-  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
 
-  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
-    defaultValue: '',
-  });
-  const [statusFilter, setStatusFilter] = useQueryState('status', {
-    defaultValue: '',
-  });
+  const {
+    contexto,
+    abrir: abrirAcaoRaw,
+    fechar: fecharAcao,
+  } = useAcoesPatrimonio();
+
+  const abrirAcao = (tipo: AcaoPatrimonio, unidade: PatrimonioData) => {
+    abrirAcaoRaw(tipo, unidade, unidade.item._id, unidade.item.nome);
+  };
 
   const {
     data,
     isLoading,
-    isFetching,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<ItemPermanenteApiResponse>({
+  } = useInfiniteQuery<PatrimonioApiResponse>({
     queryKey: [
-      'itens',
-      'permanente',
-      searchTerm,
-      categoriaFilter,
-      statusFilter,
+      'patrimonios',
+      'lista',
+      busca,
+      categoriaFiltro,
+      statusFiltro,
+      localizacaoFiltro,
     ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('tipo', 'permanente');
-      if (searchTerm) params.append('nome', searchTerm);
-      if (categoriaFilter) params.append('categoria', categoriaFilter);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('limite', '15');
+      if (busca) params.append('busca', busca);
+      if (categoriaFiltro) params.append('categoria', categoriaFiltro);
+      if (statusFiltro) params.append('status', statusFiltro);
+      if (localizacaoFiltro) params.append('localizacao', localizacaoFiltro);
+      params.append('limite', '20');
       params.append('page', page.toString());
 
-      return await get<ItemPermanenteApiResponse>(
-        `/itens?${params.toString()}`,
+      return await get<PatrimonioApiResponse>(
+        `/patrimonios?${params.toString()}`,
       );
     },
     getNextPageParam: (lastPage) => {
@@ -116,143 +131,26 @@ export default function PatrimonioPageContent({
 
     observer.observe(observerTarget.current);
 
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const unidades = data?.pages.flatMap((page) => page.data.docs) || [];
+
+  const { data: localizacoesData } = useQuery<ApiEnvelope<Localizacao>>({
+    queryKey: ['localizacoes'],
+    queryFn: () => get<ApiEnvelope<Localizacao>>('/localizacoes?limite=100'),
+  });
+  const localizacoes = localizacoesData?.data?.docs ?? [];
 
   const { data: categoriasData } = useQuery<CategoriaApiResponse>({
     queryKey: ['categorias', 'permanente'],
-    queryFn: async () => {
-      return await get<CategoriaApiResponse>(
-        '/categorias?tipo=permanente&limite=100&page=1',
-      );
-    },
+    queryFn: () =>
+      get<CategoriaApiResponse>('/categorias?tipo=permanente&limite=100'),
+    enabled: !!categoriaFiltro,
   });
-
-  const handleEdit = (id: string) => {
-    setEditarItemId(id);
-    setIsEditarModalOpen(true);
-  };
-
-  const handleCloseCadastrarModal = () => {
-    setIsCadastrarModalOpen(false);
-  };
-
-  const handleCadastrarSuccess = () => {
-    toast.success('Bem permanente criado com sucesso!', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    });
-    refetch();
-  };
-
-  const handleCloseEditarModal = () => {
-    setIsEditarModalOpen(false);
-    setTimeout(() => setEditarItemId(null), 300);
-  };
-
-  const handleEditarSuccess = () => {
-    if (editarItemId) {
-      setUpdatingItemId(editarItemId);
-    }
-    toast.success('Item atualizado com sucesso!', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    });
-    refetch();
-  };
-
-  const handleDelete = (id: string) => {
-    setExcluirItemId(id);
-    setIsExcluirModalOpen(true);
-  };
-
-  const handleVerUnidades = (id: string) => {
-    setUnidadesItemId(id);
-    setIsUnidadesSheetOpen(true);
-  };
-
-  const handleCloseUnidadesSheet = (open: boolean) => {
-    setIsUnidadesSheetOpen(open);
-    if (!open) {
-      setTimeout(() => setUnidadesItemId(null), 300);
-    }
-  };
-
-  const handleOpenFiltrosModal = () => {
-    setIsFiltrosModalOpen(true);
-  };
-
-  const handleCloseFiltrosModal = () => {
-    setIsFiltrosModalOpen(false);
-  };
-
-  const handleFiltersChange = (categoria: string, status: string) => {
-    setCategoriaFilter(categoria);
-    setStatusFilter(status);
-  };
-
-  const handleEmprestar = (id: string) => {
-    setEmprestimoItemId(id);
-    setIsEmprestimoModalOpen(true);
-  };
-
-  const handleCloseEmprestimoModal = () => {
-    setIsEmprestimoModalOpen(false);
-    setTimeout(() => setEmprestimoItemId(null), 300);
-  };
-
-  const handleEmprestimoSuccess = () => {
-    if (emprestimoItemId) {
-      setUpdatingItemId(emprestimoItemId);
-    }
-    refetch();
-  };
-
-  const handleCloseExcluirModal = () => {
-    setIsExcluirModalOpen(false);
-    setTimeout(() => setExcluirItemId(null), 300);
-  };
-
-  const handleExcluirSuccess = async () => {
-    setIsRefetchingAfterDelete(true);
-
-    toast.success('Item excluído com sucesso!', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    });
-
-    await refetch();
-    setIsRefetchingAfterDelete(false);
-  };
-
-  const handleAdicionarClick = () => {
-    setIsCadastrarModalOpen(true);
-  };
-
-  useEffect(() => {
-    if (!isFetching && updatingItemId) {
-      setUpdatingItemId(null);
-    }
-  }, [isFetching, updatingItemId]);
-
-  const itens = data?.pages.flatMap((page) => page.data.docs) || [];
+  const categoriaNome = categoriasData?.data?.docs?.find(
+    (cat) => cat._id === categoriaFiltro,
+  )?.nome;
 
   return (
     <div
@@ -270,36 +168,48 @@ export default function PatrimonioPageContent({
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
-              placeholder="Pesquisar bens..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por número de patrimônio ou modelo..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
               className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 bg-background/30 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
               data-test="search-input"
             />
           </div>
+          <Select
+            value={localizacaoFiltro || 'todas'}
+            onValueChange={(value) =>
+              setLocalizacaoFiltro(value === 'todas' ? '' : value)
+            }
+          >
+            <SelectTrigger
+              className="w-full sm:w-56"
+              data-test="filtro-localizacao"
+            >
+              <SelectValue placeholder="Todas as localizações" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as localizações</SelectItem>
+              {localizacoes.map((loc) => (
+                <SelectItem key={loc._id} value={loc._id}>
+                  {loc.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer bg-background/30 hover:bg-background/50"
             data-test="filtros-button"
-            onClick={handleOpenFiltrosModal}
+            onClick={() => setIsFiltrosModalOpen(true)}
           >
             <Filter className="w-4 h-4" />
             Filtros
           </Button>
           <Button
-            variant="outline"
-            className="h-11 px-4 flex items-center gap-2 cursor-pointer bg-background/30 hover:bg-background/50"
-            data-test="patrimonio-ver-unidades-button"
-            onClick={() => router.push('/bens/patrimonio/unidades')}
-          >
-            <ListChecks className="w-4 h-4" />
-            Ver todas as unidades
-          </Button>
-          <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="adicionar-button"
-            onClick={handleAdicionarClick}
+            onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
             Adicionar
@@ -307,50 +217,37 @@ export default function PatrimonioPageContent({
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 pb-4">
-          {(categoriaFilter || statusFilter) && (
-            <div className="mb-4" data-test="applied-filters">
-              <div className="flex flex-wrap items-center gap-2">
-                {categoriaFilter && (
-                  <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
-                    data-test="applied-filter-categoria"
+          {(categoriaFiltro || statusFiltro || localizacaoFiltro) && (
+            <div
+              className="mb-4 flex flex-wrap items-center gap-2"
+              data-test="applied-filters"
+            >
+              {statusFiltro && (
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium">
+                  <span className="font-medium">Status:</span>
+                  <span>{statusFiltro}</span>
+                  <button
+                    onClick={() => setStatusFiltro('')}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de status"
                   >
-                    <span className="font-medium">Categoria:</span>
-                    <span data-test="applied-filter-categoria-nome">
-                      {categoriasData?.data?.docs?.find(
-                        (cat: any) => cat._id === categoriaFilter,
-                      )?.nome || 'Carregando...'}
-                    </span>
-                    <button
-                      onClick={() => setCategoriaFilter('')}
-                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                      title="Remover filtro de categoria"
-                      data-test="applied-filter-categoria-remover"
-                    >
-                      <X size={12} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                )}
-                {statusFilter && (
-                  <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
-                    data-test="applied-filter-status"
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
+              {categoriaFiltro && (
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium">
+                  <span className="font-medium">Categoria:</span>
+                  <span>{categoriaNome ?? 'Carregando...'}</span>
+                  <button
+                    onClick={() => setCategoriaFiltro('')}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de categoria"
                   >
-                    <span className="font-medium">Status:</span>
-                    <span data-test="applied-filter-status-nome">
-                      {statusFilter}
-                    </span>
-                    <button
-                      onClick={() => setStatusFilter('')}
-                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                      title="Remover filtro de status"
-                      data-test="applied-filter-status-remover"
-                    >
-                      <X size={12} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                )}
-              </div>
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -360,11 +257,11 @@ export default function PatrimonioPageContent({
               data-test="error-message"
               title={`Erro completo: ${error.message}`}
             >
-              Erro ao carregar itens: {error.message}
+              Erro ao carregar unidades: {error.message}
             </div>
           )}
 
-          {isLoading || isRefetchingAfterDelete ? (
+          {isLoading ? (
             <div
               className="flex flex-col items-center justify-center py-12"
               data-test="loading-spinner"
@@ -374,10 +271,10 @@ export default function PatrimonioPageContent({
                 <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)] border-r-transparent animate-spin"></div>
               </div>
               <p className="mt-4 text-muted-foreground font-medium">
-                Carregando itens...
+                Carregando unidades...
               </p>
             </div>
-          ) : itens.length > 0 ? (
+          ) : unidades.length > 0 ? (
             <div
               className="grid gap-4 w-full"
               style={{
@@ -386,22 +283,13 @@ export default function PatrimonioPageContent({
               }}
               data-test="patrimonio-grid"
             >
-              {itens.map((item, index) => (
-                <CardItemPatrimonio
-                  key={item._id}
-                  id={item._id}
-                  nome={item.nome}
-                  categoria={item.categoria.nome}
-                  quantidade={item.quantidade}
-                  quantidadeDisponivel={item.quantidade_disponivel}
-                  status={item.status}
-                  imagem={item.imagem}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onClick={handleVerUnidades}
-                  onEmprestar={handleEmprestar}
-                  isLoading={updatingItemId === item._id && isFetching}
-                  data-test={`item-card-${index}`}
+              {unidades.map((unidade, index) => (
+                <CardPatrimonio
+                  key={unidade._id}
+                  unidade={unidade}
+                  onClick={(u) => abrirAcao('historico', u)}
+                  onAcao={abrirAcao}
+                  data-test={`patrimonio-card-${index}`}
                 />
               ))}
             </div>
@@ -409,19 +297,19 @@ export default function PatrimonioPageContent({
             <EmptyState
               icon={Boxes}
               title={
-                searchTerm || categoriaFilter || statusFilter
+                busca || categoriaFiltro || statusFiltro || localizacaoFiltro
                   ? 'Nenhum resultado'
-                  : 'Nenhum bem permanente cadastrado'
+                  : 'Nenhuma unidade de patrimônio cadastrada'
               }
               subtitle={
-                searchTerm || categoriaFilter || statusFilter
+                busca || categoriaFiltro || statusFiltro || localizacaoFiltro
                   ? 'Tente ajustar sua pesquisa ou remover os filtros.'
-                  : 'Comece adicionando o primeiro bem permanente.'
+                  : 'Comece adicionando a primeira unidade.'
               }
             />
           )}
 
-          {itens.length > 0 && (
+          {unidades.length > 0 && (
             <div
               ref={observerTarget}
               className="h-10 flex items-center justify-center"
@@ -438,58 +326,25 @@ export default function PatrimonioPageContent({
         </div>
       </div>
 
-      <SheetUnidadesItem
-        itemId={unidadesItemId}
-        itemNome={itens.find((c) => c._id === unidadesItemId)?.nome}
-        open={isUnidadesSheetOpen}
-        onOpenChange={handleCloseUnidadesSheet}
-      />
-
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
-        onClose={handleCloseFiltrosModal}
-        categoriaFilter={categoriaFilter}
-        statusFilter={statusFilter}
-        statusOptions={STATUS_OPTIONS_PERMANENTE}
-        onFiltersChange={handleFiltersChange}
+        onClose={() => setIsFiltrosModalOpen(false)}
+        categoriaFilter={categoriaFiltro}
+        statusFilter={statusFiltro}
+        statusOptions={STATUS_OPTIONS}
+        onFiltersChange={(categoria, status) => {
+          setCategoriaFiltro(categoria);
+          setStatusFiltro(status);
+        }}
         tipo="permanente"
       />
 
-      <ModalCadastrarItemPatrimonio
+      <ModalCadastrarPatrimonio
         isOpen={isCadastrarModalOpen}
-        onClose={handleCloseCadastrarModal}
-        onSuccess={handleCadastrarSuccess}
+        onClose={() => setIsCadastrarModalOpen(false)}
       />
 
-      {editarItemId && (
-        <ModalEditarItem
-          isOpen={isEditarModalOpen}
-          onClose={handleCloseEditarModal}
-          itemId={editarItemId}
-          tipo="permanente"
-          onSuccess={handleEditarSuccess}
-        />
-      )}
-
-      {excluirItemId && (
-        <ModalExcluirItem
-          isOpen={isExcluirModalOpen}
-          onClose={handleCloseExcluirModal}
-          itemId={excluirItemId}
-          itemNome={itens.find((c) => c._id === excluirItemId)?.nome || ''}
-          onSuccess={handleExcluirSuccess}
-        />
-      )}
-
-      {emprestimoItemId && (
-        <ModalEmprestarUnidade
-          isOpen={isEmprestimoModalOpen}
-          onClose={handleCloseEmprestimoModal}
-          itemId={emprestimoItemId}
-          itemNome={itens.find((c) => c._id === emprestimoItemId)?.nome || ''}
-          onSuccess={handleEmprestimoSuccess}
-        />
-      )}
+      <PatrimonioAcoesModais contexto={contexto} onFechar={fecharAcao} />
 
       <ToastContainer
         position="bottom-right"

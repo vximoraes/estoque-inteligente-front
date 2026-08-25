@@ -5,7 +5,7 @@ import type { CategoriaApiResponse } from '@/types/categorias';
 
 export default async function PageCategorias() {
   const initialData = await serverFetch<CategoriaApiResponse>(
-    '/categorias?tipo=consumo&limite=20&page=1',
+    '/categorias?tipo=permanente&limite=20&page=1',
   );
 
   return (

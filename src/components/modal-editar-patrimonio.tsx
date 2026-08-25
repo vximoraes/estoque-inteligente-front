@@ -1,0 +1,221 @@
+'use client';
+
+// Edição de metadados de uma unidade patrimonial — `PATCH /patrimonios/:id`.
+// Só número de patrimônio, data de aquisição, observações e campos
+// personalizados: status e localização têm rotas próprias (transição e
+// transferência), para garantir que toda mudança de estado gere um
+// PatrimonioEvento. Radix Dialog aninhado, mesmo motivo de
+// `modal-patrimonio-status.tsx`: abre por cima do detalhe sem fechá-lo.
+
+import { useEffect, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { patch } from '@/lib/fetchData';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
+import type { CampoPersonalizado, PatrimonioData } from '@/types/patrimonios';
+
+interface ModalEditarPatrimonioProps {
+  isOpen: boolean;
+  onClose: () => void;
+  patrimonio: PatrimonioData;
+  itemId: string;
+  onSuccess?: () => void;
+}
+
+function formatarDataInput(data?: string) {
+  if (!data) return '';
+  const parsed = new Date(data);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toISOString().slice(0, 10);
+}
+
+export default function ModalEditarPatrimonio({
+  isOpen,
+  onClose,
+  patrimonio,
+  itemId,
+  onSuccess,
+}: ModalEditarPatrimonioProps) {
+  const queryClient = useQueryClient();
+  const [numeroPatrimonio, setNumeroPatrimonio] = useState('');
+  const [dataAquisicao, setDataAquisicao] = useState('');
+  const [observacoes, setObservacoes] = useState('');
+  const [camposPersonalizados, setCamposPersonalizados] = useState<
+    CampoPersonalizado[]
+  >([]);
+  const [erros, setErros] = useState<{
+    numeroPatrimonio?: string;
+    camposPersonalizados?: string;
+  }>({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setNumeroPatrimonio(patrimonio.numero_patrimonio);
+    setDataAquisicao(formatarDataInput(patrimonio.data_aquisicao));
+    setObservacoes(patrimonio.observacoes ?? '');
+    setCamposPersonalizados(patrimonio.campos_personalizados ?? []);
+    setErros({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, patrimonio._id]);
+
+  const mutation = useMutation({
+    mutationFn: async () =>
+      await patch(`/patrimonios/${patrimonio._id}`, {
+        numero_patrimonio: numeroPatrimonio.trim(),
+        data_aquisicao: dataAquisicao
+          ? new Date(dataAquisicao).toISOString()
+          : undefined,
+        observacoes: observacoes.trim() || undefined,
+        campos_personalizados: camposPersonalizados
+          .map((c) => ({ chave: c.chave.trim(), valor: c.valor.trim() }))
+          .filter((c) => c.chave && c.valor),
+      }),
+    onSuccess: () => {
+      // Prefixo amplo: alcança tanto a grade quanto o detalhe já aberto.
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
+      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
+      toast.success(`${numeroPatrimonio} atualizado com sucesso!`, {
+        position: 'bottom-right',
+        autoClose: 3000,
+      });
+      onSuccess?.();
+      onClose();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || 'Não foi possível atualizar a unidade.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+      });
+    },
+  });
+
+  const handleSubmit = () => {
+    const chaves = new Set<string>();
+    let duplicada = false;
+    for (const campo of camposPersonalizados) {
+      const chave = campo.chave.trim().toLocaleLowerCase('pt-BR');
+      if (!chave) continue;
+      if (chaves.has(chave)) duplicada = true;
+      chaves.add(chave);
+    }
+
+    const novosErros: typeof erros = {};
+    if (!numeroPatrimonio.trim()) {
+      novosErros.numeroPatrimonio = 'Número de patrimônio é obrigatório';
+    }
+    if (duplicada) {
+      novosErros.camposPersonalizados = 'Há campos personalizados duplicados';
+    }
+
+    setErros(novosErros);
+    if (Object.keys(novosErros).length > 0) return;
+    mutation.mutate();
+  };
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        className="max-w-lg max-h-[90vh] overflow-y-auto"
+        data-test="modal-editar-patrimonio"
+      >
+        <DialogHeader>
+          <DialogTitle>Editar unidade</DialogTitle>
+          <DialogDescription>{patrimonio.item.nome}</DialogDescription>
+        </DialogHeader>
+
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Número de patrimônio <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              value={numeroPatrimonio}
+              onChange={(e) => {
+                setNumeroPatrimonio(e.target.value);
+                setErros((prev) => ({
+                  ...prev,
+                  numeroPatrimonio: undefined,
+                }));
+              }}
+              maxLength={60}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+            {erros.numeroPatrimonio && (
+              <p className="mt-1 text-sm text-destructive">
+                {erros.numeroPatrimonio}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Data de aquisição
+            </label>
+            <input
+              type="date"
+              value={dataAquisicao}
+              onChange={(e) => setDataAquisicao(e.target.value)}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Observações
+            </label>
+            <textarea
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              rows={3}
+              placeholder="Observações opcionais"
+              maxLength={500}
+            />
+          </div>
+
+          <CamposPersonalizadosEditor
+            value={camposPersonalizados}
+            onChange={setCamposPersonalizados}
+            error={erros.camposPersonalizados}
+          />
+        </div>
+
+        <DialogFooter>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="h-11 flex-1 cursor-pointer"
+              disabled={mutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
+              style={{ backgroundColor: 'var(--ei-accent)' }}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

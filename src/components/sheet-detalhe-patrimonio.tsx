@@ -1,16 +1,14 @@
 'use client';
 
-// Drawer de histórico de uma unidade patrimonial — mesmo padrão visual do
-// drawer de unidades (`sheet-unidades-item.tsx`): título + lista em
-// tabela, só que aqui cada linha é um evento do ledger
-// (`GET /patrimonios/:id/eventos`), não uma unidade. A tabela só mostra
-// Data + Evento (as únicas colunas que sempre cabem sem cortar nada);
-// clicar na linha abre um modal com o detalhe completo — sem truncar
-// texto de observação, que pode ser arbitrariamente longo.
+// Detalhe de uma unidade patrimonial: dados de cadastro, campos
+// personalizados e histórico completo (ledger imutável via
+// `GET /patrimonios/:id/eventos`). Substitui o antigo drawer de unidades +
+// drawer de histórico em dois níveis — agora a unidade já é o card
+// clicado, então o detalhe abre direto num só Sheet.
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { get } from '@/lib/fetchData';
 import {
   Dialog,
@@ -34,20 +32,18 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import StatusBadge from '@/components/status-badge';
 import type {
+  PatrimonioData,
   PatrimonioEventoApiResponse,
   PatrimonioEventoData,
   PatrimonioEventoTipo,
 } from '@/types/patrimonios';
 
-interface SheetHistoricoPatrimonioProps {
-  patrimonioId: string | null;
-  numeroPatrimonio?: string;
+interface SheetDetalhePatrimonioProps {
+  patrimonio: PatrimonioData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Volta pro drawer de unidades de onde essa unidade veio, em vez de
-   * fechar tudo — só existe quando há um drawer anterior pra voltar. */
-  onVoltar?: () => void;
 }
 
 const TIPO_LABEL: Record<PatrimonioEventoTipo, string> = {
@@ -60,6 +56,13 @@ const TIPO_LABEL: Record<PatrimonioEventoTipo, string> = {
   baixa: 'Baixa',
   reativacao: 'Reativação',
 };
+
+function formatarData(data?: string) {
+  if (!data) return '—';
+  const parsed = new Date(data);
+  if (Number.isNaN(parsed.getTime())) return '—';
+  return parsed.toLocaleDateString('pt-BR');
+}
 
 function formatarDataCompleta(data: string) {
   const parsed = new Date(data);
@@ -77,58 +80,99 @@ function nomeUsuario(usuario: PatrimonioEventoData['usuario']) {
   return typeof usuario === 'string' ? '—' : usuario.nome;
 }
 
-export default function SheetHistoricoPatrimonio({
-  patrimonioId,
-  numeroPatrimonio,
+export default function SheetDetalhePatrimonio({
+  patrimonio,
   open,
   onOpenChange,
-  onVoltar,
-}: SheetHistoricoPatrimonioProps) {
+}: SheetDetalhePatrimonioProps) {
   const [eventoSelecionado, setEventoSelecionado] =
     useState<PatrimonioEventoData | null>(null);
   const [modalEventoAberto, setModalEventoAberto] = useState(false);
 
   const { data, isLoading } = useQuery<PatrimonioEventoApiResponse>({
-    queryKey: ['patrimonio-eventos', patrimonioId],
+    queryKey: ['patrimonio-eventos', patrimonio?._id],
     queryFn: () =>
       get<PatrimonioEventoApiResponse>(
-        `/patrimonios/${patrimonioId}/eventos?limite=50`,
+        `/patrimonios/${patrimonio?._id}/eventos?limite=50`,
       ),
-    enabled: !!patrimonioId && open,
+    enabled: !!patrimonio?._id && open,
   });
 
   const eventos = data?.data?.docs ?? [];
+  const campos = patrimonio?.campos_personalizados ?? [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
         className="w-full sm:max-w-lg"
-        data-test="sheet-historico-patrimonio"
+        data-test="sheet-detalhe-patrimonio"
       >
-        <SheetHeader className={onVoltar ? 'pt-14' : undefined}>
-          {onVoltar && (
-            <button
-              onClick={onVoltar}
-              className="absolute top-4 left-4 flex h-9 items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              data-test="sheet-historico-voltar"
-            >
-              <ArrowLeft size={14} />
-              Voltar às unidades
-            </button>
-          )}
-          <SheetTitle data-test="sheet-historico-titulo">
-            {numeroPatrimonio}
-          </SheetTitle>
-          <SheetDescription data-test="sheet-historico-contador">
-            {isLoading
-              ? 'Carregando…'
-              : `${eventos.length} evento${eventos.length === 1 ? '' : 's'}`}
+        <SheetHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <SheetTitle data-test="sheet-detalhe-titulo">
+              {patrimonio?.numero_patrimonio}
+            </SheetTitle>
+            {patrimonio && <StatusBadge status={patrimonio.status} size="sm" />}
+          </div>
+          <SheetDescription data-test="sheet-detalhe-item-nome">
+            {patrimonio?.item.nome}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-col gap-3 px-4 flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto -mx-1 px-1">
+        <div className="flex flex-col gap-5 px-4 flex-1 overflow-y-auto pb-4">
+          <div data-test="sheet-detalhe-dados">
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+              Dados
+            </h4>
+            <dl className="space-y-1.5 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Localização</dt>
+                <dd className="text-foreground text-right truncate">
+                  {patrimonio?.localizacao?.nome ?? '—'}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Aquisição</dt>
+                <dd className="text-foreground text-right">
+                  {formatarData(patrimonio?.data_aquisicao)}
+                </dd>
+              </div>
+              {patrimonio?.observacoes && (
+                <div>
+                  <dt className="text-muted-foreground mb-1">Observações</dt>
+                  <dd className="text-foreground whitespace-pre-wrap break-words">
+                    {patrimonio.observacoes}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </div>
+
+          {campos.length > 0 && (
+            <div data-test="sheet-detalhe-campos-personalizados">
+              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                Campos personalizados
+              </h4>
+              <dl className="space-y-1.5 text-sm">
+                {campos.map((campo, index) => (
+                  <div key={index} className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground truncate">
+                      {campo.chave}
+                    </dt>
+                    <dd className="text-foreground text-right truncate">
+                      {campo.valor}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          <div className="flex-1 flex flex-col min-h-0">
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+              Histórico
+            </h4>
             {isLoading ? (
               <p className="text-sm text-muted-foreground py-6 text-center">
                 Carregando...
@@ -138,7 +182,7 @@ export default function SheetHistoricoPatrimonio({
                 Nenhum evento registrado.
               </p>
             ) : (
-              <Table data-test="sheet-historico-tabela">
+              <Table data-test="sheet-detalhe-historico-tabela">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Data</TableHead>
@@ -156,7 +200,7 @@ export default function SheetHistoricoPatrimonio({
                       }}
                       className="h-12 cursor-pointer"
                       title="Ver detalhe do evento"
-                      data-test="sheet-historico-linha"
+                      data-test="sheet-detalhe-historico-linha"
                     >
                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                         {formatarDataCompleta(evento.data_hora)}
@@ -176,10 +220,7 @@ export default function SheetHistoricoPatrimonio({
         </div>
       </SheetContent>
 
-      <Dialog
-        open={modalEventoAberto}
-        onOpenChange={setModalEventoAberto}
-      >
+      <Dialog open={modalEventoAberto} onOpenChange={setModalEventoAberto}>
         <DialogContent data-test="modal-evento-historico">
           {eventoSelecionado && (
             <>
