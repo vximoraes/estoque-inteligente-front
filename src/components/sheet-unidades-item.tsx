@@ -5,14 +5,11 @@
 // Manutenção/Transferir/Baixar), cada uma delegando pra um modal próprio.
 
 import { useMemo, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, MoreHorizontal, Plus, Search } from 'lucide-react';
-import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
-import ModalPatrimonioStatus from '@/components/modal-patrimonio-status';
-import ModalPatrimonioTransferir from '@/components/modal-patrimonio-transferir';
-import ModalPatrimonioRemover from '@/components/modal-patrimonio-remover';
+import { useQuery } from '@tanstack/react-query';
+import { ChevronRight, Plus, Search } from 'lucide-react';
 import ModalPatrimonioAdicionarUnidades from '@/components/modal-patrimonio-adicionar-unidades';
-import SheetHistoricoPatrimonio from '@/components/sheet-historico-patrimonio';
+import PatrimonioLinhaAcoes from '@/components/patrimonio-linha-acoes';
+import PatrimonioAcoesModais from '@/components/patrimonio-acoes-modais';
 import {
   Sheet,
   SheetContent,
@@ -28,22 +25,19 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/status-badge';
 import { get } from '@/lib/fetchData';
-import type { ItemEstoqueData } from '@/types/itens';
-import type {
-  PatrimonioApiResponse,
-  PatrimonioData,
-  PatrimonioStatus,
+import type { ItemPermanenteData } from '@/types/itens';
+import {
+  PATRIMONIO_STATUS_OPTIONS,
+  type AcaoPatrimonio,
+  type PatrimonioApiResponse,
+  type PatrimonioData,
+  type PatrimonioStatus,
 } from '@/types/patrimonios';
+import { useAcoesPatrimonio } from '@/hooks/use-acoes-patrimonio';
 
 interface SheetUnidadesItemProps {
   itemId: string | null;
@@ -52,46 +46,16 @@ interface SheetUnidadesItemProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const STATUS_OPTIONS: PatrimonioStatus[] = [
-  'Disponível',
-  'Emprestado',
-  'Manutenção',
-  'Baixado',
-];
-
-type AcaoTipo =
-  | 'emprestar'
-  | 'historico'
-  | 'manutencao'
-  | 'retornarManutencao'
-  | 'baixar'
-  | 'reativar'
-  | 'transferir'
-  | 'remover';
-
 export default function SheetUnidadesItem({
   itemId,
   itemNome,
   open,
   onOpenChange,
 }: SheetUnidadesItemProps) {
-  const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
   const [statusFiltro, setStatusFiltro] = useState<PatrimonioStatus | null>(
     null,
   );
-  // Snapshot próprio da ação em curso (tipo + unidade + item/nome),
-  // independente da prop `itemId`: fechar o Sheet (necessário para não
-  // competir por foco com o modal — ver comentário em `abrirAcao`) dispara
-  // no pai um `setTimeout` que zera `itemId` depois de 300ms; se o modal
-  // dependesse direto da prop, ele se desmontaria sozinho nesse meio-tempo,
-  // antes do usuário terminar a ação.
-  const [acaoContexto, setAcaoContexto] = useState<{
-    tipo: AcaoTipo;
-    unidade: PatrimonioData;
-    itemId: string;
-    itemNome: string;
-  } | null>(null);
   const [modalAdicionarAberto, setModalAdicionarAberto] = useState(false);
 
   // O pai zera a prop `itemId` 300ms depois de fechar o Sheet (ver
@@ -105,9 +69,9 @@ export default function SheetUnidadesItem({
   // Contadores do header vêm do Item, não somados no client: é o valor
   // autoritativo já mantido pela cascata do backend (Patrimonio →
   // atualizarContadoresItem → Item.quantidade/quantidade_disponivel).
-  const { data: itemData } = useQuery<{ data: ItemEstoqueData }>({
+  const { data: itemData } = useQuery<{ data: ItemPermanenteData }>({
     queryKey: ['item-detalhe', itemIdEfetivo],
-    queryFn: () => get<{ data: ItemEstoqueData }>(`/itens/${itemIdEfetivo}`),
+    queryFn: () => get<{ data: ItemPermanenteData }>(`/itens/${itemIdEfetivo}`),
     enabled: !!itemIdEfetivo && open,
   });
 
@@ -115,16 +79,14 @@ export default function SheetUnidadesItem({
   // em vez de paginação real: o volume esperado é dezenas de unidades por
   // item, não milhares. Se isso deixar de ser verdade, trocar por
   // paginação de verdade na tabela.
-  const { data: patrimoniosData, isLoading } = useQuery<PatrimonioApiResponse>(
-    {
-      queryKey: ['patrimonios', itemIdEfetivo],
-      queryFn: () =>
-        get<PatrimonioApiResponse>(
-          `/patrimonios?item=${itemIdEfetivo}&limite=100`,
-        ),
-      enabled: !!itemIdEfetivo && open,
-    },
-  );
+  const { data: patrimoniosData, isLoading } = useQuery<PatrimonioApiResponse>({
+    queryKey: ['patrimonios', itemIdEfetivo],
+    queryFn: () =>
+      get<PatrimonioApiResponse>(
+        `/patrimonios?item=${itemIdEfetivo}&limite=100`,
+      ),
+    enabled: !!itemIdEfetivo && open,
+  });
 
   const unidades = patrimoniosData?.data?.docs ?? [];
 
@@ -152,24 +114,22 @@ export default function SheetUnidadesItem({
   // de outro Radix Dialog (este Sheet) não rouba foco, então ficam abertos
   // por cima do drawer sem fechá-lo. Histórico é diferente: é outro Sheet
   // (drill-down, troca de tela), por isso fecha este antes de abrir.
-  const abrirAcao = (tipo: AcaoTipo, unidade: PatrimonioData) => {
-    if (!itemIdEfetivo) return;
-    setAcaoContexto({
-      tipo,
-      unidade,
-      itemId: itemIdEfetivo,
-      itemNome: nomeExibido,
-    });
-    if (tipo === 'historico') onOpenChange(false);
-  };
+  const {
+    contexto: acaoContexto,
+    abrir: abrirAcaoRaw,
+    fechar: fecharAcao,
+  } = useAcoesPatrimonio(() => onOpenChange(false));
 
-  const fecharAcao = () => setAcaoContexto(null);
+  const abrirAcao = (tipo: AcaoPatrimonio, unidade: PatrimonioData) => {
+    if (!itemIdEfetivo) return;
+    abrirAcaoRaw(tipo, unidade, itemIdEfetivo, nomeExibido);
+  };
 
   // "Voltar às unidades" a partir do histórico: reabre este Sheet (sem
   // depender da prop `itemId`, que o pai já zerou — ver `itemIdEfetivo`)
   // em vez de fechar tudo e deixar o usuário na grade.
   const voltarParaUnidades = () => {
-    setAcaoContexto(null);
+    fecharAcao();
     onOpenChange(true);
   };
 
@@ -222,7 +182,7 @@ export default function SheetUnidadesItem({
             className="grid grid-cols-4 gap-2"
             data-test="sheet-unidades-chips"
           >
-            {STATUS_OPTIONS.map((opcao) => {
+            {PATRIMONIO_STATUS_OPTIONS.map((opcao) => {
               const ativo = statusFiltro === opcao;
               return (
                 <button
@@ -281,69 +241,11 @@ export default function SheetUnidadesItem({
                         className="text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              className="p-1.5 rounded-md hover:bg-muted/60 cursor-pointer"
-                              data-test="sheet-unidades-acoes-trigger"
-                              aria-label="Ações da unidade"
-                            >
-                              <MoreHorizontal size={16} />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => abrirAcao('emprestar', unidade)}
-                              disabled={unidade.status !== 'Disponível'}
-                            >
-                              Emprestar
-                            </DropdownMenuItem>
-                            {unidade.status === 'Manutenção' ? (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  abrirAcao('retornarManutencao', unidade)
-                                }
-                              >
-                                Retornar da manutenção
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                onClick={() => abrirAcao('manutencao', unidade)}
-                                disabled={unidade.status !== 'Disponível'}
-                              >
-                                Manutenção
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() => abrirAcao('transferir', unidade)}
-                              disabled={unidade.status === 'Emprestado'}
-                            >
-                              Transferir
-                            </DropdownMenuItem>
-                            {unidade.status === 'Baixado' ? (
-                              <DropdownMenuItem
-                                onClick={() => abrirAcao('reativar', unidade)}
-                              >
-                                Reativar
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                onClick={() => abrirAcao('baixar', unidade)}
-                                disabled={unidade.status === 'Emprestado'}
-                                variant="destructive"
-                              >
-                                Baixar
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() => abrirAcao('remover', unidade)}
-                              disabled={unidade.status === 'Emprestado'}
-                              variant="destructive"
-                            >
-                              Remover (erro de cadastro)
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <PatrimonioLinhaAcoes
+                          unidade={unidade}
+                          onAcao={abrirAcao}
+                          data-test="sheet-unidades-acoes-trigger"
+                        />
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         <ChevronRight size={16} />
@@ -357,113 +259,11 @@ export default function SheetUnidadesItem({
         </div>
       </SheetContent>
 
-      {acaoContexto?.tipo === 'emprestar' && (
-        <ModalEmprestarUnidade
-          isOpen
-          onClose={fecharAcao}
-          itemId={acaoContexto.itemId}
-          itemNome={acaoContexto.itemNome}
-          patrimonioPreSelecionado={acaoContexto.unidade._id}
-          onSuccess={() => {
-            queryClient.invalidateQueries({
-              queryKey: ['patrimonios', acaoContexto.itemId],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ['item-detalhe', acaoContexto.itemId],
-            });
-          }}
-        />
-      )}
-
-      <SheetHistoricoPatrimonio
-        open={acaoContexto?.tipo === 'historico'}
-        onOpenChange={(o) => {
-          if (!o) fecharAcao();
-        }}
-        patrimonioId={
-          acaoContexto?.tipo === 'historico' ? acaoContexto.unidade._id : null
-        }
-        numeroPatrimonio={acaoContexto?.unidade.numero_patrimonio}
-        onVoltar={voltarParaUnidades}
+      <PatrimonioAcoesModais
+        contexto={acaoContexto}
+        onFechar={fecharAcao}
+        onVoltarHistorico={voltarParaUnidades}
       />
-
-      {acaoContexto?.tipo === 'manutencao' && (
-        <ModalPatrimonioStatus
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          itemId={acaoContexto.itemId}
-          novoStatus="Manutenção"
-          titulo="Enviar para manutenção"
-          descricao="A unidade fica indisponível para empréstimo até retornar."
-          confirmLabel="Confirmar envio"
-        />
-      )}
-
-      {acaoContexto?.tipo === 'retornarManutencao' && (
-        <ModalPatrimonioStatus
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          itemId={acaoContexto.itemId}
-          novoStatus="Disponível"
-          titulo="Retornar da manutenção"
-          descricao="A unidade volta a ficar disponível para empréstimo."
-          confirmLabel="Confirmar retorno"
-        />
-      )}
-
-      {acaoContexto?.tipo === 'baixar' && (
-        <ModalPatrimonioStatus
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          itemId={acaoContexto.itemId}
-          novoStatus="Baixado"
-          titulo="Baixar unidade"
-          descricao="Sai do estoque ativo e fica registrada no histórico."
-          confirmLabel="Confirmar baixa"
-          destrutivo
-        />
-      )}
-
-      {acaoContexto?.tipo === 'reativar' && (
-        <ModalPatrimonioStatus
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          itemId={acaoContexto.itemId}
-          novoStatus="Disponível"
-          titulo="Reativar unidade"
-          descricao="A unidade volta a ficar disponível para uso."
-          confirmLabel="Reativar"
-        />
-      )}
-
-      {acaoContexto?.tipo === 'transferir' && (
-        <ModalPatrimonioTransferir
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          localizacaoAtualId={acaoContexto.unidade.localizacao._id}
-          itemId={acaoContexto.itemId}
-        />
-      )}
-
-      {acaoContexto?.tipo === 'remover' && (
-        <ModalPatrimonioRemover
-          isOpen
-          onClose={fecharAcao}
-          patrimonioId={acaoContexto.unidade._id}
-          numeroPatrimonio={acaoContexto.unidade.numero_patrimonio}
-          itemId={acaoContexto.itemId}
-        />
-      )}
 
       {itemIdEfetivo && (
         <ModalPatrimonioAdicionarUnidades

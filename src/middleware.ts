@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (isGuestOnlyRoute && isAuth) {
-    return NextResponse.redirect(new URL('/itens', req.url));
+    return NextResponse.redirect(new URL('/bens/patrimonio', req.url));
   }
 
   if (!isPublicRoute && !isAuth) {

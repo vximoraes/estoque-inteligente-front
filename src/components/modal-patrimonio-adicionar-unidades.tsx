@@ -117,7 +117,9 @@ export default function ModalPatrimonioAdicionarUnidades({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
+      // Prefixo amplo: alcança tanto o drawer (`['patrimonios', itemId]`)
+      // quanto a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
       toast.success('Unidades adicionadas com sucesso!', {
         position: 'bottom-right',
@@ -127,10 +129,10 @@ export default function ModalPatrimonioAdicionarUnidades({
       onClose();
     },
     onError: (error: any) => {
-      toast.error(
-        error?.message || 'Não foi possível adicionar as unidades.',
-        { position: 'bottom-right', autoClose: 5000 },
-      );
+      toast.error(error?.message || 'Não foi possível adicionar as unidades.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+      });
     },
   });
 
@@ -228,9 +230,7 @@ export default function ModalPatrimonioAdicionarUnidades({
                 placeholder="ACC"
               />
               {erros.prefixo && (
-                <p className="mt-1 text-sm text-destructive">
-                  {erros.prefixo}
-                </p>
+                <p className="mt-1 text-sm text-destructive">{erros.prefixo}</p>
               )}
             </div>
           </div>

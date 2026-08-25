@@ -155,7 +155,7 @@ function AtivarContaContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: `${window.location.origin}/itens`,
+      callbackURL: `${window.location.origin}/bens/patrimonio`,
       errorCallbackURL: `${window.location.origin}/ativar-conta?token=${token}`,
     });
 

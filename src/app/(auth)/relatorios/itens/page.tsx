@@ -116,6 +116,10 @@ function RelatorioItensPageContent() {
     queryKey: ['itens-relatorio-global-stats', categoriaFilter, statusFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
+      // A listagem abaixo vem de `/estoques`, que só existe para itens de
+      // consumo — as estatísticas precisam do mesmo recorte, senão contam
+      // bens permanentes que a tela nem exibe.
+      params.append('tipo', 'consumo');
       if (categoriaFilter) {
         params.append('categoria', categoriaFilter);
       }

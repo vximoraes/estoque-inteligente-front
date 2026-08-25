@@ -86,7 +86,9 @@ export default function ModalEmprestarUnidade({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['itens'] });
       queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
+      // Prefixo amplo: alcança o drawer, a lista interna de "disponíveis"
+      // deste modal e a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
 
       toast.success('Empréstimo registrado com sucesso!', {
@@ -212,159 +214,159 @@ export default function ModalEmprestarUnidade({
           </DialogDescription>
         </DialogHeader>
 
-      <div className="p-6 space-y-5">
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Item
-          </label>
-          <div className="w-full h-11 flex items-center px-3 border border-border rounded-md bg-muted/50 text-muted-foreground">
-            {itemNome}
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Item
+            </label>
+            <div className="w-full h-11 flex items-center px-3 border border-border rounded-md bg-muted/50 text-muted-foreground">
+              {itemNome}
+            </div>
+          </div>
+
+          <div className="relative" data-dropdown>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Unidade <span className="text-destructive">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              disabled={isLoadingUnidades}
+              className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-md text-left hover:border-[var(--ei-accent)]/40 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span
+                className={
+                  unidadeSelecionadaObj
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                }
+              >
+                {isLoadingUnidades
+                  ? 'Carregando...'
+                  : unidadeSelecionadaObj
+                    ? `${unidadeSelecionadaObj.numero_patrimonio} — ${unidadeSelecionadaObj.localizacao?.nome ?? ''}`
+                    : 'Selecionar unidade'}
+              </span>
+              <ChevronDown
+                size={16}
+                className={`text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-y-auto">
+                {unidadesDisponiveis.length > 0 ? (
+                  unidadesDisponiveis.map((unidade) => (
+                    <button
+                      key={unidade._id}
+                      type="button"
+                      className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
+                        unidadeSelecionada === unidade._id
+                          ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
+                          : 'text-foreground'
+                      }`}
+                      onClick={() => {
+                        setUnidadeSelecionada(unidade._id);
+                        setIsDropdownOpen(false);
+                        setErrors((prev) => ({ ...prev, unidade: undefined }));
+                      }}
+                    >
+                      <span className="truncate">
+                        {unidade.numero_patrimonio}
+                      </span>
+                      <span className="text-sm px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-muted-foreground">
+                        {unidade.localizacao?.nome ?? '—'}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                    Nenhuma unidade disponível para empréstimo.
+                  </div>
+                )}
+              </div>
+            )}
+            {errors.unidade && (
+              <p className="mt-1 text-sm text-destructive">{errors.unidade}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Solicitante <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              value={solicitanteNome}
+              onChange={(e) => {
+                setSolicitanteNome(e.target.value);
+                setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
+              }}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              placeholder="Nome da pessoa solicitante"
+            />
+            {errors.solicitanteNome && (
+              <p className="mt-1 text-sm text-destructive">
+                {errors.solicitanteNome}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              E-mail do solicitante
+            </label>
+            <input
+              type="email"
+              value={solicitanteEmail}
+              onChange={(e) => {
+                setSolicitanteEmail(e.target.value);
+                setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
+              }}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              placeholder="E-mail da pessoa solicitante (opcional)"
+            />
+            {errors.solicitanteEmail && (
+              <p className="mt-1 text-sm text-destructive">
+                {errors.solicitanteEmail}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Data prevista de devolução
+            </label>
+            <input
+              type="datetime-local"
+              value={dataPrevista}
+              onChange={(e) => {
+                setDataPrevista(e.target.value);
+                setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
+              }}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+            {errors.dataPrevista && (
+              <p className="mt-1 text-sm text-destructive">
+                {errors.dataPrevista}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Observações
+            </label>
+            <textarea
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              rows={3}
+              placeholder="Observações opcionais"
+              maxLength={500}
+            />
           </div>
         </div>
-
-        <div className="relative" data-dropdown>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Unidade <span className="text-destructive">*</span>
-          </label>
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            disabled={isLoadingUnidades}
-            className="w-full h-11 flex items-center justify-between px-3 border border-border rounded-md text-left hover:border-[var(--ei-accent)]/40 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <span
-              className={
-                unidadeSelecionadaObj
-                  ? 'text-foreground'
-                  : 'text-muted-foreground'
-              }
-            >
-              {isLoadingUnidades
-                ? 'Carregando...'
-                : unidadeSelecionadaObj
-                  ? `${unidadeSelecionadaObj.numero_patrimonio} — ${unidadeSelecionadaObj.localizacao?.nome ?? ''}`
-                  : 'Selecionar unidade'}
-            </span>
-            <ChevronDown
-              size={16}
-              className={`text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-
-          {isDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md z-50 max-h-60 overflow-y-auto">
-              {unidadesDisponiveis.length > 0 ? (
-                unidadesDisponiveis.map((unidade) => (
-                  <button
-                    key={unidade._id}
-                    type="button"
-                    className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors cursor-pointer ${
-                      unidadeSelecionada === unidade._id
-                        ? 'bg-[var(--ei-accent)]/5 text-[var(--ei-accent)] font-medium'
-                        : 'text-foreground'
-                    }`}
-                    onClick={() => {
-                      setUnidadeSelecionada(unidade._id);
-                      setIsDropdownOpen(false);
-                      setErrors((prev) => ({ ...prev, unidade: undefined }));
-                    }}
-                  >
-                    <span className="truncate">
-                      {unidade.numero_patrimonio}
-                    </span>
-                    <span className="text-sm px-2 py-0.5 rounded-md shrink-0 bg-muted/50 text-muted-foreground">
-                      {unidade.localizacao?.nome ?? '—'}
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                  Nenhuma unidade disponível para empréstimo.
-                </div>
-              )}
-            </div>
-          )}
-          {errors.unidade && (
-            <p className="mt-1 text-sm text-destructive">{errors.unidade}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Solicitante <span className="text-destructive">*</span>
-          </label>
-          <input
-            type="text"
-            value={solicitanteNome}
-            onChange={(e) => {
-              setSolicitanteNome(e.target.value);
-              setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
-            }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
-            placeholder="Nome da pessoa solicitante"
-          />
-          {errors.solicitanteNome && (
-            <p className="mt-1 text-sm text-destructive">
-              {errors.solicitanteNome}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            E-mail do solicitante
-          </label>
-          <input
-            type="email"
-            value={solicitanteEmail}
-            onChange={(e) => {
-              setSolicitanteEmail(e.target.value);
-              setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
-            }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
-            placeholder="E-mail da pessoa solicitante (opcional)"
-          />
-          {errors.solicitanteEmail && (
-            <p className="mt-1 text-sm text-destructive">
-              {errors.solicitanteEmail}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Data prevista de devolução
-          </label>
-          <input
-            type="datetime-local"
-            value={dataPrevista}
-            onChange={(e) => {
-              setDataPrevista(e.target.value);
-              setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
-            }}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
-          />
-          {errors.dataPrevista && (
-            <p className="mt-1 text-sm text-destructive">
-              {errors.dataPrevista}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Observações
-          </label>
-          <textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
-            rows={3}
-            placeholder="Observações opcionais"
-            maxLength={500}
-          />
-        </div>
-      </div>
 
         <DialogFooter>
           <div className="flex gap-3">

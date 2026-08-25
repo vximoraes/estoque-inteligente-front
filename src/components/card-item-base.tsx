@@ -1,63 +1,48 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import {
-  PlusCircle,
-  MinusCircle,
-  Package,
-  MoreHorizontal,
-  X,
-} from 'lucide-react';
+import { Package, MoreHorizontal, X } from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
 import StatusBadge from './status-badge';
 
-interface ItemEstoqueProps {
+export interface CardItemBaseProps {
   id?: string;
   nome: string;
   categoria: string;
-  tipo?: 'consumo' | 'permanente';
-  quantidade: number;
-  quantidadeDisponivel?: number;
-  estoqueMinimo?: number;
   status: string;
   imagem?: string;
+  titulo: string;
+  isLoading?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClick?: (id: string) => void;
-  onEntrada?: (id: string) => void;
-  onSaida?: (id: string) => void;
   onEmprestar?: (id: string) => void;
-  isLoading?: boolean;
+  emprestarDesabilitado?: boolean;
+  emprestarTitle?: string;
+  /** Bloco à esquerda do footer — Qtd/Mín (consumo) ou Unid/Disp (patrimônio). */
+  metricas: React.ReactNode;
+  /** Ícones à direita do badge de status; omitido, o footer não reserva espaço para eles. */
+  acoesRapidas?: React.ReactNode;
   'data-test'?: string;
 }
 
-export default function ItemEstoque({
+export default function CardItemBase({
   id = '',
   nome,
   categoria,
-  tipo = 'consumo',
-  quantidade,
-  quantidadeDisponivel,
-  estoqueMinimo,
   status,
   imagem,
+  titulo,
+  isLoading = false,
   onEdit,
   onDelete,
   onClick,
-  onEntrada,
-  onSaida,
   onEmprestar,
-  isLoading = false,
+  emprestarDesabilitado = false,
+  emprestarTitle,
+  metricas,
+  acoesRapidas,
   'data-test': dataTest,
-}: ItemEstoqueProps) {
-  const ehPermanente = tipo === 'permanente';
-  // Disponibilidade real de empréstimo: `quantidade` sozinha não diz se há
-  // unidade livre num item permanente (pode estar tudo emprestado com
-  // quantidade > 0). Cai para `quantidade` só se o backend não mandar o
-  // campo novo (não deveria acontecer em uso normal).
-  const semUnidadeDisponivel =
-    quantidadeDisponivel !== undefined
-      ? quantidadeDisponivel === 0
-      : quantidade === 0;
+}: CardItemBaseProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -69,20 +54,6 @@ export default function ItemEstoque({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMenuOpen]);
-
-  const handleEntrada = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onEntrada && id) {
-      onEntrada(id);
-    }
-  };
-
-  const handleSaida = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onSaida && id) {
-      onSaida(id);
-    }
-  };
 
   const handleClick = () => {
     if (isMenuOpen) {
@@ -100,8 +71,6 @@ export default function ItemEstoque({
       setIsImageModalOpen(true);
     }
   };
-
-  const componentTitle = `${nome} - ${categoria} - Qtd: ${quantidade} - Status: ${status}`;
 
   const categoriaFormatada = React.useMemo(() => {
     if (!categoria) return '';
@@ -127,10 +96,9 @@ export default function ItemEstoque({
     <div
       className="bg-card rounded-md border border-border p-4 transition-colors w-full h-full min-h-40 min-w-0 flex flex-col cursor-pointer relative"
       data-test={dataTest || `item-${id}`}
-      title={componentTitle}
+      title={titulo}
       onClick={handleClick}
     >
-      {/* Loading overlay */}
       {isLoading && (
         <div className="absolute inset-0 bg-card/90 rounded-md flex items-center justify-center z-10">
           <div className="flex flex-col items-center">
@@ -149,7 +117,6 @@ export default function ItemEstoque({
         </div>
       )}
 
-      {/* Header: image + name/category + actions */}
       <div
         className="flex items-start justify-between mb-3 gap-2 overflow-hidden"
         data-test="header"
@@ -158,7 +125,6 @@ export default function ItemEstoque({
           className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden"
           data-test="component-info"
         >
-          {/* Image */}
           <div
             className={`w-10 h-10 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-muted/40 border border-border/40 ${
               imagemComTimestamp
@@ -185,7 +151,6 @@ export default function ItemEstoque({
             )}
           </div>
 
-          {/* Name + category */}
           <div className="flex-1 min-w-0 overflow-hidden" data-test="text-info">
             <h3
               className="text-base font-semibold text-foreground leading-tight truncate"
@@ -204,7 +169,6 @@ export default function ItemEstoque({
           </div>
         </div>
 
-        {/* Toggle button with animated MoreHorizontal → X crossfade */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -233,9 +197,7 @@ export default function ItemEstoque({
         </button>
       </div>
 
-      {/* Footer area: footer e actions ocupam o mesmo espaço, com fade entre eles */}
       <div className="relative mt-auto" style={{ minHeight: '44px' }}>
-        {/* Normal footer */}
         <div
           className={`transition-opacity duration-150 ${
             isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -245,61 +207,13 @@ export default function ItemEstoque({
             className="flex items-center justify-between gap-2 pt-3 overflow-hidden"
             data-test="footer"
           >
-            {/* Quantity (consumo) / Unidades (permanente) */}
             <div
               className="flex flex-col text-sm min-w-0 shrink-0"
               data-test="quantity"
             >
-              {ehPermanente ? (
-                <>
-                  <span title={`${quantidade} unidade${quantidade === 1 ? '' : 's'} ao todo`}>
-                    <span className="text-muted-foreground font-medium">
-                      Unid
-                    </span>
-                    <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
-                      {quantidade}
-                    </span>
-                  </span>
-                  <span
-                    className="mt-0.5"
-                    title={`${quantidadeDisponivel ?? 0} unidade${quantidadeDisponivel === 1 ? '' : 's'} dispon${quantidadeDisponivel === 1 ? 'ível' : 'íveis'} para empréstimo`}
-                  >
-                    <span className="text-muted-foreground font-medium">
-                      Disp
-                    </span>
-                    <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
-                      {quantidadeDisponivel ?? 0}
-                    </span>
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span title={`Quantidade em estoque: ${quantidade} unidades`}>
-                    <span className="text-muted-foreground font-medium">
-                      Qtd
-                    </span>
-                    <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
-                      {quantidade}
-                    </span>
-                  </span>
-                  {estoqueMinimo !== undefined && (
-                    <span
-                      className="mt-0.5"
-                      title={`Estoque mínimo: ${estoqueMinimo} unidades`}
-                    >
-                      <span className="text-muted-foreground font-medium">
-                        Mín
-                      </span>
-                      <span className="font-semibold text-foreground ml-1 tabular-nums text-base">
-                        {estoqueMinimo}
-                      </span>
-                    </span>
-                  )}
-                </>
-              )}
+              {metricas}
             </div>
 
-            {/* Status indicator */}
             <div
               className="flex items-center gap-1.5 justify-center flex-1 min-w-0 overflow-hidden px-2"
               data-test="status-container"
@@ -307,70 +221,17 @@ export default function ItemEstoque({
               <StatusBadge status={status} data-test="status-badge" />
             </div>
 
-            {/* Movement icons — só consumo: card permanente já abre o
-                drawer de unidades ao clicar em qualquer ponto do card
-                (`handleItemClick`), então um ícone extra pra fazer a
-                mesma coisa seria redundante. */}
-            <div
-              className="flex items-center gap-0.5 shrink-0"
-              data-test="movement-icons"
-            >
-              {ehPermanente ? (
-                // Placeholder invisível do mesmo tamanho dos ícones de
-                // consumo: mantém o badge de status alinhado na mesma
-                // posição horizontal em todos os cards do grid.
-                <div
-                  className="flex items-center gap-0.5 invisible"
-                  aria-hidden="true"
-                >
-                  <button className="p-1.5 rounded-md shrink-0" tabIndex={-1}>
-                    <PlusCircle size={16} />
-                  </button>
-                  <button className="p-1.5 rounded-md shrink-0" tabIndex={-1}>
-                    <MinusCircle size={16} />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button
-                    className="p-1.5 rounded-md hover:bg-muted/40 transition-colors duration-150 cursor-pointer shrink-0"
-                    title={`Registrar entrada de ${nome}`}
-                    data-test="entrada-icon"
-                    onClick={handleEntrada}
-                  >
-                    <PlusCircle size={16} className="text-foreground" />
-                  </button>
-                  <button
-                    className={`p-1.5 rounded-md transition-colors duration-150 shrink-0 ${
-                      quantidade === 0
-                        ? 'opacity-30 cursor-not-allowed'
-                        : 'hover:bg-muted/40 cursor-pointer'
-                    }`}
-                    title={
-                      quantidade === 0
-                        ? `${nome} sem estoque disponível`
-                        : `Registrar saída de ${nome}`
-                    }
-                    data-test="saida-icon"
-                    onClick={quantidade === 0 ? undefined : handleSaida}
-                    disabled={quantidade === 0}
-                  >
-                    <MinusCircle
-                      size={16}
-                      className={
-                        quantidade === 0
-                          ? 'text-muted-foreground'
-                          : 'text-foreground'
-                      }
-                    />
-                  </button>
-                </>
-              )}
-            </div>
+            {acoesRapidas && (
+              <div
+                className="flex items-center gap-0.5 shrink-0"
+                data-test="movement-icons"
+              >
+                {acoesRapidas}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Actions panel — sobrepõe o footer no mesmo espaço */}
         <div
           className={`absolute inset-0 flex items-center gap-2 pt-2 transition-opacity duration-150 ${
             isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -394,17 +255,13 @@ export default function ItemEstoque({
               setIsMenuOpen(false);
               if (onEmprestar && id) onEmprestar(id);
             }}
-            disabled={semUnidadeDisponivel}
+            disabled={emprestarDesabilitado}
             className={`flex-1 h-11 px-3 text-sm font-semibold rounded-md border transition-colors duration-100 ${
-              semUnidadeDisponivel
+              emprestarDesabilitado
                 ? 'opacity-45 cursor-not-allowed text-muted-foreground bg-muted/25 border-border'
                 : 'text-foreground bg-card border-border hover:bg-muted/45 cursor-pointer'
             }`}
-            title={
-              semUnidadeDisponivel
-                ? `${nome} sem ${ehPermanente ? 'unidade' : 'estoque'} disponível para empréstimo`
-                : undefined
-            }
+            title={emprestarDesabilitado ? emprestarTitle : undefined}
             data-test="emprestimo-button"
           >
             Emprestar

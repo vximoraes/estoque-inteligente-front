@@ -6,6 +6,25 @@ export type PatrimonioStatus =
   | 'Manutenção'
   | 'Baixado';
 
+export const PATRIMONIO_STATUS_OPTIONS: PatrimonioStatus[] = [
+  'Disponível',
+  'Emprestado',
+  'Manutenção',
+  'Baixado',
+];
+
+// Toda ação disponível sobre uma unidade de patrimônio, compartilhada entre
+// o drawer (`sheet-unidades-item.tsx`) e a página global de unidades.
+export type AcaoPatrimonio =
+  | 'emprestar'
+  | 'historico'
+  | 'manutencao'
+  | 'retornarManutencao'
+  | 'baixar'
+  | 'reativar'
+  | 'transferir'
+  | 'remover';
+
 export interface PatrimonioItemRef {
   _id: string;
   nome: string;

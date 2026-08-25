@@ -24,6 +24,7 @@ import {
   X,
   User,
   Package,
+  Boxes,
   BarChart3,
   FileText,
   Handshake,
@@ -350,17 +351,30 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-menu-item"
                 >
                   <SidebarSectionLabel
-                    label="Operações"
+                    label="Bens"
                     collapsed={collapsed}
                     first
                   />
                   <SidebarButtonMenu
                     icon={Package}
-                    name="Itens"
-                    route="/itens"
-                    data-test="sidebar-btn-itens"
+                    name="Patrimônio"
+                    route="/bens/patrimonio"
+                    data-test="sidebar-btn-patrimonio"
                     path={path}
                     onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarButtonMenu
+                    icon={Boxes}
+                    name="Almoxarifado"
+                    route="/bens/almoxarifado"
+                    data-test="sidebar-btn-almoxarifado"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarSectionLabel
+                    label="Operações"
                     collapsed={collapsed}
                   />
                   <SidebarButtonWithSubmenu
@@ -405,7 +419,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  <SidebarSectionLabel label="Cadastros" collapsed={collapsed} />
+                  <SidebarSectionLabel
+                    label="Cadastros"
+                    collapsed={collapsed}
+                  />
                   <SidebarButtonMenu
                     icon={Truck}
                     name="Fornecedores"
@@ -595,16 +612,26 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-2 flex-1 mb-6">
-              <SidebarSectionLabel label="Operações" first />
+              <SidebarSectionLabel label="Bens" first />
               <MobileMenuItem
                 icon={Package}
-                name="Itens"
-                route="/itens"
-                isActive={path?.startsWith('/itens')}
+                name="Patrimônio"
+                route="/bens/patrimonio"
+                isActive={path?.startsWith('/bens/patrimonio')}
                 onClick={() => {
                   handleItemClick();
                 }}
               />
+              <MobileMenuItem
+                icon={Boxes}
+                name="Almoxarifado"
+                route="/bens/almoxarifado"
+                isActive={path?.startsWith('/bens/almoxarifado')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
+              <SidebarSectionLabel label="Operações" />
               <MobileMenuItem
                 icon={BarChart3}
                 name="Relatórios"

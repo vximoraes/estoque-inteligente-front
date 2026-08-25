@@ -70,7 +70,9 @@ export default function ModalPatrimonioTransferir({
         observacoes: observacoes.trim() || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
+      // Prefixo amplo: alcança tanto o drawer (`['patrimonios', itemId]`)
+      // quanto a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success(`${numeroPatrimonio} transferido com sucesso!`, {
         position: 'bottom-right',
         autoClose: 3000,
@@ -111,51 +113,51 @@ export default function ModalPatrimonioTransferir({
           <DialogDescription>{numeroPatrimonio}</DialogDescription>
         </DialogHeader>
 
-      <div className="p-6 space-y-5">
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Nova localização <span className="text-destructive">*</span>
-          </label>
-          <select
-            value={localizacaoDestino}
-            onChange={(e) => {
-              setLocalizacaoDestino(e.target.value);
-              setErro('');
-            }}
-            disabled={isLoading}
-            className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card disabled:opacity-60"
-          >
-            <option value="">
-              {isLoading ? 'Carregando...' : 'Selecionar localização'}
-            </option>
-            {localizacoes.map((loc) => (
-              <option
-                key={loc._id}
-                value={loc._id}
-                disabled={loc._id === localizacaoAtualId}
-              >
-                {loc.nome}
-                {loc._id === localizacaoAtualId ? ' (atual)' : ''}
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Nova localização <span className="text-destructive">*</span>
+            </label>
+            <select
+              value={localizacaoDestino}
+              onChange={(e) => {
+                setLocalizacaoDestino(e.target.value);
+                setErro('');
+              }}
+              disabled={isLoading}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card disabled:opacity-60"
+            >
+              <option value="">
+                {isLoading ? 'Carregando...' : 'Selecionar localização'}
               </option>
-            ))}
-          </select>
-          {erro && <p className="mt-1 text-sm text-destructive">{erro}</p>}
-        </div>
+              {localizacoes.map((loc) => (
+                <option
+                  key={loc._id}
+                  value={loc._id}
+                  disabled={loc._id === localizacaoAtualId}
+                >
+                  {loc.nome}
+                  {loc._id === localizacaoAtualId ? ' (atual)' : ''}
+                </option>
+              ))}
+            </select>
+            {erro && <p className="mt-1 text-sm text-destructive">{erro}</p>}
+          </div>
 
-        <div>
-          <label className="block text-base font-medium text-foreground mb-1">
-            Observações
-          </label>
-          <textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
-            rows={3}
-            placeholder="Observações opcionais"
-            maxLength={500}
-          />
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Observações
+            </label>
+            <textarea
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              rows={3}
+              placeholder="Observações opcionais"
+              maxLength={500}
+            />
+          </div>
         </div>
-      </div>
 
         <DialogFooter>
           <div className="flex gap-3">

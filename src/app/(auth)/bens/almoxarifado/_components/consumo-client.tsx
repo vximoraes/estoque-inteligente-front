@@ -1,5 +1,5 @@
 'use client';
-import ItemEstoque from '@/components/item-estoque';
+import CardItemConsumo from '@/components/card-item-consumo';
 import Cabecalho from '@/components/cabecalho';
 import ModalLocalizacoes from '@/components/modal-localizacoes';
 import ModalFiltros from '@/components/modal-filtros';
@@ -7,15 +7,14 @@ import ModalEntradaItem from '@/components/modal-entrada-item';
 import ModalSaidaItem from '@/components/modal-saida-item';
 import ModalEmprestarItem from '@/components/modal-emprestar-item';
 import ModalExcluirItem from '@/components/modal-excluir-item';
-import ModalCadastrarItem from '@/components/modal-cadastrar-item';
+import ModalCadastrarItemConsumo from '@/components/modal-cadastrar-item-consumo';
 import ModalEditarItem from '@/components/modal-editar-item';
-import SheetUnidadesItem from '@/components/sheet-unidades-item';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { ApiResponse, EstoqueApiResponse } from '@/types/itens';
+import { ItemConsumoApiResponse, EstoqueApiResponse } from '@/types/itens';
 import { Search, Filter, Plus, Package, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
@@ -29,10 +28,10 @@ interface CategoriasApiResponse {
   };
 }
 
-export default function ItensPageContent({
+export default function ConsumoPageContent({
   initialData,
 }: {
-  initialData?: ApiResponse;
+  initialData?: ItemConsumoApiResponse;
 }) {
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
@@ -51,8 +50,6 @@ export default function ItensPageContent({
   const [emprestimoItemId, setEmprestimoItemId] = useState<string | null>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirItemId, setExcluirItemId] = useState<string | null>(null);
-  const [isUnidadesSheetOpen, setIsUnidadesSheetOpen] = useState(false);
-  const [unidadesItemId, setUnidadesItemId] = useState<string | null>(null);
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -61,9 +58,6 @@ export default function ItensPageContent({
     defaultValue: '',
   });
   const [statusFilter, setStatusFilter] = useQueryState('status', {
-    defaultValue: '',
-  });
-  const [tipoFilter, setTipoFilter] = useQueryState('tipo', {
     defaultValue: '',
   });
 
@@ -76,22 +70,19 @@ export default function ItensPageContent({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<ApiResponse>({
-    queryKey: ['itens', searchTerm, categoriaFilter, statusFilter, tipoFilter],
+  } = useInfiniteQuery<ItemConsumoApiResponse>({
+    queryKey: ['itens', 'consumo', searchTerm, categoriaFilter, statusFilter],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
+      params.append('tipo', 'consumo');
       if (searchTerm) params.append('nome', searchTerm);
       if (categoriaFilter) params.append('categoria', categoriaFilter);
       if (statusFilter) params.append('status', statusFilter);
-      if (tipoFilter) params.append('tipo', tipoFilter);
       params.append('limite', '15');
       params.append('page', page.toString());
 
-      const queryString = params.toString();
-      const url = `/itens${queryString ? `?${queryString}` : ''}`;
-
-      return await get<ApiResponse>(url);
+      return await get<ItemConsumoApiResponse>(`/itens?${params.toString()}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -190,11 +181,6 @@ export default function ItensPageContent({
   };
 
   const handleItemClick = (id: string) => {
-    const itemClicado = itens.find((c) => c._id === id);
-    if (itemClicado?.tipo === 'permanente') {
-      handleVerUnidades(id);
-      return;
-    }
     setSelectedItemId(id);
     setIsModalOpen(true);
   };
@@ -202,18 +188,6 @@ export default function ItensPageContent({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setTimeout(() => setSelectedItemId(null), 300);
-  };
-
-  const handleVerUnidades = (id: string) => {
-    setUnidadesItemId(id);
-    setIsUnidadesSheetOpen(true);
-  };
-
-  const handleCloseUnidadesSheet = (open: boolean) => {
-    setIsUnidadesSheetOpen(open);
-    if (!open) {
-      setTimeout(() => setUnidadesItemId(null), 300);
-    }
   };
 
   const handleOpenFiltrosModal = () => {
@@ -224,14 +198,9 @@ export default function ItensPageContent({
     setIsFiltrosModalOpen(false);
   };
 
-  const handleFiltersChange = (
-    categoria: string,
-    status: string,
-    tipo?: string,
-  ) => {
+  const handleFiltersChange = (categoria: string, status: string) => {
     setCategoriaFilter(categoria);
     setStatusFilter(status);
-    setTipoFilter(tipo ?? '');
   };
 
   const handleEntrada = (id: string) => {
@@ -271,16 +240,6 @@ export default function ItensPageContent({
   };
 
   const handleEmprestar = (id: string) => {
-    // ModalEmprestarItem só sabe emprestar por quantidade — abrir para
-    // patrimônio quebraria a suposição do modal (não há noção de unidade
-    // ali). Provisório até a fase de escrita ter um
-    // modal-emprestar-unidade.tsx: redireciona para o drawer, onde o
-    // empréstimo por unidade poderá ser feito quando implementado.
-    const itemAlvo = itens.find((c) => c._id === id);
-    if (itemAlvo?.tipo === 'permanente') {
-      handleVerUnidades(id);
-      return;
-    }
     setEmprestimoItemId(id);
     setIsEmprestimoModalOpen(true);
   };
@@ -350,9 +309,9 @@ export default function ItensPageContent({
   return (
     <div
       className="w-full h-screen flex flex-col overflow-x-hidden"
-      data-test="itens-page"
+      data-test="almoxarifado-page"
     >
-      <Cabecalho pagina="Itens" />
+      <Cabecalho pagina="Almoxarifado" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div
@@ -391,7 +350,7 @@ export default function ItensPageContent({
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 pb-4">
-          {(categoriaFilter || statusFilter || tipoFilter) && (
+          {(categoriaFilter || statusFilter) && (
             <div className="mb-4" data-test="applied-filters">
               <div className="flex flex-wrap items-center gap-2">
                 {categoriaFilter && (
@@ -434,25 +393,6 @@ export default function ItensPageContent({
                     </button>
                   </div>
                 )}
-                {tipoFilter && (
-                  <div
-                    className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
-                    data-test="applied-filter-tipo"
-                  >
-                    <span className="font-medium">Tipo:</span>
-                    <span data-test="applied-filter-tipo-nome">
-                      {tipoFilter === 'permanente' ? 'Permanente' : 'Consumo'}
-                    </span>
-                    <button
-                      onClick={() => setTipoFilter('')}
-                      className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                      title="Remover filtro de tipo"
-                      data-test="applied-filter-tipo-remover"
-                    >
-                      <X size={12} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -487,17 +427,15 @@ export default function ItensPageContent({
                 gridTemplateColumns:
                   'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
               }}
-              data-test="itens-grid"
+              data-test="almoxarifado-grid"
             >
               {itens.map((item, index) => (
-                <ItemEstoque
+                <CardItemConsumo
                   key={item._id}
                   id={item._id}
                   nome={item.nome}
                   categoria={item.categoria.nome}
-                  tipo={item.tipo}
                   quantidade={item.quantidade}
-                  quantidadeDisponivel={item.quantidade_disponivel}
                   estoqueMinimo={item.estoque_minimo}
                   status={item.status}
                   imagem={item.imagem}
@@ -516,14 +454,14 @@ export default function ItensPageContent({
             <EmptyState
               icon={Package}
               title={
-                searchTerm || categoriaFilter || statusFilter || tipoFilter
+                searchTerm || categoriaFilter || statusFilter
                   ? 'Nenhum resultado'
                   : 'Nenhum item cadastrado'
               }
               subtitle={
-                searchTerm || categoriaFilter || statusFilter || tipoFilter
+                searchTerm || categoriaFilter || statusFilter
                   ? 'Tente ajustar sua pesquisa ou remover os filtros.'
-                  : 'Comece adicionando o primeiro item ao estoque.'
+                  : 'Comece adicionando o primeiro item ao almoxarifado.'
               }
             />
           )}
@@ -570,24 +508,15 @@ export default function ItensPageContent({
         />
       )}
 
-      <SheetUnidadesItem
-        itemId={unidadesItemId}
-        itemNome={itens.find((c) => c._id === unidadesItemId)?.nome}
-        open={isUnidadesSheetOpen}
-        onOpenChange={handleCloseUnidadesSheet}
-      />
-
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
         onClose={handleCloseFiltrosModal}
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
-        tipoFilter={tipoFilter}
-        showTipo
         onFiltersChange={handleFiltersChange}
       />
 
-      <ModalCadastrarItem
+      <ModalCadastrarItemConsumo
         isOpen={isCadastrarModalOpen}
         onClose={handleCloseCadastrarModal}
         onSuccess={handleCadastrarSuccess}
@@ -598,6 +527,7 @@ export default function ItensPageContent({
           isOpen={isEditarModalOpen}
           onClose={handleCloseEditarModal}
           itemId={editarItemId}
+          tipo="consumo"
           onSuccess={handleEditarSuccess}
         />
       )}

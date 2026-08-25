@@ -42,7 +42,9 @@ export default function ModalPatrimonioRemover({
       await patch(`/patrimonios/${patrimonioId}/inativar`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
+      // Prefixo amplo: alcança tanto o drawer (`['patrimonios', itemId]`)
+      // quanto a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
       toast.success(`${numeroPatrimonio} removido.`, {
         position: 'bottom-right',
@@ -66,10 +68,7 @@ export default function ModalPatrimonioRemover({
         if (!open) onClose();
       }}
     >
-      <DialogContent
-        className="max-w-sm"
-        data-test="modal-patrimonio-remover"
-      >
+      <DialogContent className="max-w-sm" data-test="modal-patrimonio-remover">
         <DialogHeader className="pb-6">
           <DialogTitle>Remover unidade</DialogTitle>
           <DialogDescription>
