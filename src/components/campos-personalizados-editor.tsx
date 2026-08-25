@@ -66,7 +66,9 @@ export default function CamposPersonalizadosEditor({
 
       <div className="space-y-2">
         {value.map((campo, index) => {
-          const chaveNormalizada = campo.chave.trim().toLocaleLowerCase('pt-BR');
+          const chaveNormalizada = campo.chave
+            .trim()
+            .toLocaleLowerCase('pt-BR');
           const duplicada =
             !!chaveNormalizada && chavesDuplicadas.has(chaveNormalizada);
           return (

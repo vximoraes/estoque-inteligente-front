@@ -116,7 +116,7 @@ export default function SheetDetalhePatrimonio({
             {patrimonio && <StatusBadge status={patrimonio.status} size="sm" />}
           </div>
           <SheetDescription data-test="sheet-detalhe-item-nome">
-            {patrimonio?.item.nome}
+            {patrimonio?.modelo || patrimonio?.categoria.nome}
           </SheetDescription>
         </SheetHeader>
 
@@ -126,6 +126,28 @@ export default function SheetDetalhePatrimonio({
               Dados
             </h4>
             <dl className="space-y-1.5 text-sm">
+              {patrimonio?.modelo && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Modelo</dt>
+                  <dd className="text-foreground text-right truncate">
+                    {patrimonio.modelo}
+                  </dd>
+                </div>
+              )}
+              {patrimonio?.fabricante && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Fabricante</dt>
+                  <dd className="text-foreground text-right truncate">
+                    {patrimonio.fabricante}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Categoria</dt>
+                <dd className="text-foreground text-right truncate">
+                  {patrimonio?.categoria.nome ?? '—'}
+                </dd>
+              </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">Localização</dt>
                 <dd className="text-foreground text-right truncate">

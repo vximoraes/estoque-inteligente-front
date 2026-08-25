@@ -106,7 +106,6 @@ export interface EstoqueData {
 export type EstoqueApiResponse = ApiEnvelope<EstoqueData>;
 
 export type ItemConsumoApiResponse = ApiEnvelope<ItemConsumoData>;
-export type ItemPermanenteApiResponse = ApiEnvelope<ItemPermanenteData>;
 
 // Feed misto (os dois `tipo`), para telas que ainda listam os dois domínios
 // juntos — ex. o seletor de item de orçamentos e empréstimos.

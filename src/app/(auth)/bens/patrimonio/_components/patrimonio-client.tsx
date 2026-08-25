@@ -26,9 +26,7 @@ import type { ApiEnvelope, Localizacao } from '@/types/itens';
 import type { CategoriaApiResponse } from '@/types/categorias';
 import {
   PATRIMONIO_STATUS_OPTIONS,
-  type AcaoPatrimonio,
   type PatrimonioApiResponse,
-  type PatrimonioData,
 } from '@/types/patrimonios';
 import { Search, Filter, Plus, Boxes, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -68,13 +66,9 @@ export default function PatrimonioPageContent({
 
   const {
     contexto,
-    abrir: abrirAcaoRaw,
+    abrir: abrirAcao,
     fechar: fecharAcao,
   } = useAcoesPatrimonio();
-
-  const abrirAcao = (tipo: AcaoPatrimonio, unidade: PatrimonioData) => {
-    abrirAcaoRaw(tipo, unidade, unidade.item._id, unidade.item.nome);
-  };
 
   const {
     data,
@@ -182,7 +176,7 @@ export default function PatrimonioPageContent({
             }
           >
             <SelectTrigger
-              className="w-full sm:w-56"
+              className="w-full sm:w-56 bg-background/30 dark:bg-input/30"
               data-test="filtro-localizacao"
             >
               <SelectValue placeholder="Todas as localizações" />

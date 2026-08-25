@@ -307,7 +307,10 @@ export default function PageUsuariosContent({
                           </span>
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
-                          <span className="truncate block" title={usuario.email}>
+                          <span
+                            className="truncate block"
+                            title={usuario.email}
+                          >
                             {usuario.email}
                           </span>
                         </TableCell>

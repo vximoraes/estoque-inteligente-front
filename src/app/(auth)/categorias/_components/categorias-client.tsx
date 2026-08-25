@@ -49,8 +49,7 @@ export default function PageCategoriasContent({
   const [atualizandoCategoriaId, setAtualizandoCategoriaId] = useState<
     string | null
   >(null);
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] =
-    useState(false);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
 
   const {
     data,

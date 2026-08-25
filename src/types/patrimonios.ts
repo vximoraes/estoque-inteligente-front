@@ -1,4 +1,5 @@
 import type { ApiEnvelope, Localizacao } from './itens';
+import type { Categoria } from './categorias';
 
 export type PatrimonioStatus =
   | 'Disponível'
@@ -26,12 +27,6 @@ export type AcaoPatrimonio =
   | 'transferir'
   | 'remover';
 
-export interface PatrimonioItemRef {
-  _id: string;
-  nome: string;
-  tipo: 'consumo' | 'permanente';
-}
-
 export interface CampoPersonalizado {
   chave: string;
   valor: string;
@@ -39,8 +34,10 @@ export interface CampoPersonalizado {
 
 export interface PatrimonioData {
   _id: string;
-  item: PatrimonioItemRef;
   numero_patrimonio: string;
+  modelo?: string;
+  fabricante?: string;
+  categoria: Categoria;
   localizacao: Localizacao;
   status: PatrimonioStatus;
   data_aquisicao?: string;
@@ -65,7 +62,6 @@ export type PatrimonioEventoTipo =
 export interface PatrimonioEventoData {
   _id: string;
   patrimonio: string;
-  item: string;
   tipo: PatrimonioEventoTipo;
   status_anterior: PatrimonioStatus | null;
   status_novo: PatrimonioStatus;

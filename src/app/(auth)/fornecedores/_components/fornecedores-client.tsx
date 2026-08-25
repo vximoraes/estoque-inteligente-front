@@ -270,7 +270,10 @@ export default function PageFornecedoresContent({
                             </div>
                           )}
                         <TableCell className="font-medium text-left px-8 py-2">
-                          <span className="truncate block" title={fornecedor.nome}>
+                          <span
+                            className="truncate block"
+                            title={fornecedor.nome}
+                          >
                             {fornecedor.nome}
                           </span>
                         </TableCell>

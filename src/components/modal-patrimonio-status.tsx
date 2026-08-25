@@ -28,7 +28,6 @@ interface ModalPatrimonioStatusProps {
   onClose: () => void;
   patrimonioId: string;
   numeroPatrimonio: string;
-  itemId: string;
   novoStatus: Extract<
     PatrimonioStatus,
     'Disponível' | 'Manutenção' | 'Baixado'
@@ -45,7 +44,6 @@ export default function ModalPatrimonioStatus({
   onClose,
   patrimonioId,
   numeroPatrimonio,
-  itemId,
   novoStatus,
   titulo,
   descricao,
@@ -67,12 +65,9 @@ export default function ModalPatrimonioStatus({
         observacoes: observacoes.trim() || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      // Prefixo amplo, não `['patrimonios', itemId]`: precisa alcançar tanto
-      // o drawer (`['patrimonios', itemId]`) quanto a página global de
-      // unidades (`['patrimonios', 'lista', ...]`), que não casam entre si.
+      // Prefixo amplo: alcança tanto o detalhe da unidade já aberto quanto
+      // a página global de unidades (`['patrimonios', 'lista', ...]`).
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
-      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
       toast.success(`${numeroPatrimonio} atualizado com sucesso!`, {
         position: 'bottom-right',
         autoClose: 3000,

@@ -7,6 +7,7 @@
 // custom.
 
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { get, patch } from '@/lib/fetchData';
@@ -27,7 +28,6 @@ interface ModalPatrimonioTransferirProps {
   patrimonioId: string;
   numeroPatrimonio: string;
   localizacaoAtualId: string;
-  itemId: string;
   onSuccess?: () => void;
 }
 
@@ -37,7 +37,6 @@ export default function ModalPatrimonioTransferir({
   patrimonioId,
   numeroPatrimonio,
   localizacaoAtualId,
-  itemId,
   onSuccess,
 }: ModalPatrimonioTransferirProps) {
   const queryClient = useQueryClient();
@@ -118,29 +117,32 @@ export default function ModalPatrimonioTransferir({
             <label className="block text-base font-medium text-foreground mb-1">
               Nova localização <span className="text-destructive">*</span>
             </label>
-            <select
-              value={localizacaoDestino}
-              onChange={(e) => {
-                setLocalizacaoDestino(e.target.value);
-                setErro('');
-              }}
-              disabled={isLoading}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card disabled:opacity-60"
-            >
-              <option value="">
-                {isLoading ? 'Carregando...' : 'Selecionar localização'}
-              </option>
-              {localizacoes.map((loc) => (
-                <option
-                  key={loc._id}
-                  value={loc._id}
-                  disabled={loc._id === localizacaoAtualId}
-                >
-                  {loc.nome}
-                  {loc._id === localizacaoAtualId ? ' (atual)' : ''}
+            <div className="relative">
+              <select
+                value={localizacaoDestino}
+                onChange={(e) => {
+                  setLocalizacaoDestino(e.target.value);
+                  setErro('');
+                }}
+                disabled={isLoading}
+                className="w-full h-11 px-3 pr-9 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card text-foreground appearance-none disabled:opacity-60"
+              >
+                <option value="">
+                  {isLoading ? 'Carregando...' : 'Selecionar localização'}
                 </option>
-              ))}
-            </select>
+                {localizacoes.map((loc) => (
+                  <option
+                    key={loc._id}
+                    value={loc._id}
+                    disabled={loc._id === localizacaoAtualId}
+                  >
+                    {loc.nome}
+                    {loc._id === localizacaoAtualId ? ' (atual)' : ''}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
             {erro && <p className="mt-1 text-sm text-destructive">{erro}</p>}
           </div>
 

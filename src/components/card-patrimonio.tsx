@@ -30,7 +30,7 @@ export default function CardPatrimonio({
     <div
       className="bg-card rounded-md border border-border p-4 transition-colors w-full h-full min-h-40 min-w-0 flex flex-col cursor-pointer relative"
       data-test={dataTest || `patrimonio-card-${unidade._id}`}
-      title={`${unidade.numero_patrimonio} — ${unidade.item.nome}`}
+      title={`${unidade.modelo || unidade.categoria.nome} — ${unidade.numero_patrimonio}`}
       onClick={() => onClick(unidade)}
     >
       <div
@@ -48,17 +48,17 @@ export default function CardPatrimonio({
           <div className="flex-1 min-w-0 overflow-hidden" data-test="text-info">
             <h3
               className="text-base font-semibold text-foreground leading-tight truncate"
+              title={unidade.modelo || unidade.categoria.nome}
+              data-test="patrimonio-card-modelo"
+            >
+              {unidade.modelo || unidade.categoria.nome}
+            </h3>
+            <p
+              className="text-sm font-medium tracking-[0.03em] text-muted-foreground truncate mt-0.5"
               title={unidade.numero_patrimonio}
               data-test="patrimonio-card-numero"
             >
               {unidade.numero_patrimonio}
-            </h3>
-            <p
-              className="text-sm font-medium tracking-[0.03em] text-muted-foreground truncate mt-0.5"
-              title={unidade.item.nome}
-              data-test="patrimonio-card-item-nome"
-            >
-              {unidade.item.nome}
             </p>
           </div>
         </div>
@@ -86,7 +86,10 @@ export default function CardPatrimonio({
             <span className="truncate">{unidade.localizacao?.nome ?? '—'}</span>
           </div>
 
-          <StatusBadge status={unidade.status} data-test="patrimonio-card-status" />
+          <StatusBadge
+            status={unidade.status}
+            data-test="patrimonio-card-status"
+          />
 
           <div aria-hidden />
         </div>

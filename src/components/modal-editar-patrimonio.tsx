@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import CampoCategoria from '@/components/item-form/campo-categoria';
 import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
 import type { CampoPersonalizado, PatrimonioData } from '@/types/patrimonios';
 
@@ -27,7 +28,6 @@ interface ModalEditarPatrimonioProps {
   isOpen: boolean;
   onClose: () => void;
   patrimonio: PatrimonioData;
-  itemId: string;
   onSuccess?: () => void;
 }
 
@@ -42,11 +42,13 @@ export default function ModalEditarPatrimonio({
   isOpen,
   onClose,
   patrimonio,
-  itemId,
   onSuccess,
 }: ModalEditarPatrimonioProps) {
   const queryClient = useQueryClient();
   const [numeroPatrimonio, setNumeroPatrimonio] = useState('');
+  const [modelo, setModelo] = useState('');
+  const [fabricante, setFabricante] = useState('');
+  const [categoriaId, setCategoriaId] = useState('');
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [camposPersonalizados, setCamposPersonalizados] = useState<
@@ -54,12 +56,16 @@ export default function ModalEditarPatrimonio({
   >([]);
   const [erros, setErros] = useState<{
     numeroPatrimonio?: string;
+    categoria?: string;
     camposPersonalizados?: string;
   }>({});
 
   useEffect(() => {
     if (!isOpen) return;
     setNumeroPatrimonio(patrimonio.numero_patrimonio);
+    setModelo(patrimonio.modelo ?? '');
+    setFabricante(patrimonio.fabricante ?? '');
+    setCategoriaId(patrimonio.categoria._id);
     setDataAquisicao(formatarDataInput(patrimonio.data_aquisicao));
     setObservacoes(patrimonio.observacoes ?? '');
     setCamposPersonalizados(patrimonio.campos_personalizados ?? []);
@@ -71,6 +77,9 @@ export default function ModalEditarPatrimonio({
     mutationFn: async () =>
       await patch(`/patrimonios/${patrimonio._id}`, {
         numero_patrimonio: numeroPatrimonio.trim(),
+        modelo: modelo.trim() || undefined,
+        fabricante: fabricante.trim() || undefined,
+        categoria: categoriaId,
         data_aquisicao: dataAquisicao
           ? new Date(dataAquisicao).toISOString()
           : undefined,
@@ -82,7 +91,6 @@ export default function ModalEditarPatrimonio({
     onSuccess: () => {
       // Prefixo amplo: alcança tanto a grade quanto o detalhe já aberto.
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
-      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
       toast.success(`${numeroPatrimonio} atualizado com sucesso!`, {
         position: 'bottom-right',
         autoClose: 3000,
@@ -112,6 +120,9 @@ export default function ModalEditarPatrimonio({
     if (!numeroPatrimonio.trim()) {
       novosErros.numeroPatrimonio = 'Número de patrimônio é obrigatório';
     }
+    if (!categoriaId) {
+      novosErros.categoria = 'Selecione a categoria';
+    }
     if (duplicada) {
       novosErros.camposPersonalizados = 'Há campos personalizados duplicados';
     }
@@ -134,7 +145,9 @@ export default function ModalEditarPatrimonio({
       >
         <DialogHeader>
           <DialogTitle>Editar unidade</DialogTitle>
-          <DialogDescription>{patrimonio.item.nome}</DialogDescription>
+          <DialogDescription>
+            {patrimonio.modelo || patrimonio.numero_patrimonio}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="p-6 space-y-5">
@@ -161,6 +174,43 @@ export default function ModalEditarPatrimonio({
               </p>
             )}
           </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Modelo
+            </label>
+            <input
+              type="text"
+              value={modelo}
+              onChange={(e) => setModelo(e.target.value)}
+              maxLength={100}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Fabricante
+            </label>
+            <input
+              type="text"
+              value={fabricante}
+              onChange={(e) => setFabricante(e.target.value)}
+              maxLength={100}
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+          </div>
+
+          <CampoCategoria
+            value={categoriaId}
+            onChange={(id) => {
+              setCategoriaId(id);
+              setErros((prev) => ({ ...prev, categoria: undefined }));
+            }}
+            tipo="permanente"
+            error={erros.categoria}
+            enabled={isOpen}
+          />
 
           <div>
             <label className="block text-base font-medium text-foreground mb-1">

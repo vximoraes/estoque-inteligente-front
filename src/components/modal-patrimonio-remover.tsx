@@ -23,7 +23,6 @@ interface ModalPatrimonioRemoverProps {
   onClose: () => void;
   patrimonioId: string;
   numeroPatrimonio: string;
-  itemId: string;
   onSuccess?: () => void;
 }
 
@@ -32,7 +31,6 @@ export default function ModalPatrimonioRemover({
   onClose,
   patrimonioId,
   numeroPatrimonio,
-  itemId,
   onSuccess,
 }: ModalPatrimonioRemoverProps) {
   const queryClient = useQueryClient();
@@ -41,11 +39,9 @@ export default function ModalPatrimonioRemover({
     mutationFn: async () =>
       await patch(`/patrimonios/${patrimonioId}/inativar`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      // Prefixo amplo: alcança tanto o drawer (`['patrimonios', itemId]`)
-      // quanto a página global de unidades (`['patrimonios', 'lista', ...]`).
+      // Prefixo amplo: alcança tanto o detalhe da unidade já aberto quanto
+      // a página global de unidades (`['patrimonios', 'lista', ...]`).
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
-      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
       toast.success(`${numeroPatrimonio} removido.`, {
         position: 'bottom-right',
         autoClose: 3000,

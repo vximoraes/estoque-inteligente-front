@@ -7,6 +7,7 @@
 // modelo escolhido, mas fica sempre editável.
 
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { get, post } from '@/lib/fetchData';
@@ -19,11 +20,15 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import CampoItem from '@/components/item-form/campo-item';
+import CampoCategoria from '@/components/item-form/campo-categoria';
 import CampoLocalizacao from '@/components/item-form/campo-localizacao';
 import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
 import { sugerirNumeroPatrimonio } from '@/lib/patrimonio-numeracao';
-import type { CampoPersonalizado, PatrimonioApiResponse } from '@/types/patrimonios';
+import type {
+  CampoPersonalizado,
+  PatrimonioApiResponse,
+  PatrimonioStatus,
+} from '@/types/patrimonios';
 
 interface ModalCadastrarPatrimonioProps {
   isOpen: boolean;
@@ -31,16 +36,28 @@ interface ModalCadastrarPatrimonioProps {
   onSuccess?: () => void;
 }
 
+// 'Emprestado' fora de propósito: não é destino válido no cadastro (só
+// entra pelo fluxo de empréstimo) — mesma regra do PatrimonioSchema da API.
+const STATUS_INICIAL_OPTIONS: PatrimonioStatus[] = [
+  'Disponível',
+  'Manutenção',
+  'Baixado',
+];
+
 export default function ModalCadastrarPatrimonio({
   isOpen,
   onClose,
   onSuccess,
 }: ModalCadastrarPatrimonioProps) {
   const queryClient = useQueryClient();
-  const [itemId, setItemId] = useState('');
+  const [categoriaId, setCategoriaId] = useState('');
   const [numeroPatrimonio, setNumeroPatrimonio] = useState('');
   const [numeroEditadoManualmente, setNumeroEditadoManualmente] =
     useState(false);
+  const [modelo, setModelo] = useState('');
+  const [modeloParaSugestao, setModeloParaSugestao] = useState('');
+  const [fabricante, setFabricante] = useState('');
+  const [status, setStatus] = useState<PatrimonioStatus>('Disponível');
   const [localizacao, setLocalizacao] = useState('');
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [observacoes, setObservacoes] = useState('');
@@ -48,16 +65,21 @@ export default function ModalCadastrarPatrimonio({
     CampoPersonalizado[]
   >([]);
   const [erros, setErros] = useState<{
-    item?: string;
+    categoria?: string;
     numeroPatrimonio?: string;
+    modelo?: string;
     localizacao?: string;
     camposPersonalizados?: string;
   }>({});
 
   const resetForm = () => {
-    setItemId('');
+    setCategoriaId('');
     setNumeroPatrimonio('');
     setNumeroEditadoManualmente(false);
+    setModelo('');
+    setModeloParaSugestao('');
+    setFabricante('');
+    setStatus('Disponível');
     setLocalizacao('');
     setDataAquisicao('');
     setObservacoes('');
@@ -69,27 +91,33 @@ export default function ModalCadastrarPatrimonio({
     if (isOpen) resetForm();
   }, [isOpen]);
 
-  // Sugestão de número: só busca as unidades do modelo escolhido quando o
-  // usuário ainda não editou o campo manualmente, pra não pisar numa
-  // digitação em andamento.
-  const { data: unidadesDoItem } = useQuery<PatrimonioApiResponse>({
-    queryKey: ['patrimonios', itemId, 'sugestao-numero'],
+  // Sugestão de número: só busca as unidades do mesmo modelo (correspondência
+  // exata) quando o usuário ainda não editou o campo manualmente, pra não
+  // pisar numa digitação em andamento. Dispara no blur do campo Modelo, não
+  // a cada tecla — ver `onBlur` mais abaixo.
+  const { data: unidadesDoModelo } = useQuery<PatrimonioApiResponse>({
+    queryKey: ['patrimonios', 'sugestao-numero', modeloParaSugestao],
     queryFn: () =>
-      get<PatrimonioApiResponse>(`/patrimonios?item=${itemId}&limite=100`),
-    enabled: isOpen && !!itemId && !numeroEditadoManualmente,
+      get<PatrimonioApiResponse>(
+        `/patrimonios?modelo=${encodeURIComponent(modeloParaSugestao)}&limite=100`,
+      ),
+    enabled: isOpen && !!modeloParaSugestao && !numeroEditadoManualmente,
   });
 
   useEffect(() => {
-    if (numeroEditadoManualmente || !unidadesDoItem) return;
-    const sugestao = sugerirNumeroPatrimonio(unidadesDoItem.data.docs);
+    if (numeroEditadoManualmente || !unidadesDoModelo) return;
+    const sugestao = sugerirNumeroPatrimonio(unidadesDoModelo.data.docs);
     if (sugestao) setNumeroPatrimonio(sugestao);
-  }, [unidadesDoItem, numeroEditadoManualmente]);
+  }, [unidadesDoModelo, numeroEditadoManualmente]);
 
   const mutation = useMutation({
     mutationFn: async () =>
       await post('/patrimonios', {
-        item: itemId,
+        categoria: categoriaId,
         numero_patrimonio: numeroPatrimonio.trim(),
+        modelo: modelo.trim(),
+        fabricante: fabricante.trim() || undefined,
+        status,
         localizacao,
         data_aquisicao: dataAquisicao
           ? new Date(dataAquisicao).toISOString()
@@ -100,7 +128,6 @@ export default function ModalCadastrarPatrimonio({
           .filter((c) => c.chave && c.valor),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success('Unidade de patrimônio cadastrada com sucesso!', {
         position: 'bottom-right',
@@ -110,10 +137,10 @@ export default function ModalCadastrarPatrimonio({
       onClose();
     },
     onError: (error: any) => {
-      toast.error(
-        error?.message || 'Não foi possível cadastrar a unidade.',
-        { position: 'bottom-right', autoClose: 5000 },
-      );
+      toast.error(error?.message || 'Não foi possível cadastrar a unidade.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+      });
     },
   });
 
@@ -128,10 +155,11 @@ export default function ModalCadastrarPatrimonio({
     }
 
     const novosErros: typeof erros = {};
-    if (!itemId) novosErros.item = 'Selecione o modelo';
+    if (!categoriaId) novosErros.categoria = 'Selecione a categoria';
     if (!numeroPatrimonio.trim()) {
       novosErros.numeroPatrimonio = 'Número de patrimônio é obrigatório';
     }
+    if (!modelo.trim()) novosErros.modelo = 'Modelo é obrigatório';
     if (!localizacao) novosErros.localizacao = 'Selecione a localização';
     if (duplicada) {
       novosErros.camposPersonalizados = 'Há campos personalizados duplicados';
@@ -161,13 +189,14 @@ export default function ModalCadastrarPatrimonio({
         </DialogHeader>
 
         <div className="p-6 space-y-5">
-          <CampoItem
-            value={itemId}
+          <CampoCategoria
+            value={categoriaId}
             onChange={(id) => {
-              setItemId(id);
-              setErros((prev) => ({ ...prev, item: undefined }));
+              setCategoriaId(id);
+              setErros((prev) => ({ ...prev, categoria: undefined }));
             }}
-            error={erros.item}
+            tipo="permanente"
+            error={erros.categoria}
             enabled={isOpen}
           />
 
@@ -195,6 +224,61 @@ export default function ModalCadastrarPatrimonio({
                 {erros.numeroPatrimonio}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Modelo <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              value={modelo}
+              onChange={(e) => {
+                setModelo(e.target.value);
+                setErros((prev) => ({ ...prev, modelo: undefined }));
+              }}
+              onBlur={(e) => setModeloParaSugestao(e.target.value.trim())}
+              maxLength={100}
+              placeholder="ThinkPad T14"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+            {erros.modelo && (
+              <p className="mt-1 text-sm text-destructive">{erros.modelo}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Fabricante
+            </label>
+            <input
+              type="text"
+              value={fabricante}
+              onChange={(e) => setFabricante(e.target.value)}
+              maxLength={100}
+              placeholder="Lenovo"
+              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-base font-medium text-foreground mb-1">
+              Status
+            </label>
+            <div className="relative">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as PatrimonioStatus)}
+                className="w-full h-11 px-3 pr-9 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card text-foreground appearance-none"
+              >
+                {STATUS_INICIAL_OPTIONS.map((opcao) => (
+                  <option key={opcao} value={opcao}>
+                    {opcao}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
 
           <CampoLocalizacao

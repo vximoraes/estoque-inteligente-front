@@ -39,36 +39,42 @@ function RelatorioPatrimonioPageContent() {
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery<PatrimonioApiResponse>({
-      queryKey: ['patrimonios-relatorio', statusFilter],
-      queryFn: async ({ pageParam }) => {
-        const page = (pageParam as number) || 1;
-        const params = new URLSearchParams();
-        params.append('limite', '20');
-        params.append('page', page.toString());
-        if (statusFilter) {
-          params.append('status', statusFilter);
-        }
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<PatrimonioApiResponse>({
+    queryKey: ['patrimonios-relatorio', statusFilter],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
+      const params = new URLSearchParams();
+      params.append('limite', '20');
+      params.append('page', page.toString());
+      if (statusFilter) {
+        params.append('status', statusFilter);
+      }
 
-        const queryString = params.toString();
-        const url = `/patrimonios${queryString ? `?${queryString}` : ''}`;
+      const queryString = params.toString();
+      const url = `/patrimonios${queryString ? `?${queryString}` : ''}`;
 
-        return await get<PatrimonioApiResponse>(url);
-      },
-      getNextPageParam: (lastPage) => {
-        return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-      },
-      initialPageParam: 1,
-      refetchOnMount: true,
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error: any) => {
-        if (error?.message?.includes('Falha na autenticação')) {
-          return false;
-        }
-        return failureCount < 3;
-      },
-    });
+      return await get<PatrimonioApiResponse>(url);
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
 
   useEffect(() => {
     if (!observerTarget.current) return;
@@ -93,15 +99,14 @@ function RelatorioPatrimonioPageContent() {
   // pelo scroll infinito, não o total absoluto quando o filtro é amplo.
   const patrimoniosFiltrados = todosPatrimonios
     .filter((patrimonio) => {
-      if (!patrimonio?.item || !patrimonio?.localizacao) return false;
-      const nomeItem =
-        typeof patrimonio.item === 'object' ? patrimonio.item.nome : '';
+      if (!patrimonio?.categoria || !patrimonio?.localizacao) return false;
+      const modeloOuCategoria = patrimonio.modelo || patrimonio.categoria.nome;
       const matchSearch =
         !searchTerm ||
         patrimonio.numero_patrimonio
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        nomeItem?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        modeloOuCategoria?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         patrimonio.localizacao.nome
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase());
@@ -180,7 +185,7 @@ function RelatorioPatrimonioPageContent() {
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
-              placeholder="Pesquisar por nº de patrimônio, item ou localização..."
+              placeholder="Pesquisar por nº de patrimônio, modelo ou localização..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-11 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-[var(--ei-accent)]/35 focus-visible:border-[var(--ei-accent)]"
@@ -258,9 +263,9 @@ function RelatorioPatrimonioPageContent() {
                       </TableHead>
                       <TableHead
                         className="font-semibold text-muted-foreground bg-muted text-left px-8"
-                        data-test="table-head-item"
+                        data-test="table-head-modelo"
                       >
-                        ITEM
+                        MODELO
                       </TableHead>
                       <TableHead
                         className="font-semibold text-muted-foreground bg-muted text-center px-8"
@@ -298,19 +303,15 @@ function RelatorioPatrimonioPageContent() {
                         </TableCell>
                         <TableCell
                           className="font-medium text-left px-8 py-3"
-                          data-test="patrimonio-item"
+                          data-test="patrimonio-modelo"
                         >
                           <span
                             className="truncate block max-w-[220px]"
                             title={
-                              typeof patrimonio.item === 'object'
-                                ? patrimonio.item.nome
-                                : ''
+                              patrimonio.modelo || patrimonio.categoria.nome
                             }
                           >
-                            {typeof patrimonio.item === 'object'
-                              ? patrimonio.item.nome
-                              : '—'}
+                            {patrimonio.modelo || patrimonio.categoria.nome}
                           </span>
                         </TableCell>
                         <TableCell
@@ -369,7 +370,7 @@ function RelatorioPatrimonioPageContent() {
                 subtitle={
                   searchTerm || statusFilter
                     ? 'Tente ajustar sua pesquisa ou remover os filtros.'
-                    : 'Cadastre um item permanente para começar.'
+                    : 'Cadastre uma unidade de patrimônio para começar.'
                 }
               />
             </div>

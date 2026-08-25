@@ -38,14 +38,13 @@ export default function PageLocalizacoesContent({
   >(null);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
-  const [editarLocalizacaoId, setEditarLocalizacaoId] = useState<
-    string | null
-  >(null);
+  const [editarLocalizacaoId, setEditarLocalizacaoId] = useState<string | null>(
+    null,
+  );
   const [atualizandoLocalizacaoId, setAtualizandoLocalizacaoId] = useState<
     string | null
   >(null);
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] =
-    useState(false);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
 
   const {
     data,
@@ -342,8 +341,7 @@ export default function PageLocalizacoesContent({
           onSuccess={handleExcluirSuccess}
           localizacaoId={excluirLocalizacaoId}
           localizacaoNome={
-            localizacoes.find((l) => l._id === excluirLocalizacaoId)?.nome ||
-            ''
+            localizacoes.find((l) => l._id === excluirLocalizacaoId)?.nome || ''
           }
         />
       )}
@@ -363,12 +361,10 @@ export default function PageLocalizacoesContent({
           }}
           localizacaoId={editarLocalizacaoId}
           localizacaoNome={
-            localizacoes.find((l) => l._id === editarLocalizacaoId)?.nome ||
-            ''
+            localizacoes.find((l) => l._id === editarLocalizacaoId)?.nome || ''
           }
           localizacaoDescricao={
-            localizacoes.find((l) => l._id === editarLocalizacaoId)
-              ?.descricao
+            localizacoes.find((l) => l._id === editarLocalizacaoId)?.descricao
           }
           onSuccess={handleEditarSuccess}
         />

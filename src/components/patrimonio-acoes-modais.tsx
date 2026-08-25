@@ -29,14 +29,9 @@ export default function PatrimonioAcoesModais({
         <ModalEmprestarUnidade
           isOpen
           onClose={onFechar}
-          itemId={contexto.itemId}
-          itemNome={contexto.itemNome}
-          patrimonioPreSelecionado={contexto.unidade._id}
+          patrimonio={contexto.unidade}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
-            queryClient.invalidateQueries({
-              queryKey: ['item-detalhe', contexto.itemId],
-            });
           }}
         />
       )}
@@ -46,7 +41,6 @@ export default function PatrimonioAcoesModais({
           isOpen
           onClose={onFechar}
           patrimonio={contexto.unidade}
-          itemId={contexto.itemId}
         />
       )}
 
@@ -64,7 +58,6 @@ export default function PatrimonioAcoesModais({
           onClose={onFechar}
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
-          itemId={contexto.itemId}
           novoStatus="Manutenção"
           titulo="Enviar para manutenção"
           descricao="A unidade fica indisponível para empréstimo até retornar."
@@ -78,7 +71,6 @@ export default function PatrimonioAcoesModais({
           onClose={onFechar}
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
-          itemId={contexto.itemId}
           novoStatus="Disponível"
           titulo="Retornar da manutenção"
           descricao="A unidade volta a ficar disponível para empréstimo."
@@ -92,7 +84,6 @@ export default function PatrimonioAcoesModais({
           onClose={onFechar}
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
-          itemId={contexto.itemId}
           novoStatus="Baixado"
           titulo="Baixar unidade"
           descricao="Sai do estoque ativo e fica registrada no histórico."
@@ -107,7 +98,6 @@ export default function PatrimonioAcoesModais({
           onClose={onFechar}
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
-          itemId={contexto.itemId}
           novoStatus="Disponível"
           titulo="Reativar unidade"
           descricao="A unidade volta a ficar disponível para uso."
@@ -122,7 +112,6 @@ export default function PatrimonioAcoesModais({
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
           localizacaoAtualId={contexto.unidade.localizacao._id}
-          itemId={contexto.itemId}
         />
       )}
 
@@ -132,7 +121,6 @@ export default function PatrimonioAcoesModais({
           onClose={onFechar}
           patrimonioId={contexto.unidade._id}
           numeroPatrimonio={contexto.unidade.numero_patrimonio}
-          itemId={contexto.itemId}
         />
       )}
     </>
