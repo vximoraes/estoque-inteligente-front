@@ -17,7 +17,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import { Search, Filter, Package, X, FileDown } from 'lucide-react';
+import { Search, SlidersHorizontal, Package, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
@@ -414,7 +414,7 @@ function RelatorioItensPageContent() {
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button

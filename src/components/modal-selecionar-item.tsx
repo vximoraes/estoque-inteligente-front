@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Filter } from 'lucide-react';
+import { X, Search, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
@@ -225,7 +225,7 @@ export default function ModalSelecionarItem({
               onClick={() => setIsFiltrosModalOpen(true)}
               data-test="modal-selecionar-item-filtros-button"
             >
-              <Filter className="w-4 h-4" />
+              <SlidersHorizontal className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
             </Button>
           </div>

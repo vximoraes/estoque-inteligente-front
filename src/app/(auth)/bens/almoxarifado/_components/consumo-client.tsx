@@ -16,7 +16,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ItemConsumoApiResponse, EstoqueApiResponse } from '@/types/itens';
 import type { CategoriaApiResponse } from '@/types/categorias';
-import { Search, Filter, Plus, Package, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, Package, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -332,7 +332,7 @@ export default function ConsumoPageContent({
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button

@@ -28,7 +28,7 @@ import {
   PATRIMONIO_STATUS_OPTIONS,
   type PatrimonioApiResponse,
 } from '@/types/patrimonios';
-import { Search, Filter, Plus, Boxes, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, Boxes, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, Slide } from 'react-toastify';
@@ -203,7 +203,7 @@ export default function PatrimonioPageContent({
             data-test="filtros-button"
             onClick={() => setIsFiltrosModalOpen(true)}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button

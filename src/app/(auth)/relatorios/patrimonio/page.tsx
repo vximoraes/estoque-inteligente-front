@@ -16,7 +16,7 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import type { PatrimonioApiResponse } from '@/types/patrimonios';
-import { Search, Filter, Package, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Package, X } from 'lucide-react';
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
 
@@ -198,7 +198,7 @@ function RelatorioPatrimonioPageContent() {
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
         </div>

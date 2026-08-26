@@ -16,7 +16,7 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
-import { Search, FileText, Filter, X, FileDown } from 'lucide-react';
+import { Search, FileText, SlidersHorizontal, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
@@ -367,7 +367,7 @@ function RelatorioOrcamentosPageContent() {
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button
