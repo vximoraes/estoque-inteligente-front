@@ -128,7 +128,14 @@ export default function PatrimonioPageContent({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const unidades = data?.pages.flatMap((page) => page.data.docs) || [];
+  // Paginação por número de página: se um patrimônio muda de posição na
+  // ordenação entre um fetch e outro (ex.: número editado), a mesma unidade
+  // pode aparecer em duas páginas já carregadas — dedupe por _id evita a
+  // colisão de key no React.
+  const unidadesBrutas = data?.pages.flatMap((page) => page.data.docs) || [];
+  const unidades = Array.from(
+    new Map(unidadesBrutas.map((u) => [u._id, u])).values(),
+  );
 
   const { data: localizacoesData } = useQuery<ApiEnvelope<Localizacao>>({
     queryKey: ['localizacoes'],

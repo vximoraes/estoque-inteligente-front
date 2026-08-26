@@ -19,6 +19,6 @@ export default function Header({ children }: ComponenteReact) {
   const isPerfilPage = pathName === '/perfil';
 
   if (!rotasIgnoradas.includes(pathName)) {
-    return <CustomSidebar path={pathName} collapsed={isPerfilPage} />;
+    return <CustomSidebar path={pathName} forceCollapsed={isPerfilPage} />;
   }
 }

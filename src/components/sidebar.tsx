@@ -37,6 +37,8 @@ import {
   Moon,
   Monitor,
   Check,
+  ChevronLeft,
+  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -55,7 +57,9 @@ const temaOpcoes = [
 
 interface PathRouter {
   path: string;
-  collapsed?: boolean;
+  /** Colapsa a sidebar independente da preferência do usuário — usado hoje
+   * só pela página de perfil, que precisa de mais espaço horizontal. */
+  forceCollapsed?: boolean;
 }
 
 function SidebarSectionLabel({
@@ -202,8 +206,17 @@ function MobileMenuItem({
   );
 }
 
-export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
-  const { isOpen, closeSidebar } = useSidebarContext();
+export default function CustomSidebar({
+  path,
+  forceCollapsed = false,
+}: PathRouter) {
+  const {
+    isOpen,
+    closeSidebar,
+    collapsed: collapsedPref,
+    toggleCollapsed,
+  } = useSidebarContext();
+  const collapsed = forceCollapsed || collapsedPref;
   const { user } = useSession();
   const { canManageUsers } = usePermissions();
   const router = useRouter();
@@ -284,6 +297,21 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
         className={`hidden md:block md:relative transition-all duration-300 ${collapsed ? 'md:w-[100px]' : 'md:w-[280px]'}`}
         data-test="sidebar-container-desktop"
       >
+        {!forceCollapsed && (
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            data-test="sidebar-toggle-collapsed"
+          >
+            {collapsed ? (
+              <ChevronRight className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronLeft className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
         <SidebarProvider
           data-test="sidebar-provider"
           className={`m-0 p-0 h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
