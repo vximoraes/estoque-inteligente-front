@@ -401,6 +401,11 @@ export default function PageOrcamentosContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_ORCAMENTOS}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer"
@@ -410,11 +415,6 @@ export default function PageOrcamentosContent({
             <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
-          <OrdenarPorSelect
-            value={ordenar}
-            onChange={setOrdenar}
-            opcoes={ORDENACAO_ORCAMENTOS}
-          />
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}

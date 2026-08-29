@@ -8,9 +8,15 @@ import ModalDetalhesEmprestimo from '@/components/modal-detalhes-emprestimo';
 import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
 import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
 import ModalDevolverItem from '@/components/modal-devolver-item';
-import ModalFiltros from '@/components/modal-filtros';
 import EmptyState from '@/components/empty-state';
 import OrdenarPorSelect from '@/components/ordenar-por-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ORDENACAO_EMPRESTIMOS } from '@/lib/ordenacao';
 import type { PatrimonioData } from '@/types/patrimonios';
 import { Input } from '@/components/ui/input';
@@ -33,8 +39,7 @@ import {
   Pencil,
   Plus,
   Trash2,
-  SlidersHorizontal,
-  X,
+  ListFilter,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
@@ -46,8 +51,9 @@ const TIPO_CONTROLE_LABEL: Record<'quantidade' | 'unidade', string> = {
   unidade: 'Patrimônio',
 };
 
+const STATUS_FILTER_PADRAO = 'todos';
+
 const statusOptions = [
-  { value: '', label: 'Todos os status' },
   { value: 'Ativo', label: 'Ativo' },
   { value: 'Atrasado', label: 'Atrasado' },
   { value: 'Devolvido', label: 'Devolvido' },
@@ -71,7 +77,6 @@ export default function EmprestimosPageContent({
     defaultValue: '',
   });
   const observerTarget = useRef<HTMLDivElement>(null);
-  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
   const [isSelecionarPatrimonioModalOpen, setIsSelecionarPatrimonioModalOpen] =
     useState(false);
@@ -205,21 +210,39 @@ export default function EmprestimosPageContent({
             />
           </div>
 
-          <Button
-            variant="outline"
-            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
-            data-test="filtros-button"
-            onClick={() => setIsFiltrosModalOpen(true)}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filtros
-          </Button>
-
           <OrdenarPorSelect
             value={ordenar}
             onChange={setOrdenar}
             opcoes={ORDENACAO_EMPRESTIMOS}
           />
+
+          <Select
+            value={statusFilter || STATUS_FILTER_PADRAO}
+            onValueChange={(novoValor) =>
+              setStatusFilter(
+                novoValor === STATUS_FILTER_PADRAO ? '' : novoValor,
+              )
+            }
+          >
+            <SelectTrigger
+              className="h-11 max-w-[220px] shrink-0 bg-background/30 dark:bg-input/30"
+              data-test="status-filter-select"
+              aria-label="Filtrar por status"
+            >
+              <ListFilter className="w-4 h-4" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value={STATUS_FILTER_PADRAO}>
+                Todos os status
+              </SelectItem>
+              {statusOptions.map((opcao) => (
+                <SelectItem key={opcao.value} value={opcao.value}>
+                  {opcao.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
@@ -235,30 +258,6 @@ export default function EmprestimosPageContent({
             Adicionar
           </Button>
         </div>
-
-        {statusFilter && (
-          <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
-              <div
-                className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
-                data-test="applied-filter-status"
-              >
-                <span className="font-medium">Status:</span>
-                <span data-test="applied-filter-status-nome">
-                  {statusFilter}
-                </span>
-                <button
-                  onClick={() => setStatusFilter('')}
-                  className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                  title="Remover filtro de status"
-                  data-test="applied-filter-status-remover"
-                >
-                  <X size={12} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {error && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md">
@@ -539,16 +538,6 @@ export default function EmprestimosPageContent({
           onSuccess={() => refetch()}
         />
       )}
-
-      <ModalFiltros
-        isOpen={isFiltrosModalOpen}
-        onClose={() => setIsFiltrosModalOpen(false)}
-        categoriaFilter=""
-        statusFilter={statusFilter}
-        onFiltersChange={(_categoria, status) => setStatusFilter(status)}
-        statusOptions={statusOptions}
-        showCategoria={false}
-      />
 
       {detalhesEmprestimo && (
         <ModalDetalhesEmprestimo
