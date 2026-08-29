@@ -42,6 +42,7 @@ export interface PatrimonioData {
   status: PatrimonioStatus;
   data_aquisicao?: string;
   observacoes?: string;
+  imagem?: string;
   campos_personalizados: CampoPersonalizado[];
   ativo: boolean;
   usuario: string;

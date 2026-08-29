@@ -8,9 +8,11 @@
 // condicionais de `PatrimonioLinhaAcoes` (compartilhadas com as regras de
 // habilitação por status).
 
+import { useMemo, useState } from 'react';
 import { Package, MapPin } from 'lucide-react';
 import StatusBadge from './status-badge';
 import PatrimonioLinhaAcoes from './patrimonio-linha-acoes';
+import ModalVisualizarImagem from './modal-visualizar-imagem';
 import type { AcaoPatrimonio, PatrimonioData } from '@/types/patrimonios';
 
 interface CardPatrimonioProps {
@@ -26,6 +28,19 @@ export default function CardPatrimonio({
   onAcao,
   'data-test': dataTest,
 }: CardPatrimonioProps) {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const imagemComTimestamp = useMemo(() => {
+    if (!unidade.imagem) return undefined;
+    const separator = unidade.imagem.includes('?') ? '&' : '?';
+    return `${unidade.imagem}${separator}t=${Date.now()}`;
+  }, [unidade.imagem]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (imagemComTimestamp) setIsImageModalOpen(true);
+  };
+
   return (
     <div
       className="bg-card rounded-md border border-border p-4 transition-colors w-full h-full min-h-40 min-w-0 flex flex-col cursor-pointer relative"
@@ -41,8 +56,30 @@ export default function CardPatrimonio({
           className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden"
           data-test="component-info"
         >
-          <div className="w-10 h-10 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-muted/40 border border-border/40">
-            <Package className="w-4 h-4 text-muted-foreground" />
+          <div
+            className={`w-10 h-10 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-muted/40 border border-border/40 ${
+              imagemComTimestamp
+                ? 'cursor-pointer hover:opacity-80 transition-opacity'
+                : ''
+            }`}
+            data-test="component-icon"
+            onClick={handleImageClick}
+            title={
+              imagemComTimestamp
+                ? `Clique para ampliar a imagem de ${unidade.numero_patrimonio}`
+                : ''
+            }
+          >
+            {imagemComTimestamp ? (
+              <img
+                src={imagemComTimestamp}
+                alt={unidade.numero_patrimonio}
+                className="w-full h-full object-cover"
+                title={`Imagem da unidade: ${unidade.numero_patrimonio}`}
+              />
+            ) : (
+              <Package className="w-4 h-4 text-muted-foreground" />
+            )}
           </div>
 
           <div className="flex-1 min-w-0 overflow-hidden" data-test="text-info">
@@ -94,6 +131,15 @@ export default function CardPatrimonio({
           <div aria-hidden />
         </div>
       </div>
+
+      {imagemComTimestamp && (
+        <ModalVisualizarImagem
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imagemUrl={imagemComTimestamp}
+          nomeItem={unidade.numero_patrimonio}
+        />
+      )}
     </div>
   );
 }

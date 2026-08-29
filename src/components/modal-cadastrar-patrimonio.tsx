@@ -22,13 +22,22 @@ import {
 } from '@/components/ui/dialog';
 import CampoCategoria from '@/components/item-form/campo-categoria';
 import CampoLocalizacao from '@/components/item-form/campo-localizacao';
+import CampoImagem from '@/components/item-form/campo-imagem';
 import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
 import { sugerirNumeroPatrimonio } from '@/lib/patrimonio-numeracao';
+import { useUploadImagemPatrimonio } from '@/hooks/use-upload-imagem-patrimonio';
 import type {
   CampoPersonalizado,
   PatrimonioApiResponse,
   PatrimonioStatus,
 } from '@/types/patrimonios';
+
+interface PatrimonioPost {
+  data: {
+    _id: string;
+    imagem?: string;
+  };
+}
 
 interface ModalCadastrarPatrimonioProps {
   isOpen: boolean;
@@ -61,6 +70,8 @@ export default function ModalCadastrarPatrimonio({
   const [localizacao, setLocalizacao] = useState('');
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [imagem, setImagem] = useState<File | null>(null);
+  const [imagemPreview, setImagemPreview] = useState<string | null>(null);
   const [camposPersonalizados, setCamposPersonalizados] = useState<
     CampoPersonalizado[]
   >([]);
@@ -71,6 +82,7 @@ export default function ModalCadastrarPatrimonio({
     localizacao?: string;
     camposPersonalizados?: string;
   }>({});
+  const { enviar: enviarImagem } = useUploadImagemPatrimonio();
 
   const resetForm = () => {
     setCategoriaId('');
@@ -83,6 +95,8 @@ export default function ModalCadastrarPatrimonio({
     setLocalizacao('');
     setDataAquisicao('');
     setObservacoes('');
+    setImagem(null);
+    setImagemPreview(null);
     setCamposPersonalizados([]);
     setErros({});
   };
@@ -112,7 +126,7 @@ export default function ModalCadastrarPatrimonio({
 
   const mutation = useMutation({
     mutationFn: async () =>
-      await post('/patrimonios', {
+      await post<PatrimonioPost>('/patrimonios', {
         categoria: categoriaId,
         numero_patrimonio: numeroPatrimonio.trim(),
         modelo: modelo.trim(),
@@ -127,14 +141,37 @@ export default function ModalCadastrarPatrimonio({
           .map((c) => ({ chave: c.chave.trim(), valor: c.valor.trim() }))
           .filter((c) => c.chave && c.valor),
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const novoPatrimonioId = data.data._id;
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success('Unidade de patrimônio cadastrada com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,
       });
-      onSuccess?.();
-      onClose();
+
+      if (imagem) {
+        enviarImagem.mutate(
+          { patrimonioId: novoPatrimonioId, arquivo: imagem },
+          {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
+              onSuccess?.();
+              onClose();
+            },
+            onError: () => {
+              toast.error('Erro ao fazer upload da imagem.', {
+                position: 'bottom-right',
+                autoClose: 5000,
+              });
+              onSuccess?.();
+              onClose();
+            },
+          },
+        );
+      } else {
+        onSuccess?.();
+        onClose();
+      }
     },
     onError: (error: any) => {
       toast.error(error?.message || 'Não foi possível cadastrar a unidade.', {
@@ -143,6 +180,8 @@ export default function ModalCadastrarPatrimonio({
       });
     },
   });
+
+  const isPending = mutation.isPending || enviarImagem.isPending;
 
   const handleSubmit = () => {
     const chaves = new Set<string>();
@@ -321,6 +360,18 @@ export default function ModalCadastrarPatrimonio({
             />
           </div>
 
+          <CampoImagem
+            previewUrl={imagemPreview}
+            onChange={(arquivo, preview) => {
+              setImagem(arquivo);
+              setImagemPreview(preview);
+            }}
+            onRemover={() => {
+              setImagem(null);
+              setImagemPreview(null);
+            }}
+          />
+
           <CamposPersonalizadosEditor
             value={camposPersonalizados}
             onChange={setCamposPersonalizados}
@@ -334,7 +385,7 @@ export default function ModalCadastrarPatrimonio({
               variant="outline"
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
-              disabled={mutation.isPending}
+              disabled={isPending}
             >
               Cancelar
             </Button>
@@ -342,9 +393,9 @@ export default function ModalCadastrarPatrimonio({
               onClick={handleSubmit}
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
-              disabled={mutation.isPending}
+              disabled={isPending}
             >
-              {mutation.isPending ? 'Salvando...' : 'Cadastrar'}
+              {isPending ? 'Salvando...' : 'Cadastrar'}
             </Button>
           </div>
         </DialogFooter>

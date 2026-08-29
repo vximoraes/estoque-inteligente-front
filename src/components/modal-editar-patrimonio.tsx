@@ -21,7 +21,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import CampoCategoria from '@/components/item-form/campo-categoria';
+import CampoImagem from '@/components/item-form/campo-imagem';
 import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
+import { useUploadImagemPatrimonio } from '@/hooks/use-upload-imagem-patrimonio';
 import type { CampoPersonalizado, PatrimonioData } from '@/types/patrimonios';
 
 interface ModalEditarPatrimonioProps {
@@ -51,6 +53,10 @@ export default function ModalEditarPatrimonio({
   const [categoriaId, setCategoriaId] = useState('');
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [imagem, setImagem] = useState<File | null>(null);
+  const [imagemPreview, setImagemPreview] = useState<string | null>(null);
+  const [imagemAtual, setImagemAtual] = useState<string | null>(null);
+  const [imagemParaDeletar, setImagemParaDeletar] = useState(false);
   const [camposPersonalizados, setCamposPersonalizados] = useState<
     CampoPersonalizado[]
   >([]);
@@ -59,6 +65,8 @@ export default function ModalEditarPatrimonio({
     categoria?: string;
     camposPersonalizados?: string;
   }>({});
+  const { enviar: enviarImagem, remover: removerImagem } =
+    useUploadImagemPatrimonio();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -70,8 +78,45 @@ export default function ModalEditarPatrimonio({
     setObservacoes(patrimonio.observacoes ?? '');
     setCamposPersonalizados(patrimonio.campos_personalizados ?? []);
     setErros({});
+    setImagemParaDeletar(false);
+    if (patrimonio.imagem) {
+      const comCacheBust = `${patrimonio.imagem}${patrimonio.imagem.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      setImagemAtual(patrimonio.imagem);
+      setImagem(null);
+      setImagemPreview(comCacheBust);
+    } else {
+      setImagemAtual(null);
+      setImagem(null);
+      setImagemPreview(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, patrimonio._id]);
+
+  const finalizarComOuSemImagem = () => {
+    if (imagem) {
+      enviarImagem.mutate(
+        { patrimonioId: patrimonio._id, arquivo: imagem },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
+            onSuccess?.();
+            onClose();
+          },
+          onError: () => {
+            toast.error('Erro ao atualizar a imagem da unidade.', {
+              position: 'bottom-right',
+              autoClose: 5000,
+            });
+            onSuccess?.();
+            onClose();
+          },
+        },
+      );
+    } else {
+      onSuccess?.();
+      onClose();
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async () =>
@@ -88,15 +133,26 @@ export default function ModalEditarPatrimonio({
           .map((c) => ({ chave: c.chave.trim(), valor: c.valor.trim() }))
           .filter((c) => c.chave && c.valor),
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       // Prefixo amplo: alcança tanto a grade quanto o detalhe já aberto.
       queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success(`${numeroPatrimonio} atualizado com sucesso!`, {
         position: 'bottom-right',
         autoClose: 3000,
       });
-      onSuccess?.();
-      onClose();
+
+      if (imagemParaDeletar && imagemAtual) {
+        await removerImagem.mutateAsync(patrimonio._id, {
+          onError: () => {
+            toast.error('Erro ao deletar a imagem da unidade.', {
+              position: 'bottom-right',
+              autoClose: 5000,
+            });
+          },
+        });
+      }
+
+      finalizarComOuSemImagem();
     },
     onError: (error: any) => {
       toast.error(error?.message || 'Não foi possível atualizar a unidade.', {
@@ -105,6 +161,8 @@ export default function ModalEditarPatrimonio({
       });
     },
   });
+
+  const isPending = mutation.isPending || enviarImagem.isPending;
 
   const handleSubmit = () => {
     const chaves = new Set<string>();
@@ -240,6 +298,20 @@ export default function ModalEditarPatrimonio({
             />
           </div>
 
+          <CampoImagem
+            previewUrl={imagemPreview}
+            onChange={(arquivo, preview) => {
+              setImagem(arquivo);
+              setImagemPreview(preview);
+              setImagemParaDeletar(false);
+            }}
+            onRemover={() => {
+              setImagem(null);
+              setImagemPreview(null);
+              if (imagemAtual) setImagemParaDeletar(true);
+            }}
+          />
+
           <CamposPersonalizadosEditor
             value={camposPersonalizados}
             onChange={setCamposPersonalizados}
@@ -253,7 +325,7 @@ export default function ModalEditarPatrimonio({
               variant="outline"
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
-              disabled={mutation.isPending}
+              disabled={isPending}
             >
               Cancelar
             </Button>
@@ -261,9 +333,9 @@ export default function ModalEditarPatrimonio({
               onClick={handleSubmit}
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
-              disabled={mutation.isPending}
+              disabled={isPending}
             >
-              {mutation.isPending ? 'Salvando...' : 'Salvar'}
+              {isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </DialogFooter>
