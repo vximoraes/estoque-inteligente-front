@@ -25,6 +25,8 @@ interface CampoLocalizacaoProps {
   obrigatorio?: boolean;
   /** Esconde o botão "+" e as ações de editar/excluir — modo somente-seleção. */
   permitirGerenciar?: boolean;
+  /** Localização a marcar como "(atual)" e desabilitar a seleção — usado na transferência. */
+  localizacaoAtualId?: string;
   enabled?: boolean;
   'data-test'?: string;
 }
@@ -40,6 +42,7 @@ export default function CampoLocalizacao({
   label = 'Localização',
   obrigatorio = true,
   permitirGerenciar = true,
+  localizacaoAtualId,
   enabled = true,
   'data-test': dataTest = 'botao-selecionar-localizacao',
 }: CampoLocalizacaoProps) {
@@ -123,62 +126,69 @@ export default function CampoLocalizacao({
               </div>
               <div className="overflow-y-auto">
                 {localizacoesFiltradas.length > 0 ? (
-                  localizacoesFiltradas.map((loc) => (
-                    <div
-                      key={loc._id}
-                      className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
-                        value === loc._id ? 'bg-[var(--ei-accent)]/10' : ''
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onChange(loc._id);
-                          setIsDropdownOpen(false);
-                          setPesquisa('');
-                        }}
-                        className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${
-                          value === loc._id
-                            ? 'text-[var(--ei-accent)] font-medium'
-                            : 'text-foreground'
+                  localizacoesFiltradas.map((loc) => {
+                    const isAtual = loc._id === localizacaoAtualId;
+                    return (
+                      <div
+                        key={loc._id}
+                        className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-muted transition-colors group ${
+                          value === loc._id ? 'bg-[var(--ei-accent)]/10' : ''
                         }`}
-                        title={loc.nome}
-                        data-test="localizacao-option"
                       >
-                        {loc.nome}
-                      </button>
-                      {permitirGerenciar && (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocalizacaoToEdit(loc);
-                              setIsEditarModalOpen(true);
-                            }}
-                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
-                            title="Editar localização"
-                            data-test="botao-editar-localizacao"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocalizacaoToEdit(loc);
-                              setIsExcluirModalOpen(true);
-                            }}
-                            className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
-                            title="Excluir localização"
-                            data-test="botao-excluir-localizacao"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))
+                        <button
+                          type="button"
+                          disabled={isAtual}
+                          onClick={() => {
+                            onChange(loc._id);
+                            setIsDropdownOpen(false);
+                            setPesquisa('');
+                          }}
+                          className={`flex-1 text-left text-sm sm:text-base truncate ${
+                            isAtual
+                              ? 'text-muted-foreground cursor-not-allowed'
+                              : value === loc._id
+                                ? 'text-[var(--ei-accent)] font-medium cursor-pointer'
+                                : 'text-foreground cursor-pointer'
+                          }`}
+                          title={loc.nome}
+                          data-test="localizacao-option"
+                        >
+                          {loc.nome}
+                          {isAtual ? ' (atual)' : ''}
+                        </button>
+                        {permitirGerenciar && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocalizacaoToEdit(loc);
+                                setIsEditarModalOpen(true);
+                              }}
+                              className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                              title="Editar localização"
+                              data-test="botao-editar-localizacao"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocalizacaoToEdit(loc);
+                                setIsExcluirModalOpen(true);
+                              }}
+                              className="p-1.5 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                              title="Excluir localização"
+                              data-test="botao-excluir-localizacao"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : (
                   <div className="px-4 py-6 sm:py-8 text-center text-muted-foreground text-xs sm:text-sm">
                     Nenhuma localização encontrada

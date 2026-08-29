@@ -1,16 +1,12 @@
 'use client';
 
 // Transferência de localização de uma unidade patrimonial —
-// `PATCH /patrimonios/:id/localizacao`. Select simples em vez do dropdown
-// com busca de `modal-cadastrar-item.tsx`: a lista de localizações tende a
-// ser pequena, não justifica o custo de manutenção de um segundo dropdown
-// custom.
+// `PATCH /patrimonios/:id/localizacao`.
 
 import { useEffect, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { get, patch } from '@/lib/fetchData';
+import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,7 +16,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import type { ApiEnvelope, Localizacao } from '@/types/itens';
+import CampoLocalizacao from '@/components/item-form/campo-localizacao';
 
 interface ModalPatrimonioTransferirProps {
   isOpen: boolean;
@@ -43,16 +39,6 @@ export default function ModalPatrimonioTransferir({
   const [localizacaoDestino, setLocalizacaoDestino] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [erro, setErro] = useState('');
-
-  const { data: localizacoesData, isLoading } = useQuery<
-    ApiEnvelope<Localizacao>
-  >({
-    queryKey: ['localizacoes'],
-    queryFn: () => get<ApiEnvelope<Localizacao>>('/localizacoes?limite=100'),
-    enabled: isOpen,
-  });
-
-  const localizacoes = localizacoesData?.data?.docs ?? [];
 
   useEffect(() => {
     if (isOpen) {
@@ -113,38 +99,18 @@ export default function ModalPatrimonioTransferir({
         </DialogHeader>
 
         <div className="p-6 space-y-5">
-          <div>
-            <label className="block text-base font-medium text-foreground mb-1">
-              Nova localização <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <select
-                value={localizacaoDestino}
-                onChange={(e) => {
-                  setLocalizacaoDestino(e.target.value);
-                  setErro('');
-                }}
-                disabled={isLoading}
-                className="w-full h-11 px-3 pr-9 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card text-foreground appearance-none disabled:opacity-60"
-              >
-                <option value="">
-                  {isLoading ? 'Carregando...' : 'Selecionar localização'}
-                </option>
-                {localizacoes.map((loc) => (
-                  <option
-                    key={loc._id}
-                    value={loc._id}
-                    disabled={loc._id === localizacaoAtualId}
-                  >
-                    {loc.nome}
-                    {loc._id === localizacaoAtualId ? ' (atual)' : ''}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-            {erro && <p className="mt-1 text-sm text-destructive">{erro}</p>}
-          </div>
+          <CampoLocalizacao
+            value={localizacaoDestino}
+            onChange={(id) => {
+              setLocalizacaoDestino(id);
+              setErro('');
+            }}
+            label="Nova localização"
+            error={erro}
+            permitirGerenciar={false}
+            localizacaoAtualId={localizacaoAtualId}
+            enabled={isOpen}
+          />
 
           <div>
             <label className="block text-base font-medium text-foreground mb-1">
