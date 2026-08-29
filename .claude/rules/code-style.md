@@ -6,4 +6,4 @@
 - Alias de import `@/*` aponta para `src/*` — sempre usar o alias em vez de caminhos relativos longos (`../../../`).
 - Componentes shadcn/ui (`style: new-york`) ficam em `src/components/ui/`; não editar à mão sem necessidade — preferir regenerar via CLI do shadcn quando possível.
 - Modais de domínio ficam soltos em `src/components/modal-*.tsx` (não em subpastas por domínio), seguindo o padrão `modal-<ação>-<entidade>.tsx` (ex.: `modal-excluir-item.tsx`, `modal-editar-emprestimo.tsx`).
-- Elementos que testes Cypress precisam localizar levam `data-test="..."`. Nenhum componente usa `data-testid` — os poucos seletores `[data-testid*="..."]` que aparecem em `cypress/support/commands.ts` (`clearAllFilters`) e `cypress/e2e/itens/02-cadastro-edicao.cy.ts` são resíduo morto, não casam com nada; não replicar esse padrão.
+- Elementos que testes Cypress precisam localizar levam `data-test="..."`. Nenhum componente usa `data-testid` — não introduzir esse padrão.

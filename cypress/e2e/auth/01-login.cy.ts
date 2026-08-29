@@ -7,13 +7,13 @@ describe('Login', () => {
     cy.clearCookies();
   });
 
-  it('faz login com credenciais válidas e redireciona pra /itens', () => {
+  it('faz login com credenciais válidas e redireciona pra /bens/patrimonio', () => {
     cy.visit(`${frontendUrl}/login`);
     cy.getByData('email-input').type(email);
     cy.getByData('senha-input').type(senha);
     cy.getByData('botao-entrar').click();
 
-    cy.url({ timeout: 30000 }).should('include', '/itens');
+    cy.url({ timeout: 30000 }).should('include', '/bens/patrimonio');
   });
 
   it('exibe erro de e-mail/senha incorretos com senha errada', () => {

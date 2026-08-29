@@ -20,7 +20,7 @@ npm run fix                 # lint:fix + format em sequência
 npm run test                 # Cypress E2E (cypress run)
 ```
 
-Não há testes unitários configurados — a suíte de testes é inteiramente E2E via Cypress (`cypress/e2e`). Para rodar Cypress em modo interativo, use `npx cypress open`. Para rodar uma única spec: `npx cypress run --spec "cypress/e2e/itens/01-listagem-pesquisa-filtros.cy.ts"`.
+Não há testes unitários configurados. A suíte E2E via Cypress (`cypress/e2e`) cobre só o fluxo de autenticação (`cypress/e2e/auth`) — decisão deliberada, E2E completo era lento e não era o foco do projeto. Para rodar Cypress em modo interativo, use `npx cypress open`. Para rodar uma única spec: `npx cypress run --spec "cypress/e2e/auth/01-login.cy.ts"`.
 
 Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas client-side) e `API_URL` (chamadas server-side/SSR — no Docker aponta para o nome do serviço da API, não `localhost`).
 
@@ -67,8 +67,8 @@ Ao adicionar uma nova página de listagem, siga esse mesmo padrão em vez de bus
 
 ### Testes E2E (Cypress)
 
-- Specs organizadas por domínio em `cypress/e2e/<dominio>/NN-descricao.cy.ts` (ex. `itens/01-listagem-pesquisa-filtros.cy.ts`, `usuarios/03-exclusao.cy.ts`). Numeração de prefixo indica ordem lógica de fluxo dentro do domínio, não ordem de execução obrigatória.
-- Helpers e comandos customizados em `cypress/support/commands.ts` e `cypress/support/helpers.ts`.
+- Specs só de autenticação, em `cypress/e2e/auth/NN-descricao.cy.ts` (login, esqueci-senha, redefinir-senha). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória.
+- Comando customizado único em `cypress/support/commands.ts` (`cy.getByData`).
 - `cypress.config.ts` usa `FRONTEND_URL` (env do Cypress) como `baseUrl`, com fallback para `http://localhost:3000` — o app precisa estar rodando (`npm run dev` ou build) antes de `npm run test`.
 
 ## Convenções de código
