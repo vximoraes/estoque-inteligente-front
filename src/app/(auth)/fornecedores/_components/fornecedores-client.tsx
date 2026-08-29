@@ -18,6 +18,8 @@ import { get } from '@/lib/fetchData';
 import { FornecedorApiResponse } from '@/types/fornecedores';
 import { Search, Truck, Plus, Pencil, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_FORNECEDORES } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -30,6 +32,9 @@ export default function PageFornecedoresContent({
   initialData?: FornecedorApiResponse;
 }) {
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
     defaultValue: '',
   });
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -61,11 +66,12 @@ export default function PageFornecedoresContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<FornecedorApiResponse>({
-    queryKey: ['fornecedores', searchTerm],
+    queryKey: ['fornecedores', searchTerm, ordenar],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -182,6 +188,11 @@ export default function PageFornecedoresContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_FORNECEDORES}
+          />
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}

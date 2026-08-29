@@ -18,6 +18,8 @@ import { CategoriaApiResponse } from '@/types/categorias';
 import { ITEM_TIPO_LABEL_CURTO, type ItemTipo } from '@/types/itens';
 import { Search, Tag, Plus, Pencil, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_CATEGORIAS } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -36,6 +38,9 @@ export default function PageCategoriasContent({
     defaultValue: 'permanente',
   });
   const tipo: ItemTipo = tipoRaw === 'consumo' ? 'consumo' : 'permanente';
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirCategoriaId, setExcluirCategoriaId] = useState<string | null>(
@@ -61,12 +66,13 @@ export default function PageCategoriasContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<CategoriaApiResponse>({
-    queryKey: ['categorias', tipo, searchTerm],
+    queryKey: ['categorias', tipo, searchTerm, ordenar],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       params.append('tipo', tipo);
       if (searchTerm) params.append('nome', searchTerm);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -202,6 +208,11 @@ export default function PageCategoriasContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_CATEGORIAS}
+          />
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}

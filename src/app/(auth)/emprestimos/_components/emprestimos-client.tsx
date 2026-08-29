@@ -10,6 +10,8 @@ import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
 import ModalDevolverItem from '@/components/modal-devolver-item';
 import ModalFiltros from '@/components/modal-filtros';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_EMPRESTIMOS } from '@/lib/ordenacao';
 import type { PatrimonioData } from '@/types/patrimonios';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -65,6 +67,9 @@ export default function EmprestimosPageContent({
   const tipoControle: 'quantidade' | 'unidade' =
     tipoControleRaw === 'quantidade' ? 'quantidade' : 'unidade';
   const [statusFilter, setStatusFilter] = useState('');
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
@@ -102,7 +107,7 @@ export default function EmprestimosPageContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<EmprestimosApiResponse>({
-    queryKey: ['emprestimos', tipoControle, searchTerm, statusFilter],
+    queryKey: ['emprestimos', tipoControle, searchTerm, statusFilter, ordenar],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
@@ -113,6 +118,7 @@ export default function EmprestimosPageContent({
       if (searchTerm) params.append('busca', searchTerm);
       if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
       if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+      if (ordenar) params.append('ordenar', ordenar);
 
       return await get<EmprestimosApiResponse>(
         `/emprestimos?${params.toString()}`,
@@ -208,6 +214,12 @@ export default function EmprestimosPageContent({
             <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
+
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_EMPRESTIMOS}
+          />
 
           <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"

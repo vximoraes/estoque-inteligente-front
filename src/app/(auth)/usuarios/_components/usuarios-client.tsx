@@ -13,6 +13,8 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
 import { Search, Plus, Trash2, Mail, Loader2, Users } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_USUARIOS } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { notFound } from 'next/navigation';
 import { useQueryState } from 'nuqs';
@@ -65,6 +67,9 @@ export default function PageUsuariosContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null);
@@ -88,11 +93,12 @@ export default function PageUsuariosContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<UsuarioApiResponse>({
-    queryKey: ['usuarios', searchTerm],
+    queryKey: ['usuarios', searchTerm, ordenar],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -229,6 +235,11 @@ export default function PageUsuariosContent({
               className="h-11 pl-10"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_USUARIOS}
+          />
           <Button
             data-test="cadastrar-usuario-button"
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"

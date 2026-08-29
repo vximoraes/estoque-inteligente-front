@@ -15,6 +15,8 @@ import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
 import ModalCadastrarOrcamento from '@/components/modal-cadastrar-orcamento';
 import ModalEditarOrcamento from '@/components/modal-editar-orcamento';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_ORCAMENTOS } from '@/lib/ordenacao';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
@@ -57,6 +59,9 @@ export default function PageOrcamentosContent({
   const [dataFimFilter, setDataFimFilter] = useQueryState('dataFim', {
     defaultValue: '',
   });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(
     null,
@@ -94,6 +99,7 @@ export default function PageOrcamentosContent({
       valorMaxFilter,
       dataInicioFilter,
       dataFimFilter,
+      ordenar,
     ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
@@ -103,6 +109,7 @@ export default function PageOrcamentosContent({
       if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
       if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
       if (dataFimFilter) params.append('dataFim', dataFimFilter);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -403,6 +410,11 @@ export default function PageOrcamentosContent({
             <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_ORCAMENTOS}
+          />
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
