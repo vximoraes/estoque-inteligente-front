@@ -12,12 +12,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {
@@ -35,8 +29,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Monitor,
-  Check,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -52,7 +44,6 @@ interface CustomSidebarProps {
 const temaOpcoes = [
   { value: 'light', label: 'Claro', icon: Sun },
   { value: 'dark', label: 'Escuro', icon: Moon },
-  { value: 'system', label: 'Sistema', icon: Monitor },
 ] as const;
 
 interface PathRouter {
@@ -229,12 +220,12 @@ export default function CustomSidebar({
     setMounted(true);
   }, []);
 
-  const temaAtual = mounted ? (theme ?? 'system') : 'system';
-  const IconeTemaAtual =
-    temaAtual === 'light' ? Sun : temaAtual === 'dark' ? Moon : Monitor;
+  const temaAtual = mounted && theme === 'dark' ? 'dark' : 'light';
+  const IconeTemaAtual = temaAtual === 'dark' ? Moon : Sun;
   const temaLabelAtual = temaOpcoes.find(
     (opcao) => opcao.value === temaAtual,
   )?.label;
+  const alternarTema = () => setTheme(temaAtual === 'dark' ? 'light' : 'dark');
 
   const displayName = mounted ? user?.name : undefined;
   const displayEmail = mounted ? user?.email : undefined;
@@ -507,55 +498,29 @@ export default function CustomSidebar({
                   data-test="sidebar-divider-bottom"
                 />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    {collapsed ? (
-                      <button
-                        type="button"
-                        className="flex justify-center items-center h-10 w-10 mx-auto mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
-                        title="Tema"
-                        data-test="sidebar-tema-toggle-collapsed"
-                      >
-                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 h-10 w-full pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
-                        data-test="sidebar-tema-toggle"
-                      >
-                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                        <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
-                          Tema: {temaLabelAtual}
-                        </span>
-                      </button>
-                    )}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align={collapsed ? 'center' : 'end'}
-                    className={
-                      collapsed
-                        ? undefined
-                        : 'w-[var(--radix-dropdown-menu-trigger-width)]'
-                    }
-                    data-test="sidebar-tema-menu"
+                {collapsed ? (
+                  <button
+                    type="button"
+                    onClick={alternarTema}
+                    className="flex justify-center items-center h-10 w-10 mx-auto mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                    title="Tema"
+                    data-test="sidebar-tema-toggle-collapsed"
                   >
-                    {temaOpcoes.map(({ value, label, icon: Icon }) => (
-                      <DropdownMenuItem
-                        key={value}
-                        onClick={() => setTheme(value)}
-                        className="cursor-pointer"
-                        data-test={`sidebar-tema-opcao-${value}`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {label}
-                        {temaAtual === value && (
-                          <Check className="w-4 h-4 ml-auto" />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={alternarTema}
+                    className="flex items-center gap-3 h-10 w-full pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                    data-test="sidebar-tema-toggle"
+                  >
+                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                      Tema: {temaLabelAtual}
+                    </span>
+                  </button>
+                )}
 
                 <SidebarMenuButton
                   className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-md' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-md'}`}
@@ -742,40 +707,17 @@ export default function CustomSidebar({
             <div className="mt-auto mb-6">
               <div className="border-b border-ei-sidebar-divider mb-6" />
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-3 h-10 pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150 w-full"
-                    data-test="sidebar-tema-toggle-mobile"
-                  >
-                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
-                      Tema: {temaLabelAtual}
-                    </span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                  data-test="sidebar-tema-menu-mobile"
-                >
-                  {temaOpcoes.map(({ value, label, icon: Icon }) => (
-                    <DropdownMenuItem
-                      key={value}
-                      onClick={() => setTheme(value)}
-                      className="cursor-pointer"
-                      data-test={`sidebar-tema-opcao-mobile-${value}`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                      {temaAtual === value && (
-                        <Check className="w-4 h-4 ml-auto" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <button
+                type="button"
+                onClick={alternarTema}
+                className="flex items-center gap-3 h-10 pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150 w-full"
+                data-test="sidebar-tema-toggle-mobile"
+              >
+                <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                  Tema: {temaLabelAtual}
+                </span>
+              </button>
 
               <button
                 onClick={() => {
