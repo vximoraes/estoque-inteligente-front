@@ -9,14 +9,35 @@ import ModalEmprestarItem from '@/components/modal-emprestar-item';
 import ModalExcluirItem from '@/components/modal-excluir-item';
 import ModalCadastrarItemConsumo from '@/components/modal-cadastrar-item-consumo';
 import ModalEditarItem from '@/components/modal-editar-item';
+import ItemConsumoLinhaAcoes from '@/components/item-consumo-linha-acoes';
+import ViewModeToggle from '@/components/view-mode-toggle';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import StatusBadge from '@/components/status-badge';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
+import { useViewMode } from '@/hooks/use-view-mode';
+import { ORDENACAO_ITENS_CONSUMO } from '@/lib/ordenacao';
 import { ItemConsumoApiResponse, EstoqueApiResponse } from '@/types/itens';
 import type { CategoriaApiResponse } from '@/types/categorias';
-import { Search, SlidersHorizontal, Plus, Package, X } from 'lucide-react';
+import {
+  Search,
+  SlidersHorizontal,
+  Plus,
+  Package,
+  X,
+  PlusCircle,
+  MinusCircle,
+} from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -48,11 +69,15 @@ export default function ConsumoPageContent({
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useViewMode('almoxarifado');
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', {
     defaultValue: '',
   });
   const [statusFilter, setStatusFilter] = useQueryState('status', {
+    defaultValue: '',
+  });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
     defaultValue: '',
   });
 
@@ -66,7 +91,14 @@ export default function ConsumoPageContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<ItemConsumoApiResponse>({
-    queryKey: ['itens', 'consumo', searchTerm, categoriaFilter, statusFilter],
+    queryKey: [
+      'itens',
+      'consumo',
+      searchTerm,
+      categoriaFilter,
+      statusFilter,
+      ordenar,
+    ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
@@ -74,6 +106,7 @@ export default function ConsumoPageContent({
       if (searchTerm) params.append('nome', searchTerm);
       if (categoriaFilter) params.append('categoria', categoriaFilter);
       if (statusFilter) params.append('status', statusFilter);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '15');
       params.append('page', page.toString());
 
@@ -326,6 +359,11 @@ export default function ConsumoPageContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_ITENS_CONSUMO}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer bg-background/30 hover:bg-background/50"
@@ -335,6 +373,11 @@ export default function ConsumoPageContent({
             <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={setViewMode}
+            data-test="almoxarifado-view-toggle"
+          />
           <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
@@ -418,35 +461,158 @@ export default function ConsumoPageContent({
               </p>
             </div>
           ) : itens.length > 0 ? (
-            <div
-              className="grid gap-4 w-full"
-              style={{
-                gridTemplateColumns:
-                  'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
-              }}
-              data-test="almoxarifado-grid"
-            >
-              {itens.map((item, index) => (
-                <CardItemConsumo
-                  key={item._id}
-                  id={item._id}
-                  nome={item.nome}
-                  categoria={item.categoria.nome}
-                  quantidade={item.quantidade}
-                  estoqueMinimo={item.estoque_minimo}
-                  status={item.status}
-                  imagem={item.imagem}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onClick={handleItemClick}
-                  onEntrada={handleEntrada}
-                  onSaida={handleSaida}
-                  onEmprestar={handleEmprestar}
-                  isLoading={updatingItemId === item._id && isFetching}
-                  data-test={`item-card-${index}`}
-                />
-              ))}
-            </div>
+            viewMode === 'cards' ? (
+              <div
+                className="grid gap-4 w-full"
+                style={{
+                  gridTemplateColumns:
+                    'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
+                }}
+                data-test="almoxarifado-grid"
+              >
+                {itens.map((item, index) => (
+                  <CardItemConsumo
+                    key={item._id}
+                    id={item._id}
+                    nome={item.nome}
+                    categoria={item.categoria.nome}
+                    quantidade={item.quantidade}
+                    estoqueMinimo={item.estoque_minimo}
+                    status={item.status}
+                    imagem={item.imagem}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onClick={handleItemClick}
+                    onEntrada={handleEntrada}
+                    onSaida={handleSaida}
+                    onEmprestar={handleEmprestar}
+                    isLoading={updatingItemId === item._id && isFetching}
+                    data-test={`item-card-${index}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                className="border rounded-md bg-card overflow-x-auto"
+                data-test="almoxarifado-table"
+              >
+                <table className="w-full min-w-[700px] caption-bottom text-xs sm:text-sm">
+                  <TableHeader>
+                    <TableRow className="bg-muted border-b">
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        ITEM
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        CATEGORIA
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        QTD
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        MÍN
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        STATUS
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        AÇÕES
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {itens.map((item, index) => (
+                      <TableRow
+                        key={item._id}
+                        data-test={`item-row-${index}`}
+                        onClick={() => handleItemClick(item._id)}
+                        className="hover:bg-muted border-b cursor-pointer"
+                        style={{ height: '56px' }}
+                      >
+                        <TableCell
+                          className="font-medium text-left px-6 py-2 truncate max-w-[220px]"
+                          title={item.nome}
+                        >
+                          {item.nome}
+                        </TableCell>
+                        <TableCell
+                          className="text-left px-6 py-2 truncate max-w-[160px]"
+                          title={item.categoria.nome}
+                        >
+                          {item.categoria.nome}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          {item.quantidade}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          {item.estoque_minimo}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          <StatusBadge
+                            status={item.status}
+                            size="sm"
+                            data-test="item-row-status"
+                          />
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center justify-center gap-0.5"
+                          >
+                            <button
+                              className="p-1.5 rounded-md hover:bg-muted/40 transition-colors duration-150 cursor-pointer"
+                              title={`Registrar entrada de ${item.nome}`}
+                              data-test="entrada-icon"
+                              onClick={() => handleEntrada(item._id)}
+                            >
+                              <PlusCircle
+                                size={16}
+                                className="text-foreground"
+                              />
+                            </button>
+                            <button
+                              className={`p-1.5 rounded-md transition-colors duration-150 ${
+                                item.quantidade === 0
+                                  ? 'opacity-30 cursor-not-allowed'
+                                  : 'hover:bg-muted/40 cursor-pointer'
+                              }`}
+                              title={
+                                item.quantidade === 0
+                                  ? `${item.nome} sem estoque disponível`
+                                  : `Registrar saída de ${item.nome}`
+                              }
+                              data-test="saida-icon"
+                              disabled={item.quantidade === 0}
+                              onClick={
+                                item.quantidade === 0
+                                  ? undefined
+                                  : () => handleSaida(item._id)
+                              }
+                            >
+                              <MinusCircle
+                                size={16}
+                                className={
+                                  item.quantidade === 0
+                                    ? 'text-muted-foreground'
+                                    : 'text-foreground'
+                                }
+                              />
+                            </button>
+                            <ItemConsumoLinhaAcoes
+                              onEditar={() => handleEdit(item._id)}
+                              onEmprestar={() => handleEmprestar(item._id)}
+                              onExcluir={() => handleDelete(item._id)}
+                              emprestarDesabilitado={item.quantidade === 0}
+                              emprestarTitle={`${item.nome} sem estoque disponível para empréstimo`}
+                              data-test={`item-row-acoes-${index}`}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+              </div>
+            )
           ) : (
             <EmptyState
               icon={Package}

@@ -10,6 +10,10 @@ import Cabecalho from '@/components/cabecalho';
 import ModalFiltros from '@/components/modal-filtros';
 import ModalCadastrarPatrimonio from '@/components/modal-cadastrar-patrimonio';
 import PatrimonioAcoesModais from '@/components/patrimonio-acoes-modais';
+import PatrimonioLinhaAcoes from '@/components/patrimonio-linha-acoes';
+import ViewModeToggle from '@/components/view-mode-toggle';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import StatusBadge from '@/components/status-badge';
 import EmptyState from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +24,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
+import { useViewMode } from '@/hooks/use-view-mode';
 import type { ApiEnvelope, Localizacao } from '@/types/itens';
 import type { CategoriaApiResponse } from '@/types/categorias';
 import {
@@ -35,6 +47,7 @@ import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
 import { useAcoesPatrimonio } from '@/hooks/use-acoes-patrimonio';
+import { ORDENACAO_PATRIMONIO } from '@/lib/ordenacao';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
@@ -60,9 +73,13 @@ export default function PatrimonioPageContent({
     'localizacao',
     { defaultValue: '' },
   );
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useViewMode('patrimonio');
 
   const {
     contexto,
@@ -85,6 +102,7 @@ export default function PatrimonioPageContent({
       categoriaFiltro,
       statusFiltro,
       localizacaoFiltro,
+      ordenar,
     ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
@@ -93,6 +111,7 @@ export default function PatrimonioPageContent({
       if (categoriaFiltro) params.append('categoria', categoriaFiltro);
       if (statusFiltro) params.append('status', statusFiltro);
       if (localizacaoFiltro) params.append('localizacao', localizacaoFiltro);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -197,6 +216,11 @@ export default function PatrimonioPageContent({
               ))}
             </SelectContent>
           </Select>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_PATRIMONIO}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer bg-background/30 hover:bg-background/50"
@@ -206,6 +230,11 @@ export default function PatrimonioPageContent({
             <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={setViewMode}
+            data-test="patrimonio-view-toggle"
+          />
           <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground font-semibold tracking-tight hover:opacity-95 shadow-sm cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
@@ -276,24 +305,111 @@ export default function PatrimonioPageContent({
               </p>
             </div>
           ) : unidades.length > 0 ? (
-            <div
-              className="grid gap-4 w-full"
-              style={{
-                gridTemplateColumns:
-                  'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
-              }}
-              data-test="patrimonio-grid"
-            >
-              {unidades.map((unidade, index) => (
-                <CardPatrimonio
-                  key={unidade._id}
-                  unidade={unidade}
-                  onClick={(u) => abrirAcao('historico', u)}
-                  onAcao={abrirAcao}
-                  data-test={`patrimonio-card-${index}`}
-                />
-              ))}
-            </div>
+            viewMode === 'cards' ? (
+              <div
+                className="grid gap-4 w-full"
+                style={{
+                  gridTemplateColumns:
+                    'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))',
+                }}
+                data-test="patrimonio-grid"
+              >
+                {unidades.map((unidade, index) => (
+                  <CardPatrimonio
+                    key={unidade._id}
+                    unidade={unidade}
+                    onClick={(u) => abrirAcao('historico', u)}
+                    onAcao={abrirAcao}
+                    data-test={`patrimonio-card-${index}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                className="border rounded-md bg-card overflow-x-auto"
+                data-test="patrimonio-table"
+              >
+                <table className="w-full min-w-[700px] caption-bottom text-xs sm:text-sm">
+                  <TableHeader>
+                    <TableRow className="bg-muted border-b">
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        PATRIMÔNIO
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        MODELO
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        CATEGORIA
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-left px-6">
+                        LOCALIZAÇÃO
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        STATUS
+                      </TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-center px-6">
+                        AÇÕES
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {unidades.map((unidade, index) => (
+                      <TableRow
+                        key={unidade._id}
+                        data-test={`patrimonio-row-${index}`}
+                        onClick={() => abrirAcao('historico', unidade)}
+                        className="hover:bg-muted border-b cursor-pointer"
+                        style={{ height: '56px' }}
+                      >
+                        <TableCell
+                          className="font-medium text-left px-6 py-2 truncate max-w-[160px]"
+                          title={unidade.numero_patrimonio}
+                        >
+                          {unidade.numero_patrimonio}
+                        </TableCell>
+                        <TableCell
+                          className="text-left px-6 py-2 truncate max-w-[200px]"
+                          title={unidade.modelo || '-'}
+                        >
+                          {unidade.modelo || '-'}
+                        </TableCell>
+                        <TableCell
+                          className="text-left px-6 py-2 truncate max-w-[160px]"
+                          title={unidade.categoria.nome}
+                        >
+                          {unidade.categoria.nome}
+                        </TableCell>
+                        <TableCell
+                          className="text-left px-6 py-2 truncate max-w-[160px]"
+                          title={unidade.localizacao?.nome ?? '-'}
+                        >
+                          {unidade.localizacao?.nome ?? '-'}
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          <StatusBadge
+                            status={unidade.status}
+                            size="sm"
+                            data-test="patrimonio-row-status"
+                          />
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-2">
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex justify-center"
+                          >
+                            <PatrimonioLinhaAcoes
+                              unidade={unidade}
+                              onAcao={abrirAcao}
+                              data-test={`patrimonio-row-acoes-${index}`}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+              </div>
+            )
           ) : (
             <EmptyState
               icon={Boxes}

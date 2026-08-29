@@ -1,8 +1,9 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Package, MoreHorizontal, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Package } from 'lucide-react';
 import ModalVisualizarImagem from './modal-visualizar-imagem';
 import StatusBadge from './status-badge';
+import ItemConsumoLinhaAcoes from './item-consumo-linha-acoes';
 
 export interface CardItemBaseProps {
   id?: string;
@@ -44,22 +45,8 @@ export default function CardItemBase({
   'data-test': dataTest,
 }: CardItemBaseProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMenuOpen(false);
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isMenuOpen]);
 
   const handleClick = () => {
-    if (isMenuOpen) {
-      setIsMenuOpen(false);
-      return;
-    }
     if (onClick && id) {
       onClick(id);
     }
@@ -169,114 +156,45 @@ export default function CardItemBase({
           </div>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsMenuOpen((v) => !v);
-          }}
-          className="relative w-8 h-8 flex items-center justify-center shrink-0 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors duration-150 cursor-pointer"
-          title={isMenuOpen ? 'Fechar ações' : 'Ações do item'}
-          data-test="actions-menu-button"
-        >
-          <MoreHorizontal
-            size={18}
-            className={`absolute transition-all duration-200 ease-out ${
-              isMenuOpen
-                ? 'opacity-0 scale-50 rotate-45'
-                : 'opacity-100 scale-100 rotate-0'
-            }`}
+        <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+          <ItemConsumoLinhaAcoes
+            onEditar={() => onEdit && id && onEdit(id)}
+            onEmprestar={() => onEmprestar && id && onEmprestar(id)}
+            onExcluir={() => onDelete && id && onDelete(id)}
+            emprestarDesabilitado={emprestarDesabilitado}
+            emprestarTitle={emprestarTitle}
+            data-test="actions-menu-button"
           />
-          <X
-            size={18}
-            className={`absolute transition-all duration-200 ease-out ${
-              isMenuOpen
-                ? 'opacity-100 scale-100 rotate-0'
-                : 'opacity-0 scale-50 -rotate-45'
-            }`}
-          />
-        </button>
+        </div>
       </div>
 
-      <div className="relative mt-auto" style={{ minHeight: '44px' }}>
+      <div className="mt-auto" style={{ minHeight: '44px' }}>
         <div
-          className={`transition-opacity duration-150 ${
-            isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          }`}
+          className="flex items-center justify-between gap-2 pt-3 overflow-hidden"
+          data-test="footer"
         >
           <div
-            className="flex items-center justify-between gap-2 pt-3 overflow-hidden"
-            data-test="footer"
+            className="flex flex-col text-sm min-w-0 shrink-0"
+            data-test="quantity"
           >
-            <div
-              className="flex flex-col text-sm min-w-0 shrink-0"
-              data-test="quantity"
-            >
-              {metricas}
-            </div>
-
-            <div
-              className="flex items-center gap-1.5 justify-center flex-1 min-w-0 overflow-hidden px-2"
-              data-test="status-container"
-            >
-              <StatusBadge status={status} data-test="status-badge" />
-            </div>
-
-            {acoesRapidas && (
-              <div
-                className="flex items-center gap-0.5 shrink-0"
-                data-test="movement-icons"
-              >
-                {acoesRapidas}
-              </div>
-            )}
+            {metricas}
           </div>
-        </div>
 
-        <div
-          className={`absolute inset-0 flex items-center gap-2 pt-2 transition-opacity duration-150 ${
-            isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          data-test="action-buttons"
-        >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(false);
-              if (onEdit && id) onEdit(id);
-            }}
-            className="flex-1 h-11 px-3 text-sm font-semibold text-foreground bg-card border border-border hover:bg-muted/45 rounded-md transition-colors duration-100 cursor-pointer"
-            data-test="edit-button"
+          <div
+            className="flex items-center gap-1.5 justify-center flex-1 min-w-0 overflow-hidden px-2"
+            data-test="status-container"
           >
-            Editar
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(false);
-              if (onEmprestar && id) onEmprestar(id);
-            }}
-            disabled={emprestarDesabilitado}
-            className={`flex-1 h-11 px-3 text-sm font-semibold rounded-md border transition-colors duration-100 ${
-              emprestarDesabilitado
-                ? 'opacity-45 cursor-not-allowed text-muted-foreground bg-muted/25 border-border'
-                : 'text-foreground bg-card border-border hover:bg-muted/45 cursor-pointer'
-            }`}
-            title={emprestarDesabilitado ? emprestarTitle : undefined}
-            data-test="emprestimo-button"
-          >
-            Emprestar
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(false);
-              if (onDelete && id) onDelete(id);
-            }}
-            className="flex-1 h-11 px-3 text-sm font-semibold text-destructive bg-destructive/10 border border-destructive/25 hover:bg-destructive/20 dark:border-destructive/40 dark:hover:bg-destructive/30 rounded-md transition-colors duration-100 cursor-pointer"
-            data-test="delete-button"
-          >
-            Excluir
-          </button>
+            <StatusBadge status={status} data-test="status-badge" />
+          </div>
+
+          {acoesRapidas && (
+            <div
+              className="flex items-center gap-0.5 shrink-0"
+              data-test="movement-icons"
+            >
+              {acoesRapidas}
+            </div>
+          )}
         </div>
       </div>
 
