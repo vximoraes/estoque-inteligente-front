@@ -166,7 +166,9 @@ export default function ModalEditarPatrimonio({
                 }));
               }}
               maxLength={60}
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+                erros.numeroPatrimonio ? 'border-destructive' : 'border-border'
+              }`}
             />
             {erros.numeroPatrimonio && (
               <p className="mt-1 text-sm text-destructive">

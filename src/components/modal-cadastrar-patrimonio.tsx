@@ -189,17 +189,6 @@ export default function ModalCadastrarPatrimonio({
         </DialogHeader>
 
         <div className="p-6 space-y-5">
-          <CampoCategoria
-            value={categoriaId}
-            onChange={(id) => {
-              setCategoriaId(id);
-              setErros((prev) => ({ ...prev, categoria: undefined }));
-            }}
-            tipo="permanente"
-            error={erros.categoria}
-            enabled={isOpen}
-          />
-
           <div>
             <label className="block text-base font-medium text-foreground mb-1">
               Número de patrimônio <span className="text-destructive">*</span>
@@ -217,7 +206,9 @@ export default function ModalCadastrarPatrimonio({
               }}
               maxLength={60}
               placeholder="NB-0001"
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+                erros.numeroPatrimonio ? 'border-destructive' : 'border-border'
+              }`}
             />
             {erros.numeroPatrimonio && (
               <p className="mt-1 text-sm text-destructive">
@@ -240,7 +231,9 @@ export default function ModalCadastrarPatrimonio({
               onBlur={(e) => setModeloParaSugestao(e.target.value.trim())}
               maxLength={100}
               placeholder="ThinkPad T14"
-              className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
+              className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
+                erros.modelo ? 'border-destructive' : 'border-border'
+              }`}
             />
             {erros.modelo && (
               <p className="mt-1 text-sm text-destructive">{erros.modelo}</p>
@@ -261,6 +254,27 @@ export default function ModalCadastrarPatrimonio({
             />
           </div>
 
+          <CampoCategoria
+            value={categoriaId}
+            onChange={(id) => {
+              setCategoriaId(id);
+              setErros((prev) => ({ ...prev, categoria: undefined }));
+            }}
+            tipo="permanente"
+            error={erros.categoria}
+            enabled={isOpen}
+          />
+
+          <CampoLocalizacao
+            value={localizacao}
+            onChange={(id) => {
+              setLocalizacao(id);
+              setErros((prev) => ({ ...prev, localizacao: undefined }));
+            }}
+            error={erros.localizacao}
+            enabled={isOpen}
+          />
+
           <div>
             <label className="block text-base font-medium text-foreground mb-1">
               Status
@@ -280,16 +294,6 @@ export default function ModalCadastrarPatrimonio({
               <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
-
-          <CampoLocalizacao
-            value={localizacao}
-            onChange={(id) => {
-              setLocalizacao(id);
-              setErros((prev) => ({ ...prev, localizacao: undefined }));
-            }}
-            error={erros.localizacao}
-            enabled={isOpen}
-          />
 
           <div>
             <label className="block text-base font-medium text-foreground mb-1">
