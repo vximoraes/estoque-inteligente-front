@@ -301,7 +301,7 @@ export default function CustomSidebar({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+            className="hidden md:flex absolute -right-3 top-[46px] -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
             title={collapsed ? 'Expandir menu' : 'Recolher menu'}
             data-test="sidebar-toggle-collapsed"
           >
