@@ -14,7 +14,7 @@ Requer o front rodando em `FRONTEND_URL` (padrão `http://localhost:3000`, ver `
 
 ## Organização
 
-Specs em `cypress/e2e/auth/NN-descricao.cy.ts` (login, esqueci-senha, redefinir-senha) — o prefixo numérico indica ordem lógica de fluxo, não uma ordem de execução obrigatória entre arquivos.
+Specs em `cypress/e2e/auth/NN-descricao.cy.ts` (login, esqueci-senha, redefinir-senha, ativar-conta) — o prefixo numérico indica ordem lógica de fluxo, não uma ordem de execução obrigatória entre arquivos. Não existe spec de cadastro: a rota `/cadastro` (autocadastro público) foi removida do sistema — ver nota em `CLAUDE.md`.
 
 ## Seletores
 

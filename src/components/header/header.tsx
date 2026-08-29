@@ -11,7 +11,6 @@ export default function Header({ children }: ComponenteReact) {
   const rotasIgnoradas = [
     '/',
     '/login',
-    '/cadastro',
     '/ativar-conta',
     '/esqueci-senha',
     '/redefinir-senha',

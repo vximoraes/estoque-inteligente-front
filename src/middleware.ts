@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_ROUTES = [
   '/login',
-  '/cadastro',
   '/ativar-conta',
   '/esqueci-senha',
   '/redefinir-senha',
 ];
 
-const GUEST_ONLY_ROUTES = ['/login', '/cadastro'];
+const GUEST_ONLY_ROUTES = ['/login'];
 
 const API_URL =
   process.env.API_URL ??
