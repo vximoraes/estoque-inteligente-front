@@ -1,13 +1,13 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Filter } from 'lucide-react';
+import { X, Search, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { Input } from '@/components/ui/input';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { ApiResponse } from '@/types/itens';
+import { ItemApiResponse } from '@/types/itens';
 import { PulseLoader } from 'react-spinners';
 import ItemCardSimples from './item-card';
 import ModalFiltros from './modal-filtros';
@@ -61,7 +61,7 @@ export default function ModalSelecionarItem({
       params.append('limit', '24');
       params.append('page', pageParam.toString());
 
-      return await get<ApiResponse>(`/itens?${params.toString()}`);
+      return await get<ItemApiResponse>(`/itens?${params.toString()}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -225,7 +225,7 @@ export default function ModalSelecionarItem({
               onClick={() => setIsFiltrosModalOpen(true)}
               data-test="modal-selecionar-item-filtros-button"
             >
-              <Filter className="w-4 h-4" />
+              <SlidersHorizontal className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
             </Button>
           </div>
@@ -309,6 +309,10 @@ export default function ModalSelecionarItem({
           setCategoriaFilter(categoria);
           setStatusFilter(status);
         }}
+        // Feed misto (itens de consumo e permanente juntos) — como
+        // categoria agora pertence a um único domínio, um filtro de
+        // categoria só faria sentido por tipo, o que este seletor não tem.
+        showCategoria={false}
       />
     </>
   );

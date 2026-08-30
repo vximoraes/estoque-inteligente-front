@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import { Search, Filter, FileText, X, FileDown } from 'lucide-react';
+import { Search, SlidersHorizontal, FileText, X, FileDown } from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { toast, Slide } from 'react-toastify';
@@ -347,7 +347,7 @@ function RelatorioMovimentacoesPageContent() {
             data-test="filtros-button"
             onClick={() => setIsFiltrosModalOpen(true)}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
 

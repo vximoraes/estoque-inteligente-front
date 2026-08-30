@@ -17,7 +17,13 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
-import { Search, Filter, Handshake, X, FileDown } from 'lucide-react';
+import {
+  Search,
+  SlidersHorizontal,
+  Handshake,
+  X,
+  FileDown,
+} from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { toast, Slide } from 'react-toastify';
@@ -325,7 +331,7 @@ function RelatorioEmprestimosPageContent() {
             data-test="filtros-button"
             onClick={() => setIsFiltrosModalOpen(true)}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
 

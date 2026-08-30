@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Emprestimo } from '@/types/emprestimos';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 import { ModalShell } from '@/components/ui/modal-shell';
 
 interface ModalDetalhesEmprestimoProps {
@@ -87,7 +88,7 @@ export default function ModalDetalhesEmprestimo({
         </button>
         <div className="text-center px-8">
           <h2 className="text-xl font-semibold text-foreground">
-            {emprestimo.item?.nome || 'Item'}
+            {getEmprestimoNome(emprestimo)}
           </h2>
           <div className="flex justify-center mt-2">
             <span

@@ -52,8 +52,6 @@ describe('Redefinir senha', () => {
     cy.getByData('confirmar-senha-input').type('SenhaForte@123');
     cy.getByData('botao-redefinir-senha').click();
 
-    // Better Auth rejeita o token inválido; a página mostra o erro via toast
-    // (react-toastify), sem navegar pra /login.
     cy.url({ timeout: 10000 }).should('include', '/redefinir-senha');
   });
 });

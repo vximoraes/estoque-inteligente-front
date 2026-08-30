@@ -102,12 +102,12 @@ docker build -t estoque-inteligente-front .
 
 ## Testes
 
-Não há testes unitários. A suíte inteira é E2E via [Cypress](https://www.cypress.io), rodando contra um app real e uma API real.
+Não há testes unitários. A suíte E2E via [Cypress](https://www.cypress.io) cobre só o fluxo de autenticação (`cypress/e2e/auth`) — decisão deliberada, E2E completo era lento e não era o foco do projeto.
 
 ```bash
-npm run test                                                                    # roda tudo (cypress run)
-npx cypress open                                                                # modo interativo
-npx cypress run --spec "cypress/e2e/itens/01-listagem-pesquisa-filtros.cy.ts"   # uma spec
+npm run test                                                # roda tudo (cypress run)
+npx cypress open                                            # modo interativo
+npx cypress run --spec "cypress/e2e/auth/01-login.cy.ts"    # uma spec
 ```
 
 ## Estrutura do projeto
@@ -118,7 +118,7 @@ estoque-inteligente-front/
 │   ├── app/
 │   │   ├── (auth)/          # área logada: itens, fornecedores, emprestimos,
 │   │   │                    # orcamentos, usuarios, perfil, relatorios
-│   │   └── (no-auth)/       # login, cadastro, ativar-conta, esqueci-senha,
+│   │   └── (no-auth)/       # login, ativar-conta, esqueci-senha,
 │   │                        # redefinir-senha
 │   ├── middleware.ts        # gate de autenticação (valida sessão na API)
 │   ├── lib/
@@ -135,8 +135,8 @@ estoque-inteligente-front/
 │   ├── contexts/            # ChatContext, SidebarContext
 │   └── providers/           # queryProvider (React Query)
 ├── cypress/
-│   ├── e2e/<dominio>/NN-descricao.cy.ts
-│   └── support/commands.ts, helpers.ts
+│   ├── e2e/auth/NN-descricao.cy.ts
+│   └── support/commands.ts
 ├── docs/screenshots/        # imagens usadas neste README
 ├── components.json          # config shadcn/ui
 ├── Dockerfile

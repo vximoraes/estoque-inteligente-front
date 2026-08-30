@@ -11,8 +11,25 @@ import {
 } from '@/components/ui/table';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get, post } from '@/lib/fetchData';
-import { Search, Plus, Trash2, Mail, Loader2, Users } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Trash2,
+  Mail,
+  Loader2,
+  Users,
+  UserCheck,
+} from 'lucide-react';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ORDENACAO_USUARIOS } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { notFound } from 'next/navigation';
 import { useQueryState } from 'nuqs';
@@ -49,6 +66,13 @@ interface UsuarioApiResponse {
   };
 }
 
+const STATUS_FILTER_PADRAO = 'todos';
+
+const STATUS_OPTIONS = [
+  { value: 'true', label: 'Ativo' },
+  { value: 'false', label: 'Aguardando ativação' },
+];
+
 export default function PageUsuariosContent({
   initialData,
 }: {
@@ -63,6 +87,12 @@ export default function PageUsuariosContent({
   }, []);
 
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
+    defaultValue: '',
+  });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
+  const [statusFilter, setStatusFilter] = useQueryState('status', {
     defaultValue: '',
   });
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -88,11 +118,13 @@ export default function PageUsuariosContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<UsuarioApiResponse>({
-    queryKey: ['usuarios', searchTerm],
+    queryKey: ['usuarios', searchTerm, ordenar, statusFilter],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
+      if (ordenar) params.append('ordenar', ordenar);
+      if (statusFilter) params.append('ativo', statusFilter);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -229,6 +261,38 @@ export default function PageUsuariosContent({
               className="h-11 pl-10"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_USUARIOS}
+          />
+          <Select
+            value={statusFilter || STATUS_FILTER_PADRAO}
+            onValueChange={(novoValor) =>
+              setStatusFilter(
+                novoValor === STATUS_FILTER_PADRAO ? '' : novoValor,
+              )
+            }
+          >
+            <SelectTrigger
+              className="h-11 max-w-[220px] shrink-0 bg-background/30 dark:bg-input/30"
+              data-test="status-filter-select"
+              aria-label="Filtrar por status"
+            >
+              <UserCheck className="w-4 h-4" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value={STATUS_FILTER_PADRAO}>
+                Todos os status
+              </SelectItem>
+              {STATUS_OPTIONS.map((opcao) => (
+                <SelectItem key={opcao.value} value={opcao.value}>
+                  {opcao.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             data-test="cadastrar-usuario-button"
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
@@ -307,7 +371,10 @@ export default function PageUsuariosContent({
                           </span>
                         </TableCell>
                         <TableCell className="text-left px-8 py-2">
-                          <span className="truncate block" title={usuario.email}>
+                          <span
+                            className="truncate block"
+                            title={usuario.email}
+                          >
                             {usuario.email}
                           </span>
                         </TableCell>
@@ -400,11 +467,13 @@ export default function PageUsuariosContent({
               <EmptyState
                 icon={Users}
                 title={
-                  searchTerm ? 'Nenhum resultado' : 'Nenhum usuário cadastrado'
+                  searchTerm || statusFilter
+                    ? 'Nenhum resultado'
+                    : 'Nenhum usuário cadastrado'
                 }
                 subtitle={
-                  searchTerm
-                    ? 'Tente ajustar sua pesquisa.'
+                  searchTerm || statusFilter
+                    ? 'Tente ajustar sua pesquisa ou filtros.'
                     : 'Comece adicionando o primeiro usuário.'
                 }
               />

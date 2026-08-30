@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { Emprestimo } from '@/types/emprestimos';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 
 interface ModalEditarEmprestimoProps {
   isOpen: boolean;
@@ -157,7 +158,7 @@ export default function ModalEditarEmprestimo({
             Editar Empréstimo
           </h2>
           <p className="text-sm text-muted-foreground">
-            {emprestimo.item?.nome || 'Item'}
+            {getEmprestimoNome(emprestimo)}
           </p>
         </div>
       </div>

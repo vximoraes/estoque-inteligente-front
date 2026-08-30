@@ -7,13 +7,13 @@ describe('Login', () => {
     cy.clearCookies();
   });
 
-  it('faz login com credenciais válidas e redireciona pra /itens', () => {
+  it('faz login com credenciais válidas e redireciona pra /bens/patrimonio', () => {
     cy.visit(`${frontendUrl}/login`);
     cy.getByData('email-input').type(email);
     cy.getByData('senha-input').type(senha);
     cy.getByData('botao-entrar').click();
 
-    cy.url({ timeout: 30000 }).should('include', '/itens');
+    cy.url({ timeout: 30000 }).should('include', '/bens/patrimonio');
   });
 
   it('exibe erro de e-mail/senha incorretos com senha errada', () => {
@@ -41,13 +41,9 @@ describe('Login', () => {
   });
 
   it('bloqueia com 429 e mostra tempo de espera após tentativas seguidas de senha errada', () => {
-    // Testes anteriores no arquivo já fizeram sign-in no mesmo IP; espera a
-    // janela de 10s do rate limit zerar pra garantir 3 tentativas limpas.
     cy.wait(10000);
     cy.visit(`${frontendUrl}/login`);
 
-    // Rate limit anti-bruteforce da API: 3 tentativas / 10s por IP em
-    // /sign-in*. Repetir rápido o suficiente pra estourar na 4a tentativa.
     for (let tentativa = 1; tentativa <= 3; tentativa++) {
       cy.getByData('email-input').clear().type(email);
       cy.getByData('senha-input').clear().type('SenhaErrada@999');

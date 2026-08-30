@@ -11,7 +11,6 @@ export default function Header({ children }: ComponenteReact) {
   const rotasIgnoradas = [
     '/',
     '/login',
-    '/cadastro',
     '/ativar-conta',
     '/esqueci-senha',
     '/redefinir-senha',
@@ -19,6 +18,6 @@ export default function Header({ children }: ComponenteReact) {
   const isPerfilPage = pathName === '/perfil';
 
   if (!rotasIgnoradas.includes(pathName)) {
-    return <CustomSidebar path={pathName} collapsed={isPerfilPage} />;
+    return <CustomSidebar path={pathName} forceCollapsed={isPerfilPage} />;
   }
 }

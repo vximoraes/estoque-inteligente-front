@@ -76,8 +76,7 @@ export default function ModalEntradaItem({
   }>({});
   const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
   const [novaLocalizacao, setNovaLocalizacao] = useState('');
-  const [novaLocalizacaoDescricao, setNovaLocalizacaoDescricao] =
-    useState('');
+  const [novaLocalizacaoDescricao, setNovaLocalizacaoDescricao] = useState('');
   const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] =
     useState(false);
   const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] =
@@ -807,9 +806,7 @@ export default function ModalEntradaItem({
                   type="text"
                   placeholder="Breve descrição da localização (opcional)"
                   value={novaLocalizacaoDescricao}
-                  onChange={(e) =>
-                    setNovaLocalizacaoDescricao(e.target.value)
-                  }
+                  onChange={(e) => setNovaLocalizacaoDescricao(e.target.value)}
                   maxLength={200}
                   className="w-full h-11 px-3 text-base md:text-sm bg-background border border-border rounded-md hover:border-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent transition-colors"
                 />

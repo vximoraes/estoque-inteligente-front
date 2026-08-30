@@ -69,7 +69,7 @@ function LoginContent() {
           setError('E-mail ou senha incorretos.');
         }
       } else {
-        router.push('/itens');
+        router.push('/bens/patrimonio');
       }
     } catch {
       setError('Erro ao fazer login. Tente novamente.');
@@ -82,7 +82,7 @@ function LoginContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: `${window.location.origin}/itens`,
+      callbackURL: `${window.location.origin}/bens/patrimonio`,
     });
 
     if (error) {

@@ -15,26 +15,27 @@ import ModalFiltrosOrcamentos from '@/components/modal-filtros-orcamentos';
 import ModalCadastrarOrcamento from '@/components/modal-cadastrar-orcamento';
 import ModalEditarOrcamento from '@/components/modal-editar-orcamento';
 import EmptyState from '@/components/empty-state';
-import { useQuery } from '@tanstack/react-query';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_ORCAMENTOS } from '@/lib/ordenacao';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
 import {
   Search,
-  Filter,
+  SlidersHorizontal,
   Plus,
   Pencil,
   Trash2,
   FileDown,
   FileText,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   X,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
 
 export default function PageOrcamentosContent({
   initialData,
@@ -44,7 +45,7 @@ export default function PageOrcamentosContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  const observerTarget = useRef<HTMLDivElement>(null);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [valorMinFilter, setValorMinFilter] = useQueryState('valorMin', {
     defaultValue: '',
@@ -56,6 +57,9 @@ export default function PageOrcamentosContent({
     defaultValue: '',
   });
   const [dataFimFilter, setDataFimFilter] = useQueryState('dataFim', {
+    defaultValue: '',
+  });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
     defaultValue: '',
   });
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
@@ -79,46 +83,70 @@ export default function PageOrcamentosContent({
     null,
   );
 
-  const { data, isLoading, isFetching, error, refetch } =
-    useQuery<OrcamentoApiResponse>({
-      queryKey: [
-        'orcamentos',
-        searchTerm,
-        valorMinFilter,
-        valorMaxFilter,
-        dataInicioFilter,
-        dataFimFilter,
-        currentPage,
-      ],
-      queryFn: async () => {
-        const params = new URLSearchParams();
-        if (searchTerm) params.append('nome', searchTerm);
-        if (valorMinFilter) params.append('valorMin', valorMinFilter);
-        if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
-        if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
-        if (dataFimFilter) params.append('dataFim', dataFimFilter);
-        params.append('limite', '20');
-        params.append('page', currentPage.toString());
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<OrcamentoApiResponse>({
+    queryKey: [
+      'orcamentos',
+      searchTerm,
+      valorMinFilter,
+      valorMaxFilter,
+      dataInicioFilter,
+      dataFimFilter,
+      ordenar,
+    ],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('nome', searchTerm);
+      if (valorMinFilter) params.append('valorMin', valorMinFilter);
+      if (valorMaxFilter) params.append('valorMax', valorMaxFilter);
+      if (dataInicioFilter) params.append('dataInicio', dataInicioFilter);
+      if (dataFimFilter) params.append('dataFim', dataFimFilter);
+      if (ordenar) params.append('ordenar', ordenar);
+      params.append('limite', '20');
+      params.append('page', page.toString());
 
-        const queryString = params.toString();
-        const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;
+      const queryString = params.toString();
+      const url = `/orcamentos${queryString ? `?${queryString}` : ''}`;
 
-        return await get<OrcamentoApiResponse>(url);
-      },
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      placeholderData: initialData,
-    });
+      return await get<OrcamentoApiResponse>(url);
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    placeholderData: initialData
+      ? { pages: [initialData], pageParams: [1] }
+      : undefined,
+  });
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    valorMinFilter,
-    valorMaxFilter,
-    dataInicioFilter,
-    dataFimFilter,
-  ]);
+    if (!observerTarget.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleAdicionarClick = () => {
     setIsCadastrarModalOpen(true);
@@ -348,14 +376,7 @@ export default function PageOrcamentosContent({
     }
   };
 
-  const orcamentos = data?.data?.docs || [];
-  const paginationInfo = data?.data || {
-    totalDocs: 0,
-    totalPages: 0,
-    page: 1,
-    hasPrevPage: false,
-    hasNextPage: false,
-  };
+  const orcamentos = data?.pages.flatMap((page) => page.data.docs) || [];
 
   return (
     <div
@@ -380,13 +401,18 @@ export default function PageOrcamentosContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_ORCAMENTOS}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer"
             onClick={handleOpenFiltrosModal}
             data-test="filtros-button"
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button
@@ -460,9 +486,7 @@ export default function PageOrcamentosContent({
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {isLoading ||
-          isRefetchingAfterDelete ||
-          (isFetching && !isLoading) ? (
+          {isLoading || isRefetchingAfterDelete ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-[var(--ei-accent)]/15"></div>
@@ -577,34 +601,21 @@ export default function PageOrcamentosContent({
                     ))}
                   </TableBody>
                 </table>
-              </div>
-              {paginationInfo.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t bg-muted shrink-0">
-                  <p className="text-sm text-muted-foreground">
-                    Página {paginationInfo.page} de {paginationInfo.totalPages}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      disabled={!paginationInfo.hasPrevPage || isFetching}
-                      className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Página anterior"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage((prev) => prev + 1)}
-                      disabled={!paginationInfo.hasNextPage || isFetching}
-                      className="p-2 rounded-md hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      aria-label="Próxima página"
-                    >
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </div>
+
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                  data-test="infinite-scroll-sentinel"
+                >
+                  {isFetchingNextPage && (
+                    <PulseLoader
+                      color="var(--ei-accent)"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">

@@ -2,12 +2,23 @@
 
 import Cabecalho from '@/components/cabecalho';
 import ModalCadastrarEmprestimo from '@/components/modal-cadastrar-emprestimo';
+import ModalSelecionarPatrimonio from '@/components/modal-selecionar-patrimonio';
+import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
 import ModalDetalhesEmprestimo from '@/components/modal-detalhes-emprestimo';
 import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
 import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
 import ModalDevolverItem from '@/components/modal-devolver-item';
-import ModalFiltros from '@/components/modal-filtros';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ORDENACAO_EMPRESTIMOS } from '@/lib/ordenacao';
+import type { PatrimonioData } from '@/types/patrimonios';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,27 +28,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useQueryState } from 'nuqs';
 import { get } from '@/lib/fetchData';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 import { EmprestimosApiResponse, Emprestimo } from '@/types/emprestimos';
 import {
   Search,
   Handshake,
-  ChevronLeft,
-  ChevronRight,
   Pencil,
   Plus,
   Trash2,
-  Filter,
-  X,
+  ListFilter,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
+
+const TIPO_CONTROLE_LABEL: Record<'quantidade' | 'unidade', string> = {
+  quantidade: 'Almoxarifado',
+  unidade: 'Patrimônio',
+};
+
+const STATUS_FILTER_PADRAO = 'todos';
 
 const statusOptions = [
-  { value: '', label: 'Todos os status' },
   { value: 'Ativo', label: 'Ativo' },
   { value: 'Atrasado', label: 'Atrasado' },
   { value: 'Devolvido', label: 'Devolvido' },
@@ -51,10 +67,23 @@ export default function EmprestimosPageContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
+  const [tipoControleRaw, setTipoControle] = useQueryState('tipo_controle', {
+    defaultValue: 'unidade',
+  });
+  const tipoControle: 'quantidade' | 'unidade' =
+    tipoControleRaw === 'quantidade' ? 'quantidade' : 'unidade';
   const [statusFilter, setStatusFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
+  const observerTarget = useRef<HTMLDivElement>(null);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
+  const [isSelecionarPatrimonioModalOpen, setIsSelecionarPatrimonioModalOpen] =
+    useState(false);
+  const [patrimonioParaEmprestar, setPatrimonioParaEmprestar] =
+    useState<PatrimonioData | null>(null);
+  const [isEmprestarUnidadeModalOpen, setIsEmprestarUnidadeModalOpen] =
+    useState(false);
 
   const [detalhesEmprestimo, setDetalhesEmprestimo] =
     useState<Emprestimo | null>(null);
@@ -74,31 +103,63 @@ export default function EmprestimosPageContent({
     useState<Emprestimo | null>(null);
   const [isDevolverModalOpen, setIsDevolverModalOpen] = useState(false);
 
-  const { data, isLoading, error, refetch } = useQuery<EmprestimosApiResponse>({
-    queryKey: ['emprestimos', searchTerm, statusFilter, currentPage],
-    queryFn: async () => {
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<EmprestimosApiResponse>({
+    queryKey: ['emprestimos', tipoControle, searchTerm, statusFilter, ordenar],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('page', currentPage.toString());
+      params.append('page', page.toString());
       params.append('limite', '20');
+      params.append('tipo_controle', tipoControle);
 
       if (searchTerm) params.append('busca', searchTerm);
       if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
       if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+      if (ordenar) params.append('ordenar', ordenar);
 
       return await get<EmprestimosApiResponse>(
         `/emprestimos?${params.toString()}`,
       );
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     refetchOnMount: 'always',
-    placeholderData: initialData,
+    placeholderData:
+      initialData && tipoControle === 'unidade'
+        ? { pages: [initialData], pageParams: [1] }
+        : undefined,
   });
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+    if (!observerTarget.current) return;
 
-  const emprestimos = data?.data?.docs || [];
-  const paginationInfo = data?.data;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const emprestimos = data?.pages.flatMap((page) => page.data.docs) || [];
 
   const formatarDataPrevista = (data?: string | null) => {
     if (!data) return 'Sem previsão';
@@ -115,6 +176,27 @@ export default function EmprestimosPageContent({
       <Cabecalho pagina="Empréstimos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1">
+        <div
+          className="flex gap-1 mb-4 shrink-0 border-b border-border"
+          data-test="emprestimos-tabs"
+        >
+          {(['unidade', 'quantidade'] as const).map((opcaoTipoControle) => (
+            <button
+              key={opcaoTipoControle}
+              type="button"
+              onClick={() => setTipoControle(opcaoTipoControle)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                tipoControle === opcaoTipoControle
+                  ? 'border-[var(--ei-accent)] text-[var(--ei-accent)]'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+              data-test={`emprestimos-tab-${opcaoTipoControle}`}
+            >
+              {TIPO_CONTROLE_LABEL[opcaoTipoControle]}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -128,50 +210,54 @@ export default function EmprestimosPageContent({
             />
           </div>
 
-          <Button
-            variant="outline"
-            className="h-11 px-4 flex items-center gap-2 cursor-pointer"
-            data-test="filtros-button"
-            onClick={() => setIsFiltrosModalOpen(true)}
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_EMPRESTIMOS}
+          />
+
+          <Select
+            value={statusFilter || STATUS_FILTER_PADRAO}
+            onValueChange={(novoValor) =>
+              setStatusFilter(
+                novoValor === STATUS_FILTER_PADRAO ? '' : novoValor,
+              )
+            }
           >
-            <Filter className="w-4 h-4" />
-            Filtros
-          </Button>
+            <SelectTrigger
+              className="h-11 max-w-[220px] shrink-0 bg-background/30 dark:bg-input/30"
+              data-test="status-filter-select"
+              aria-label="Filtrar por status"
+            >
+              <ListFilter className="w-4 h-4" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value={STATUS_FILTER_PADRAO}>
+                Todos os status
+              </SelectItem>
+              {statusOptions.map((opcao) => (
+                <SelectItem key={opcao.value} value={opcao.value}>
+                  {opcao.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Button
             className="h-11 px-4 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
             data-test="adicionar-button"
-            onClick={() => setIsCadastrarModalOpen(true)}
+            onClick={() =>
+              tipoControle === 'unidade'
+                ? setIsSelecionarPatrimonioModalOpen(true)
+                : setIsCadastrarModalOpen(true)
+            }
           >
             <Plus className="w-4 h-4" />
             Adicionar
           </Button>
         </div>
-
-        {statusFilter && (
-          <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
-              <div
-                className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs border border-border font-medium"
-                data-test="applied-filter-status"
-              >
-                <span className="font-medium">Status:</span>
-                <span data-test="applied-filter-status-nome">
-                  {statusFilter}
-                </span>
-                <button
-                  onClick={() => setStatusFilter('')}
-                  className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                  title="Remover filtro de status"
-                  data-test="applied-filter-status-remover"
-                >
-                  <X size={12} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {error && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/40 text-destructive rounded-md">
@@ -202,27 +288,55 @@ export default function EmprestimosPageContent({
                 >
                   <TableHeader className="sticky top-0 bg-muted z-10 shadow-sm">
                     <TableRow className="bg-muted border-b">
-                      <TableHead className="w-[22%] font-semibold text-muted-foreground text-left px-6">
-                        ITEM
-                      </TableHead>
-                      <TableHead className="w-[18%] font-semibold text-muted-foreground text-left px-6">
-                        SOLICITANTE
-                      </TableHead>
-                      <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
-                        QTD. EMPRESTADA
-                      </TableHead>
-                      <TableHead className="w-[16%] font-semibold text-muted-foreground text-center px-6">
-                        DATA PREVISTA
-                      </TableHead>
-                      <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
-                        STATUS
-                      </TableHead>
-                      <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-6">
-                        AÇÕES
-                      </TableHead>
-                      <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-8">
-                        DEVOLVER
-                      </TableHead>
+                      {tipoControle === 'unidade' ? (
+                        <>
+                          <TableHead className="w-[16%] font-semibold text-muted-foreground text-left px-6">
+                            PATRIMÔNIO
+                          </TableHead>
+                          <TableHead className="w-[18%] font-semibold text-muted-foreground text-left px-6">
+                            MODELO
+                          </TableHead>
+                          <TableHead className="w-[16%] font-semibold text-muted-foreground text-left px-6">
+                            SOLICITANTE
+                          </TableHead>
+                          <TableHead className="w-[16%] font-semibold text-muted-foreground text-center px-6">
+                            DATA PREVISTA
+                          </TableHead>
+                          <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
+                            STATUS
+                          </TableHead>
+                          <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-8">
+                            DEVOLVER
+                          </TableHead>
+                          <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-6">
+                            AÇÕES
+                          </TableHead>
+                        </>
+                      ) : (
+                        <>
+                          <TableHead className="w-[22%] font-semibold text-muted-foreground text-left px-6">
+                            ITEM
+                          </TableHead>
+                          <TableHead className="w-[18%] font-semibold text-muted-foreground text-left px-6">
+                            SOLICITANTE
+                          </TableHead>
+                          <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
+                            QTD. EMPRESTADA
+                          </TableHead>
+                          <TableHead className="w-[16%] font-semibold text-muted-foreground text-center px-6">
+                            DATA PREVISTA
+                          </TableHead>
+                          <TableHead className="w-[12%] font-semibold text-muted-foreground text-center px-6">
+                            STATUS
+                          </TableHead>
+                          <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-8">
+                            DEVOLVER
+                          </TableHead>
+                          <TableHead className="w-[10%] font-semibold text-muted-foreground text-center px-6">
+                            AÇÕES
+                          </TableHead>
+                        </>
+                      )}
                     </TableRow>
                   </TableHeader>
 
@@ -238,24 +352,56 @@ export default function EmprestimosPageContent({
                         className="hover:bg-muted border-b cursor-pointer"
                         style={{ height: '60px' }}
                       >
-                        <TableCell
-                          className="font-medium text-left px-6 py-3 truncate"
-                          title={emp.item?.nome || '-'}
-                        >
-                          {emp.item?.nome || '-'}
-                        </TableCell>
-                        <TableCell
-                          className="text-left px-6 py-3 truncate"
-                          title={emp.solicitante_nome}
-                        >
-                          {emp.solicitante_nome}
-                        </TableCell>
-                        <TableCell className="text-center px-6 py-3">
-                          {emp.quantidade_emprestada}
-                        </TableCell>
-                        <TableCell className="text-center px-6 py-3 whitespace-nowrap">
-                          {formatarDataPrevista(emp.data_prevista_devolucao)}
-                        </TableCell>
+                        {tipoControle === 'unidade' ? (
+                          <>
+                            <TableCell
+                              className="font-medium text-left px-6 py-3 truncate"
+                              title={getEmprestimoNome(emp)}
+                            >
+                              {getEmprestimoNome(emp)}
+                            </TableCell>
+                            <TableCell
+                              className="text-left px-6 py-3 truncate"
+                              title={emp.patrimonio?.modelo || '-'}
+                            >
+                              {emp.patrimonio?.modelo || '-'}
+                            </TableCell>
+                            <TableCell
+                              className="text-left px-6 py-3 truncate"
+                              title={emp.solicitante_nome}
+                            >
+                              {emp.solicitante_nome}
+                            </TableCell>
+                            <TableCell className="text-center px-6 py-3 whitespace-nowrap">
+                              {formatarDataPrevista(
+                                emp.data_prevista_devolucao,
+                              )}
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell
+                              className="font-medium text-left px-6 py-3 truncate"
+                              title={getEmprestimoNome(emp)}
+                            >
+                              {getEmprestimoNome(emp)}
+                            </TableCell>
+                            <TableCell
+                              className="text-left px-6 py-3 truncate"
+                              title={emp.solicitante_nome}
+                            >
+                              {emp.solicitante_nome}
+                            </TableCell>
+                            <TableCell className="text-center px-6 py-3">
+                              {emp.quantidade_emprestada}
+                            </TableCell>
+                            <TableCell className="text-center px-6 py-3 whitespace-nowrap">
+                              {formatarDataPrevista(
+                                emp.data_prevista_devolucao,
+                              )}
+                            </TableCell>
+                          </>
+                        )}
                         <TableCell className="text-center px-6 py-3">
                           <span
                             data-test="status-badge"
@@ -277,6 +423,24 @@ export default function EmprestimosPageContent({
                           >
                             {emp.status}
                           </span>
+                        </TableCell>
+                        <TableCell className="text-center px-6 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDevolverEmprestimo(emp);
+                              setIsDevolverModalOpen(true);
+                            }}
+                            disabled={emp.quantidade_aberta <= 0}
+                            className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
+                              emp.quantidade_aberta <= 0
+                                ? 'border-border text-muted-foreground bg-muted cursor-not-allowed'
+                                : 'border-border text-muted-foreground bg-card hover:bg-muted cursor-pointer'
+                            }`}
+                            data-test="devolver-button"
+                          >
+                            Devolver
+                          </button>
                         </TableCell>
                         <TableCell className="text-center px-8 py-3">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
@@ -307,61 +471,25 @@ export default function EmprestimosPageContent({
                             </button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center px-6 py-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDevolverEmprestimo(emp);
-                              setIsDevolverModalOpen(true);
-                            }}
-                            disabled={emp.quantidade_aberta <= 0}
-                            className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
-                              emp.quantidade_aberta <= 0
-                                ? 'border-border text-muted-foreground bg-muted cursor-not-allowed'
-                                : 'border-border text-muted-foreground bg-card hover:bg-muted cursor-pointer'
-                            }`}
-                            data-test="devolver-button"
-                          >
-                            Devolver
-                          </button>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </table>
-              </div>
-              {paginationInfo && paginationInfo.totalPages > 1 && (
+
                 <div
-                  className="flex items-center justify-between px-6 py-3 border-t border-border shrink-0"
-                  data-test="pagination-controls"
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center"
+                  data-test="infinite-scroll-sentinel"
                 >
-                  <span className="text-sm text-muted-foreground">
-                    Página {currentPage} de {paginationInfo.totalPages}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={!paginationInfo.hasPrevPage}
-                      className="p-1.5 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                      data-test="prev-page-button"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) =>
-                          Math.min(paginationInfo.totalPages, p + 1),
-                        )
-                      }
-                      disabled={!paginationInfo.hasNextPage}
-                      className="p-1.5 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                      data-test="next-page-button"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {isFetchingNextPage && (
+                    <PulseLoader
+                      color="var(--ei-accent)"
+                      size={5}
+                      speedMultiplier={0.8}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-card rounded-md border border-border">
@@ -389,15 +517,27 @@ export default function EmprestimosPageContent({
         onSuccess={() => refetch()}
       />
 
-      <ModalFiltros
-        isOpen={isFiltrosModalOpen}
-        onClose={() => setIsFiltrosModalOpen(false)}
-        categoriaFilter=""
-        statusFilter={statusFilter}
-        onFiltersChange={(_categoria, status) => setStatusFilter(status)}
-        statusOptions={statusOptions}
-        showCategoria={false}
+      <ModalSelecionarPatrimonio
+        isOpen={isSelecionarPatrimonioModalOpen}
+        onClose={() => setIsSelecionarPatrimonioModalOpen(false)}
+        onSelect={(patrimonio) => {
+          setPatrimonioParaEmprestar(patrimonio);
+          setIsSelecionarPatrimonioModalOpen(false);
+          setIsEmprestarUnidadeModalOpen(true);
+        }}
       />
+
+      {patrimonioParaEmprestar && (
+        <ModalEmprestarUnidade
+          isOpen={isEmprestarUnidadeModalOpen}
+          onClose={() => {
+            setIsEmprestarUnidadeModalOpen(false);
+            setTimeout(() => setPatrimonioParaEmprestar(null), 300);
+          }}
+          patrimonio={patrimonioParaEmprestar}
+          onSuccess={() => refetch()}
+        />
+      )}
 
       {detalhesEmprestimo && (
         <ModalDetalhesEmprestimo
@@ -430,7 +570,7 @@ export default function EmprestimosPageContent({
             setTimeout(() => setDevolverEmprestimo(null), 300);
           }}
           emprestimoId={devolverEmprestimo._id}
-          itemNome={devolverEmprestimo.item?.nome || 'Item'}
+          itemNome={getEmprestimoNome(devolverEmprestimo)}
           quantidadeAberta={devolverEmprestimo.quantidade_aberta}
           onSuccess={() => refetch()}
         />
@@ -444,15 +584,9 @@ export default function EmprestimosPageContent({
             setTimeout(() => setExcluirEmprestimo(null), 300);
           }}
           emprestimoId={excluirEmprestimo._id}
-          itemNome={excluirEmprestimo.item?.nome || 'Item'}
+          itemNome={getEmprestimoNome(excluirEmprestimo)}
           solicitanteNome={excluirEmprestimo.solicitante_nome}
-          onSuccess={() => {
-            if (emprestimos.length === 1 && currentPage > 1) {
-              setCurrentPage((p) => p - 1);
-            } else {
-              refetch();
-            }
-          }}
+          onSuccess={() => refetch()}
         />
       )}
 

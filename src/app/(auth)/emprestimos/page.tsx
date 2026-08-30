@@ -5,7 +5,7 @@ import type { EmprestimosApiResponse } from '@/types/emprestimos';
 
 export default async function EmprestimosPage() {
   const initialData = await serverFetch<EmprestimosApiResponse>(
-    '/emprestimos?limite=20&page=1',
+    '/emprestimos?limite=20&page=1&tipo_controle=unidade',
   );
 
   return (

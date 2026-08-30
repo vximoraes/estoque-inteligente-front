@@ -8,7 +8,7 @@ import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
-import { ApiResponse } from '@/types/itens';
+import { ItemConsumoApiResponse } from '@/types/itens';
 
 interface Localizacao {
   _id: string;
@@ -130,16 +130,21 @@ export default function ModalCadastrarEmprestimo({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isOpen]);
 
-  const { data: itensData, isLoading: isLoadingItens } = useQuery<ApiResponse>({
-    queryKey: ['itens-dropdown-emprestimo', itemPesquisa],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (itemPesquisa) params.append('nome', itemPesquisa);
-      params.append('limite', '20');
-      return await get<ApiResponse>(`/itens?${params.toString()}`);
-    },
-    enabled: isOpen,
-  });
+  // Só consumo: este fluxo empresta por quantidade e depois busca
+  // `/estoques/item/:id`, que não existe para item permanente (unidades
+  // patrimoniais emprestam por `modal-emprestar-unidade.tsx`).
+  const { data: itensData, isLoading: isLoadingItens } =
+    useQuery<ItemConsumoApiResponse>({
+      queryKey: ['itens-dropdown-emprestimo', itemPesquisa],
+      queryFn: async () => {
+        const params = new URLSearchParams();
+        if (itemPesquisa) params.append('nome', itemPesquisa);
+        params.append('tipo', 'consumo');
+        params.append('limite', '20');
+        return await get<ItemConsumoApiResponse>(`/itens?${params.toString()}`);
+      },
+      enabled: isOpen,
+    });
 
   const { data: estoquesData, isLoading: isLoadingLocalizacoes } =
     useQuery<EstoqueApiResponse>({

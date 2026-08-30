@@ -155,7 +155,7 @@ function AtivarContaContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: `${window.location.origin}/itens`,
+      callbackURL: `${window.location.origin}/bens/patrimonio`,
       errorCallbackURL: `${window.location.origin}/ativar-conta?token=${token}`,
     });
 
@@ -178,7 +178,7 @@ function AtivarContaContent() {
       <div className="grid min-h-screen w-full overflow-hidden bg-background md:grid-cols-2">
         <AuthLeftPanel />
         <div className="flex items-center justify-center px-8 py-12 md:px-12 lg:px-16">
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm" data-test="token-invalido">
             <h2 className="text-[1.625rem] font-semibold leading-tight text-foreground mb-3">
               Link inválido
             </h2>
@@ -231,6 +231,7 @@ function AtivarContaContent() {
                     placeholder="••••••••"
                     {...register('senha')}
                     disabled={isSubmitting}
+                    data-test="senha-input"
                   />
                   <button
                     type="button"
@@ -288,6 +289,7 @@ function AtivarContaContent() {
                     placeholder="••••••••"
                     {...register('confirmarSenha')}
                     disabled={isSubmitting}
+                    data-test="confirmar-senha-input"
                   />
                   <button
                     type="button"
@@ -320,6 +322,7 @@ function AtivarContaContent() {
               type="submit"
               className="mt-6 h-11 w-full rounded-md bg-[var(--ei-accent)] text-sm font-semibold text-ei-accent-foreground transition-colors duration-200 hover:bg-[var(--ei-accent-hover)] cursor-pointer"
               disabled={isSubmitting}
+              data-test="botao-ativar-conta"
             >
               {isSubmitting ? 'Ativando conta...' : 'Ativar conta'}
             </Button>
@@ -339,6 +342,7 @@ function AtivarContaContent() {
             className="h-11 w-full gap-2 cursor-pointer"
             onClick={handleGoogleContinuar}
             disabled={googleLoading || isSubmitting}
+            data-test="botao-google"
           >
             {!googleLoading && <GoogleIcon />}
             {googleLoading ? 'Redirecionando...' : 'Continuar com Google'}
