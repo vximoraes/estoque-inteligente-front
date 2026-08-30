@@ -1,8 +1,9 @@
-import type { ApiEnvelope } from './itens';
+import type { ApiEnvelope, ItemTipo } from './itens';
 
 export interface Categoria {
   _id: string;
   nome: string;
+  tipo: ItemTipo;
   ativo: boolean;
   usuario: string;
   descricao?: string;

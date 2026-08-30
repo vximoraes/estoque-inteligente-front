@@ -28,8 +28,10 @@ interface ModalPatrimonioStatusProps {
   onClose: () => void;
   patrimonioId: string;
   numeroPatrimonio: string;
-  itemId: string;
-  novoStatus: Extract<PatrimonioStatus, 'Disponível' | 'Manutenção' | 'Baixado'>;
+  novoStatus: Extract<
+    PatrimonioStatus,
+    'Disponível' | 'Manutenção' | 'Baixado'
+  >;
   titulo: string;
   descricao: string;
   confirmLabel: string;
@@ -42,7 +44,6 @@ export default function ModalPatrimonioStatus({
   onClose,
   patrimonioId,
   numeroPatrimonio,
-  itemId,
   novoStatus,
   titulo,
   descricao,
@@ -64,9 +65,9 @@ export default function ModalPatrimonioStatus({
         observacoes: observacoes.trim() || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
-      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
+      // Prefixo amplo: alcança tanto o detalhe da unidade já aberto quanto
+      // a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success(`${numeroPatrimonio} atualizado com sucesso!`, {
         position: 'bottom-right',
         autoClose: 3000,

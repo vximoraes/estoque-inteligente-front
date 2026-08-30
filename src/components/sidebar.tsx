@@ -12,18 +12,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import SidebarButtonMenu from './sidebarButton';
 import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {
   X,
   User,
   Package,
+  Boxes,
   BarChart3,
   FileText,
   Handshake,
@@ -34,8 +29,8 @@ import {
   LogOut,
   Sun,
   Moon,
-  Monitor,
-  Check,
+  ChevronLeft,
+  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -49,12 +44,13 @@ interface CustomSidebarProps {
 const temaOpcoes = [
   { value: 'light', label: 'Claro', icon: Sun },
   { value: 'dark', label: 'Escuro', icon: Moon },
-  { value: 'system', label: 'Sistema', icon: Monitor },
 ] as const;
 
 interface PathRouter {
   path: string;
-  collapsed?: boolean;
+  /** Colapsa a sidebar independente da preferência do usuário — usado hoje
+   * só pela página de perfil, que precisa de mais espaço horizontal. */
+  forceCollapsed?: boolean;
 }
 
 function SidebarSectionLabel({
@@ -201,8 +197,17 @@ function MobileMenuItem({
   );
 }
 
-export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
-  const { isOpen, closeSidebar } = useSidebarContext();
+export default function CustomSidebar({
+  path,
+  forceCollapsed = false,
+}: PathRouter) {
+  const {
+    isOpen,
+    closeSidebar,
+    collapsed: collapsedPref,
+    toggleCollapsed,
+  } = useSidebarContext();
+  const collapsed = forceCollapsed || collapsedPref;
   const { user } = useSession();
   const { canManageUsers } = usePermissions();
   const router = useRouter();
@@ -215,12 +220,12 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
     setMounted(true);
   }, []);
 
-  const temaAtual = mounted ? (theme ?? 'system') : 'system';
-  const IconeTemaAtual =
-    temaAtual === 'light' ? Sun : temaAtual === 'dark' ? Moon : Monitor;
+  const temaAtual = mounted && theme === 'dark' ? 'dark' : 'light';
+  const IconeTemaAtual = temaAtual === 'dark' ? Moon : Sun;
   const temaLabelAtual = temaOpcoes.find(
     (opcao) => opcao.value === temaAtual,
   )?.label;
+  const alternarTema = () => setTheme(temaAtual === 'dark' ? 'light' : 'dark');
 
   const displayName = mounted ? user?.name : undefined;
   const displayEmail = mounted ? user?.email : undefined;
@@ -283,6 +288,21 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
         className={`hidden md:block md:relative transition-all duration-300 ${collapsed ? 'md:w-[100px]' : 'md:w-[280px]'}`}
         data-test="sidebar-container-desktop"
       >
+        {!forceCollapsed && (
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden md:flex absolute -right-3 top-[46px] -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            data-test="sidebar-toggle-collapsed"
+          >
+            {collapsed ? (
+              <ChevronRight className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronLeft className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
         <SidebarProvider
           data-test="sidebar-provider"
           className={`m-0 p-0 h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
@@ -350,17 +370,30 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-menu-item"
                 >
                   <SidebarSectionLabel
-                    label="Operações"
+                    label="Bens"
                     collapsed={collapsed}
                     first
                   />
                   <SidebarButtonMenu
                     icon={Package}
-                    name="Itens"
-                    route="/itens"
-                    data-test="sidebar-btn-itens"
+                    name="Patrimônio"
+                    route="/bens/patrimonio"
+                    data-test="sidebar-btn-patrimonio"
                     path={path}
                     onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarButtonMenu
+                    icon={Boxes}
+                    name="Almoxarifado"
+                    route="/bens/almoxarifado"
+                    data-test="sidebar-btn-almoxarifado"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
+                  <SidebarSectionLabel
+                    label="Operações"
                     collapsed={collapsed}
                   />
                   <SidebarButtonWithSubmenu
@@ -405,7 +438,10 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  <SidebarSectionLabel label="Cadastros" collapsed={collapsed} />
+                  <SidebarSectionLabel
+                    label="Cadastros"
+                    collapsed={collapsed}
+                  />
                   <SidebarButtonMenu
                     icon={Truck}
                     name="Fornecedores"
@@ -462,55 +498,29 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   data-test="sidebar-divider-bottom"
                 />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    {collapsed ? (
-                      <button
-                        type="button"
-                        className="flex justify-center items-center h-10 w-10 mx-auto mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
-                        title="Tema"
-                        data-test="sidebar-tema-toggle-collapsed"
-                      >
-                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 h-10 w-full pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
-                        data-test="sidebar-tema-toggle"
-                      >
-                        <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                        <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
-                          Tema: {temaLabelAtual}
-                        </span>
-                      </button>
-                    )}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align={collapsed ? 'center' : 'end'}
-                    className={
-                      collapsed
-                        ? undefined
-                        : 'w-[var(--radix-dropdown-menu-trigger-width)]'
-                    }
-                    data-test="sidebar-tema-menu"
+                {collapsed ? (
+                  <button
+                    type="button"
+                    onClick={alternarTema}
+                    className="flex justify-center items-center h-10 w-10 mx-auto mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                    title="Tema"
+                    data-test="sidebar-tema-toggle-collapsed"
                   >
-                    {temaOpcoes.map(({ value, label, icon: Icon }) => (
-                      <DropdownMenuItem
-                        key={value}
-                        onClick={() => setTheme(value)}
-                        className="cursor-pointer"
-                        data-test={`sidebar-tema-opcao-${value}`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {label}
-                        {temaAtual === value && (
-                          <Check className="w-4 h-4 ml-auto" />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={alternarTema}
+                    className="flex items-center gap-3 h-10 w-full pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+                    data-test="sidebar-tema-toggle"
+                  >
+                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                      Tema: {temaLabelAtual}
+                    </span>
+                  </button>
+                )}
 
                 <SidebarMenuButton
                   className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-md' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-md'}`}
@@ -595,16 +605,26 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
             <div className="flex flex-col gap-2 flex-1 mb-6">
-              <SidebarSectionLabel label="Operações" first />
+              <SidebarSectionLabel label="Bens" first />
               <MobileMenuItem
                 icon={Package}
-                name="Itens"
-                route="/itens"
-                isActive={path?.startsWith('/itens')}
+                name="Patrimônio"
+                route="/bens/patrimonio"
+                isActive={path?.startsWith('/bens/patrimonio')}
                 onClick={() => {
                   handleItemClick();
                 }}
               />
+              <MobileMenuItem
+                icon={Boxes}
+                name="Almoxarifado"
+                route="/bens/almoxarifado"
+                isActive={path?.startsWith('/bens/almoxarifado')}
+                onClick={() => {
+                  handleItemClick();
+                }}
+              />
+              <SidebarSectionLabel label="Operações" />
               <MobileMenuItem
                 icon={BarChart3}
                 name="Relatórios"
@@ -687,40 +707,17 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
             <div className="mt-auto mb-6">
               <div className="border-b border-ei-sidebar-divider mb-6" />
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-3 h-10 pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150 w-full"
-                    data-test="sidebar-tema-toggle-mobile"
-                  >
-                    <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
-                    <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
-                      Tema: {temaLabelAtual}
-                    </span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                  data-test="sidebar-tema-menu-mobile"
-                >
-                  {temaOpcoes.map(({ value, label, icon: Icon }) => (
-                    <DropdownMenuItem
-                      key={value}
-                      onClick={() => setTheme(value)}
-                      className="cursor-pointer"
-                      data-test={`sidebar-tema-opcao-mobile-${value}`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                      {temaAtual === value && (
-                        <Check className="w-4 h-4 ml-auto" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <button
+                type="button"
+                onClick={alternarTema}
+                className="flex items-center gap-3 h-10 pl-4 pr-3 mb-2 rounded-md hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150 w-full"
+                data-test="sidebar-tema-toggle-mobile"
+              >
+                <IconeTemaAtual className="w-4 h-4 shrink-0 text-ei-sidebar-text-soft" />
+                <span className="text-[13px] font-medium tracking-wide text-ei-sidebar-text-soft">
+                  Tema: {temaLabelAtual}
+                </span>
+              </button>
 
               <button
                 onClick={() => {

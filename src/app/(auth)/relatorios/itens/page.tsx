@@ -17,19 +17,14 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/itens';
-import { Search, Filter, Package, X, FileDown } from 'lucide-react';
+import { Search, SlidersHorizontal, Package, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateItensPDF } from '@/utils/pdfGenerator';
 import { generateItensCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
-
-interface CategoriasApiResponse {
-  data: {
-    docs: any[];
-  };
-}
+import type { CategoriaApiResponse } from '@/types/categorias';
 
 interface ItensGlobaisStats {
   totalItens: number;
@@ -116,6 +111,10 @@ function RelatorioItensPageContent() {
     queryKey: ['itens-relatorio-global-stats', categoriaFilter, statusFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
+      // A listagem abaixo vem de `/estoques`, que só existe para itens de
+      // consumo — as estatísticas precisam do mesmo recorte, senão contam
+      // bens permanentes que a tela nem exibe.
+      params.append('tipo', 'consumo');
       if (categoriaFilter) {
         params.append('categoria', categoriaFilter);
       }
@@ -204,10 +203,12 @@ function RelatorioItensPageContent() {
   const indisponiveis = globalStats?.indisponiveis ?? indisponiveisLocal;
 
   // Query para buscar categorias para mostrar o nome nos filtros
-  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
-    queryKey: ['categorias'],
+  const { data: categoriasData } = useQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', 'consumo'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias?limite=100&page=1');
+      return await get<CategoriaApiResponse>(
+        '/categorias?tipo=consumo&limite=100&page=1',
+      );
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -413,7 +414,7 @@ function RelatorioItensPageContent() {
             data-test="filtros-button"
             onClick={handleOpenFiltrosModal}
           >
-            <Filter className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filtros
           </Button>
           <Button
@@ -686,6 +687,7 @@ function RelatorioItensPageContent() {
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+        tipo="consumo"
         data-test="modal-filtros"
       />
 

@@ -20,7 +20,7 @@ npm run fix                 # lint:fix + format em sequência
 npm run test                 # Cypress E2E (cypress run)
 ```
 
-Não há testes unitários configurados — a suíte de testes é inteiramente E2E via Cypress (`cypress/e2e`). Para rodar Cypress em modo interativo, use `npx cypress open`. Para rodar uma única spec: `npx cypress run --spec "cypress/e2e/itens/01-listagem-pesquisa-filtros.cy.ts"`.
+Não há testes unitários configurados. A suíte E2E via Cypress (`cypress/e2e`) cobre só o fluxo de autenticação (`cypress/e2e/auth`) — decisão deliberada, E2E completo era lento e não era o foco do projeto. Para rodar Cypress em modo interativo, use `npx cypress open`. Para rodar uma única spec: `npx cypress run --spec "cypress/e2e/auth/01-login.cy.ts"`.
 
 Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas client-side) e `API_URL` (chamadas server-side/SSR — no Docker aponta para o nome do serviço da API, não `localhost`).
 
@@ -28,8 +28,8 @@ Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas cli
 
 ### Roteamento e autenticação
 
-- App Router com dois grupos de rotas: `src/app/(auth)/*` (área logada: itens, fornecedores, emprestimos, orcamentos, usuarios, perfil, relatorios) e `src/app/(no-auth)/*` (login, cadastro, ativar-conta, esqueci-senha, redefinir-senha).
-- `src/middleware.ts` faz o gate de autenticação em toda navegação: encaminha o cookie da requisição para `${API_URL}/api/auth/get-session` e redireciona para `/login` (rotas privadas sem sessão) ou para `/itens` (rotas públicas já autenticado). A lista de rotas públicas está hardcoded em `PUBLIC_ROUTES`.
+- App Router com dois grupos de rotas: `src/app/(auth)/*` (área logada: itens, fornecedores, emprestimos, orcamentos, usuarios, perfil, relatorios) e `src/app/(no-auth)/*` (login, ativar-conta, esqueci-senha, redefinir-senha). Não existe autocadastro público — `/cadastro` foi removida (chamava um endpoint `/signup` que nunca existiu na API, e mesmo funcional criaria usuário sem grupo/permissão, fora do fluxo de convite via admin). Onboarding de usuário é sempre `POST /usuarios` pelo admin seguido de `/ativar-conta?token=...`.
+- `src/middleware.ts` faz o gate de autenticação em toda navegação: encaminha o cookie da requisição para `${API_URL}/api/auth/get-session` e redireciona para `/login` (rotas privadas sem sessão) ou para `/bens/patrimonio` (rotas só-visitante já autenticado). Listas hardcoded em `PUBLIC_ROUTES`/`GUEST_ONLY_ROUTES`.
 - Autenticação de fato é feita pelo Better Auth (`src/lib/auth-client.ts`), com campos extras de usuário (`ativo`, `fotoPerfil`) injetados via plugin `inferAdditionalFields`.
 - `src/hooks/use-session.ts` expõe `useSession()` (client-side, wrapper de `authClient.useSession()`) — usar em vez de acessar `authClient` diretamente em componentes.
 - `src/hooks/use-permissions.ts` expõe `usePermissions()`, que busca as permissões do usuário (`GET /usuarios/:id`) e oferece `hasPermission(rota, action?)`, `isAdmin()`, `canManageUsers()`. Ações de permissão seguem o vocabulário da API: `'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'`.
@@ -67,8 +67,8 @@ Ao adicionar uma nova página de listagem, siga esse mesmo padrão em vez de bus
 
 ### Testes E2E (Cypress)
 
-- Specs organizadas por domínio em `cypress/e2e/<dominio>/NN-descricao.cy.ts` (ex. `itens/01-listagem-pesquisa-filtros.cy.ts`, `usuarios/03-exclusao.cy.ts`). Numeração de prefixo indica ordem lógica de fluxo dentro do domínio, não ordem de execução obrigatória.
-- Helpers e comandos customizados em `cypress/support/commands.ts` e `cypress/support/helpers.ts`.
+- Specs só de autenticação, em `cypress/e2e/auth/NN-descricao.cy.ts` (login, esqueci-senha, redefinir-senha, ativar-conta). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória.
+- Comando customizado único em `cypress/support/commands.ts` (`cy.getByData`).
 - `cypress.config.ts` usa `FRONTEND_URL` (env do Cypress) como `baseUrl`, com fallback para `http://localhost:3000` — o app precisa estar rodando (`npm run dev` ou build) antes de `npm run test`.
 
 ## Convenções de código

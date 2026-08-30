@@ -30,11 +30,9 @@ export default function SidebarButtonWithSubmenu({
   collapsed = false,
 }: SidebarMenuButtonWithSubmenuProps) {
   const router = useRouter();
-  const slug = name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-  const isActive = !!path?.startsWith('/' + slug);
+  const isActive =
+    !!path &&
+    subItems.some((i) => path === i.route || path.startsWith(i.route + '/'));
   const [isOpen, setIsOpen] = useState(isActive);
 
   useEffect(() => {

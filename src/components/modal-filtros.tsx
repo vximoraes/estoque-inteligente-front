@@ -5,50 +5,20 @@ import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-
-interface Categoria {
-  _id: string;
-  nome: string;
-  usuario: string;
-  __v: number;
-}
-
-interface CategoriasApiResponse {
-  error: boolean;
-  code: number;
-  message: string;
-  data: {
-    docs: Categoria[];
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    page: number;
-    pagingCounter: number;
-    hasPrevPage: boolean;
-    hasNextPage: boolean;
-    prevPage: number | null;
-    nextPage: number | null;
-  };
-  errors: any[];
-}
+import type { CategoriaApiResponse } from '@/types/categorias';
+import type { ItemTipo } from '@/types/itens';
 
 interface ModalFiltrosProps {
   isOpen: boolean;
   onClose: () => void;
   categoriaFilter: string;
   statusFilter: string;
-  onFiltersChange: (categoria: string, status: string, tipo?: string) => void;
+  onFiltersChange: (categoria: string, status: string) => void;
   statusOptions?: Array<{ value: string; label: string }>;
   showCategoria?: boolean;
-  showTipo?: boolean;
-  tipoFilter?: string;
+  /** Domínio das categorias listadas — obrigatório quando `showCategoria` é true. */
+  tipo?: ItemTipo;
 }
-
-const tipoOptions = [
-  { value: '', label: 'Todos os tipos' },
-  { value: 'consumo', label: 'Consumo' },
-  { value: 'permanente', label: 'Permanente' },
-];
 
 const defaultStatusOptions = [
   { value: '', label: 'Todos os status' },
@@ -65,29 +35,29 @@ export default function ModalFiltros({
   onFiltersChange,
   statusOptions = defaultStatusOptions,
   showCategoria = true,
-  showTipo = false,
-  tipoFilter = '',
+  tipo,
 }: ModalFiltrosProps) {
   const [selectedCategoria, setSelectedCategoria] = useState(categoriaFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
-  const [selectedTipo, setSelectedTipo] = useState(tipoFilter);
   const [categoriaDropdownOpen, setCategoriaDropdownOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoriaSearch, setCategoriaSearch] = useState('');
 
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', tipo],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>(`/categorias?limite=100&page=1`);
+      return await get<CategoriaApiResponse>(
+        `/categorias?tipo=${tipo}&limite=100&page=1`,
+      );
     },
+    enabled: showCategoria && !!tipo,
     staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {
     setSelectedCategoria(categoriaFilter);
     setSelectedStatus(statusFilter);
-    setSelectedTipo(tipoFilter);
-  }, [categoriaFilter, statusFilter, tipoFilter]);
+  }, [categoriaFilter, statusFilter]);
 
   useEffect(() => {
     if (isOpen) {
@@ -137,15 +107,14 @@ export default function ModalFiltros({
   }, [isOpen]);
 
   const handleApplyFilters = () => {
-    onFiltersChange(selectedCategoria, selectedStatus, selectedTipo);
+    onFiltersChange(selectedCategoria, selectedStatus);
     handleCloseModal();
   };
 
   const handleClearFilters = () => {
     setSelectedCategoria('');
     setSelectedStatus('');
-    setSelectedTipo('');
-    onFiltersChange('', '', '');
+    onFiltersChange('', '');
     handleCloseModal();
   };
 
@@ -341,32 +310,6 @@ export default function ModalFiltros({
             )}
           </div>
         </div>
-
-        {/* Filtro por Tipo — só na listagem de itens (patrimônio x consumo) */}
-        {showTipo && (
-          <div className="space-y-2" data-test="filtro-tipo-container">
-            <label className="block text-sm font-semibold text-foreground tracking-tight">
-              Tipo
-            </label>
-            <div className="flex gap-2">
-              {tipoOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setSelectedTipo(option.value)}
-                  className={`flex-1 h-11 px-3 rounded-md border text-sm font-medium transition-colors cursor-pointer ${
-                    selectedTipo === option.value
-                      ? 'border-[var(--ei-accent)] bg-[var(--ei-accent)]/10 text-[var(--ei-accent)]'
-                      : 'border-border text-foreground hover:bg-muted/40'
-                  }`}
-                  data-test={`filtro-tipo-option-${option.value || 'todos'}`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer com ações */}

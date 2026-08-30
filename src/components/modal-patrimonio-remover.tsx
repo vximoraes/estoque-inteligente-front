@@ -23,7 +23,6 @@ interface ModalPatrimonioRemoverProps {
   onClose: () => void;
   patrimonioId: string;
   numeroPatrimonio: string;
-  itemId: string;
   onSuccess?: () => void;
 }
 
@@ -32,7 +31,6 @@ export default function ModalPatrimonioRemover({
   onClose,
   patrimonioId,
   numeroPatrimonio,
-  itemId,
   onSuccess,
 }: ModalPatrimonioRemoverProps) {
   const queryClient = useQueryClient();
@@ -41,9 +39,9 @@ export default function ModalPatrimonioRemover({
     mutationFn: async () =>
       await patch(`/patrimonios/${patrimonioId}/inativar`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['patrimonios', itemId] });
-      queryClient.invalidateQueries({ queryKey: ['item-detalhe', itemId] });
+      // Prefixo amplo: alcança tanto o detalhe da unidade já aberto quanto
+      // a página global de unidades (`['patrimonios', 'lista', ...]`).
+      queryClient.invalidateQueries({ queryKey: ['patrimonios'] });
       toast.success(`${numeroPatrimonio} removido.`, {
         position: 'bottom-right',
         autoClose: 3000,
@@ -66,10 +64,7 @@ export default function ModalPatrimonioRemover({
         if (!open) onClose();
       }}
     >
-      <DialogContent
-        className="max-w-sm"
-        data-test="modal-patrimonio-remover"
-      >
+      <DialogContent className="max-w-sm" data-test="modal-patrimonio-remover">
         <DialogHeader className="pb-6">
           <DialogTitle>Remover unidade</DialogTitle>
           <DialogDescription>

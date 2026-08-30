@@ -1,4 +1,5 @@
 import type { ApiEnvelope, Localizacao } from './itens';
+import type { Categoria } from './categorias';
 
 export type PatrimonioStatus =
   | 'Disponível'
@@ -6,20 +7,43 @@ export type PatrimonioStatus =
   | 'Manutenção'
   | 'Baixado';
 
-export interface PatrimonioItemRef {
-  _id: string;
-  nome: string;
-  tipo: 'consumo' | 'permanente';
+export const PATRIMONIO_STATUS_OPTIONS: PatrimonioStatus[] = [
+  'Disponível',
+  'Emprestado',
+  'Manutenção',
+  'Baixado',
+];
+
+// Toda ação disponível sobre uma unidade de patrimônio, compartilhada entre
+// o card da grade (`card-patrimonio.tsx`) e o detalhe da unidade.
+export type AcaoPatrimonio =
+  | 'emprestar'
+  | 'historico'
+  | 'editar'
+  | 'manutencao'
+  | 'retornarManutencao'
+  | 'baixar'
+  | 'reativar'
+  | 'transferir'
+  | 'remover';
+
+export interface CampoPersonalizado {
+  chave: string;
+  valor: string;
 }
 
 export interface PatrimonioData {
   _id: string;
-  item: PatrimonioItemRef;
   numero_patrimonio: string;
+  modelo?: string;
+  fabricante?: string;
+  categoria: Categoria;
   localizacao: Localizacao;
   status: PatrimonioStatus;
   data_aquisicao?: string;
   observacoes?: string;
+  imagem?: string;
+  campos_personalizados: CampoPersonalizado[];
   ativo: boolean;
   usuario: string;
   createdAt: string;
@@ -39,7 +63,6 @@ export type PatrimonioEventoTipo =
 export interface PatrimonioEventoData {
   _id: string;
   patrimonio: string;
-  item: string;
   tipo: PatrimonioEventoTipo;
   status_anterior: PatrimonioStatus | null;
   status_novo: PatrimonioStatus;

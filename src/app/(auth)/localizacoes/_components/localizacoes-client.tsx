@@ -17,6 +17,8 @@ import { get } from '@/lib/fetchData';
 import { LocalizacaoApiResponse } from '@/types/itens';
 import { Search, MapPin, Plus, Pencil, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
+import OrdenarPorSelect from '@/components/ordenar-por-select';
+import { ORDENACAO_LOCALIZACOES } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -31,6 +33,9 @@ export default function PageLocalizacoesContent({
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
+  const [ordenar, setOrdenar] = useQueryState('ordenar', {
+    defaultValue: '',
+  });
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
   const [excluirLocalizacaoId, setExcluirLocalizacaoId] = useState<
@@ -38,14 +43,13 @@ export default function PageLocalizacoesContent({
   >(null);
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
-  const [editarLocalizacaoId, setEditarLocalizacaoId] = useState<
-    string | null
-  >(null);
+  const [editarLocalizacaoId, setEditarLocalizacaoId] = useState<string | null>(
+    null,
+  );
   const [atualizandoLocalizacaoId, setAtualizandoLocalizacaoId] = useState<
     string | null
   >(null);
-  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] =
-    useState(false);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
 
   const {
     data,
@@ -57,11 +61,12 @@ export default function PageLocalizacoesContent({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<LocalizacaoApiResponse>({
-    queryKey: ['localizacoes', searchTerm],
+    queryKey: ['localizacoes', searchTerm, ordenar],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
+      if (ordenar) params.append('ordenar', ordenar);
       params.append('limite', '20');
       params.append('page', page.toString());
 
@@ -173,6 +178,11 @@ export default function PageLocalizacoesContent({
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_LOCALIZACOES}
+          />
           <Button
             className="h-11 flex items-center gap-2 text-ei-accent-foreground hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
@@ -342,8 +352,7 @@ export default function PageLocalizacoesContent({
           onSuccess={handleExcluirSuccess}
           localizacaoId={excluirLocalizacaoId}
           localizacaoNome={
-            localizacoes.find((l) => l._id === excluirLocalizacaoId)?.nome ||
-            ''
+            localizacoes.find((l) => l._id === excluirLocalizacaoId)?.nome || ''
           }
         />
       )}
@@ -363,12 +372,10 @@ export default function PageLocalizacoesContent({
           }}
           localizacaoId={editarLocalizacaoId}
           localizacaoNome={
-            localizacoes.find((l) => l._id === editarLocalizacaoId)?.nome ||
-            ''
+            localizacoes.find((l) => l._id === editarLocalizacaoId)?.nome || ''
           }
           localizacaoDescricao={
-            localizacoes.find((l) => l._id === editarLocalizacaoId)
-              ?.descricao
+            localizacoes.find((l) => l._id === editarLocalizacaoId)?.descricao
           }
           onSuccess={handleEditarSuccess}
         />

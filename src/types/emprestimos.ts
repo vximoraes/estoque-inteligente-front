@@ -8,6 +8,14 @@ export interface EmprestimoLocalizacao {
   nome: string;
 }
 
+export interface EmprestimoPatrimonio {
+  _id: string;
+  numero_patrimonio: string;
+  modelo?: string;
+  fabricante?: string;
+  status: string;
+}
+
 export interface EmprestimoUsuarioResponsavel {
   _id: string;
   nome: string;
@@ -18,8 +26,10 @@ export type EmprestimoStatus = 'Ativo' | 'Atrasado' | 'Devolvido';
 
 export interface Emprestimo {
   _id: string;
-  item: EmprestimoItem;
+  item?: EmprestimoItem | null;
   localizacao: EmprestimoLocalizacao;
+  patrimonio?: EmprestimoPatrimonio | null;
+  tipo_controle: 'quantidade' | 'unidade';
   quantidade_emprestada: number;
   quantidade_devolvida: number;
   quantidade_aberta: number;

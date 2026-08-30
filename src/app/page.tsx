@@ -7,6 +7,9 @@ const API_URL =
   'http://localhost:3010';
 
 export default async function Home() {
+  // `redirect()` funciona lançando `NEXT_REDIRECT` — precisa ficar fora do
+  // `try`, senão o catch abaixo engole a exceção e sempre cai no /login.
+  let autenticado = false;
   try {
     const reqHeaders = await headers();
     const cookie = reqHeaders.get('cookie') ?? '';
@@ -16,13 +19,11 @@ export default async function Home() {
     });
     if (response.ok) {
       const session = await response.json();
-      if (session?.user?.id) {
-        redirect('/itens');
-      }
+      autenticado = !!session?.user?.id;
     }
   } catch {
     // API indisponível → redireciona para login
   }
 
-  redirect('/login');
+  redirect(autenticado ? '/bens/patrimonio' : '/login');
 }
