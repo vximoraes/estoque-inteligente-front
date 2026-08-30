@@ -132,7 +132,7 @@ export default function ModalEditarLocalizacao({
       isOpen={isOpen}
       onClose={handleClose}
       zIndex={99999}
-      contentClassName="max-w-md overflow-visible"
+      contentClassName="max-w-lg overflow-visible"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">

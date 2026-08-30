@@ -129,7 +129,7 @@ export default function ModalCadastrarLocalizacao({
       onClose={handleClose}
       data-test="modal-cadastrar-localizacao"
       zIndex={99999}
-      contentClassName="max-w-md overflow-visible"
+      contentClassName="max-w-lg overflow-visible"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">

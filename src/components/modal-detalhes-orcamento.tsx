@@ -106,7 +106,7 @@ export default function ModalDetalhesOrcamento({
       onClose={handleClose}
       zIndex={99999}
       data-test="modal-detalhes-orcamento"
-      contentClassName="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden"
+      contentClassName="max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
     >
       {/* Header */}
       <div className="relative p-6 border-b border-border flex-shrink-0">

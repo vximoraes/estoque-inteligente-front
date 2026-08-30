@@ -32,7 +32,7 @@ export default function ModalExportarRelatorio({
       onClose={onClose}
       overlayClassName="z-50"
       data-test="modal-exportar-overlay"
-      contentClassName="shadow-none max-w-md"
+      contentClassName="shadow-none max-w-lg"
       contentDataTest="modal-exportar-content"
     >
       {/* Header */}
