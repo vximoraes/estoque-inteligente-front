@@ -64,7 +64,7 @@ export default function ModalPatrimonioRemover({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="max-w-sm" data-test="modal-patrimonio-remover">
+      <DialogContent className="max-w-lg" data-test="modal-patrimonio-remover">
         <DialogHeader className="pb-6">
           <DialogTitle>Remover unidade</DialogTitle>
           <DialogDescription>

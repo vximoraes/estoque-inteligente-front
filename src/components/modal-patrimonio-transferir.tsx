@@ -92,7 +92,7 @@ export default function ModalPatrimonioTransferir({
         if (!open) onClose();
       }}
     >
-      <DialogContent data-test="modal-patrimonio-transferir">
+      <DialogContent className="max-w-lg" data-test="modal-patrimonio-transferir">
         <DialogHeader>
           <DialogTitle>Transferir unidade</DialogTitle>
           <DialogDescription>{numeroPatrimonio}</DialogDescription>

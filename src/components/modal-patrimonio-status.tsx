@@ -90,7 +90,7 @@ export default function ModalPatrimonioStatus({
         if (!open) onClose();
       }}
     >
-      <DialogContent data-test="modal-patrimonio-status">
+      <DialogContent className="max-w-lg" data-test="modal-patrimonio-status">
         <DialogHeader>
           <DialogTitle>{titulo}</DialogTitle>
           <DialogDescription>
