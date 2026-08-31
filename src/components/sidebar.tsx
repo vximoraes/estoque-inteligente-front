@@ -48,9 +48,6 @@ const temaOpcoes = [
 
 interface PathRouter {
   path: string;
-  /** Colapsa a sidebar independente da preferência do usuário — usado hoje
-   * só pela página de perfil, que precisa de mais espaço horizontal. */
-  forceCollapsed?: boolean;
 }
 
 function SidebarSectionLabel({
@@ -197,17 +194,9 @@ function MobileMenuItem({
   );
 }
 
-export default function CustomSidebar({
-  path,
-  forceCollapsed = false,
-}: PathRouter) {
-  const {
-    isOpen,
-    closeSidebar,
-    collapsed: collapsedPref,
-    toggleCollapsed,
-  } = useSidebarContext();
-  const collapsed = forceCollapsed || collapsedPref;
+export default function CustomSidebar({ path }: PathRouter) {
+  const { isOpen, closeSidebar, collapsed, toggleCollapsed } =
+    useSidebarContext();
   const { user } = useSession();
   const { canManageUsers } = usePermissions();
   const router = useRouter();
@@ -288,21 +277,19 @@ export default function CustomSidebar({
         className={`hidden md:block md:relative transition-all duration-300 ${collapsed ? 'md:w-[100px]' : 'md:w-[280px]'}`}
         data-test="sidebar-container-desktop"
       >
-        {!forceCollapsed && (
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="hidden md:flex absolute -right-3 top-[46px] -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
-            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
-            data-test="sidebar-toggle-collapsed"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronLeft className="w-3.5 h-3.5" />
-            )}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          className="hidden md:flex absolute -right-3 top-[46px] -translate-y-1/2 z-20 w-6 h-6 items-center justify-center rounded-full border border-ei-sidebar-divider bg-ei-sidebar-bg text-ei-sidebar-text-soft hover:text-ei-sidebar-text-strong hover:bg-ei-sidebar-surface-hover cursor-pointer transition-colors duration-150"
+          title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          data-test="sidebar-toggle-collapsed"
+        >
+          {collapsed ? (
+            <ChevronRight className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronLeft className="w-3.5 h-3.5" />
+          )}
+        </button>
         <SidebarProvider
           data-test="sidebar-provider"
           className={`m-0 p-0 h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
@@ -317,7 +304,7 @@ export default function CustomSidebar({
             className={`h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
           >
             <SidebarContent
-              className={`bg-ei-sidebar-bg h-auto relative overflow-y-auto transition-all duration-300 flex flex-col ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
+              className={`bg-ei-sidebar-bg h-full relative overflow-hidden transition-all duration-300 flex flex-col ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}
               data-test="sidebar-content"
             >
               {/* Seção de Perfil no Topo */}
@@ -364,7 +351,10 @@ export default function CustomSidebar({
                 />
               </div>
 
-              <SidebarMenu className="flex-1" data-test="sidebar-menu">
+              <SidebarMenu
+                className="flex-1 min-h-0 overflow-y-auto"
+                data-test="sidebar-menu"
+              >
                 <SidebarMenuItem
                   className="items-center gap-2 flex flex-col"
                   data-test="sidebar-menu-item"
