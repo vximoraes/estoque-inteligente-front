@@ -15,9 +15,8 @@ export default function Header({ children }: ComponenteReact) {
     '/esqueci-senha',
     '/redefinir-senha',
   ];
-  const isPerfilPage = pathName === '/perfil';
 
   if (!rotasIgnoradas.includes(pathName)) {
-    return <CustomSidebar path={pathName} forceCollapsed={isPerfilPage} />;
+    return <CustomSidebar path={pathName} />;
   }
 }
