@@ -61,7 +61,7 @@ Ao adicionar uma nova página de listagem, siga esse mesmo padrão em vez de bus
 ### UI
 
 - Componentes shadcn/ui (`style: new-york`, base color `neutral`) em `src/components/ui/`, gerados/configurados via `components.json`. Ícones via `lucide-react`.
-- Padrão de nomenclatura: modais de domínio ficam soltos em `src/components/modal-*.tsx` (não em subpastas por domínio) — ex. `modal-excluir-item.tsx`, `modal-editar-emprestimo.tsx`, `modal-filtros.tsx`.
+- Colocation por rota: componente usado por uma única rota mora no `_components/` dessa rota (ex. `src/app/(auth)/fornecedores/_components/modal-cadastrar-fornecedor.tsx`), seguindo o mesmo padrão já usado pelos `*-client.tsx`. `src/components/` guarda só o que é compartilhado por 2+ rotas, agrupado por domínio: `layout/` (chrome do app), `comum/` (genéricos cross-domínio), `item-form/`, `categoria/`, `localizacao/`, `emprestimo/` (compartilhados entre fluxos de item e patrimônio), além de `ui/` e `chat/`.
 - Alias de import `@/*` → `src/*` (configurado em `tsconfig.json` e `components.json`).
 - Tailwind v4 (config em `tailwind.config.js` + `postcss.config.mjs`, sem arquivo de tema separado — cores usam CSS variables em `globals.css`).
 

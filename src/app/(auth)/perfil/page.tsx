@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Camera, User, Eye, EyeOff, Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Cabecalho from '@/components/cabecalho';
+import Cabecalho from '@/components/layout/cabecalho';
 import { useSession } from '@/hooks/use-session';
 import { authClient } from '@/lib/auth-client';
 import { get, patch } from '@/lib/fetchData';

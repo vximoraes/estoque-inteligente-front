@@ -5,16 +5,16 @@
 // Clicar no card abre o detalhe da unidade; o menu "..." do card concentra
 // as ações (Editar/Emprestar/Manutenção/Transferir/Baixar/Remover).
 
-import CardPatrimonio from '@/components/card-patrimonio';
-import Cabecalho from '@/components/cabecalho';
-import ModalFiltros from '@/components/modal-filtros';
-import ModalCadastrarPatrimonio from '@/components/modal-cadastrar-patrimonio';
-import PatrimonioAcoesModais from '@/components/patrimonio-acoes-modais';
-import PatrimonioLinhaAcoes from '@/components/patrimonio-linha-acoes';
-import ViewModeToggle from '@/components/view-mode-toggle';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
-import StatusBadge from '@/components/status-badge';
-import EmptyState from '@/components/empty-state';
+import CardPatrimonio from '@/app/(auth)/bens/patrimonio/_components/card-patrimonio';
+import Cabecalho from '@/components/layout/cabecalho';
+import ModalFiltros from '@/components/comum/modal-filtros';
+import ModalCadastrarPatrimonio from '@/app/(auth)/bens/patrimonio/_components/modal-cadastrar-patrimonio';
+import PatrimonioAcoesModais from '@/app/(auth)/bens/patrimonio/_components/patrimonio-acoes-modais';
+import PatrimonioLinhaAcoes from '@/app/(auth)/bens/patrimonio/_components/patrimonio-linha-acoes';
+import ViewModeToggle from '@/components/comum/view-mode-toggle';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
+import StatusBadge from '@/components/comum/status-badge';
+import EmptyState from '@/components/comum/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/sidebar';
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
-import SidebarButtonMenu from './sidebarButton';
-import SidebarButtonWithSubmenu from './sidebarButtonWithSubmenu';
+import SidebarButtonMenu from './sidebar-button';
+import SidebarButtonWithSubmenu from './sidebar-button-with-submenu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {

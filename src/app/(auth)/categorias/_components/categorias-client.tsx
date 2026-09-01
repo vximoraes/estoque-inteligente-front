@@ -1,5 +1,5 @@
 'use client';
-import Cabecalho from '@/components/cabecalho';
+import Cabecalho from '@/components/layout/cabecalho';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,17 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
-import ModalCadastrarCategoria from '@/components/modal-cadastrar-categoria';
-import ModalEditarCategoria from '@/components/modal-editar-categoria';
-import ModalDetalheCategoria from '@/components/modal-detalhe-categoria';
+import ModalExcluirCategoria from '@/components/categoria/modal-excluir-categoria';
+import ModalCadastrarCategoria from '@/components/categoria/modal-cadastrar-categoria';
+import ModalEditarCategoria from '@/components/categoria/modal-editar-categoria';
+import ModalDetalheCategoria from '@/components/categoria/modal-detalhe-categoria';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { CategoriaApiResponse } from '@/types/categorias';
 import { ITEM_TIPO_LABEL_CURTO, type ItemTipo } from '@/types/itens';
 import { Search, Tag, Plus, Pencil, Trash2 } from 'lucide-react';
-import EmptyState from '@/components/empty-state';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
+import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import { ORDENACAO_CATEGORIAS } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
