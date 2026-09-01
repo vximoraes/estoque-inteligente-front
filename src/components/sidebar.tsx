@@ -399,7 +399,7 @@ export default function CustomSidebar({ path }: PathRouter) {
                         name: 'Movimentações',
                         route: '/relatorios/movimentacoes',
                       },
-                          {
+                      {
                         name: 'Empréstimos',
                         route: '/relatorios/emprestimos',
                       },
