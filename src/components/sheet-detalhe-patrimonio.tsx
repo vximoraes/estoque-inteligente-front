@@ -125,45 +125,57 @@ export default function SheetDetalhePatrimonio({
             <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
               Dados
             </h4>
-            <dl className="space-y-1.5 text-sm">
+            <dl className="space-y-3">
               {patrimonio?.modelo && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Modelo</dt>
-                  <dd className="text-foreground text-right truncate">
+                <div>
+                  <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Modelo
+                  </dt>
+                  <dd className="text-sm text-foreground break-words">
                     {patrimonio.modelo}
                   </dd>
                 </div>
               )}
               {patrimonio?.fabricante && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Fabricante</dt>
-                  <dd className="text-foreground text-right truncate">
+                <div>
+                  <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Fabricante
+                  </dt>
+                  <dd className="text-sm text-foreground break-words">
                     {patrimonio.fabricante}
                   </dd>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Categoria</dt>
-                <dd className="text-foreground text-right truncate">
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Categoria
+                </dt>
+                <dd className="text-sm text-foreground break-words">
                   {patrimonio?.categoria.nome ?? '—'}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Localização</dt>
-                <dd className="text-foreground text-right truncate">
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Localização
+                </dt>
+                <dd className="text-sm text-foreground break-words">
                   {patrimonio?.localizacao?.nome ?? '—'}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Aquisição</dt>
-                <dd className="text-foreground text-right">
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Aquisição
+                </dt>
+                <dd className="text-sm text-foreground">
                   {formatarData(patrimonio?.data_aquisicao)}
                 </dd>
               </div>
               {patrimonio?.observacoes && (
                 <div>
-                  <dt className="text-muted-foreground mb-1">Observações</dt>
-                  <dd className="text-foreground whitespace-pre-wrap break-words">
+                  <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Observações
+                  </dt>
+                  <dd className="text-sm text-foreground whitespace-pre-wrap break-words">
                     {patrimonio.observacoes}
                   </dd>
                 </div>
@@ -176,13 +188,13 @@ export default function SheetDetalhePatrimonio({
               <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
                 Campos personalizados
               </h4>
-              <dl className="space-y-1.5 text-sm">
+              <dl className="space-y-3">
                 {campos.map((campo, index) => (
-                  <div key={index} className="flex justify-between gap-4">
-                    <dt className="text-muted-foreground truncate">
+                  <div key={index}>
+                    <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1 truncate">
                       {campo.chave}
                     </dt>
-                    <dd className="text-foreground text-right truncate">
+                    <dd className="text-sm text-foreground break-words">
                       {campo.valor}
                     </dd>
                   </div>
