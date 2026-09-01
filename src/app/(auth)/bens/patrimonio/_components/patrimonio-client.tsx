@@ -246,7 +246,7 @@ export default function PatrimonioPageContent({
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 pb-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 pr-2 pb-4">
           {(categoriaFiltro || statusFiltro || localizacaoFiltro) && (
             <div
               className="mb-4 flex flex-wrap items-center gap-2"
