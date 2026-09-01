@@ -75,6 +75,8 @@ export interface Localizacao {
   ativo: boolean;
   usuario: string;
   descricao?: string;
+  createdAt?: string;
+  updatedAt?: string;
   __v: number;
 }
 

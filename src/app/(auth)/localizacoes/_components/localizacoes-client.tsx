@@ -12,6 +12,7 @@ import {
 import ModalExcluirLocalizacao from '@/components/modal-excluir-localizacao';
 import ModalCadastrarLocalizacao from '@/components/modal-cadastrar-localizacao';
 import ModalEditarLocalizacao from '@/components/modal-editar-localizacao';
+import ModalDetalheLocalizacao from '@/components/modal-detalhe-localizacao';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { LocalizacaoApiResponse } from '@/types/itens';
@@ -46,6 +47,10 @@ export default function PageLocalizacoesContent({
   const [editarLocalizacaoId, setEditarLocalizacaoId] = useState<string | null>(
     null,
   );
+  const [isDetalheModalOpen, setIsDetalheModalOpen] = useState(false);
+  const [detalheLocalizacaoId, setDetalheLocalizacaoId] = useState<
+    string | null
+  >(null);
   const [atualizandoLocalizacaoId, setAtualizandoLocalizacaoId] = useState<
     string | null
   >(null);
@@ -134,6 +139,11 @@ export default function PageLocalizacoesContent({
   const handleDelete = (id: string) => {
     setExcluirLocalizacaoId(id);
     setIsExcluirModalOpen(true);
+  };
+
+  const handleVerDetalhe = (id: string) => {
+    setDetalheLocalizacaoId(id);
+    setIsDetalheModalOpen(true);
   };
 
   const handleExcluirSuccess = async () => {
@@ -239,7 +249,8 @@ export default function PageLocalizacoesContent({
                       <TableRow
                         key={localizacao._id}
                         data-test={`localizacao-row-${index}`}
-                        className="hover:bg-muted border-b relative"
+                        onClick={() => handleVerDetalhe(localizacao._id)}
+                        className="hover:bg-muted border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         {atualizandoLocalizacaoId === localizacao._id &&
@@ -273,7 +284,10 @@ export default function PageLocalizacoesContent({
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
-                          <div className="flex items-center justify-center gap-1 sm:gap-2">
+                          <div
+                            className="flex items-center justify-center gap-1 sm:gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
                               onClick={() => handleEdit(localizacao._id)}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer"
@@ -380,6 +394,27 @@ export default function PageLocalizacoesContent({
           onSuccess={handleEditarSuccess}
         />
       )}
+
+      {detalheLocalizacaoId &&
+        (() => {
+          const localizacaoDetalhe = localizacoes.find(
+            (l) => l._id === detalheLocalizacaoId,
+          );
+          if (!localizacaoDetalhe) return null;
+
+          return (
+            <ModalDetalheLocalizacao
+              isOpen={isDetalheModalOpen}
+              onClose={() => {
+                setIsDetalheModalOpen(false);
+                setTimeout(() => setDetalheLocalizacaoId(null), 300);
+              }}
+              localizacaoNome={localizacaoDetalhe.nome}
+              localizacaoDescricao={localizacaoDetalhe.descricao}
+              localizacaoCriadoEm={localizacaoDetalhe.createdAt}
+            />
+          );
+        })()}
     </div>
   );
 }
