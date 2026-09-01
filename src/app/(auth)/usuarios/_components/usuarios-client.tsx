@@ -1,5 +1,5 @@
 'use client';
-import Cabecalho from '@/components/cabecalho';
+import Cabecalho from '@/components/layout/cabecalho';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,8 +20,8 @@ import {
   Users,
   UserCheck,
 } from 'lucide-react';
-import EmptyState from '@/components/empty-state';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
+import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import {
   Select,
   SelectContent,
@@ -35,9 +35,9 @@ import { notFound } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario';
-import ModalExcluirUsuario from '@/components/modal-excluir-usuario';
-import ModalDetalhesUsuario from '@/components/modal-detalhes-usuario';
+import ModalCadastrarUsuario from '@/app/(auth)/usuarios/_components/modal-cadastrar-usuario';
+import ModalExcluirUsuario from '@/app/(auth)/usuarios/_components/modal-excluir-usuario';
+import ModalDetalhesUsuario from '@/app/(auth)/usuarios/_components/modal-detalhes-usuario';
 import { useSession } from '@/hooks/use-session';
 import { usePermissions } from '@/hooks/use-permissions';
 import { PulseLoader } from 'react-spinners';

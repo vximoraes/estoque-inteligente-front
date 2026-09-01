@@ -1,5 +1,5 @@
 import { ChatProvider } from '@/contexts/ChatContext';
-import { ChatWidget } from '@/components/chat/ChatWidget';
+import { ChatWidget } from '@/components/chat/chat-widget';
 
 export default function AuthLayout({
   children,

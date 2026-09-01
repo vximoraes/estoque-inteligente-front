@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLeftPanel from '@/components/auth-left-panel';
-import GoogleIcon from '@/components/google-icon';
+import AuthLeftPanel from '@/app/(no-auth)/_components/auth-left-panel';
+import GoogleIcon from '@/app/(no-auth)/_components/google-icon';
 import { loginSchema, type LoginFormData } from '@/schemas';
 
 const ERRO_GOOGLE_PADRAO = 'Erro ao fazer login. Tente novamente.';

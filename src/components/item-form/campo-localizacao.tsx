@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
-import ModalCadastrarLocalizacao from '@/components/modal-cadastrar-localizacao';
-import ModalEditarLocalizacao from '@/components/modal-editar-localizacao';
-import ModalExcluirLocalizacao from '@/components/modal-excluir-localizacao';
+import ModalCadastrarLocalizacao from '@/components/localizacao/modal-cadastrar-localizacao';
+import ModalEditarLocalizacao from '@/components/localizacao/modal-editar-localizacao';
+import ModalExcluirLocalizacao from '@/components/localizacao/modal-excluir-localizacao';
 import type { Localizacao } from '@/types/itens';
 
 interface LocalizacoesApiResponse {

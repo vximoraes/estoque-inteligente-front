@@ -11,8 +11,8 @@ import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
-import ModalEditarLocalizacao from './modal-editar-localizacao';
-import ModalExcluirLocalizacao from './modal-excluir-localizacao';
+import ModalEditarLocalizacao from '@/components/localizacao/modal-editar-localizacao';
+import ModalExcluirLocalizacao from '@/components/localizacao/modal-excluir-localizacao';
 import { PulseLoader } from 'react-spinners';
 import type { Localizacao } from '@/types/itens';
 

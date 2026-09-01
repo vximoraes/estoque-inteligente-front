@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import CampoCategoria from '@/components/item-form/campo-categoria';
 import CampoImagem from '@/components/item-form/campo-imagem';
-import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
+import CamposPersonalizadosEditor from '@/app/(auth)/bens/patrimonio/_components/campos-personalizados-editor';
 import { useUploadImagemPatrimonio } from '@/hooks/use-upload-imagem-patrimonio';
 import type { CampoPersonalizado, PatrimonioData } from '@/types/patrimonios';
 

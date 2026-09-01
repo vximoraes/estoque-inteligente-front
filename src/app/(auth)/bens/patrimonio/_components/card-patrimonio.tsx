@@ -10,9 +10,9 @@
 
 import { useMemo, useState } from 'react';
 import { Package, MapPin } from 'lucide-react';
-import StatusBadge from './status-badge';
+import StatusBadge from '@/components/comum/status-badge';
 import PatrimonioLinhaAcoes from './patrimonio-linha-acoes';
-import ModalVisualizarImagem from './modal-visualizar-imagem';
+import ModalVisualizarImagem from '@/components/comum/modal-visualizar-imagem';
 import type { AcaoPatrimonio, PatrimonioData } from '@/types/patrimonios';
 
 interface CardPatrimonioProps {

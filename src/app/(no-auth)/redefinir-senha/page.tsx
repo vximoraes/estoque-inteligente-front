@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Eye, EyeOff } from 'lucide-react';
-import AuthLeftPanel from '@/components/auth-left-panel';
+import AuthLeftPanel from '@/app/(no-auth)/_components/auth-left-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
