@@ -122,7 +122,7 @@ export default function SheetDetalhePatrimonio({
 
         <div className="flex flex-col gap-5 px-4 flex-1 overflow-y-auto pb-4">
           <div data-test="sheet-detalhe-dados">
-            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide pb-2 mb-3 border-b border-border">
               Dados
             </h4>
             <dl className="space-y-3">
@@ -185,7 +185,7 @@ export default function SheetDetalhePatrimonio({
 
           {campos.length > 0 && (
             <div data-test="sheet-detalhe-campos-personalizados">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide pb-2 mb-3 border-b border-border">
                 Campos personalizados
               </h4>
               <dl className="space-y-3">
@@ -204,7 +204,7 @@ export default function SheetDetalhePatrimonio({
           )}
 
           <div className="flex-1 flex flex-col min-h-0">
-            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide pb-2 mb-3 border-b border-border">
               Histórico
             </h4>
             {isLoading ? (
