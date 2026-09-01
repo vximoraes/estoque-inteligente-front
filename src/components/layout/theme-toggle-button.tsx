@@ -32,15 +32,15 @@ export default function ThemeToggleButton() {
       <Sun
         className={`absolute h-4 w-4 transition-all duration-200 ease-out ${
           isDark
-            ? 'opacity-100 scale-100 rotate-0'
-            : 'opacity-0 scale-50 -rotate-45'
+            ? 'opacity-0 scale-50 -rotate-45'
+            : 'opacity-100 scale-100 rotate-0'
         }`}
       />
       <Moon
         className={`absolute h-4 w-4 transition-all duration-200 ease-out ${
           isDark
-            ? 'opacity-0 scale-50 rotate-45'
-            : 'opacity-100 scale-100 rotate-0'
+            ? 'opacity-100 scale-100 rotate-0'
+            : 'opacity-0 scale-50 rotate-45'
         }`}
       />
     </button>
