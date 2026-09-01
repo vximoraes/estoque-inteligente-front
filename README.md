@@ -30,17 +30,32 @@ Repositórios do projeto no grupo GitLab [`estoque-inteligente`](https://gitlab.
 **Login**
 ![Login](docs/screenshots/login.png)
 
-**Listagem de itens**
-![Listagem de itens](docs/screenshots/dashboard-itens.png)
+**Perfil**
+![Perfil](docs/screenshots/perfil.png)
 
 **Assistente de IA**
 ![Chat com IA](docs/screenshots/chat-ia.png)
 
-**Relatórios**
-![Relatórios](docs/screenshots/relatorios.png)
+**Patrimônio**
+![Patrimônio](docs/screenshots/patrimonio.png)
 
-**Perfil**
-![Perfil](docs/screenshots/perfil.png)
+**Almoxarifado**
+![Almoxarifado](docs/screenshots/almoxarifado.png)
+
+**Empréstimos**
+![Empréstimos](docs/screenshots/emprestimos.png)
+
+**Fornecedores**
+![Fornecedores](docs/screenshots/fornecedores.png)
+
+**Categorias**
+![Categorias](docs/screenshots/categorias.png)
+
+**Localizações**
+![Localizações](docs/screenshots/localizacoes.png)
+
+**Usuários**
+![Usuários](docs/screenshots/usuarios.png)
 
 ## Funcionalidades
 
