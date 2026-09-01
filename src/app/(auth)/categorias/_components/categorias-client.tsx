@@ -12,6 +12,7 @@ import {
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria';
 import ModalCadastrarCategoria from '@/components/modal-cadastrar-categoria';
 import ModalEditarCategoria from '@/components/modal-editar-categoria';
+import ModalDetalheCategoria from '@/components/modal-detalhe-categoria';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { CategoriaApiResponse } from '@/types/categorias';
@@ -49,6 +50,10 @@ export default function PageCategoriasContent({
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [editarCategoriaId, setEditarCategoriaId] = useState<string | null>(
+    null,
+  );
+  const [isDetalheModalOpen, setIsDetalheModalOpen] = useState(false);
+  const [detalheCategoriaId, setDetalheCategoriaId] = useState<string | null>(
     null,
   );
   const [atualizandoCategoriaId, setAtualizandoCategoriaId] = useState<
@@ -143,6 +148,11 @@ export default function PageCategoriasContent({
   const handleDelete = (id: string) => {
     setExcluirCategoriaId(id);
     setIsExcluirModalOpen(true);
+  };
+
+  const handleVerDetalhe = (id: string) => {
+    setDetalheCategoriaId(id);
+    setIsDetalheModalOpen(true);
   };
 
   const handleExcluirSuccess = async () => {
@@ -269,7 +279,8 @@ export default function PageCategoriasContent({
                       <TableRow
                         key={categoria._id}
                         data-test={`categoria-row-${index}`}
-                        className="hover:bg-muted border-b relative"
+                        onClick={() => handleVerDetalhe(categoria._id)}
+                        className="hover:bg-muted border-b relative cursor-pointer"
                         style={{ height: '60px' }}
                       >
                         {atualizandoCategoriaId === categoria._id &&
@@ -303,7 +314,10 @@ export default function PageCategoriasContent({
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
-                          <div className="flex items-center justify-center gap-1 sm:gap-2">
+                          <div
+                            className="flex items-center justify-center gap-1 sm:gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
                               onClick={() => handleEdit(categoria._id)}
                               className="p-1 sm:p-2 text-muted-foreground hover:text-[var(--ei-accent)] hover:bg-[var(--ei-accent)]/10 rounded-md transition-colors duration-200 cursor-pointer"
@@ -411,6 +425,28 @@ export default function PageCategoriasContent({
           onSuccess={handleEditarSuccess}
         />
       )}
+
+      {detalheCategoriaId &&
+        (() => {
+          const categoriaDetalhe = categorias.find(
+            (c) => c._id === detalheCategoriaId,
+          );
+          if (!categoriaDetalhe) return null;
+
+          return (
+            <ModalDetalheCategoria
+              isOpen={isDetalheModalOpen}
+              onClose={() => {
+                setIsDetalheModalOpen(false);
+                setTimeout(() => setDetalheCategoriaId(null), 300);
+              }}
+              categoriaNome={categoriaDetalhe.nome}
+              categoriaTipo={categoriaDetalhe.tipo}
+              categoriaDescricao={categoriaDetalhe.descricao}
+              categoriaCriadoEm={categoriaDetalhe.createdAt}
+            />
+          );
+        })()}
     </div>
   );
 }
