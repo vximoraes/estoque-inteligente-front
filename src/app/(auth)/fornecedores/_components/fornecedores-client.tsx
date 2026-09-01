@@ -1,5 +1,5 @@
 'use client';
-import Cabecalho from '@/components/cabecalho';
+import Cabecalho from '@/components/layout/cabecalho';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,16 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ModalExcluirFornecedor from '@/components/modal-excluir-fornecedor';
-import ModalDetalhesFornecedor from '@/components/modal-detalhes-fornecedor';
-import ModalCadastrarFornecedor from '@/components/modal-cadastrar-fornecedor';
-import ModalEditarFornecedor from '@/components/modal-editar-fornecedor';
+import ModalExcluirFornecedor from '@/app/(auth)/fornecedores/_components/modal-excluir-fornecedor';
+import ModalDetalhesFornecedor from '@/app/(auth)/fornecedores/_components/modal-detalhes-fornecedor';
+import ModalCadastrarFornecedor from '@/app/(auth)/fornecedores/_components/modal-cadastrar-fornecedor';
+import ModalEditarFornecedor from '@/app/(auth)/fornecedores/_components/modal-editar-fornecedor';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { FornecedorApiResponse } from '@/types/fornecedores';
 import { Search, Truck, Plus, Pencil, Trash2 } from 'lucide-react';
-import EmptyState from '@/components/empty-state';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
+import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import { ORDENACAO_FORNECEDORES } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';

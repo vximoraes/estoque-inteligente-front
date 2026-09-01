@@ -1,15 +1,15 @@
 'use client';
 
-import Cabecalho from '@/components/cabecalho';
-import ModalCadastrarEmprestimo from '@/components/modal-cadastrar-emprestimo';
-import ModalSelecionarPatrimonio from '@/components/modal-selecionar-patrimonio';
-import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
-import ModalDetalhesEmprestimo from '@/components/modal-detalhes-emprestimo';
-import ModalEditarEmprestimo from '@/components/modal-editar-emprestimo';
-import ModalExcluirEmprestimo from '@/components/modal-excluir-emprestimo';
-import ModalDevolverItem from '@/components/modal-devolver-item';
-import EmptyState from '@/components/empty-state';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
+import Cabecalho from '@/components/layout/cabecalho';
+import ModalCadastrarEmprestimo from '@/app/(auth)/emprestimos/_components/modal-cadastrar-emprestimo';
+import ModalSelecionarPatrimonio from '@/app/(auth)/emprestimos/_components/modal-selecionar-patrimonio';
+import ModalEmprestarUnidade from '@/components/emprestimo/modal-emprestar-unidade';
+import ModalDetalhesEmprestimo from '@/app/(auth)/emprestimos/_components/modal-detalhes-emprestimo';
+import ModalEditarEmprestimo from '@/app/(auth)/emprestimos/_components/modal-editar-emprestimo';
+import ModalExcluirEmprestimo from '@/app/(auth)/emprestimos/_components/modal-excluir-emprestimo';
+import ModalDevolverItem from '@/app/(auth)/emprestimos/_components/modal-devolver-item';
+import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import {
   Select,
   SelectContent,

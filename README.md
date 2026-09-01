@@ -116,10 +116,14 @@ npx cypress run --spec "cypress/e2e/auth/01-login.cy.ts"    # uma spec
 estoque-inteligente-front/
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/          # área logada: itens, fornecedores, emprestimos,
-│   │   │                    # orcamentos, usuarios, perfil, relatorios
+│   │   ├── (auth)/          # área logada: bens (patrimonio/almoxarifado),
+│   │   │                    # fornecedores, emprestimos, usuarios, perfil,
+│   │   │                    # categorias, localizacoes, relatorios — cada
+│   │   │                    # rota traz seu _components/ (client + modais
+│   │   │                    # exclusivos dela)
 │   │   └── (no-auth)/       # login, ativar-conta, esqueci-senha,
-│   │                        # redefinir-senha
+│   │                        # redefinir-senha, + _components/ (auth-left-panel,
+│   │                        # google-icon, grainient)
 │   ├── middleware.ts        # gate de autenticação (valida sessão na API)
 │   ├── lib/
 │   │   ├── fetchData.ts     # client HTTP client-side (get/post/put/patch/del)
@@ -128,11 +132,16 @@ estoque-inteligente-front/
 │   ├── hooks/               # use-session, use-permissions, useChat, useFormApiErrors...
 │   ├── schemas/             # validação Zod por domínio
 │   ├── types/               # tipos de resposta da API por domínio
-│   ├── components/
-│   │   ├── ui/              # shadcn/ui
-│   │   ├── chat/            # ChatWidget, ChatPanel, ChatMessage, ChatInput
-│   │   └── modal-*.tsx      # modais de domínio (fora de subpastas)
-│   ├── contexts/            # ChatContext, SidebarContext
+│   ├── components/          # só o que é compartilhado por 2+ rotas
+│   │   ├── ui/               # shadcn/ui
+│   │   ├── chat/              # chat-widget, chat-panel, chat-message, chat-input
+│   │   ├── layout/            # cabecalho, header, sidebar, theme-toggle-button
+│   │   ├── comum/             # empty-state, page-loading, status-badge, modal-filtros...
+│   │   ├── item-form/         # campos de form usados por item e patrimônio
+│   │   ├── categoria/         # modais de categoria (puxados por item-form também)
+│   │   ├── localizacao/       # modais de localização (idem)
+│   │   └── emprestimo/        # modal-emprestar-unidade (emprestimos + patrimônio)
+│   ├── contexts/             # ChatContext, SidebarContext
 │   └── providers/           # queryProvider (React Query)
 ├── cypress/
 │   ├── e2e/auth/NN-descricao.cy.ts

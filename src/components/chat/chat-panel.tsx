@@ -5,9 +5,9 @@ import { X, Bot, MessageSquare, History, SquarePen } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useChatContext } from '@/contexts/ChatContext';
 import { useSession } from '@/hooks/use-session';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
-import { ConversasList } from './ConversasList';
+import { ChatMessage } from './chat-message';
+import { ChatInput } from './chat-input';
+import { ConversasList } from './conversas-list';
 import {
   useConversas,
   useConversa,

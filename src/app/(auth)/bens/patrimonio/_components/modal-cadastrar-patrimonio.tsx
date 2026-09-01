@@ -23,7 +23,7 @@ import {
 import CampoCategoria from '@/components/item-form/campo-categoria';
 import CampoLocalizacao from '@/components/item-form/campo-localizacao';
 import CampoImagem from '@/components/item-form/campo-imagem';
-import CamposPersonalizadosEditor from '@/components/campos-personalizados-editor';
+import CamposPersonalizadosEditor from '@/app/(auth)/bens/patrimonio/_components/campos-personalizados-editor';
 import { sugerirNumeroPatrimonio } from '@/lib/patrimonio-numeracao';
 import { useUploadImagemPatrimonio } from '@/hooks/use-upload-imagem-patrimonio';
 import type {

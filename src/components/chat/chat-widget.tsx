@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Bot } from 'lucide-react';
 import { useChatContext } from '@/contexts/ChatContext';
-import { ChatPanel } from './ChatPanel';
+import { ChatPanel } from './chat-panel';
 
 const ANIMATION_DURATION = 200;
 

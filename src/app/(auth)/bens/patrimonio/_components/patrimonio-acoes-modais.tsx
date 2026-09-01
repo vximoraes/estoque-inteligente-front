@@ -1,12 +1,12 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import ModalEmprestarUnidade from '@/components/modal-emprestar-unidade';
-import ModalEditarPatrimonio from '@/components/modal-editar-patrimonio';
-import ModalPatrimonioStatus from '@/components/modal-patrimonio-status';
-import ModalPatrimonioTransferir from '@/components/modal-patrimonio-transferir';
-import ModalPatrimonioRemover from '@/components/modal-patrimonio-remover';
-import SheetDetalhePatrimonio from '@/components/sheet-detalhe-patrimonio';
+import ModalEmprestarUnidade from '@/components/emprestimo/modal-emprestar-unidade';
+import ModalEditarPatrimonio from '@/app/(auth)/bens/patrimonio/_components/modal-editar-patrimonio';
+import ModalPatrimonioStatus from '@/app/(auth)/bens/patrimonio/_components/modal-patrimonio-status';
+import ModalPatrimonioTransferir from '@/app/(auth)/bens/patrimonio/_components/modal-patrimonio-transferir';
+import ModalPatrimonioRemover from '@/app/(auth)/bens/patrimonio/_components/modal-patrimonio-remover';
+import SheetDetalhePatrimonio from '@/app/(auth)/bens/patrimonio/_components/sheet-detalhe-patrimonio';
 import type { AcaoPatrimonioContexto } from '@/hooks/use-acoes-patrimonio';
 
 interface PatrimonioAcoesModaisProps {

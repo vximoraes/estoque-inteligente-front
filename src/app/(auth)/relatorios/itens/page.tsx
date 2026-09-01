@@ -1,10 +1,10 @@
 'use client';
-import StatCard from '@/components/stat-card';
-import Cabecalho from '@/components/cabecalho';
-import ModalFiltros from '@/components/modal-filtros';
-import ModalExportarRelatorio from '@/components/modal-exportar-relatorio';
-import EmptyState from '@/components/empty-state';
-import StatusBadge from '@/components/status-badge';
+import StatCard from '@/app/(auth)/relatorios/_components/stat-card';
+import Cabecalho from '@/components/layout/cabecalho';
+import ModalFiltros from '@/components/comum/modal-filtros';
+import ModalExportarRelatorio from '@/app/(auth)/relatorios/_components/modal-exportar-relatorio';
+import EmptyState from '@/components/comum/empty-state';
+import StatusBadge from '@/components/comum/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

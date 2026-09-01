@@ -1,6 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import CustomSidebar from '../sidebar';
+import CustomSidebar from './sidebar';
 
 interface ComponenteReact {
   children?: React.ReactNode;

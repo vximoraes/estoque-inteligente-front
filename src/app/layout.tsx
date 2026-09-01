@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
-import Header from '@/components/header/header';
+import Header from '@/components/layout/header';
 import { QueryProvider } from '@/providers/queryProvider';
 import { ThemeProvider } from '@/providers/themeProvider';
 import { SidebarProvider } from '@/contexts/SidebarContext';

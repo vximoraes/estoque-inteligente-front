@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
-import ModalVisualizarImagem from './modal-visualizar-imagem';
-import StatusBadge from './status-badge';
+import ModalVisualizarImagem from '@/components/comum/modal-visualizar-imagem';
+import StatusBadge from '@/components/comum/status-badge';
 import ItemConsumoLinhaAcoes from './item-consumo-linha-acoes';
 
 export interface CardItemBaseProps {

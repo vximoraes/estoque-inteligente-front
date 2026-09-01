@@ -32,7 +32,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
-import StatusBadge from '@/components/status-badge';
+import StatusBadge from '@/components/comum/status-badge';
 import type {
   PatrimonioData,
   PatrimonioEventoApiResponse,

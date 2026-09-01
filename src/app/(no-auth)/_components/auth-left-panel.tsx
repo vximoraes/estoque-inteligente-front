@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Grainient from '@/components/Grainient';
+import Grainient from '@/app/(no-auth)/_components/grainient';
 
 const features = [
   'Controle de entradas e saídas em tempo real',

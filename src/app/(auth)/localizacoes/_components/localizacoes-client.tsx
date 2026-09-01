@@ -1,5 +1,5 @@
 'use client';
-import Cabecalho from '@/components/cabecalho';
+import Cabecalho from '@/components/layout/cabecalho';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,16 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ModalExcluirLocalizacao from '@/components/modal-excluir-localizacao';
-import ModalCadastrarLocalizacao from '@/components/modal-cadastrar-localizacao';
-import ModalEditarLocalizacao from '@/components/modal-editar-localizacao';
-import ModalDetalheLocalizacao from '@/components/modal-detalhe-localizacao';
+import ModalExcluirLocalizacao from '@/components/localizacao/modal-excluir-localizacao';
+import ModalCadastrarLocalizacao from '@/components/localizacao/modal-cadastrar-localizacao';
+import ModalEditarLocalizacao from '@/components/localizacao/modal-editar-localizacao';
+import ModalDetalheLocalizacao from '@/components/localizacao/modal-detalhe-localizacao';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { LocalizacaoApiResponse } from '@/types/itens';
 import { Search, MapPin, Plus, Pencil, Trash2 } from 'lucide-react';
-import EmptyState from '@/components/empty-state';
-import OrdenarPorSelect from '@/components/ordenar-por-select';
+import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import { ORDENACAO_LOCALIZACOES } from '@/lib/ordenacao';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryState } from 'nuqs';
