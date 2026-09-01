@@ -20,7 +20,6 @@ import {
   Package,
   Boxes,
   BarChart3,
-  FileText,
   Handshake,
   Truck,
   Tag,
@@ -400,21 +399,11 @@ export default function CustomSidebar({ path }: PathRouter) {
                         name: 'Movimentações',
                         route: '/relatorios/movimentacoes',
                       },
-                      { name: 'Orçamentos', route: '/relatorios/orcamentos' },
-                      {
+                          {
                         name: 'Empréstimos',
                         route: '/relatorios/emprestimos',
                       },
                     ]}
-                    path={path}
-                    onItemClick={handleItemClick}
-                    collapsed={collapsed}
-                  />
-                  <SidebarButtonMenu
-                    icon={FileText}
-                    name="Orçamentos"
-                    route="/orcamentos"
-                    data-test="sidebar-btn-orcamentos"
                     path={path}
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
@@ -627,18 +616,8 @@ export default function CustomSidebar({ path }: PathRouter) {
                   { name: 'Itens', route: '/relatorios/itens' },
                   { name: 'Patrimônio', route: '/relatorios/patrimonio' },
                   { name: 'Movimentações', route: '/relatorios/movimentacoes' },
-                  { name: 'Orçamentos', route: '/relatorios/orcamentos' },
                   { name: 'Empréstimos', route: '/relatorios/emprestimos' },
                 ]}
-              />
-              <MobileMenuItem
-                icon={FileText}
-                name="Orçamentos"
-                route="/orcamentos"
-                isActive={path?.startsWith('/orcamentos')}
-                onClick={() => {
-                  handleItemClick();
-                }}
               />
               <MobileMenuItem
                 icon={Handshake}
