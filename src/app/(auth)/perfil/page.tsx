@@ -624,7 +624,7 @@ export default function HomePage() {
 
       {/* Conteúdo principal */}
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
-        <div className="flex flex-col gap-6 flex-1 overflow-y-auto pb-2">
+        <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 pb-2">
           {/* Card resumo da conta */}
           <div
             className="bg-card rounded-md border border-border p-4 flex items-center justify-between gap-4"

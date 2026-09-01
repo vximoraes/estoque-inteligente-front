@@ -202,13 +202,13 @@ export default function CustomSidebar({ path }: PathRouter) {
   const [imageError, setImageError] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const temaAtual = mounted && theme === 'dark' ? 'dark' : 'light';
+  const temaAtual = mounted && resolvedTheme === 'dark' ? 'dark' : 'light';
   const IconeTemaAtual = temaAtual === 'dark' ? Moon : Sun;
   const temaLabelAtual = temaOpcoes.find(
     (opcao) => opcao.value === temaAtual,
