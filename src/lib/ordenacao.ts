@@ -29,15 +29,6 @@ export const ORDENACAO_EMPRESTIMOS: OpcaoOrdenacao[] = [
   { value: 'createdAt:asc', label: 'Mais antigos' },
 ];
 
-export const ORDENACAO_ORCAMENTOS: OpcaoOrdenacao[] = [
-  { value: 'nome:asc', label: 'Nome (A-Z)' },
-  { value: 'nome:desc', label: 'Nome (Z-A)' },
-  { value: 'total:desc', label: 'Valor (maior primeiro)' },
-  { value: 'total:asc', label: 'Valor (menor primeiro)' },
-  { value: 'createdAt:desc', label: 'Mais recentes' },
-  { value: 'createdAt:asc', label: 'Mais antigos' },
-];
-
 export const ORDENACAO_USUARIOS: OpcaoOrdenacao[] = [
   { value: 'nome:asc', label: 'Nome (A-Z)' },
   { value: 'nome:desc', label: 'Nome (Z-A)' },

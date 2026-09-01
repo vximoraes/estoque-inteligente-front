@@ -105,7 +105,6 @@ export default function HomePage() {
   const [stats, setStats] = useState({
     totalItens: 0,
     totalMovimentacoes: 0,
-    totalOrcamentos: 0,
   });
 
   useEffect(() => {
@@ -292,22 +291,9 @@ export default function HomePage() {
           }) || [];
         const totalMovimentacoes = movimentacoesDoUsuario.length;
 
-        // Buscar orçamentos do usuário
-        const orcamentosResponse = await get<any>('/orcamentos?limite=100');
-        const orcamentosDoUsuario =
-          orcamentosResponse.data?.docs?.filter((orc: any) => {
-            const orcUsuarioId = orc.usuario?._id || orc.usuario;
-            return (
-              orcUsuarioId === user.id ||
-              String(orcUsuarioId) === String(user.id)
-            );
-          }) || [];
-        const totalOrcamentos = orcamentosDoUsuario.length;
-
         setStats({
           totalItens,
           totalMovimentacoes,
-          totalOrcamentos,
         });
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
@@ -1051,7 +1037,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
                 <div
                   className="flex flex-col justify-center px-6 py-8 gap-1"
                   data-test="card-total-itens"
@@ -1081,22 +1067,6 @@ export default function HomePage() {
                     data-test="total-movimentacoes-value"
                   >
                     {stats.totalMovimentacoes}
-                  </p>
-                </div>
-
-                <div
-                  className="flex flex-col justify-center px-6 py-8 gap-1"
-                  data-test="card-total-orcamentos"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ei-stat-title leading-none">
-                    Orçamentos Criados
-                  </p>
-                  <p
-                    className="text-[2rem] font-extrabold leading-none tracking-tight tabular-nums text-ei-stat-value"
-                    title={stats.totalOrcamentos.toString()}
-                    data-test="total-orcamentos-value"
-                  >
-                    {stats.totalOrcamentos}
                   </p>
                 </div>
               </div>
