@@ -175,11 +175,7 @@ function RelatorioPatrimonioPageContent() {
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
       data-test="relatorio-patrimonio-page"
     >
-      <Cabecalho
-        pagina="Relatórios"
-        acao="Patrimônio"
-        descricao="Unidades individuais de bens permanentes. Material de consumo tem relatório próprio."
-      />
+      <Cabecalho pagina="Relatórios" acao="Patrimônio" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div className="shrink-0 mb-6">

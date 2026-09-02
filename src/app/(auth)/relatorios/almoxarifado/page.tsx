@@ -344,11 +344,7 @@ function RelatorioAlmoxarifadoPageContent() {
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
       data-test="relatorio-almoxarifado-page"
     >
-      <Cabecalho
-        pagina="Relatórios"
-        acao="Almoxarifado"
-        descricao="Cobre apenas itens de material de consumo. Bens permanentes (patrimônio) têm relatório próprio."
-      />
+      <Cabecalho pagina="Relatórios" acao="Almoxarifado" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div className="shrink-0 mb-6">
