@@ -1,5 +1,6 @@
 import { EstoqueData } from '@/types/itens';
 import { Emprestimo } from '@/types/emprestimos';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 
 interface CSVGeneratorOptions {
   estoques: EstoqueData[];
@@ -219,7 +220,7 @@ export const generateEmprestimosCSV = ({
 
   emprestimos.forEach((emp) => {
     const codigo = emp._id || '-';
-    const produto = emp.item?.nome ? escapeCSV(emp.item.nome) : '-';
+    const produto = escapeCSV(getEmprestimoNome(emp));
     const solicitante = escapeCSV(emp.solicitante_nome || '-');
     const quantidade = (emp.quantidade_emprestada ?? 0).toString();
     const quantidadeAberta = (emp.quantidade_aberta ?? 0).toString();

@@ -7,6 +7,7 @@ import ModalExportarRelatorio from '@/app/(auth)/relatorios/_components/modal-ex
 import EmptyState from '@/components/comum/empty-state';
 import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
 import { ORDENACAO_EMPRESTIMOS } from '@/lib/ordenacao';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -547,21 +548,12 @@ function RelatorioEmprestimosPageContent() {
                           className="font-medium text-left px-8 py-3"
                           data-test="emprestimo-item"
                         >
-                          {(() => {
-                            const descricao =
-                              emp.item?.nome ||
-                              (emp.patrimonio
-                                ? `${emp.patrimonio.numero_patrimonio} — ${emp.patrimonio.modelo || 'Patrimônio'}`
-                                : '-');
-                            return (
-                              <span
-                                className="truncate block max-w-[200px]"
-                                title={descricao}
-                              >
-                                {descricao}
-                              </span>
-                            );
-                          })()}
+                          <span
+                            className="truncate block max-w-[200px]"
+                            title={getEmprestimoNome(emp)}
+                          >
+                            {getEmprestimoNome(emp)}
+                          </span>
                         </TableCell>
 
                         <TableCell

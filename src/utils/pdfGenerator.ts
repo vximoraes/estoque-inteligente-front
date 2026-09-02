@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { EstoqueData } from '@/types/itens';
 import { Emprestimo } from '@/types/emprestimos';
+import { getEmprestimoNome } from '@/lib/emprestimo';
 
 interface PDFGeneratorOptions {
   estoques: EstoqueData[];
@@ -377,7 +378,7 @@ export const generateEmprestimosPDF = async ({
 
     xPos = margin + 2;
 
-    const nomeProduto = emp.item?.nome || '-';
+    const nomeProduto = getEmprestimoNome(emp);
     const produtoTrunc =
       nomeProduto.length > 28
         ? nomeProduto.substring(0, 25) + '...'
