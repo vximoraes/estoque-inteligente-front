@@ -5,6 +5,8 @@ import Cabecalho from '@/components/layout/cabecalho';
 import ModalFiltros from '@/components/comum/modal-filtros';
 import ModalExportarRelatorio from '@/app/(auth)/relatorios/_components/modal-exportar-relatorio';
 import EmptyState from '@/components/comum/empty-state';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
+import { ORDENACAO_EMPRESTIMOS } from '@/lib/ordenacao';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -38,6 +40,11 @@ const statusOptions = [
   { value: 'Devolvido', label: 'Devolvido' },
 ];
 
+const TIPO_CONTROLE_LABEL: Record<'quantidade' | 'unidade', string> = {
+  quantidade: 'Almoxarifado',
+  unidade: 'Patrimônio',
+};
+
 interface EmprestimosGlobaisStats {
   total: number;
   ativos: number;
@@ -50,14 +57,18 @@ function buildParams(
   limit: number,
   searchTerm: string,
   statusFilter: string,
+  tipoControle: 'quantidade' | 'unidade',
+  ordenar: string,
 ) {
   const params = new URLSearchParams();
   params.append('page', page.toString());
   params.append('limite', limit.toString());
+  params.append('tipo_controle', tipoControle);
 
   if (searchTerm) params.append('busca', searchTerm);
   if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
   if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+  if (ordenar) params.append('ordenar', ordenar);
 
   return params;
 }
@@ -66,6 +77,10 @@ function RelatorioEmprestimosPageContent() {
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [tipoControle, setTipoControle] = useState<'quantidade' | 'unidade'>(
+    'unidade',
+  );
+  const [ordenar, setOrdenar] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -79,10 +94,23 @@ function RelatorioEmprestimosPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<EmprestimosApiResponse>({
-    queryKey: ['emprestimos-relatorio', searchTerm, statusFilter],
+    queryKey: [
+      'emprestimos-relatorio',
+      searchTerm,
+      statusFilter,
+      tipoControle,
+      ordenar,
+    ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
-      const params = buildParams(page, 20, searchTerm, statusFilter);
+      const params = buildParams(
+        page,
+        20,
+        searchTerm,
+        statusFilter,
+        tipoControle,
+        ordenar,
+      );
 
       return await get<EmprestimosApiResponse>(
         `/emprestimos?${params.toString()}`,
@@ -124,7 +152,12 @@ function RelatorioEmprestimosPageContent() {
   const todosEmprestimos = data?.pages.flatMap((page) => page.data.docs) || [];
 
   const { data: globalStats } = useQuery<EmprestimosGlobaisStats>({
-    queryKey: ['emprestimos-relatorio-global-stats', searchTerm, statusFilter],
+    queryKey: [
+      'emprestimos-relatorio-global-stats',
+      searchTerm,
+      statusFilter,
+      tipoControle,
+    ],
     queryFn: async () => {
       const limit = 500;
       let page = 1;
@@ -132,7 +165,14 @@ function RelatorioEmprestimosPageContent() {
       const docs: Emprestimo[] = [];
 
       while (hasNextPage) {
-        const params = buildParams(page, limit, searchTerm, statusFilter);
+        const params = buildParams(
+          page,
+          limit,
+          searchTerm,
+          statusFilter,
+          tipoControle,
+          '',
+        );
 
         const response = await get<EmprestimosApiResponse>(
           `/emprestimos?${params.toString()}`,
@@ -143,24 +183,15 @@ function RelatorioEmprestimosPageContent() {
         page = response?.data?.nextPage || page + 1;
       }
 
-      const termo = searchTerm.toLowerCase().trim();
-
-      const filtrados = docs.filter((emp) => {
-        const matchSearch =
-          !termo ||
-          emp.solicitante_nome?.toLowerCase().includes(termo) ||
-          emp.item?.nome?.toLowerCase().includes(termo) ||
-          emp.localizacao?.nome?.toLowerCase().includes(termo);
-
-        const matchStatus = !statusFilter || emp.status === statusFilter;
-        return matchSearch && matchStatus;
-      });
-
+      // `busca`/`apenas_abertos`/`atrasados` já filtraram no servidor —
+      // "Devolvido" não tem parâmetro equivalente na API (mesma lacuna da
+      // tela original de empréstimos), então os docs aqui já são o universo
+      // correto pros três primeiros contadores.
       return {
-        total: filtrados.length,
-        ativos: filtrados.filter((e) => e.status === 'Ativo').length,
-        atrasados: filtrados.filter((e) => e.status === 'Atrasado').length,
-        devolvidos: filtrados.filter((e) => e.status === 'Devolvido').length,
+        total: docs.length,
+        ativos: docs.filter((e) => e.status === 'Ativo').length,
+        atrasados: docs.filter((e) => e.status === 'Atrasado').length,
+        devolvidos: docs.filter((e) => e.status === 'Devolvido').length,
       };
     },
     staleTime: 30_000,
@@ -172,24 +203,9 @@ function RelatorioEmprestimosPageContent() {
     },
   });
 
-  const emprestimosFiltrados = todosEmprestimos
-    .filter((emp) => {
-      const termo = searchTerm.toLowerCase().trim();
-
-      const matchSearch =
-        !termo ||
-        emp.solicitante_nome?.toLowerCase().includes(termo) ||
-        emp.item?.nome?.toLowerCase().includes(termo) ||
-        emp.localizacao?.nome?.toLowerCase().includes(termo);
-
-      const matchStatus = !statusFilter || emp.status === statusFilter;
-      return matchSearch && matchStatus;
-    })
-    .sort((a, b) => {
-      return (
-        new Date(b.data_saida).getTime() - new Date(a.data_saida).getTime()
-      );
-    });
+  // Busca/status/ordenação já delegados à API, igual à tela original de
+  // empréstimos (que também não reaplica filtro client-side).
+  const emprestimosFiltrados = todosEmprestimos;
 
   const totalLocal = emprestimosFiltrados.length;
   const ativosLocal = emprestimosFiltrados.filter(
@@ -284,6 +300,27 @@ function RelatorioEmprestimosPageContent() {
       <Cabecalho pagina="Relatórios" acao="Empréstimos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+        <div
+          className="flex gap-1 mb-4 shrink-0 border-b border-border"
+          data-test="emprestimos-tabs"
+        >
+          {(['unidade', 'quantidade'] as const).map((opcaoTipoControle) => (
+            <button
+              key={opcaoTipoControle}
+              type="button"
+              onClick={() => setTipoControle(opcaoTipoControle)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                tipoControle === opcaoTipoControle
+                  ? 'border-[var(--ei-accent)] text-[var(--ei-accent)]'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+              data-test={`emprestimos-tab-${opcaoTipoControle}`}
+            >
+              {TIPO_CONTROLE_LABEL[opcaoTipoControle]}
+            </button>
+          ))}
+        </div>
+
         <div className="shrink-0 mb-6">
           <div
             className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
@@ -324,6 +361,12 @@ function RelatorioEmprestimosPageContent() {
               data-test="search-input"
             />
           </div>
+
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_EMPRESTIMOS}
+          />
 
           <Button
             variant="outline"
@@ -504,12 +547,21 @@ function RelatorioEmprestimosPageContent() {
                           className="font-medium text-left px-8 py-3"
                           data-test="emprestimo-item"
                         >
-                          <span
-                            className="truncate block max-w-[200px]"
-                            title={emp.item?.nome || '-'}
-                          >
-                            {emp.item?.nome || '-'}
-                          </span>
+                          {(() => {
+                            const descricao =
+                              emp.item?.nome ||
+                              (emp.patrimonio
+                                ? `${emp.patrimonio.numero_patrimonio} — ${emp.patrimonio.modelo || 'Patrimônio'}`
+                                : '-');
+                            return (
+                              <span
+                                className="truncate block max-w-[200px]"
+                                title={descricao}
+                              >
+                                {descricao}
+                              </span>
+                            );
+                          })()}
                         </TableCell>
 
                         <TableCell

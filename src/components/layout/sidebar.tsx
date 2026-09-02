@@ -390,14 +390,13 @@ export default function CustomSidebar({ path }: PathRouter) {
                     name="Relatórios"
                     data-test="sidebar-btn-relatorios"
                     subItems={[
-                      { name: 'Itens', route: '/relatorios/itens' },
                       {
                         name: 'Patrimônio',
                         route: '/relatorios/patrimonio',
                       },
                       {
-                        name: 'Movimentações',
-                        route: '/relatorios/movimentacoes',
+                        name: 'Almoxarifado',
+                        route: '/relatorios/almoxarifado',
                       },
                       {
                         name: 'Empréstimos',
@@ -613,9 +612,8 @@ export default function CustomSidebar({ path }: PathRouter) {
                   handleItemClick();
                 }}
                 subItems={[
-                  { name: 'Itens', route: '/relatorios/itens' },
                   { name: 'Patrimônio', route: '/relatorios/patrimonio' },
-                  { name: 'Movimentações', route: '/relatorios/movimentacoes' },
+                  { name: 'Almoxarifado', route: '/relatorios/almoxarifado' },
                   { name: 'Empréstimos', route: '/relatorios/emprestimos' },
                 ]}
               />

@@ -4,8 +4,17 @@ import Cabecalho from '@/components/layout/cabecalho';
 import ModalFiltros from '@/components/comum/modal-filtros';
 import EmptyState from '@/components/comum/empty-state';
 import StatusBadge from '@/components/comum/status-badge';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
+import { ORDENACAO_PATRIMONIO } from '@/lib/ordenacao';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   TableBody,
   TableCell,
@@ -13,9 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import type { PatrimonioApiResponse } from '@/types/patrimonios';
+import type { ApiEnvelope, Localizacao } from '@/types/itens';
+import type { CategoriaApiResponse } from '@/types/categorias';
 import { Search, SlidersHorizontal, Package, X } from 'lucide-react';
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { PulseLoader } from 'react-spinners';
@@ -35,7 +46,10 @@ function formatarData(data?: string) {
 
 function RelatorioPatrimonioPageContent() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [localizacaoFilter, setLocalizacaoFilter] = useState('');
+  const [ordenar, setOrdenar] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -47,14 +61,33 @@ function RelatorioPatrimonioPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PatrimonioApiResponse>({
-    queryKey: ['patrimonios-relatorio', statusFilter],
+    queryKey: [
+      'patrimonios-relatorio',
+      searchTerm,
+      categoriaFilter,
+      statusFilter,
+      localizacaoFilter,
+      ordenar,
+    ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       params.append('limite', '20');
       params.append('page', page.toString());
+      if (searchTerm) {
+        params.append('busca', searchTerm);
+      }
+      if (categoriaFilter) {
+        params.append('categoria', categoriaFilter);
+      }
       if (statusFilter) {
         params.append('status', statusFilter);
+      }
+      if (localizacaoFilter) {
+        params.append('localizacao', localizacaoFilter);
+      }
+      if (ordenar) {
+        params.append('ordenar', ordenar);
       }
 
       const queryString = params.toString();
@@ -97,24 +130,27 @@ function RelatorioPatrimonioPageContent() {
   // Sem endpoint de stats dedicado para patrimônio (diferente de
   // `/itens/stats`) — os contadores refletem só as páginas já carregadas
   // pelo scroll infinito, não o total absoluto quando o filtro é amplo.
-  const patrimoniosFiltrados = todosPatrimonios
-    .filter((patrimonio) => {
-      if (!patrimonio?.categoria || !patrimonio?.localizacao) return false;
-      const modeloOuCategoria = patrimonio.modelo || patrimonio.categoria.nome;
-      const matchSearch =
-        !searchTerm ||
-        patrimonio.numero_patrimonio
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        modeloOuCategoria?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patrimonio.localizacao.nome
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
-      return matchSearch;
-    })
-    .sort((a, b) =>
-      a.numero_patrimonio.localeCompare(b.numero_patrimonio, 'pt-BR'),
-    );
+  // Busca/filtros/ordenação já delegados à API — só descarta linhas com
+  // categoria/localização não populadas (guarda defensiva).
+  const patrimoniosFiltrados = todosPatrimonios.filter(
+    (patrimonio) => patrimonio?.categoria && patrimonio?.localizacao,
+  );
+
+  const { data: localizacoesData } = useQuery<ApiEnvelope<Localizacao>>({
+    queryKey: ['localizacoes'],
+    queryFn: () => get<ApiEnvelope<Localizacao>>('/localizacoes?limite=100'),
+  });
+  const localizacoes = localizacoesData?.data?.docs ?? [];
+
+  const { data: categoriasData } = useQuery<CategoriaApiResponse>({
+    queryKey: ['categorias', 'permanente'],
+    queryFn: () =>
+      get<CategoriaApiResponse>('/categorias?tipo=permanente&limite=100'),
+    enabled: !!categoriaFilter,
+  });
+  const categoriaNome = categoriasData?.data?.docs?.find(
+    (cat) => cat._id === categoriaFilter,
+  )?.nome;
 
   const totalUnidades = patrimoniosFiltrados.length;
   const disponiveis = patrimoniosFiltrados.filter(
@@ -129,7 +165,8 @@ function RelatorioPatrimonioPageContent() {
 
   const handleOpenFiltrosModal = () => setIsFiltrosModalOpen(true);
   const handleCloseFiltrosModal = () => setIsFiltrosModalOpen(false);
-  const handleFiltersChange = (_categoria: string, status: string) => {
+  const handleFiltersChange = (categoria: string, status: string) => {
+    setCategoriaFilter(categoria);
     setStatusFilter(status);
   };
 
@@ -192,6 +229,32 @@ function RelatorioPatrimonioPageContent() {
               data-test="search-input"
             />
           </div>
+          <Select
+            value={localizacaoFilter || 'todas'}
+            onValueChange={(value) =>
+              setLocalizacaoFilter(value === 'todas' ? '' : value)
+            }
+          >
+            <SelectTrigger
+              className="w-full sm:w-56"
+              data-test="filtro-localizacao"
+            >
+              <SelectValue placeholder="Todas as localizações" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as localizações</SelectItem>
+              {localizacoes.map((loc) => (
+                <SelectItem key={loc._id} value={loc._id}>
+                  {loc.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_PATRIMONIO}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer"
@@ -203,27 +266,66 @@ function RelatorioPatrimonioPageContent() {
           </Button>
         </div>
 
-        {statusFilter && (
+        {(categoriaFilter || statusFilter || localizacaoFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
             <div
               className="flex flex-wrap items-center gap-2"
               data-test="filters-container"
             >
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
-                data-test="filter-tag-status"
-              >
-                <span className="font-medium">Status:</span>
-                <span>{statusFilter}</span>
-                <button
-                  onClick={() => setStatusFilter('')}
-                  className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                  title="Remover filtro de status"
-                  data-test="remove-status-filter"
+              {statusFilter && (
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
+                  data-test="filter-tag-status"
                 >
-                  <X size={12} strokeWidth={2.5} />
-                </button>
-              </div>
+                  <span className="font-medium">Status:</span>
+                  <span>{statusFilter}</span>
+                  <button
+                    onClick={() => setStatusFilter('')}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de status"
+                    data-test="remove-status-filter"
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
+              {categoriaFilter && (
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
+                  data-test="filter-tag-categoria"
+                >
+                  <span className="font-medium">Categoria:</span>
+                  <span>{categoriaNome ?? 'Carregando...'}</span>
+                  <button
+                    onClick={() => setCategoriaFilter('')}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de categoria"
+                    data-test="remove-categoria-filter"
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
+              {localizacaoFilter && (
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-md text-xs border border-border"
+                  data-test="filter-tag-localizacao"
+                >
+                  <span className="font-medium">Localização:</span>
+                  <span>
+                    {localizacoes.find((loc) => loc._id === localizacaoFilter)
+                      ?.nome ?? 'Carregando...'}
+                  </span>
+                  <button
+                    onClick={() => setLocalizacaoFilter('')}
+                    className="ml-1 p-1 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remover filtro de localização"
+                    data-test="remove-localizacao-filter"
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -363,12 +465,18 @@ function RelatorioPatrimonioPageContent() {
               <EmptyState
                 icon={Package}
                 title={
-                  searchTerm || statusFilter
+                  searchTerm ||
+                  categoriaFilter ||
+                  statusFilter ||
+                  localizacaoFilter
                     ? 'Nenhum resultado'
                     : 'Nenhuma unidade cadastrada'
                 }
                 subtitle={
-                  searchTerm || statusFilter
+                  searchTerm ||
+                  categoriaFilter ||
+                  statusFilter ||
+                  localizacaoFilter
                     ? 'Tente ajustar sua pesquisa ou remover os filtros.'
                     : 'Cadastre uma unidade de patrimônio para começar.'
                 }
@@ -381,11 +489,11 @@ function RelatorioPatrimonioPageContent() {
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
         onClose={handleCloseFiltrosModal}
-        categoriaFilter=""
+        categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
-        showCategoria={false}
         statusOptions={statusOptions}
         onFiltersChange={handleFiltersChange}
+        tipo="permanente"
         data-test="modal-filtros"
       />
     </div>

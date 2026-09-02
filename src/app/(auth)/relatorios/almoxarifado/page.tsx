@@ -5,6 +5,8 @@ import ModalFiltros from '@/components/comum/modal-filtros';
 import ModalExportarRelatorio from '@/app/(auth)/relatorios/_components/modal-exportar-relatorio';
 import EmptyState from '@/components/comum/empty-state';
 import StatusBadge from '@/components/comum/status-badge';
+import OrdenarPorSelect from '@/components/comum/ordenar-por-select';
+import { ORDENACAO_ESTOQUE } from '@/lib/ordenacao';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,8 +22,8 @@ import { EstoqueApiResponse } from '@/types/itens';
 import { Search, SlidersHorizontal, Package, X, FileDown } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
-import { generateItensPDF } from '@/utils/pdfGenerator';
-import { generateItensCSV } from '@/utils/csvGenerator';
+import { generateAlmoxarifadoPDF } from '@/utils/pdfGenerator';
+import { generateAlmoxarifadoCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
 import type { CategoriaApiResponse } from '@/types/categorias';
@@ -33,11 +35,12 @@ interface ItensGlobaisStats {
   indisponiveis: number;
 }
 
-function RelatorioItensPageContent() {
+function RelatorioAlmoxarifadoPageContent() {
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [ordenar, setOrdenar] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -52,18 +55,30 @@ function RelatorioItensPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<EstoqueApiResponse>({
-    queryKey: ['estoques-relatorio', categoriaFilter, statusFilter],
+    queryKey: [
+      'estoques-relatorio',
+      searchTerm,
+      categoriaFilter,
+      statusFilter,
+      ordenar,
+    ],
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
       params.append('limite', '20');
       params.append('page', page.toString());
 
+      if (searchTerm) {
+        params.append('nome', searchTerm);
+      }
       if (categoriaFilter) {
         params.append('categoria', categoriaFilter);
       }
       if (statusFilter) {
         params.append('status', statusFilter);
+      }
+      if (ordenar) {
+        params.append('ordenar', ordenar);
       }
 
       const queryString = params.toString();
@@ -144,35 +159,11 @@ function RelatorioItensPageContent() {
     },
   });
 
-  // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
-  const estoquesFiltrados = todosEstoques
-    .filter((estoque) => {
-      // Validar se o estoque tem item e localização
-      if (!estoque?.item || !estoque?.localizacao) {
-        return false;
-      }
-
-      const matchSearch =
-        !searchTerm ||
-        estoque.item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        estoque.item._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        estoque.localizacao.nome
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-      const matchCategoria =
-        !categoriaFilter || estoque.item.categoria === categoriaFilter;
-
-      const matchStatus = !statusFilter || estoque.item.status === statusFilter;
-
-      return matchSearch && matchCategoria && matchStatus;
-    })
-    .sort((a, b) => {
-      // Ordenar alfabeticamente pelo nome do item
-      const nomeA = a.item?.nome?.toLowerCase() || '';
-      const nomeB = b.item?.nome?.toLowerCase() || '';
-      return nomeA.localeCompare(nomeB, 'pt-BR');
-    });
+  // Filtro/busca/ordenação já delegados à API — só descarta linhas com
+  // item/localização não populados (guarda defensiva, não regra de negócio).
+  const estoquesFiltrados = todosEstoques.filter(
+    (estoque) => estoque?.item && estoque?.localizacao,
+  );
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
   const itensUnicosLocal = new Map<
@@ -248,10 +239,10 @@ function RelatorioItensPageContent() {
 
       if (format === 'PDF') {
         // Gerar PDF
-        await generateItensPDF({
+        await generateAlmoxarifadoPDF({
           estoques: estoquesSelecionados,
           fileName: fileName.trim(),
-          title: 'RELATÓRIO DE ITENS',
+          title: 'RELATÓRIO DE ALMOXARIFADO',
           includeStats: true,
           userName: user?.name,
         });
@@ -273,7 +264,7 @@ function RelatorioItensPageContent() {
         handleCloseExportarModal();
       } else if (format === 'CSV') {
         // Gerar CSV
-        generateItensCSV({
+        generateAlmoxarifadoCSV({
           estoques: estoquesSelecionados,
           fileName: fileName.trim(),
           includeStats: true,
@@ -351,11 +342,11 @@ function RelatorioItensPageContent() {
   return (
     <div
       className="w-full max-w-full h-screen flex flex-col overflow-hidden"
-      data-test="relatorio-itens-page"
+      data-test="relatorio-almoxarifado-page"
     >
       <Cabecalho
         pagina="Relatórios"
-        acao="Itens"
+        acao="Almoxarifado"
         descricao="Cobre apenas itens de material de consumo. Bens permanentes (patrimônio) têm relatório próprio."
       />
 
@@ -408,6 +399,11 @@ function RelatorioItensPageContent() {
               data-test="search-input"
             />
           </div>
+          <OrdenarPorSelect
+            value={ordenar}
+            onChange={setOrdenar}
+            opcoes={ORDENACAO_ESTOQUE}
+          />
           <Button
             variant="outline"
             className="h-11 px-4 flex items-center gap-2 cursor-pointer"
@@ -667,11 +663,13 @@ function RelatorioItensPageContent() {
               <EmptyState
                 icon={Package}
                 title={
-                  searchTerm ? 'Nenhum resultado' : 'Nenhum item encontrado'
+                  searchTerm || categoriaFilter || statusFilter
+                    ? 'Nenhum resultado'
+                    : 'Nenhum item encontrado'
                 }
                 subtitle={
-                  searchTerm
-                    ? 'Tente ajustar sua pesquisa.'
+                  searchTerm || categoriaFilter || statusFilter
+                    ? 'Tente ajustar sua pesquisa ou remover os filtros.'
                     : 'Não há itens para exibir no relatório.'
                 }
               />
@@ -701,7 +699,7 @@ function RelatorioItensPageContent() {
   );
 }
 
-export default function RelatorioItensPage() {
+export default function RelatorioAlmoxarifadoPage() {
   return (
     <Suspense
       fallback={
@@ -716,7 +714,7 @@ export default function RelatorioItensPage() {
         </div>
       }
     >
-      <RelatorioItensPageContent />
+      <RelatorioAlmoxarifadoPageContent />
     </Suspense>
   );
 }

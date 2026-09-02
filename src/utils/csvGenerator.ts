@@ -7,16 +7,16 @@ interface CSVGeneratorOptions {
   includeStats?: boolean;
 }
 
-export const generateItensCSV = ({
+export const generateAlmoxarifadoCSV = ({
   estoques,
-  fileName = 'relatorio-itens',
+  fileName = 'relatorio-almoxarifado',
   includeStats = true,
 }: CSVGeneratorOptions) => {
   // Preparar dados
   const lines: string[] = [];
 
   // ==================== CABEÇALHO ====================
-  lines.push('RELATÓRIO DE ITENS');
+  lines.push('RELATÓRIO DE ALMOXARIFADO');
   lines.push(
     `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
   );
@@ -163,101 +163,6 @@ const formatDate = (dateString: string): string => {
     });
   } catch {
     return dateString;
-  }
-};
-
-// ==================== GERADOR DE CSV PARA MOVIMENTAÇÕES ====================
-
-interface MovimentacaoCSVGeneratorOptions {
-  movimentacoes: any[];
-  fileName?: string;
-  includeStats?: boolean;
-}
-
-export const generateMovimentacoesCSV = ({
-  movimentacoes,
-  fileName = 'relatorio-movimentacoes',
-  includeStats = true,
-}: MovimentacaoCSVGeneratorOptions) => {
-  const lines: string[] = [];
-
-  // Cabeçalho
-  lines.push('RELATÓRIO DE MOVIMENTAÇÕES');
-  lines.push(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-  );
-  lines.push('');
-
-  // Estatísticas simples
-  if (includeStats && movimentacoes.length > 0) {
-    const entradas = movimentacoes.filter((m) => m.tipo === 'Entrada').length;
-    const saidas = movimentacoes.filter(
-      (m) => m.tipo === 'Saída' || m.tipo === 'Saida',
-    ).length;
-    const total = movimentacoes.length;
-
-    lines.push('RESUMO ESTATÍSTICO');
-    lines.push(`Total de Movimentações,${total}`);
-    lines.push(`Entradas,${entradas}`);
-    lines.push(`Saídas,${saidas}`);
-    lines.push('');
-  }
-
-  // Tabela
-  lines.push('MOVIMENTAÇÕES SELECIONADAS');
-  const headers = [
-    'CÓDIGO',
-    'TIPO',
-    'PRODUTO',
-    'QUANTIDADE',
-    'LOCALIZAÇÃO',
-    'DATA',
-  ];
-  lines.push(headers.join(','));
-
-  movimentacoes.forEach((mov) => {
-    const codigo = mov.item?._id || mov._id || '-';
-    const produto = mov.item?.nome ? escapeCSV(mov.item.nome) : '-';
-    const quantidade = (mov.quantidade ?? 0).toString();
-    const tipo = mov.tipo || '-';
-    const local = mov.localizacao?.nome ? escapeCSV(mov.localizacao.nome) : '-';
-    const data = mov.createdAt ? formatDate(mov.createdAt) : '-';
-
-    const row = [
-      `"${codigo}"`,
-      `"${tipo}"`,
-      `"${produto}"`,
-      quantidade,
-      `"${local}"`,
-      `"${data}"`,
-    ];
-
-    lines.push(row.join(','));
-  });
-
-  // Rodapé
-  lines.push('');
-  lines.push(`Total de registros exportados: ${movimentacoes.length}`);
-  lines.push('Estoque Inteligente - Sistema de Gerenciamento');
-
-  const csvContent = lines.join('\n');
-  const blob = new Blob(['\uFEFF' + csvContent], {
-    type: 'text/csv;charset=utf-8;',
-  });
-  const link = document.createElement('a');
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const hoje = new Date();
-    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 };
 
