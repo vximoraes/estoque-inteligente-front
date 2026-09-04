@@ -1,6 +1,15 @@
 import { EstoqueData } from '@/types/itens';
 import { Emprestimo } from '@/types/emprestimos';
+import { PatrimonioData } from '@/types/patrimonios';
+import { Movimentacao } from '@/types/movimentacoes';
 import { getEmprestimoNome } from '@/lib/emprestimo';
+import {
+  gerarTabelaCSV,
+  formatarDataHora,
+  type ColunaRelatorio,
+} from './relatorioTabela';
+
+// ==================== ALMOXARIFADO ====================
 
 interface CSVGeneratorOptions {
   estoques: EstoqueData[];
@@ -8,166 +17,55 @@ interface CSVGeneratorOptions {
   includeStats?: boolean;
 }
 
+const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
+  { header: 'CÓDIGO', get: (e) => e.item._id },
+  { header: 'PRODUTO', get: (e) => e.item.nome },
+  { header: 'DESCRIÇÃO', get: (e) => e.item.descricao || '-' },
+  { header: 'CATEGORIA', get: (e) => String(e.item.categoria) },
+  { header: 'QUANTIDADE', get: (e) => e.quantidade.toString() },
+  { header: 'ESTOQUE MÍNIMO', get: (e) => e.item.estoque_minimo.toString() },
+  { header: 'STATUS', get: (e) => e.item.status },
+  { header: 'LOCALIZAÇÃO', get: (e) => e.localizacao.nome },
+  { header: 'DATA CRIAÇÃO', get: (e) => formatarDataHora(e.createdAt) },
+  { header: 'ÚLTIMA ATUALIZAÇÃO', get: (e) => formatarDataHora(e.updatedAt) },
+];
+
 export const generateAlmoxarifadoCSV = ({
   estoques,
   fileName = 'relatorio-almoxarifado',
   includeStats = true,
 }: CSVGeneratorOptions) => {
-  // Preparar dados
-  const lines: string[] = [];
+  const totalItens = new Set(estoques.map((e) => e.item._id)).size;
+  const emEstoque = estoques.filter(
+    (e) => e.item.status === 'Em Estoque',
+  ).length;
+  const baixoEstoque = estoques.filter(
+    (e) => e.item.status === 'Baixo Estoque',
+  ).length;
+  const indisponiveis = estoques.filter(
+    (e) => e.item.status === 'Indisponível',
+  ).length;
+  const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
-  // ==================== CABEÇALHO ====================
-  lines.push('RELATÓRIO DE ALMOXARIFADO');
-  lines.push(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-  );
-  lines.push('');
-
-  // ==================== ESTATÍSTICAS ====================
-  if (includeStats && estoques.length > 0) {
-    const totalItens = new Set(estoques.map((e) => e.item._id)).size;
-    const emEstoque = estoques.filter(
-      (e) => e.item.status === 'Em Estoque',
-    ).length;
-    const baixoEstoque = estoques.filter(
-      (e) => e.item.status === 'Baixo Estoque',
-    ).length;
-    const indisponiveis = estoques.filter(
-      (e) => e.item.status === 'Indisponível',
-    ).length;
-    const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
-
-    lines.push('RESUMO ESTATÍSTICO');
-    lines.push(`Total de Itens Únicos,${totalItens}`);
-    lines.push(`Total de Itens em Estoque,${quantidadeTotal}`);
-    lines.push(`Em Estoque,${emEstoque}`);
-    lines.push(`Baixo Estoque,${baixoEstoque}`);
-    lines.push(`Indisponíveis,${indisponiveis}`);
-    lines.push('');
-  }
-
-  // ==================== TABELA DE ITENS ====================
-  lines.push('ITENS SELECIONADOS');
-
-  // Cabeçalho da tabela
-  const headers = [
-    'CÓDIGO',
-    'PRODUTO',
-    'DESCRIÇÃO',
-    'CATEGORIA',
-    'QUANTIDADE',
-    'ESTOQUE MÍNIMO',
-    'STATUS',
-    'LOCALIZAÇÃO',
-    'DATA CRIAÇÃO',
-    'ÚLTIMA ATUALIZAÇÃO',
-  ];
-  lines.push(headers.join(','));
-
-  // Dados da tabela
-  estoques.forEach((estoque) => {
-    const row = [
-      // Código completo
-      `"${estoque.item._id}"`,
-
-      // Nome do produto (escapar vírgulas e aspas)
-      `"${escapeCSV(estoque.item.nome)}"`,
-
-      // Descrição
-      `"${escapeCSV(estoque.item.descricao || '-')}"`,
-
-      // Categoria (se for string, usar diretamente, se for objeto, pegar o ID)
-      `"${
-        typeof estoque.item.categoria === 'string'
-          ? estoque.item.categoria
-          : estoque.item.categoria
-      }"`,
-
-      // Quantidade
-      estoque.quantidade.toString(),
-
-      // Estoque mínimo
-      estoque.item.estoque_minimo.toString(),
-
-      // Status
-      `"${estoque.item.status}"`,
-
-      // Localização
-      `"${escapeCSV(estoque.localizacao.nome)}"`,
-
-      // Data de criação
-      `"${formatDate(estoque.createdAt)}"`,
-
-      // Data de atualização
-      `"${formatDate(estoque.updatedAt)}"`,
-    ];
-
-    lines.push(row.join(','));
+  gerarTabelaCSV({
+    titulo: 'RELATÓRIO DE ALMOXARIFADO',
+    fileName,
+    colunas: colunasAlmoxarifado,
+    linhas: estoques,
+    nomeSecaoTabela: 'ITENS SELECIONADOS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Itens Únicos', value: totalItens },
+          { label: 'Total de Itens em Estoque', value: quantidadeTotal },
+          { label: 'Em Estoque', value: emEstoque },
+          { label: 'Baixo Estoque', value: baixoEstoque },
+          { label: 'Indisponíveis', value: indisponiveis },
+        ]
+      : undefined,
   });
-
-  // Adicionar rodapé
-  lines.push('');
-  lines.push(`Total de registros exportados: ${estoques.length}`);
-  lines.push('Estoque Inteligente - Sistema de Gerenciamento');
-
-  // Converter para CSV e fazer download
-  const csvContent = lines.join('\n');
-  const blob = new Blob(['\uFEFF' + csvContent], {
-    type: 'text/csv;charset=utf-8;',
-  });
-  const link = document.createElement('a');
-
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const hoje = new Date();
-    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
 };
 
-// Função auxiliar para escapar caracteres especiais no CSV
-const escapeCSV = (text: string): string => {
-  if (!text) return '';
-
-  // Substituir aspas duplas por aspas duplas escapadas
-  let escaped = text.replace(/"/g, '""');
-
-  // Remover quebras de linha
-  escaped = escaped.replace(/\n/g, ' ').replace(/\r/g, '');
-
-  // Prevenir injeção de fórmula
-  if (/^[=+\-@\t]/.test(escaped)) {
-    escaped = `'${escaped}`;
-  }
-
-  return escaped;
-};
-
-// Função auxiliar para formatar datas
-const formatDate = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-// ==================== GERADOR DE CSV PARA EMPRÉSTIMOS ====================
+// ==================== EMPRÉSTIMOS ====================
 
 interface EmprestimoCSVGeneratorOptions {
   emprestimos: Emprestimo[];
@@ -175,98 +73,149 @@ interface EmprestimoCSVGeneratorOptions {
   includeStats?: boolean;
 }
 
+const colunasEmprestimos: ColunaRelatorio<Emprestimo>[] = [
+  { header: 'CÓDIGO', get: (e) => e._id || '-' },
+  { header: 'PRODUTO', get: (e) => getEmprestimoNome(e) },
+  { header: 'SOLICITANTE', get: (e) => e.solicitante_nome || '-' },
+  {
+    header: 'QUANTIDADE EMPRESTADA',
+    get: (e) => (e.quantidade_emprestada ?? 0).toString(),
+  },
+  {
+    header: 'QUANTIDADE ABERTA',
+    get: (e) => (e.quantidade_aberta ?? 0).toString(),
+  },
+  { header: 'STATUS', get: (e) => e.status || '-' },
+  { header: 'LOCALIZAÇÃO', get: (e) => e.localizacao?.nome || '-' },
+  {
+    header: 'DATA SAÍDA',
+    get: (e) => (e.data_saida ? formatarDataHora(e.data_saida) : '-'),
+  },
+  {
+    header: 'DATA PREVISTA DEVOLUÇÃO',
+    get: (e) =>
+      e.data_prevista_devolucao
+        ? formatarDataHora(e.data_prevista_devolucao)
+        : 'Sem previsão',
+  },
+];
+
 export const generateEmprestimosCSV = ({
   emprestimos,
   fileName = 'relatorio-emprestimos',
   includeStats = true,
 }: EmprestimoCSVGeneratorOptions) => {
-  const lines: string[] = [];
+  const total = emprestimos.length;
+  const ativos = emprestimos.filter((e) => e.status === 'Ativo').length;
+  const atrasados = emprestimos.filter((e) => e.status === 'Atrasado').length;
+  const devolvidos = emprestimos.filter((e) => e.status === 'Devolvido').length;
 
-  lines.push('RELATÓRIO DE EMPRÉSTIMOS');
-  lines.push(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-  );
-  lines.push('');
-
-  if (includeStats && emprestimos.length > 0) {
-    const total = emprestimos.length;
-    const ativos = emprestimos.filter((e) => e.status === 'Ativo').length;
-    const atrasados = emprestimos.filter((e) => e.status === 'Atrasado').length;
-    const devolvidos = emprestimos.filter(
-      (e) => e.status === 'Devolvido',
-    ).length;
-
-    lines.push('RESUMO ESTATÍSTICO');
-    lines.push(`Total de Empréstimos,${total}`);
-    lines.push(`Ativos,${ativos}`);
-    lines.push(`Atrasados,${atrasados}`);
-    lines.push(`Devolvidos,${devolvidos}`);
-    lines.push('');
-  }
-
-  lines.push('EMPRÉSTIMOS SELECIONADOS');
-  const headers = [
-    'CÓDIGO',
-    'PRODUTO',
-    'SOLICITANTE',
-    'QUANTIDADE EMPRESTADA',
-    'QUANTIDADE ABERTA',
-    'STATUS',
-    'LOCALIZAÇÃO',
-    'DATA SAÍDA',
-    'DATA PREVISTA DEVOLUÇÃO',
-  ];
-  lines.push(headers.join(','));
-
-  emprestimos.forEach((emp) => {
-    const codigo = emp._id || '-';
-    const produto = escapeCSV(getEmprestimoNome(emp));
-    const solicitante = escapeCSV(emp.solicitante_nome || '-');
-    const quantidade = (emp.quantidade_emprestada ?? 0).toString();
-    const quantidadeAberta = (emp.quantidade_aberta ?? 0).toString();
-    const status = emp.status || '-';
-    const local = emp.localizacao?.nome ? escapeCSV(emp.localizacao.nome) : '-';
-    const dataSaida = emp.data_saida ? formatDate(emp.data_saida) : '-';
-    const dataPrevista = emp.data_prevista_devolucao
-      ? formatDate(emp.data_prevista_devolucao)
-      : 'Sem previsão';
-
-    const row = [
-      `"${codigo}"`,
-      `"${produto}"`,
-      `"${solicitante}"`,
-      quantidade,
-      quantidadeAberta,
-      `"${status}"`,
-      `"${local}"`,
-      `"${dataSaida}"`,
-      `"${dataPrevista}"`,
-    ];
-
-    lines.push(row.join(','));
+  gerarTabelaCSV({
+    titulo: 'RELATÓRIO DE EMPRÉSTIMOS',
+    fileName,
+    colunas: colunasEmprestimos,
+    linhas: emprestimos,
+    nomeSecaoTabela: 'EMPRÉSTIMOS SELECIONADOS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Empréstimos', value: total },
+          { label: 'Ativos', value: ativos },
+          { label: 'Atrasados', value: atrasados },
+          { label: 'Devolvidos', value: devolvidos },
+        ]
+      : undefined,
   });
+};
 
-  lines.push('');
-  lines.push(`Total de registros exportados: ${emprestimos.length}`);
-  lines.push('Estoque Inteligente - Sistema de Gerenciamento');
+// ==================== PATRIMÔNIO ====================
 
-  const csvContent = lines.join('\n');
-  const blob = new Blob(['﻿' + csvContent], {
-    type: 'text/csv;charset=utf-8;',
+interface PatrimonioCSVGeneratorOptions {
+  patrimonios: PatrimonioData[];
+  fileName?: string;
+  includeStats?: boolean;
+}
+
+const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
+  { header: 'Nº PATRIMÔNIO', get: (p) => p.numero_patrimonio },
+  { header: 'MODELO', get: (p) => p.modelo || p.categoria.nome },
+  { header: 'CATEGORIA', get: (p) => p.categoria.nome },
+  { header: 'LOCALIZAÇÃO', get: (p) => p.localizacao.nome },
+  { header: 'STATUS', get: (p) => p.status },
+  {
+    header: 'DATA AQUISIÇÃO',
+    get: (p) => (p.data_aquisicao ? formatarDataHora(p.data_aquisicao) : '-'),
+  },
+];
+
+export const generatePatrimonioCSV = ({
+  patrimonios,
+  fileName = 'relatorio-patrimonio',
+  includeStats = true,
+}: PatrimonioCSVGeneratorOptions) => {
+  const total = patrimonios.length;
+  const disponiveis = patrimonios.filter(
+    (p) => p.status === 'Disponível',
+  ).length;
+  const emprestadas = patrimonios.filter(
+    (p) => p.status === 'Emprestado',
+  ).length;
+  const baixadas = patrimonios.filter((p) => p.status === 'Baixado').length;
+
+  gerarTabelaCSV({
+    titulo: 'RELATÓRIO DE PATRIMÔNIO',
+    fileName,
+    colunas: colunasPatrimonio,
+    linhas: patrimonios,
+    nomeSecaoTabela: 'UNIDADES SELECIONADAS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Unidades', value: total },
+          { label: 'Disponíveis', value: disponiveis },
+          { label: 'Emprestadas', value: emprestadas },
+          { label: 'Baixadas', value: baixadas },
+        ]
+      : undefined,
   });
-  const link = document.createElement('a');
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const hoje = new Date();
-    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+};
 
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+// ==================== MOVIMENTAÇÕES ====================
+
+interface MovimentacaoCSVGeneratorOptions {
+  movimentacoes: Movimentacao[];
+  fileName?: string;
+  includeStats?: boolean;
+}
+
+const colunasMovimentacoes: ColunaRelatorio<Movimentacao>[] = [
+  { header: 'DATA/HORA', get: (m) => formatarDataHora(m.data_hora) },
+  { header: 'TIPO', get: (m) => (m.tipo === 'entrada' ? 'Entrada' : 'Saída') },
+  { header: 'ITEM', get: (m) => m.item?.nome || '-' },
+  { header: 'QUANTIDADE', get: (m) => m.quantidade.toString() },
+  { header: 'LOCALIZAÇÃO', get: (m) => m.localizacao?.nome || '-' },
+  { header: 'RESPONSÁVEL', get: (m) => m.usuario?.nome || '-' },
+];
+
+export const generateMovimentacoesCSV = ({
+  movimentacoes,
+  fileName = 'relatorio-movimentacoes',
+  includeStats = true,
+}: MovimentacaoCSVGeneratorOptions) => {
+  const total = movimentacoes.length;
+  const entradas = movimentacoes.filter((m) => m.tipo === 'entrada').length;
+  const saidas = movimentacoes.filter((m) => m.tipo === 'saida').length;
+
+  gerarTabelaCSV({
+    titulo: 'RELATÓRIO DE MOVIMENTAÇÕES',
+    fileName,
+    colunas: colunasMovimentacoes,
+    linhas: movimentacoes,
+    nomeSecaoTabela: 'MOVIMENTAÇÕES SELECIONADAS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Movimentações', value: total },
+          { label: 'Entradas', value: entradas },
+          { label: 'Saídas', value: saidas },
+        ]
+      : undefined,
+  });
 };
