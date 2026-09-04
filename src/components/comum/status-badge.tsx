@@ -1,7 +1,7 @@
 // Badge de status compartilhado por Item (Em Estoque/Baixo Estoque/
 // Indisponível) e por unidade de Patrimônio (Disponível/Emprestado/
 // Manutenção/Baixado). Extraído de `item-estoque.tsx` e
-// `relatorios/itens/page.tsx`, que tinham a mesma lógica de cor duplicada.
+// `relatorios/almoxarifado/page.tsx`, que tinham a mesma lógica de cor duplicada.
 //
 // O tema só define 3 pares de cor (--status-success/warning/danger-bg/text).
 // Mapeamento para os status de patrimônio, sem cor nova:

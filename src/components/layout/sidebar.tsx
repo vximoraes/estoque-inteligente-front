@@ -11,7 +11,6 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import SidebarButtonMenu from './sidebar-button';
-import SidebarButtonWithSubmenu from './sidebar-button-with-submenu';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {
@@ -385,25 +384,11 @@ export default function CustomSidebar({ path }: PathRouter) {
                     label="Operações"
                     collapsed={collapsed}
                   />
-                  <SidebarButtonWithSubmenu
+                  <SidebarButtonMenu
                     icon={BarChart3}
                     name="Relatórios"
+                    route="/relatorios"
                     data-test="sidebar-btn-relatorios"
-                    subItems={[
-                      { name: 'Itens', route: '/relatorios/itens' },
-                      {
-                        name: 'Patrimônio',
-                        route: '/relatorios/patrimonio',
-                      },
-                      {
-                        name: 'Movimentações',
-                        route: '/relatorios/movimentacoes',
-                      },
-                      {
-                        name: 'Empréstimos',
-                        route: '/relatorios/emprestimos',
-                      },
-                    ]}
                     path={path}
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
@@ -612,12 +597,6 @@ export default function CustomSidebar({ path }: PathRouter) {
                 onClick={() => {
                   handleItemClick();
                 }}
-                subItems={[
-                  { name: 'Itens', route: '/relatorios/itens' },
-                  { name: 'Patrimônio', route: '/relatorios/patrimonio' },
-                  { name: 'Movimentações', route: '/relatorios/movimentacoes' },
-                  { name: 'Empréstimos', route: '/relatorios/emprestimos' },
-                ]}
               />
               <MobileMenuItem
                 icon={Handshake}
