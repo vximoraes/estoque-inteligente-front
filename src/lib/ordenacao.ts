@@ -71,3 +71,22 @@ export const ORDENACAO_ITENS_CONSUMO: OpcaoOrdenacao[] = [
   { value: 'createdAt:desc', label: 'Mais recentes' },
   { value: 'createdAt:asc', label: 'Mais antigos' },
 ];
+
+// `/estoques` ordena por linha item×localização, sem acesso direto ao nome
+// do item populado — por isso não inclui as opções `nome:*` de
+// ORDENACAO_ITENS_CONSUMO (ver ESTOQUE_SORT_FIELDS na API).
+export const ORDENACAO_ESTOQUE: OpcaoOrdenacao[] = [
+  { value: 'quantidade:desc', label: 'Quantidade (maior primeiro)' },
+  { value: 'quantidade:asc', label: 'Quantidade (menor primeiro)' },
+  { value: 'createdAt:desc', label: 'Mais recentes' },
+  { value: 'createdAt:asc', label: 'Mais antigos' },
+];
+
+export const ORDENACAO_MOVIMENTACOES: OpcaoOrdenacao[] = [
+  { value: 'data_hora:desc', label: 'Data/hora (mais recente)' },
+  { value: 'data_hora:asc', label: 'Data/hora (mais antiga)' },
+  { value: 'quantidade:desc', label: 'Quantidade (maior primeiro)' },
+  { value: 'quantidade:asc', label: 'Quantidade (menor primeiro)' },
+  { value: 'createdAt:desc', label: 'Mais recentes' },
+  { value: 'createdAt:asc', label: 'Mais antigos' },
+];

@@ -1,6 +1,22 @@
-import jsPDF from 'jspdf';
 import { EstoqueData } from '@/types/itens';
 import { Emprestimo } from '@/types/emprestimos';
+import { PatrimonioData } from '@/types/patrimonios';
+import { Movimentacao } from '@/types/movimentacoes';
+import { getEmprestimoNome } from '@/lib/emprestimo';
+import {
+  gerarTabelaPDF,
+  formatarDataHora,
+  type ColunaRelatorio,
+} from './relatorioTabela';
+
+const CORES = {
+  verde: [0, 128, 0] as [number, number, number],
+  amareloEscuro: [200, 150, 0] as [number, number, number],
+  vermelho: [200, 0, 0] as [number, number, number],
+  cinza: [100, 100, 100] as [number, number, number],
+};
+
+// ==================== ALMOXARIFADO ====================
 
 interface PDFGeneratorOptions {
   estoques: EstoqueData[];
@@ -10,493 +26,63 @@ interface PDFGeneratorOptions {
   userName?: string;
 }
 
-export const generateItensPDF = async ({
+const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
+  { header: 'CÓDIGO', width: 25, get: (e) => e.item._id.slice(-8) },
+  { header: 'PRODUTO', width: 60, get: (e) => e.item.nome },
+  { header: 'QTD', width: 20, get: (e) => e.quantidade.toString() },
+  {
+    header: 'STATUS',
+    width: 30,
+    get: (e) => e.item.status,
+    cor: (e) =>
+      e.item.status === 'Em Estoque'
+        ? CORES.verde
+        : e.item.status === 'Baixo Estoque'
+          ? CORES.amareloEscuro
+          : CORES.vermelho,
+  },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (e) => e.localizacao.nome },
+];
+
+export const generateAlmoxarifadoPDF = async ({
   estoques,
-  fileName = 'relatorio-itens',
-  title = 'RELATÓRIO DE ITENS',
-  includeStats = true,
-  userName = 'Javascript',
-}: PDFGeneratorOptions) => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  let yPosition = 20;
-
-  // Função auxiliar para adicionar nova página se necessário
-  const checkPageBreak = (requiredSpace: number = 10) => {
-    if (yPosition + requiredSpace > pageHeight - 20) {
-      doc.addPage();
-      yPosition = 20;
-      return true;
-    }
-    return false;
-  };
-
-  // ==================== CABEÇALHO ====================
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 12;
-
-  // Data e hora de geração
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-    pageWidth / 2,
-    yPosition,
-    { align: 'center' },
-  );
-  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
-    align: 'center',
-  });
-  doc.setTextColor(0, 0, 0);
-  yPosition += 10;
-
-  // Linha separadora
-  doc.setLineWidth(0.5);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 10;
-
-  // ==================== ESTATÍSTICAS ====================
-  if (includeStats) {
-    const totalItens = new Set(estoques.map((e) => e.item._id)).size;
-    const emEstoque = estoques.filter(
-      (e) => e.item.status === 'Em Estoque',
-    ).length;
-    const baixoEstoque = estoques.filter(
-      (e) => e.item.status === 'Baixo Estoque',
-    ).length;
-    const indisponiveis = estoques.filter(
-      (e) => e.item.status === 'Indisponível',
-    ).length;
-    const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RESUMO ESTATÍSTICO', margin, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-
-    const stats = [
-      `Total de Itens Únicos: ${totalItens}`,
-      `Total de Itens em Estoque: ${quantidadeTotal}`,
-      `Em Estoque: ${emEstoque}`,
-      `Baixo Estoque: ${baixoEstoque}`,
-      `Indisponíveis: ${indisponiveis}`,
-    ];
-
-    stats.forEach((stat) => {
-      doc.text(stat, margin + 5, yPosition);
-      yPosition += 6;
-    });
-
-    yPosition += 5;
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-  }
-
-  // ==================== TABELA DE ITENS ====================
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ITENS SELECIONADOS', margin, yPosition);
-  yPosition += 8;
-
-  // Cabeçalho da tabela
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-
-  const colWidths = {
-    codigo: 25,
-    produto: 60,
-    quantidade: 20,
-    status: 30,
-    localizacao: 35,
-  };
-
-  let xPos = margin + 2;
-  doc.text('CÓDIGO', xPos, yPosition);
-  xPos += colWidths.codigo;
-  doc.text('PRODUTO', xPos, yPosition);
-  xPos += colWidths.produto;
-  doc.text('QTD', xPos, yPosition);
-  xPos += colWidths.quantidade;
-  doc.text('STATUS', xPos, yPosition);
-  xPos += colWidths.status;
-  doc.text('LOCALIZAÇÃO', xPos, yPosition);
-  yPosition += 7;
-
-  // Linha abaixo do cabeçalho
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 5;
-
-  // Dados da tabela
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-
-  estoques.forEach((estoque, index) => {
-    checkPageBreak(15);
-
-    // Fundo alternado para linhas
-    if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 10, 'F');
-    }
-
-    xPos = margin + 2;
-
-    // Código (últimos 8 caracteres)
-    const codigo = estoque.item._id.slice(-8);
-    doc.text(codigo, xPos, yPosition);
-    xPos += colWidths.codigo;
-
-    // Produto (nome do item - truncado se necessário)
-    const nomeProduto =
-      estoque.item.nome.length > 40
-        ? estoque.item.nome.substring(0, 37) + '...'
-        : estoque.item.nome;
-    doc.text(nomeProduto, xPos, yPosition);
-    xPos += colWidths.produto;
-
-    // Quantidade
-    doc.text(estoque.quantidade.toString(), xPos, yPosition);
-    xPos += colWidths.quantidade;
-
-    // Status com cor
-    const status = estoque.item.status;
-    if (status === 'Em Estoque') {
-      doc.setTextColor(0, 128, 0); // Verde
-    } else if (status === 'Baixo Estoque') {
-      doc.setTextColor(200, 150, 0); // Amarelo escuro
-    } else {
-      doc.setTextColor(200, 0, 0); // Vermelho
-    }
-    doc.text(status, xPos, yPosition);
-    doc.setTextColor(0, 0, 0); // Resetar cor
-    xPos += colWidths.status;
-
-    // Localização
-    const localizacao =
-      estoque.localizacao.nome.length > 25
-        ? estoque.localizacao.nome.substring(0, 22) + '...'
-        : estoque.localizacao.nome;
-    doc.text(localizacao, xPos, yPosition);
-
-    yPosition += 10;
-
-    // Linha separadora entre itens
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.1);
-    doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
-  });
-
-  // ==================== RODAPÉ ====================
-  const addFooter = (pageNumber: number, totalPages: number) => {
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 120, 120);
-    doc.text(
-      `Página ${pageNumber} de ${totalPages}`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: 'center' },
-    );
-    doc.text(
-      'Estoque Inteligente - Sistema de Gerenciamento',
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' },
-    );
-    doc.setTextColor(0, 0, 0);
-  };
-
-  // Adicionar rodapé em todas as páginas
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    addFooter(i, totalPages);
-  }
-
-  // Salvar o PDF
-  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const hoje = new Date();
-  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-  doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
-
-  return doc;
-};
-
-// ==================== GERADOR DE PDF PARA MOVIMENTAÇÕES ====================
-
-interface Movimentacao {
-  _id: string;
-  item?: { _id?: string; nome?: string };
-  quantidade?: number;
-  tipo?: string;
-  localizacao?: { nome?: string };
-  data_hora?: string;
-}
-
-interface MovimentacoesPDFOptions {
-  movimentacoes: Movimentacao[];
-  fileName?: string;
-  title?: string;
-  includeStats?: boolean;
-  userName?: string;
-}
-
-export const generateMovimentacoesPDF = async ({
-  movimentacoes,
-  fileName = 'relatorio-movimentacoes',
-  title = 'RELATÓRIO DE MOVIMENTAÇÕES',
+  fileName = 'relatorio-almoxarifado',
+  title = 'RELATÓRIO DE ALMOXARIFADO',
   includeStats = true,
   userName = 'Administrador',
-}: MovimentacoesPDFOptions) => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  let yPosition = 20;
+}: PDFGeneratorOptions) => {
+  const totalItens = new Set(estoques.map((e) => e.item._id)).size;
+  const emEstoque = estoques.filter(
+    (e) => e.item.status === 'Em Estoque',
+  ).length;
+  const baixoEstoque = estoques.filter(
+    (e) => e.item.status === 'Baixo Estoque',
+  ).length;
+  const indisponiveis = estoques.filter(
+    (e) => e.item.status === 'Indisponível',
+  ).length;
+  const quantidadeTotal = estoques.reduce((acc, e) => acc + e.quantidade, 0);
 
-  // Função auxiliar para adicionar nova página se necessário
-  const checkPageBreak = (requiredSpace: number = 10) => {
-    if (yPosition + requiredSpace > pageHeight - 20) {
-      doc.addPage();
-      yPosition = 20;
-      return true;
-    }
-    return false;
-  };
-
-  // ==================== CABEÇALHO ====================
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 12;
-
-  // Data e hora de geração
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-    pageWidth / 2,
-    yPosition,
-    { align: 'center' },
-  );
-  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
-    align: 'center',
+  return gerarTabelaPDF({
+    titulo: title,
+    fileName,
+    userName,
+    colunas: colunasAlmoxarifado,
+    linhas: estoques,
+    nomeSecaoTabela: 'ITENS SELECIONADOS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Itens Únicos', value: totalItens },
+          { label: 'Total de Itens em Estoque', value: quantidadeTotal },
+          { label: 'Em Estoque', value: emEstoque },
+          { label: 'Baixo Estoque', value: baixoEstoque },
+          { label: 'Indisponíveis', value: indisponiveis },
+        ]
+      : undefined,
   });
-  doc.setTextColor(0, 0, 0);
-  yPosition += 10;
-
-  // Linha separadora
-  doc.setLineWidth(0.5);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 10;
-
-  // ==================== ESTATÍSTICAS ====================
-  if (includeStats) {
-    const totalMovimentacoes = movimentacoes.length;
-    const entradas = movimentacoes.filter((m) =>
-      String(m.tipo).toLowerCase().includes('entrada'),
-    ).length;
-    const saidas = movimentacoes.filter(
-      (m) =>
-        String(m.tipo).toLowerCase().includes('saída') ||
-        String(m.tipo).toLowerCase().includes('saida'),
-    ).length;
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RESUMO ESTATÍSTICO', margin, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-
-    const stats = [
-      `Total de Movimentações: ${totalMovimentacoes}`,
-      `Entradas: ${entradas}`,
-      `Saídas: ${saidas}`,
-    ];
-
-    stats.forEach((stat) => {
-      doc.text(stat, margin + 5, yPosition);
-      yPosition += 6;
-    });
-
-    yPosition += 5;
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-  }
-
-  // ==================== TABELA DE MOVIMENTAÇÕES ====================
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('MOVIMENTAÇÕES SELECIONADAS', margin, yPosition);
-  yPosition += 8;
-
-  // Cabeçalho da tabela
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-
-  const colWidths = {
-    codigo: 25,
-    produto: 50,
-    quantidade: 18,
-    tipo: 22,
-    localizacao: 35,
-    data: 30,
-  };
-
-  let xPos = margin + 2;
-  doc.text('CÓDIGO', xPos, yPosition);
-  xPos += colWidths.codigo;
-  doc.text('PRODUTO', xPos, yPosition);
-  xPos += colWidths.produto;
-  doc.text('QTD', xPos, yPosition);
-  xPos += colWidths.quantidade;
-  doc.text('TIPO', xPos, yPosition);
-  xPos += colWidths.tipo;
-  doc.text('LOCALIZAÇÃO', xPos, yPosition);
-  xPos += colWidths.localizacao;
-  doc.text('DATA/HORA', xPos, yPosition);
-  yPosition += 7;
-
-  // Linha abaixo do cabeçalho
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 5;
-
-  // Dados da tabela
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-
-  movimentacoes.forEach((mov, index) => {
-    checkPageBreak(15);
-
-    // Fundo alternado para linhas
-    if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 10, 'F');
-    }
-
-    xPos = margin + 2;
-
-    // Código (últimos 8 caracteres)
-    const codigo = mov.item?._id?.slice(-8) || mov._id?.slice(-8) || '-';
-    doc.text(codigo, xPos, yPosition);
-    xPos += colWidths.codigo;
-
-    // Produto (nome do item - truncado se necessário)
-    const nomeProduto = mov.item?.nome || '-';
-    const produtoTrunc =
-      nomeProduto.length > 30
-        ? nomeProduto.substring(0, 27) + '...'
-        : nomeProduto;
-    doc.text(produtoTrunc, xPos, yPosition);
-    xPos += colWidths.produto;
-
-    // Quantidade
-    doc.text(String(mov.quantidade ?? '-'), xPos, yPosition);
-    xPos += colWidths.quantidade;
-
-    // Tipo com cor
-    const tipoRaw = String(mov.tipo ?? '').toLowerCase();
-    const isEntrada = tipoRaw.includes('entrada');
-    const isSaida = tipoRaw.includes('saída') || tipoRaw.includes('saida');
-    const tipoFormatado = isEntrada
-      ? 'Entrada'
-      : isSaida
-        ? 'Saída'
-        : mov.tipo || '-';
-
-    if (isEntrada) {
-      doc.setTextColor(0, 128, 0); // Verde
-    } else if (isSaida) {
-      doc.setTextColor(200, 100, 0); // Laranja
-    }
-    doc.text(tipoFormatado, xPos, yPosition);
-    doc.setTextColor(0, 0, 0); // Resetar cor
-    xPos += colWidths.tipo;
-
-    // Localização
-    const localizacao = mov.localizacao?.nome || '-';
-    const locTrunc =
-      localizacao.length > 25
-        ? localizacao.substring(0, 22) + '...'
-        : localizacao;
-    doc.text(locTrunc, xPos, yPosition);
-    xPos += colWidths.localizacao;
-
-    // Data/Hora
-    const dataStr = mov.data_hora
-      ? new Date(mov.data_hora).toLocaleDateString('pt-BR') +
-        ' ' +
-        new Date(mov.data_hora).toLocaleTimeString('pt-BR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      : '-';
-    doc.text(dataStr, xPos, yPosition);
-
-    yPosition += 10;
-
-    // Linha separadora entre itens
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.1);
-    doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
-  });
-
-  // ==================== RODAPÉ ====================
-  const addFooter = (pageNumber: number, totalPages: number) => {
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 120, 120);
-    doc.text(
-      `Página ${pageNumber} de ${totalPages}`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: 'center' },
-    );
-    doc.text(
-      'Estoque Inteligente - Sistema de Gerenciamento',
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' },
-    );
-    doc.setTextColor(0, 0, 0);
-  };
-
-  // Adicionar rodapé em todas as páginas
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    addFooter(i, totalPages);
-  }
-
-  // Salvar o PDF
-  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const hoje = new Date();
-  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-  doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
-
-  return doc;
 };
 
-// ==================== GERADOR DE PDF PARA EMPRÉSTIMOS ====================
+// ==================== EMPRÉSTIMOS ====================
 
 interface EmprestimosPDFGeneratorOptions {
   emprestimos: Emprestimo[];
@@ -506,6 +92,45 @@ interface EmprestimosPDFGeneratorOptions {
   userName?: string;
 }
 
+const colunasEmprestimos: ColunaRelatorio<Emprestimo>[] = [
+  { header: 'PRODUTO', width: 45, get: (e) => getEmprestimoNome(e) },
+  {
+    header: 'SOLICITANTE',
+    width: 40,
+    get: (e) => e.solicitante_nome || '-',
+  },
+  {
+    header: 'QTD',
+    width: 18,
+    get: (e) => String(e.quantidade_emprestada ?? '-'),
+  },
+  {
+    header: 'STATUS',
+    width: 25,
+    get: (e) => e.status,
+    cor: (e) =>
+      e.status === 'Ativo'
+        ? CORES.verde
+        : e.status === 'Atrasado'
+          ? CORES.vermelho
+          : CORES.cinza,
+  },
+  {
+    header: 'SAÍDA',
+    width: 30,
+    get: (e) =>
+      e.data_saida ? new Date(e.data_saida).toLocaleDateString('pt-BR') : '-',
+  },
+  {
+    header: 'PREVISÃO',
+    width: 30,
+    get: (e) =>
+      e.data_prevista_devolucao
+        ? new Date(e.data_prevista_devolucao).toLocaleDateString('pt-BR')
+        : 'Sem previsão',
+  },
+];
+
 export const generateEmprestimosPDF = async ({
   emprestimos,
   fileName = 'relatorio-emprestimos',
@@ -513,210 +138,150 @@ export const generateEmprestimosPDF = async ({
   includeStats = true,
   userName = 'Administrador',
 }: EmprestimosPDFGeneratorOptions) => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  let yPosition = 20;
+  const total = emprestimos.length;
+  const ativos = emprestimos.filter((e) => e.status === 'Ativo').length;
+  const atrasados = emprestimos.filter((e) => e.status === 'Atrasado').length;
+  const devolvidos = emprestimos.filter((e) => e.status === 'Devolvido').length;
 
-  const checkPageBreak = (requiredSpace: number = 10) => {
-    if (yPosition + requiredSpace > pageHeight - 20) {
-      doc.addPage();
-      yPosition = 20;
-      return true;
-    }
-    return false;
-  };
-
-  // ==================== CABEÇALHO ====================
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 12;
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-    pageWidth / 2,
-    yPosition,
-    { align: 'center' },
-  );
-  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, {
-    align: 'center',
+  return gerarTabelaPDF({
+    titulo: title,
+    fileName,
+    userName,
+    colunas: colunasEmprestimos,
+    linhas: emprestimos,
+    nomeSecaoTabela: 'EMPRÉSTIMOS SELECIONADOS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Empréstimos', value: total },
+          { label: 'Ativos', value: ativos },
+          { label: 'Atrasados', value: atrasados },
+          { label: 'Devolvidos', value: devolvidos },
+        ]
+      : undefined,
   });
-  doc.setTextColor(0, 0, 0);
-  yPosition += 10;
+};
 
-  doc.setLineWidth(0.5);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 10;
+// ==================== PATRIMÔNIO ====================
 
-  // ==================== ESTATÍSTICAS ====================
-  if (includeStats) {
-    const total = emprestimos.length;
-    const ativos = emprestimos.filter((e) => e.status === 'Ativo').length;
-    const atrasados = emprestimos.filter((e) => e.status === 'Atrasado').length;
-    const devolvidos = emprestimos.filter(
-      (e) => e.status === 'Devolvido',
-    ).length;
+interface PatrimonioPDFGeneratorOptions {
+  patrimonios: PatrimonioData[];
+  fileName?: string;
+  title?: string;
+  includeStats?: boolean;
+  userName?: string;
+}
 
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RESUMO ESTATÍSTICO', margin, yPosition);
-    yPosition += 8;
+const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
+  { header: 'Nº PATRIMÔNIO', width: 35, get: (p) => p.numero_patrimonio },
+  {
+    header: 'MODELO',
+    width: 45,
+    get: (p) => p.modelo || p.categoria.nome,
+  },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (p) => p.localizacao.nome },
+  {
+    header: 'STATUS',
+    width: 25,
+    get: (p) => p.status,
+    cor: (p) =>
+      p.status === 'Disponível'
+        ? CORES.verde
+        : p.status === 'Baixado'
+          ? CORES.vermelho
+          : CORES.amareloEscuro,
+  },
+  {
+    header: 'AQUISIÇÃO',
+    width: 25,
+    get: (p) =>
+      p.data_aquisicao
+        ? new Date(p.data_aquisicao).toLocaleDateString('pt-BR')
+        : '—',
+  },
+];
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+export const generatePatrimonioPDF = async ({
+  patrimonios,
+  fileName = 'relatorio-patrimonio',
+  title = 'RELATÓRIO DE PATRIMÔNIO',
+  includeStats = true,
+  userName = 'Administrador',
+}: PatrimonioPDFGeneratorOptions) => {
+  const total = patrimonios.length;
+  const disponiveis = patrimonios.filter(
+    (p) => p.status === 'Disponível',
+  ).length;
+  const emprestadas = patrimonios.filter(
+    (p) => p.status === 'Emprestado',
+  ).length;
+  const baixadas = patrimonios.filter((p) => p.status === 'Baixado').length;
 
-    const stats = [
-      `Total de Empréstimos: ${total}`,
-      `Ativos: ${ativos}`,
-      `Atrasados: ${atrasados}`,
-      `Devolvidos: ${devolvidos}`,
-    ];
-
-    stats.forEach((stat) => {
-      doc.text(stat, margin + 5, yPosition);
-      yPosition += 6;
-    });
-
-    yPosition += 5;
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-  }
-
-  // ==================== TABELA DE EMPRÉSTIMOS ====================
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('EMPRÉSTIMOS SELECIONADOS', margin, yPosition);
-  yPosition += 8;
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-
-  const colWidths = {
-    produto: 45,
-    solicitante: 40,
-    quantidade: 18,
-    status: 25,
-    dataSaida: 30,
-    dataPrevista: 30,
-  };
-
-  let xPos = margin + 2;
-  doc.text('PRODUTO', xPos, yPosition);
-  xPos += colWidths.produto;
-  doc.text('SOLICITANTE', xPos, yPosition);
-  xPos += colWidths.solicitante;
-  doc.text('QTD', xPos, yPosition);
-  xPos += colWidths.quantidade;
-  doc.text('STATUS', xPos, yPosition);
-  xPos += colWidths.status;
-  doc.text('SAÍDA', xPos, yPosition);
-  xPos += colWidths.dataSaida;
-  doc.text('PREVISÃO', xPos, yPosition);
-  yPosition += 7;
-
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 5;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-
-  emprestimos.forEach((emp, index) => {
-    checkPageBreak(15);
-
-    if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 10, 'F');
-    }
-
-    xPos = margin + 2;
-
-    const nomeProduto = emp.item?.nome || '-';
-    const produtoTrunc =
-      nomeProduto.length > 28
-        ? nomeProduto.substring(0, 25) + '...'
-        : nomeProduto;
-    doc.text(produtoTrunc, xPos, yPosition);
-    xPos += colWidths.produto;
-
-    const solicitante = emp.solicitante_nome || '-';
-    const solicitanteTrunc =
-      solicitante.length > 25
-        ? solicitante.substring(0, 22) + '...'
-        : solicitante;
-    doc.text(solicitanteTrunc, xPos, yPosition);
-    xPos += colWidths.solicitante;
-
-    doc.text(String(emp.quantidade_emprestada ?? '-'), xPos, yPosition);
-    xPos += colWidths.quantidade;
-
-    if (emp.status === 'Ativo') {
-      doc.setTextColor(0, 128, 0);
-    } else if (emp.status === 'Atrasado') {
-      doc.setTextColor(200, 0, 0);
-    } else {
-      doc.setTextColor(100, 100, 100);
-    }
-    doc.text(emp.status, xPos, yPosition);
-    doc.setTextColor(0, 0, 0);
-    xPos += colWidths.status;
-
-    const dataSaida = emp.data_saida
-      ? new Date(emp.data_saida).toLocaleDateString('pt-BR')
-      : '-';
-    doc.text(dataSaida, xPos, yPosition);
-    xPos += colWidths.dataSaida;
-
-    const dataPrevista = emp.data_prevista_devolucao
-      ? new Date(emp.data_prevista_devolucao).toLocaleDateString('pt-BR')
-      : 'Sem previsão';
-    doc.text(dataPrevista, xPos, yPosition);
-
-    yPosition += 10;
-
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.1);
-    doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+  return gerarTabelaPDF({
+    titulo: title,
+    fileName,
+    userName,
+    colunas: colunasPatrimonio,
+    linhas: patrimonios,
+    nomeSecaoTabela: 'UNIDADES SELECIONADAS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Unidades', value: total },
+          { label: 'Disponíveis', value: disponiveis },
+          { label: 'Emprestadas', value: emprestadas },
+          { label: 'Baixadas', value: baixadas },
+        ]
+      : undefined,
   });
+};
 
-  // ==================== RODAPÉ ====================
-  const addFooter = (pageNumber: number, totalPages: number) => {
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 120, 120);
-    doc.text(
-      `Página ${pageNumber} de ${totalPages}`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: 'center' },
-    );
-    doc.text(
-      'Estoque Inteligente - Sistema de Gerenciamento',
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' },
-    );
-    doc.setTextColor(0, 0, 0);
-  };
+// ==================== MOVIMENTAÇÕES ====================
 
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    addFooter(i, totalPages);
-  }
+interface MovimentacoesPDFGeneratorOptions {
+  movimentacoes: Movimentacao[];
+  fileName?: string;
+  title?: string;
+  includeStats?: boolean;
+  userName?: string;
+}
 
-  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const hoje = new Date();
-  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-  doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
+const colunasMovimentacoes: ColunaRelatorio<Movimentacao>[] = [
+  { header: 'DATA/HORA', width: 32, get: (m) => formatarDataHora(m.data_hora) },
+  { header: 'ITEM', width: 45, get: (m) => m.item?.nome || '-' },
+  { header: 'QTD', width: 15, get: (m) => m.quantidade.toString() },
+  {
+    header: 'TIPO',
+    width: 20,
+    get: (m) => (m.tipo === 'entrada' ? 'Entrada' : 'Saída'),
+    cor: (m) => (m.tipo === 'entrada' ? CORES.verde : CORES.vermelho),
+  },
+  { header: 'LOCALIZAÇÃO', width: 30, get: (m) => m.localizacao?.nome || '-' },
+  { header: 'RESPONSÁVEL', width: 30, get: (m) => m.usuario?.nome || '-' },
+];
 
-  return doc;
+export const generateMovimentacoesPDF = async ({
+  movimentacoes,
+  fileName = 'relatorio-movimentacoes',
+  title = 'RELATÓRIO DE MOVIMENTAÇÕES',
+  includeStats = true,
+  userName = 'Administrador',
+}: MovimentacoesPDFGeneratorOptions) => {
+  const total = movimentacoes.length;
+  const entradas = movimentacoes.filter((m) => m.tipo === 'entrada').length;
+  const saidas = movimentacoes.filter((m) => m.tipo === 'saida').length;
+
+  return gerarTabelaPDF({
+    titulo: title,
+    fileName,
+    userName,
+    colunas: colunasMovimentacoes,
+    linhas: movimentacoes,
+    nomeSecaoTabela: 'MOVIMENTAÇÕES SELECIONADAS',
+    stats: includeStats
+      ? [
+          { label: 'Total de Movimentações', value: total },
+          { label: 'Entradas', value: entradas },
+          { label: 'Saídas', value: saidas },
+        ]
+      : undefined,
+  });
 };
