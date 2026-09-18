@@ -80,6 +80,7 @@ export default function ModalPatrimonioRemover({
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-remover-cancelar"
             >
               Cancelar
             </Button>
@@ -87,6 +88,7 @@ export default function ModalPatrimonioRemover({
               onClick={() => mutation.mutate()}
               className="h-11 flex-1 bg-destructive text-white cursor-pointer hover:opacity-90"
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-remover-confirmar"
             >
               {mutation.isPending ? 'Removendo...' : 'Remover'}
             </Button>

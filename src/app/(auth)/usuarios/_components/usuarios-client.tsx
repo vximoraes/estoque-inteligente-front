@@ -242,7 +242,10 @@ export default function PageUsuariosContent({
   }
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
+    <div
+      className="w-full max-w-full h-screen flex flex-col overflow-hidden"
+      data-test="usuarios-page"
+    >
       <Cabecalho pagina="Usuários" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-1 max-w-full">

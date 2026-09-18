@@ -133,6 +133,7 @@ export default function ModalEditarCategoria({
       onClose={handleClose}
       zIndex={99999}
       contentClassName="max-w-lg overflow-visible"
+      data-test="modal-editar-categoria"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">
@@ -173,6 +174,7 @@ export default function ModalEditarCategoria({
             placeholder="Digite o nome da categoria"
             {...register('nome')}
             maxLength={50}
+            data-test="nome-input"
             className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
             disabled={isSubmitting || updateCategoriaMutation.isPending}
           />
@@ -229,6 +231,7 @@ export default function ModalEditarCategoria({
             onClick={handleClose}
             disabled={isSubmitting || updateCategoriaMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
+            data-test="modal-editar-categoria-cancelar"
           >
             Cancelar
           </Button>
@@ -237,6 +240,7 @@ export default function ModalEditarCategoria({
             disabled={isSubmitting || updateCategoriaMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="modal-editar-categoria-confirmar"
           >
             {isSubmitting || updateCategoriaMutation.isPending
               ? 'Salvando...'

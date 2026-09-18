@@ -104,6 +104,7 @@ export default function ModalExcluirLocalizacao({
       onClose={handleClose}
       zIndex={99999}
       contentClassName="max-w-lg overflow-visible"
+      data-test="modal-excluir-localizacao"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">
@@ -154,6 +155,7 @@ export default function ModalExcluirLocalizacao({
             onClick={handleClose}
             disabled={inativarLocalizacaoMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
+            data-test="modal-excluir-localizacao-cancelar"
           >
             Cancelar
           </Button>
@@ -162,6 +164,7 @@ export default function ModalExcluirLocalizacao({
             onClick={handleConfirm}
             disabled={inativarLocalizacaoMutation.isPending}
             className="h-11 flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 text-white"
+            data-test="modal-excluir-localizacao-confirmar"
           >
             {inativarLocalizacaoMutation.isPending ? 'Excluindo...' : 'Excluir'}
           </Button>

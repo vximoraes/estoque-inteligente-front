@@ -133,6 +133,7 @@ export default function ModalEditarLocalizacao({
       onClose={handleClose}
       zIndex={99999}
       contentClassName="max-w-lg overflow-visible"
+      data-test="modal-editar-localizacao"
     >
       {/* Botão de fechar */}
       <div className="relative p-6 pb-0">
@@ -175,6 +176,7 @@ export default function ModalEditarLocalizacao({
             placeholder="Digite o nome da localização"
             {...register('nome')}
             maxLength={50}
+            data-test="nome-input"
             className={`h-11 ${errors.nome ? 'border-destructive' : ''}`}
             disabled={isSubmitting || updateLocalizacaoMutation.isPending}
           />
@@ -233,6 +235,7 @@ export default function ModalEditarLocalizacao({
             onClick={handleClose}
             disabled={isSubmitting || updateLocalizacaoMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
+            data-test="modal-editar-localizacao-cancelar"
           >
             Cancelar
           </Button>
@@ -241,6 +244,7 @@ export default function ModalEditarLocalizacao({
             disabled={isSubmitting || updateLocalizacaoMutation.isPending}
             className="h-11 flex-1 cursor-pointer"
             style={{ backgroundColor: 'var(--ei-accent)' }}
+            data-test="modal-editar-localizacao-confirmar"
           >
             {isSubmitting || updateLocalizacaoMutation.isPending
               ? 'Salvando...'
