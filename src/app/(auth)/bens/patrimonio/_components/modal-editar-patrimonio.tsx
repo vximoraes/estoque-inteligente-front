@@ -224,6 +224,7 @@ export default function ModalEditarPatrimonio({
                 }));
               }}
               maxLength={60}
+              data-test="numero-patrimonio-input"
               className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
                 erros.numeroPatrimonio ? 'border-destructive' : 'border-border'
               }`}
@@ -244,6 +245,7 @@ export default function ModalEditarPatrimonio({
               value={modelo}
               onChange={(e) => setModelo(e.target.value)}
               maxLength={100}
+              data-test="modelo-input"
               className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             />
           </div>
@@ -257,6 +259,7 @@ export default function ModalEditarPatrimonio({
               value={fabricante}
               onChange={(e) => setFabricante(e.target.value)}
               maxLength={100}
+              data-test="fabricante-input"
               className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             />
           </div>
@@ -326,6 +329,7 @@ export default function ModalEditarPatrimonio({
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
               disabled={isPending}
+              data-test="modal-editar-patrimonio-cancelar"
             >
               Cancelar
             </Button>
@@ -334,6 +338,7 @@ export default function ModalEditarPatrimonio({
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
               disabled={isPending}
+              data-test="modal-editar-patrimonio-confirmar"
             >
               {isPending ? 'Salvando...' : 'Salvar'}
             </Button>

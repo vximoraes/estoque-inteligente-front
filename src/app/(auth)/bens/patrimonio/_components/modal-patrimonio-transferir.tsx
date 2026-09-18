@@ -137,6 +137,7 @@ export default function ModalPatrimonioTransferir({
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-transferir-cancelar"
             >
               Cancelar
             </Button>
@@ -145,6 +146,7 @@ export default function ModalPatrimonioTransferir({
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-transferir-confirmar"
             >
               {mutation.isPending
                 ? 'Transferindo...'

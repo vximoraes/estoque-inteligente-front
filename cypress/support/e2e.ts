@@ -1,17 +1,14 @@
-// ***********************************************************
-// This example support/e2e.ts is processed and
-// loaded automatically before your test files.
-//
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
-
 // Import commands.js using ES2015 syntax:
 import './commands';
+
+// Aquece a API antes da primeira spec — o middleware.ts chama
+// ${API_URL}/api/auth/get-session em toda navegação, e a primeira requisição
+// contra a API de teste recém-subida pode ser lenta o bastante para estourar
+// o responseTimeout.
+before(() => {
+  cy.request({
+    url: Cypress.env('API_URL'),
+    failOnStatusCode: false,
+    timeout: 30000,
+  });
+});

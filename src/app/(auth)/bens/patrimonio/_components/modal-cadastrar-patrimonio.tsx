@@ -245,6 +245,7 @@ export default function ModalCadastrarPatrimonio({
               }}
               maxLength={60}
               placeholder="NB-0001"
+              data-test="numero-patrimonio-input"
               className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
                 erros.numeroPatrimonio ? 'border-destructive' : 'border-border'
               }`}
@@ -270,6 +271,7 @@ export default function ModalCadastrarPatrimonio({
               onBlur={(e) => setModeloParaSugestao(e.target.value.trim())}
               maxLength={100}
               placeholder="ThinkPad T14"
+              data-test="modelo-input"
               className={`w-full h-11 px-3 text-base md:text-sm border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 ${
                 erros.modelo ? 'border-destructive' : 'border-border'
               }`}
@@ -289,6 +291,7 @@ export default function ModalCadastrarPatrimonio({
               onChange={(e) => setFabricante(e.target.value)}
               maxLength={100}
               placeholder="Lenovo"
+              data-test="fabricante-input"
               className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
             />
           </div>
@@ -322,6 +325,7 @@ export default function ModalCadastrarPatrimonio({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as PatrimonioStatus)}
+                data-test="status-select"
                 className="w-full h-11 px-3 pr-9 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 bg-card text-foreground appearance-none"
               >
                 {STATUS_INICIAL_OPTIONS.map((opcao) => (
@@ -386,6 +390,7 @@ export default function ModalCadastrarPatrimonio({
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
               disabled={isPending}
+              data-test="modal-cadastrar-patrimonio-cancelar"
             >
               Cancelar
             </Button>
@@ -394,6 +399,7 @@ export default function ModalCadastrarPatrimonio({
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
               disabled={isPending}
+              data-test="modal-cadastrar-patrimonio-confirmar"
             >
               {isPending ? 'Salvando...' : 'Cadastrar'}
             </Button>

@@ -20,7 +20,7 @@ npm run fix                 # lint:fix + format em sequência
 npm run test                 # Cypress E2E (cypress run)
 ```
 
-Não há testes unitários configurados. A suíte E2E via Cypress (`cypress/e2e`) cobre só o fluxo de autenticação (`cypress/e2e/auth`) — decisão deliberada, E2E completo era lento e não era o foco do projeto. Para rodar Cypress em modo interativo, use `npx cypress open`. Para rodar uma única spec: `npx cypress run --spec "cypress/e2e/auth/01-login.cy.ts"`.
+Não há testes unitários configurados. A suíte E2E via Cypress (`cypress/e2e`) cobre autenticação e todas as telas da área logada, contra uma instância de teste dedicada da API (`npm run test:server` no repositório da API, porta `3011`, banco efêmero) — ver `.claude/rules/testing.md`. Para rodar Cypress em modo interativo, use `npx cypress open` (funciona também contra a API de dev normal). Para rodar uma pasta de specs: `npx cypress run --spec "cypress/e2e/patrimonio/*.cy.ts"`.
 
 Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas client-side) e `API_URL` (chamadas server-side/SSR — no Docker aponta para o nome do serviço da API, não `localhost`).
 
@@ -67,9 +67,10 @@ Ao adicionar uma nova página de listagem, siga esse mesmo padrão em vez de bus
 
 ### Testes E2E (Cypress)
 
-- Specs só de autenticação, em `cypress/e2e/auth/NN-descricao.cy.ts` (login, esqueci-senha, redefinir-senha, ativar-conta). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória.
-- Comando customizado único em `cypress/support/commands.ts` (`cy.getByData`).
-- `cypress.config.ts` usa `FRONTEND_URL` (env do Cypress) como `baseUrl`, com fallback para `http://localhost:3000` — o app precisa estar rodando (`npm run dev` ou build) antes de `npm run test`.
+- Specs em `cypress/e2e/<dominio>/NN-descricao.cy.ts` — um domínio por área logada (`auth`, `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória. Documentação de cada suíte em `documentacao/suites-de-teste/`.
+- `cypress/support/commands.ts`: `cy.getByData` (seleção por `data-test`), `cy.login`/`cy.loginViaAPI` (sessão real via API, cacheada com `cy.session`), `cy.api` (requisição autenticada), `cy.irPara` (visita + espera pelo marcador da página), `cy.esperarToast`.
+- `cypress/support/helpers.ts`: fábricas de dados por recurso (`criarCategoria`, `criarItem`, `criarPatrimonio`, etc.) e helpers de interação para componentes Radix (`selecionarNoCombobox`, `confirmarDialogo`).
+- `cypress.config.ts` usa `FRONTEND_URL` (env do Cypress) como `baseUrl`. O alvo padrão é uma API de teste dedicada (porta `3011`, banco efêmero, ver `.claude/rules/testing.md`) — rodar sempre o front em produção (`npm run build && npm run start`), nunca em `npm run dev`, para evitar timeout por compilação sob demanda do Next.
 
 ## Convenções de código
 

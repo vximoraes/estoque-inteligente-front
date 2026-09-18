@@ -40,18 +40,21 @@ export default function PatrimonioLinhaAcoes({
         <DropdownMenuItem
           onClick={() => onAcao('editar', unidade)}
           disabled={unidade.status === 'Baixado'}
+          data-test="patrimonio-acao-editar"
         >
           Editar
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onAcao('emprestar', unidade)}
           disabled={unidade.status !== 'Disponível'}
+          data-test="patrimonio-acao-emprestar"
         >
           Emprestar
         </DropdownMenuItem>
         {unidade.status === 'Manutenção' ? (
           <DropdownMenuItem
             onClick={() => onAcao('retornarManutencao', unidade)}
+            data-test="patrimonio-acao-retornar-manutencao"
           >
             Retornar da manutenção
           </DropdownMenuItem>
@@ -59,6 +62,7 @@ export default function PatrimonioLinhaAcoes({
           <DropdownMenuItem
             onClick={() => onAcao('manutencao', unidade)}
             disabled={unidade.status !== 'Disponível'}
+            data-test="patrimonio-acao-manutencao"
           >
             Manutenção
           </DropdownMenuItem>
@@ -66,11 +70,15 @@ export default function PatrimonioLinhaAcoes({
         <DropdownMenuItem
           onClick={() => onAcao('transferir', unidade)}
           disabled={unidade.status === 'Emprestado'}
+          data-test="patrimonio-acao-transferir"
         >
           Transferir
         </DropdownMenuItem>
         {unidade.status === 'Baixado' ? (
-          <DropdownMenuItem onClick={() => onAcao('reativar', unidade)}>
+          <DropdownMenuItem
+            onClick={() => onAcao('reativar', unidade)}
+            data-test="patrimonio-acao-reativar"
+          >
             Reativar
           </DropdownMenuItem>
         ) : (
@@ -78,6 +86,7 @@ export default function PatrimonioLinhaAcoes({
             onClick={() => onAcao('baixar', unidade)}
             disabled={unidade.status === 'Emprestado'}
             variant="destructive"
+            data-test="patrimonio-acao-baixar"
           >
             Baixar
           </DropdownMenuItem>
@@ -86,6 +95,7 @@ export default function PatrimonioLinhaAcoes({
           onClick={() => onAcao('remover', unidade)}
           disabled={unidade.status === 'Emprestado'}
           variant="destructive"
+          data-test="patrimonio-acao-remover"
         >
           Remover (erro de cadastro)
         </DropdownMenuItem>

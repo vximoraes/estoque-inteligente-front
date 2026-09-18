@@ -40,23 +40,25 @@ describe('Login', () => {
     cy.get('@signIn.all').should('have.length', 0);
   });
 
-  it('bloqueia com 429 e mostra tempo de espera após tentativas seguidas de senha errada', () => {
-    cy.wait(10000);
+  it('mostra mensagem de espera quando a API responde 429', () => {
+    // A API de teste roda com NODE_ENV=test, que desliga o rate limit do
+    // Better Auth — não dá pra provocar um 429 real aqui. Este teste cobre
+    // só a responsabilidade do front: renderizar a mensagem certa quando a
+    // API responde 429 com o header X-Retry-After. O algoritmo de rate
+    // limit em si (3 tentativas/10s) é responsabilidade do Better Auth,
+    // não do front.
+    cy.intercept('POST', '**/api/auth/sign-in/email', {
+      statusCode: 429,
+      body: { message: 'Too many requests' },
+      headers: { 'x-retry-after': '10' },
+    }).as('signInBloqueado');
+
     cy.visit(`${frontendUrl}/login`);
-
-    for (let tentativa = 1; tentativa <= 3; tentativa++) {
-      cy.getByData('email-input').clear().type(email);
-      cy.getByData('senha-input').clear().type('SenhaErrada@999');
-      cy.getByData('botao-entrar').click();
-      cy.contains('E-mail ou senha incorretos.', { timeout: 10000 }).should(
-        'be.visible',
-      );
-    }
-
-    cy.getByData('email-input').clear().type(email);
-    cy.getByData('senha-input').clear().type('SenhaErrada@999');
+    cy.getByData('email-input').type(email);
+    cy.getByData('senha-input').type(senha);
     cy.getByData('botao-entrar').click();
 
+    cy.wait('@signInBloqueado');
     cy.contains(/Muitas tentativas\./, { timeout: 10000 }).should('be.visible');
   });
 

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 
 export function usePermissions() {
-  const { user } = useSession();
+  const { user, isLoading: sessionLoading } = useSession();
 
   const { data, isLoading } = useQuery({
     queryKey: ['user-permissions', user?.id],
@@ -61,6 +61,12 @@ export function usePermissions() {
     canManageUsers,
     permissoes,
     grupos,
-    loading: isLoading,
+    // Enquanto a sessão ainda resolve, `user?.id` é undefined e a query de
+    // permissões fica `enabled: false` — nesse estado o React Query reporta
+    // isLoading=false (não é "carregando", é "desabilitada"), então sem
+    // considerar sessionLoading aqui um consumidor que decide algo com base
+    // em canManageUsers() (ex.: chamar notFound()) age antes da resposta
+    // real chegar.
+    loading: sessionLoading || isLoading,
   };
 }
