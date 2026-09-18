@@ -121,6 +121,7 @@ export default function ModalPatrimonioStatus({
               onClick={onClose}
               className="h-11 flex-1 cursor-pointer"
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-status-cancelar"
             >
               Cancelar
             </Button>
@@ -135,6 +136,7 @@ export default function ModalPatrimonioStatus({
                 destrutivo ? undefined : { backgroundColor: 'var(--ei-accent)' }
               }
               disabled={mutation.isPending}
+              data-test="modal-patrimonio-status-confirmar"
             >
               {mutation.isPending ? 'Salvando...' : confirmLabel}
             </Button>
