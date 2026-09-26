@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cabecalho from '@/components/layout/cabecalho';
 import { useSession } from '@/hooks/use-session';
+import { useNotificacoesNaoLidas } from '@/hooks/use-notificacoes-nao-lidas';
 import { authClient } from '@/lib/auth-client';
 import { get, patch } from '@/lib/fetchData';
 import { toast, ToastContainer, Slide } from 'react-toastify';
@@ -330,6 +331,8 @@ export default function HomePage() {
     refetchOnMount: true,
   });
 
+  const totalNaoLidas = useNotificacoesNaoLidas(10000);
+
   const notificacoes =
     notificacoesData?.pages.flatMap((page) => {
       const data = page.data || page;
@@ -366,7 +369,7 @@ export default function HomePage() {
     setLoadingAction('visualizar');
     try {
       await patch(`/notificacoes/${notificacaoId}/visualizar`, {});
-      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
       toast.success('Notificação marcada como lida!', {
         position: 'bottom-right',
         autoClose: 2000,
@@ -392,7 +395,7 @@ export default function HomePage() {
     setLoadingAction('excluir');
     try {
       await patch(`/notificacoes/${notificacaoId}/inativar`, {});
-      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
       toast.success('Notificação excluída!', {
         position: 'bottom-right',
         autoClose: 2000,
@@ -410,9 +413,7 @@ export default function HomePage() {
   }
 
   async function marcarTodasComoVisualizadas() {
-    const naoVisualizadas = notificacoes.filter((n) => !n.visualizada);
-
-    if (naoVisualizadas.length === 0) {
+    if (totalNaoLidas === 0) {
       toast.info('Todas as notificações já foram lidas', {
         position: 'bottom-right',
         autoClose: 2000,
@@ -421,16 +422,11 @@ export default function HomePage() {
     }
 
     try {
-      // Marcar todas as não visualizadas
-      await Promise.all(
-        naoVisualizadas.map((notif) =>
-          patch(`/notificacoes/${notif._id}/visualizar`, {}),
-        ),
-      );
+      await patch('/notificacoes/visualizar-todas', {});
 
-      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
       toast.success(
-        `${naoVisualizadas.length} notificação${naoVisualizadas.length > 1 ? 'ões' : ''} marcada${naoVisualizadas.length > 1 ? 's' : ''} como lida${naoVisualizadas.length > 1 ? 's' : ''}`,
+        `${totalNaoLidas} notificação${totalNaoLidas > 1 ? 'ões' : ''} marcada${totalNaoLidas > 1 ? 's' : ''} como lida${totalNaoLidas > 1 ? 's' : ''}`,
         {
           position: 'bottom-right',
           autoClose: 2000,
@@ -1083,16 +1079,16 @@ export default function HomePage() {
                 <h3 className="text-lg font-semibold tracking-wide">
                   Notificações
                 </h3>
-                {notificacoes.filter((n) => !n.visualizada).length > 0 && (
+                {totalNaoLidas > 0 && (
                   <span
                     className="text-base text-ei-accent font-medium"
                     data-test="notificacoes-nao-lidas-count"
                   >
-                    ({notificacoes.filter((n) => !n.visualizada).length})
+                    ({totalNaoLidas})
                   </span>
                 )}
               </div>
-              {notificacoes.filter((n) => !n.visualizada).length > 0 && (
+              {totalNaoLidas > 0 && (
                 <button
                   onClick={marcarTodasComoVisualizadas}
                   className="text-sm text-ei-accent hover:text-ei-accent/80 hover:underline transition-colors cursor-pointer"

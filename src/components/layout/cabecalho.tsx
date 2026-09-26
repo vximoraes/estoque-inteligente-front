@@ -6,6 +6,7 @@ import { useSidebarContext } from '@/contexts/SidebarContext';
 import { Bell, Menu, ChevronLeft } from 'lucide-react';
 import { get, patch } from '@/lib/fetchData';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNotificacoesNaoLidas } from '@/hooks/use-notificacoes-nao-lidas';
 
 type NotificationItem = {
   _id: string;
@@ -54,7 +55,7 @@ export default function Cabecalho({
   const [sseConnected, setSSEConnected] = useState(false);
 
   const { data: notificacoesData } = useQuery<NotificacoesApiResponse>({
-    queryKey: ['notificacoes-header', user?.id],
+    queryKey: ['notificacoes', 'header', user?.id],
     queryFn: async () =>
       await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
     enabled: !!user?.id,
@@ -64,6 +65,7 @@ export default function Cabecalho({
   });
 
   const notifications = notificacoesData?.data?.docs || [];
+  const totalNaoLidas = useNotificacoesNaoLidas(sseConnected ? false : 15000);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -133,7 +135,7 @@ export default function Cabecalho({
             if (eventType && eventData) {
               if (eventType === 'notificacao') {
                 queryClient.invalidateQueries({
-                  queryKey: ['notificacoes-header', user?.id],
+                  queryKey: ['notificacoes'],
                 });
               }
             }
@@ -192,18 +194,14 @@ export default function Cabecalho({
     if (id) {
       try {
         await patch(`/notificacoes/${id}/visualizar`, {});
-        queryClient.invalidateQueries({
-          queryKey: ['notificacoes-header', user?.id],
-        });
+        queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
       } catch (error) {
         console.error('Erro ao marcar notificação como lida:', error);
       }
     } else {
       try {
         await patch(`/notificacoes/visualizar-todas`, {});
-        queryClient.invalidateQueries({
-          queryKey: ['notificacoes-header', user?.id],
-        });
+        queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
       } catch (error) {
         console.error('Erro ao marcar todas como lidas:', error);
       }
@@ -278,12 +276,12 @@ export default function Cabecalho({
               className="w-[22px] h-[22px] text-foreground"
               strokeWidth={2.3}
             />
-            {notifications.some((n) => !n.visualizada) && (
+            {totalNaoLidas > 0 && (
               <span
                 className="absolute -top-1 -right-1 bg-destructive text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-card"
                 data-test="contador-notificacoes"
               >
-                {notifications.filter((n) => !n.visualizada).length}
+                {totalNaoLidas > 99 ? '99+' : totalNaoLidas}
               </span>
             )}
           </button>
