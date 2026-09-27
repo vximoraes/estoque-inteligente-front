@@ -24,6 +24,10 @@ const SUGESTOES = [
   'Resumo do estoque atual',
 ];
 
+function truncar(texto: string, max: number): string {
+  return texto.length > max ? `${texto.slice(0, max).trimEnd()}…` : texto;
+}
+
 export function ChatPanel() {
   const {
     fecharChat,
@@ -205,6 +209,9 @@ export function ChatPanel() {
   };
 
   const conversas = conversasData?.docs ?? [];
+  const tituloExclusao = conversas.find(
+    (c) => c._id === confirmDeleteId,
+  )?.titulo;
 
   return (
     <div
@@ -217,10 +224,12 @@ export function ChatPanel() {
     >
       {/* Delete confirmation popup */}
       {confirmDeleteId && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
           <div className="bg-background border border-border rounded-md shadow-lg px-5 py-4 flex flex-col gap-3 w-64">
-            <p className="text-sm font-medium text-foreground">
-              Excluir conversa?
+            <p className="text-sm font-medium text-foreground break-words">
+              {tituloExclusao
+                ? `Excluir conversa "${truncar(tituloExclusao, 60)}"?`
+                : 'Excluir conversa?'}
             </p>
             <p className="text-xs text-muted-foreground">
               Esta ação não pode ser desfeita.
