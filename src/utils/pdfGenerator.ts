@@ -8,6 +8,7 @@ import {
   formatarDataHora,
   type ColunaRelatorio,
 } from './relatorioTabela';
+import { formatarData, formatarDataCalendario } from '@/lib/datas';
 
 const CORES = {
   verde: [0, 128, 0] as [number, number, number],
@@ -118,16 +119,12 @@ const colunasEmprestimos: ColunaRelatorio<Emprestimo>[] = [
   {
     header: 'SAÍDA',
     width: 30,
-    get: (e) =>
-      e.data_saida ? new Date(e.data_saida).toLocaleDateString('pt-BR') : '-',
+    get: (e) => formatarData(e.data_saida),
   },
   {
     header: 'PREVISÃO',
     width: 30,
-    get: (e) =>
-      e.data_prevista_devolucao
-        ? new Date(e.data_prevista_devolucao).toLocaleDateString('pt-BR')
-        : 'Sem previsão',
+    get: (e) => formatarData(e.data_prevista_devolucao, 'Sem previsão'),
   },
 ];
 
@@ -193,10 +190,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
   {
     header: 'AQUISIÇÃO',
     width: 25,
-    get: (p) =>
-      p.data_aquisicao
-        ? new Date(p.data_aquisicao).toLocaleDateString('pt-BR')
-        : '—',
+    get: (p) => formatarDataCalendario(p.data_aquisicao, '—'),
   },
 ];
 

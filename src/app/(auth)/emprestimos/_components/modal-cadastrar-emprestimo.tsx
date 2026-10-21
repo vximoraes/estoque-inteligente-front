@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { ItemConsumoApiResponse } from '@/types/itens';
+import { deInputDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface Localizacao {
   _id: string;
@@ -52,6 +54,7 @@ export default function ModalCadastrarEmprestimo({
   onClose,
   onSuccess,
 }: ModalCadastrarEmprestimoProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
 
   const [itemSelecionado, setItemSelecionado] = useState<{
@@ -255,7 +258,13 @@ export default function ModalCadastrarEmprestimo({
       newErrors.solicitanteEmail = 'E-mail inválido';
     }
 
-    if (dataPrevista && new Date(dataPrevista) <= new Date()) {
+    const dataPrevistaInformada = dataPrevista
+      ? deInputDataHora(dataPrevista)
+      : null;
+    if (
+      dataPrevista &&
+      (!dataPrevistaInformada || dataPrevistaInformada <= new Date())
+    ) {
       newErrors.dataPrevista = 'A data prevista deve ser futura';
     }
 
@@ -277,7 +286,8 @@ export default function ModalCadastrarEmprestimo({
       data.solicitante_email = solicitanteEmail.trim();
     }
     if (dataPrevista) {
-      data.data_prevista_devolucao = dataPrevista;
+      data.data_prevista_devolucao =
+        deInputDataHora(dataPrevista)?.toISOString();
     }
     if (observacoes.trim()) {
       data.observacoes_emprestimo = observacoes.trim();

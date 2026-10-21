@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { HEADER_FUSO } from '@/lib/datas';
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -24,6 +25,7 @@ export async function middleware(req: NextRequest) {
   );
 
   let isAuth = false;
+  let fusoHorario = '';
   try {
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
       headers: { cookie: req.headers.get('cookie') ?? '' },
@@ -31,6 +33,7 @@ export async function middleware(req: NextRequest) {
     if (response.ok) {
       const session = await response.json();
       isAuth = !!session?.user?.id;
+      fusoHorario = session?.user?.fuso_horario ?? '';
     }
   } catch {
     isAuth = false;
@@ -47,6 +50,10 @@ export async function middleware(req: NextRequest) {
       new URL(`/login?from=${encodeURIComponent(from)}`, req.url),
     );
   }
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set(HEADER_FUSO, fusoHorario);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

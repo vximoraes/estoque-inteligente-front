@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import Header from '@/components/layout/header';
 import { QueryProvider } from '@/providers/queryProvider';
 import { ThemeProvider } from '@/providers/themeProvider';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import SincronizarFusoHorario from '@/components/layout/sincronizar-fuso-horario';
+import { HEADER_FUSO, fusoValido } from '@/lib/datas';
 import './globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -22,11 +25,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const fusoDoUsuario = (await headers()).get(HEADER_FUSO);
+  const fuso = fusoValido(fusoDoUsuario) ? fusoDoUsuario : 'UTC';
+
   return (
     <html
       lang="pt-BR"
@@ -38,10 +44,12 @@ export default function RootLayout({
           <SidebarProvider>
             <NuqsAdapter>
               <QueryProvider>
-                <Header />
-                <main className="w-full max-w-full overflow-hidden">
-                  {children}
-                </main>
+                <SincronizarFusoHorario fuso={fuso}>
+                  <Header />
+                  <main className="w-full max-w-full overflow-hidden">
+                    {children}
+                  </main>
+                </SincronizarFusoHorario>
               </QueryProvider>
             </NuqsAdapter>
           </SidebarProvider>

@@ -36,16 +36,8 @@ import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
 import { generateMovimentacoesPDF } from '@/utils/pdfGenerator';
 import { generateMovimentacoesCSV } from '@/utils/csvGenerator';
-
-function ultimosDias(dias: number) {
-  const fim = new Date();
-  const inicio = new Date();
-  inicio.setDate(inicio.getDate() - (dias - 1));
-  return {
-    inicio: inicio.toISOString().slice(0, 10),
-    fim: fim.toISOString().slice(0, 10),
-  };
-}
+import { formatarDataHora, periodoUltimosDias } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 function buildParams(
   page: number,
@@ -70,8 +62,9 @@ function buildParams(
 }
 
 export default function AbaMovimentacoes() {
+  useFusoAtual();
   const { user } = useSession();
-  const periodoPadrao = ultimosDias(30);
+  const periodoPadrao = periodoUltimosDias(30);
   const [dataInicio, setDataInicio] = useState(periodoPadrao.inicio);
   const [dataFim, setDataFim] = useState(periodoPadrao.fim);
   const [searchTerm, setSearchTerm] = useState('');
@@ -476,7 +469,7 @@ export default function AbaMovimentacoes() {
                         className="text-center px-8 py-3 font-medium whitespace-nowrap"
                         data-test="movimentacao-data"
                       >
-                        {new Date(mov.data_hora).toLocaleString('pt-BR')}
+                        {formatarDataHora(mov.data_hora)}
                       </TableCell>
                       <TableCell className="text-center px-8 py-3 whitespace-nowrap">
                         <span

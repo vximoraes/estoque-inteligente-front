@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { ITEM_TIPO_LABEL, type ItemTipo } from '@/types/itens';
+import { formatarData as formatarDataDoFuso } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalDetalheCategoriaProps {
   isOpen: boolean;
@@ -16,10 +18,7 @@ interface ModalDetalheCategoriaProps {
 }
 
 function formatarData(data?: string) {
-  if (!data) return '—';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '—';
-  return parsed.toLocaleDateString('pt-BR');
+  return formatarDataDoFuso(data, '—');
 }
 
 export default function ModalDetalheCategoria({
@@ -30,6 +29,7 @@ export default function ModalDetalheCategoria({
   categoriaDescricao,
   categoriaCriadoEm,
 }: ModalDetalheCategoriaProps) {
+  useFusoAtual();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

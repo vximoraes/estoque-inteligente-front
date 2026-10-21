@@ -7,6 +7,8 @@ import { Bell, Menu, ChevronLeft } from 'lucide-react';
 import { get, patch } from '@/lib/fetchData';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNotificacoesNaoLidas } from '@/hooks/use-notificacoes-nao-lidas';
+import { formatarData } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 type NotificationItem = {
   _id: string;
@@ -46,6 +48,7 @@ export default function Cabecalho({
   showBackButton,
   onBackClick,
 }: CabecalhoProps) {
+  useFusoAtual();
   const router = useRouter();
   const { user } = useSession();
   const { toggleSidebar } = useSidebarContext();
@@ -221,7 +224,7 @@ export default function Cabecalho({
     if (diferencaHoras < 24) return `Há ${diferencaHoras}h`;
     if (diferencaDias === 1) return 'Ontem';
     if (diferencaDias < 7) return `Há ${diferencaDias}d`;
-    return new Date(data).toLocaleDateString('pt-BR');
+    return formatarData(data);
   }
 
   return (

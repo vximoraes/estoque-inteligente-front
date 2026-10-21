@@ -11,6 +11,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import SidebarButtonMenu from './sidebar-button';
+import SeletorFusoHorario from './seletor-fuso-horario';
 import { authClient } from '@/lib/auth-client';
 import { useSidebarContext } from '@/contexts/SidebarContext';
 import {
@@ -486,6 +487,15 @@ export default function CustomSidebar({ path }: PathRouter) {
                   </button>
                 )}
 
+                <SeletorFusoHorario
+                  collapsed={collapsed}
+                  dataTest={
+                    collapsed
+                      ? 'sidebar-fuso-horario-collapsed'
+                      : 'sidebar-fuso-horario'
+                  }
+                />
+
                 <SidebarMenuButton
                   className={`cursor-pointer transition-colors duration-150 hover:bg-ei-sidebar-surface-hover! ${collapsed ? 'flex justify-center items-center h-10 w-10 mx-auto rounded-md' : 'pl-4 pr-3 h-10 w-full flex gap-3 items-center rounded-md'}`}
                   onClick={() => {
@@ -666,6 +676,8 @@ export default function CustomSidebar({ path }: PathRouter) {
                   Tema: {temaLabelAtual}
                 </span>
               </button>
+
+              <SeletorFusoHorario dataTest="sidebar-fuso-horario-mobile" />
 
               <button
                 onClick={() => {

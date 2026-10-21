@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'react-toastify';
 import type { PatrimonioData } from '@/types/patrimonios';
+import { deInputDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface EmprestimoUnidadeRequest {
   patrimonio: string;
@@ -44,6 +46,7 @@ export default function ModalEmprestarUnidade({
   patrimonio,
   onSuccess,
 }: ModalEmprestarUnidadeProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
 
   const [solicitanteNome, setSolicitanteNome] = useState('');
@@ -106,8 +109,8 @@ export default function ModalEmprestarUnidade({
     }
 
     if (dataPrevista) {
-      const data = new Date(dataPrevista);
-      if (Number.isNaN(data.getTime()) || data <= new Date()) {
+      const data = deInputDataHora(dataPrevista);
+      if (!data || data <= new Date()) {
         newErrors.dataPrevista = 'A data prevista deve ser futura';
       }
     }
@@ -123,9 +126,7 @@ export default function ModalEmprestarUnidade({
       patrimonio: patrimonio._id,
       solicitante_nome: solicitanteNome.trim(),
       solicitante_email: solicitanteEmail.trim() || undefined,
-      data_prevista_devolucao: dataPrevista
-        ? new Date(dataPrevista).toISOString()
-        : undefined,
+      data_prevista_devolucao: deInputDataHora(dataPrevista)?.toISOString(),
       observacoes_emprestimo: observacoes.trim() || undefined,
     });
   };

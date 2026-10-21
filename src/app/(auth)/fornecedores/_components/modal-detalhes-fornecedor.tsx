@@ -5,6 +5,8 @@ import { X, ExternalLink, Copy, Check } from 'lucide-react';
 import { get } from '@/lib/fetchData';
 import { Fornecedor } from '@/types/fornecedores';
 import { ModalShell } from '@/components/ui/modal-shell';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface FornecedorApiResponse {
   data: Fornecedor;
@@ -21,6 +23,7 @@ export default function ModalDetalhesFornecedor({
   onClose,
   fornecedorId,
 }: ModalDetalhesFornecedorProps) {
+  useFusoAtual();
   const [fornecedor, setFornecedor] = useState<Fornecedor | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -219,16 +222,7 @@ export default function ModalDetalhesFornecedor({
                       Criado em
                     </label>
                     <p className="text-base text-muted-foreground">
-                      {new Date(fornecedor.createdAt).toLocaleDateString(
-                        'pt-BR',
-                        {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        },
-                      )}
+                      {formatarDataHora(fornecedor.createdAt)}
                     </p>
                   </div>
                 )}
@@ -238,16 +232,7 @@ export default function ModalDetalhesFornecedor({
                       Atualizado em
                     </label>
                     <p className="text-base text-muted-foreground">
-                      {new Date(fornecedor.updatedAt).toLocaleDateString(
-                        'pt-BR',
-                        {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        },
-                      )}
+                      {formatarDataHora(fornecedor.updatedAt)}
                     </p>
                   </div>
                 )}

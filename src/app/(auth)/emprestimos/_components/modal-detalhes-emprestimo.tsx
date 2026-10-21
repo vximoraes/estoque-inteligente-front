@@ -5,6 +5,8 @@ import { X } from 'lucide-react';
 import { Emprestimo } from '@/types/emprestimos';
 import { getEmprestimoNome } from '@/lib/emprestimo';
 import { ModalShell } from '@/components/ui/modal-shell';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalDetalhesEmprestimoProps {
   isOpen: boolean;
@@ -25,16 +27,7 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 function formatarData(data?: string | null) {
-  if (!data) return '-';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '-';
-  return parsed.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatarDataHora(data);
 }
 
 export default function ModalDetalhesEmprestimo({
@@ -42,6 +35,7 @@ export default function ModalDetalhesEmprestimo({
   onClose,
   emprestimo,
 }: ModalDetalhesEmprestimoProps) {
+  useFusoAtual();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

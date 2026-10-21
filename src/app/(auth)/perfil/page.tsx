@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
+import { formatarData } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface PasswordRequirement {
   text: string;
@@ -78,6 +80,7 @@ interface NotificacoesApiResponse {
 }
 
 export default function HomePage() {
+  useFusoAtual();
   const { user, refetch: refetchSession } = useSession();
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [isEditingNome, setIsEditingNome] = useState(false);
@@ -465,8 +468,7 @@ export default function HomePage() {
   }
 
   function formatDate(dateString?: string) {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return formatarData(dateString, 'N/A');
   }
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

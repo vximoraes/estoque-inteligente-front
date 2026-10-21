@@ -45,6 +45,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const TIPO_CONTROLE_LABEL: Record<'quantidade' | 'unidade', string> = {
   quantidade: 'Almoxarifado',
@@ -64,6 +66,7 @@ export default function EmprestimosPageContent({
 }: {
   initialData?: EmprestimosApiResponse;
 }) {
+  useFusoAtual();
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
@@ -161,12 +164,8 @@ export default function EmprestimosPageContent({
 
   const emprestimos = data?.pages.flatMap((page) => page.data.docs) || [];
 
-  const formatarDataPrevista = (data?: string | null) => {
-    if (!data) return 'Sem previsão';
-    const parsed = new Date(data);
-    if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
-    return parsed.toLocaleString('pt-BR');
-  };
+  const formatarDataPrevista = (data?: string | null) =>
+    formatarDataHora(data, 'Sem previsão');
 
   return (
     <div

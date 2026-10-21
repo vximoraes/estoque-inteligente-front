@@ -1,4 +1,10 @@
 import jsPDF from 'jspdf';
+import {
+  deslocamentoDoFuso,
+  diaNoFuso,
+  formatarDataHora as formatarDataHoraLocal,
+  obterFuso,
+} from '@/lib/datas';
 
 export interface ColunaRelatorio<T> {
   header: string;
@@ -14,8 +20,7 @@ export interface StatRelatorio {
 
 function sanitizarNomeArquivo(fileName: string) {
   const sanitized = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const hoje = new Date();
-  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+  const timestamp = diaNoFuso();
   return `${sanitized}-${timestamp}`;
 }
 
@@ -63,7 +68,7 @@ export function gerarTabelaPDF<T>({
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
   doc.text(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+    `Gerado em: ${formatarDataHoraLocal(new Date())} (${deslocamentoDoFuso(obterFuso())})`,
     pageWidth / 2,
     yPosition,
     { align: 'center' },
@@ -220,7 +225,7 @@ export function gerarTabelaCSV<T>({
 
   lines.push(titulo);
   lines.push(
-    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+    `Gerado em: ${formatarDataHoraLocal(new Date())} (${deslocamentoDoFuso(obterFuso())})`,
   );
   lines.push('');
 
@@ -261,16 +266,5 @@ export function gerarTabelaCSV<T>({
 }
 
 export function formatarDataHora(dateString?: string | null): string {
-  if (!dateString) return '-';
-  try {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return dateString;
-  }
+  return formatarDataHoraLocal(dateString);
 }

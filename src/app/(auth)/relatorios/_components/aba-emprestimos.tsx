@@ -32,6 +32,8 @@ import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
 import { generateEmprestimosPDF } from '@/utils/pdfGenerator';
 import { generateEmprestimosCSV } from '@/utils/csvGenerator';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -74,6 +76,7 @@ function buildParams(
 }
 
 export default function AbaEmprestimos() {
+  useFusoAtual();
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -223,12 +226,8 @@ export default function AbaEmprestimos() {
   const atrasados = globalStats?.atrasados ?? atrasadosLocal;
   const devolvidos = globalStats?.devolvidos ?? devolvidosLocal;
 
-  const formatarData = (data?: string | null) => {
-    if (!data) return 'Sem previsão';
-    const parsed = new Date(data);
-    if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
-    return parsed.toLocaleString('pt-BR');
-  };
+  const formatarData = (data?: string | null) =>
+    formatarDataHora(data, 'Sem previsão');
 
   const handleSelectAll = () => {
     if (selectedItems.size === emprestimosFiltrados.length) {

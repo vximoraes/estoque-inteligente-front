@@ -9,6 +9,12 @@ import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { Emprestimo } from '@/types/emprestimos';
 import { getEmprestimoNome } from '@/lib/emprestimo';
+import {
+  deInputDataHora,
+  formatarDataHora,
+  paraInputDataHora,
+} from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalEditarEmprestimoProps {
   isOpen: boolean;
@@ -23,6 +29,7 @@ export default function ModalEditarEmprestimo({
   emprestimo,
   onSuccess,
 }: ModalEditarEmprestimoProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
 
   const [solicitante, setSolicitante] = useState('');
@@ -35,9 +42,7 @@ export default function ModalEditarEmprestimo({
   useEffect(() => {
     if (!isOpen) return;
     setSolicitante(emprestimo.solicitante_nome || '');
-    const dp = emprestimo.data_prevista_devolucao
-      ? new Date(emprestimo.data_prevista_devolucao).toISOString().slice(0, 16)
-      : '';
+    const dp = paraInputDataHora(emprestimo.data_prevista_devolucao);
     setDataPrevista(dp);
     dataPrevistaOriginalRef.current = dp;
     setObservacoes(emprestimo.observacoes_emprestimo || '');
@@ -70,7 +75,7 @@ export default function ModalEditarEmprestimo({
         solicitante_nome: solicitante.trim() || undefined,
         data_prevista_devolucao:
           dataPrevista !== dataPrevistaOriginalRef.current
-            ? dataPrevista || undefined
+            ? deInputDataHora(dataPrevista)?.toISOString()
             : undefined,
         observacoes_emprestimo: observacoes.trim() || undefined,
         observacoes_devolucao:
@@ -168,7 +173,7 @@ export default function ModalEditarEmprestimo({
           <div className="bg-muted/50 border border-border rounded-md p-3 text-sm text-muted-foreground">
             Este empréstimo já foi devolvido
             {emprestimo.data_devolucao_total
-              ? ` em ${new Date(emprestimo.data_devolucao_total).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+              ? ` em ${formatarDataHora(emprestimo.data_devolucao_total)}`
               : ''}
             .
           </div>

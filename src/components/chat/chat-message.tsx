@@ -5,18 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Copy, Check } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
-
-function formatarDataHora(isoString: string): string {
-  const data = new Date(isoString);
-  if (isNaN(data.getTime())) return '';
-  return data.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ChatMessageProps {
   mensagem: Mensagem;
@@ -27,6 +17,7 @@ export function ChatMessage({
   mensagem,
   isStreaming = false,
 }: ChatMessageProps) {
+  useFusoAtual();
   const isUser = mensagem.role === 'user';
   const isError = mensagem.role === 'error';
   const [copiado, setCopiado] = useState(false);
@@ -43,7 +34,7 @@ export function ChatMessage({
 
   const podeCopiar = !isStreaming && mensagem.content.length > 0;
   const dataHora = mensagem.timestamp
-    ? formatarDataHora(mensagem.timestamp)
+    ? formatarDataHora(mensagem.timestamp, '')
     : '';
 
   if (isError) {

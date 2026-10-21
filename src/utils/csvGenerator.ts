@@ -8,6 +8,7 @@ import {
   formatarDataHora,
   type ColunaRelatorio,
 } from './relatorioTabela';
+import { formatarDataCalendario } from '@/lib/datas';
 
 // ==================== ALMOXARIFADO ====================
 
@@ -143,7 +144,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
   { header: 'STATUS', get: (p) => p.status },
   {
     header: 'DATA AQUISIÇÃO',
-    get: (p) => (p.data_aquisicao ? formatarDataHora(p.data_aquisicao) : '-'),
+    get: (p) => formatarDataCalendario(p.data_aquisicao),
   },
 ];
 

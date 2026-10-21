@@ -28,6 +28,8 @@ import { generatePatrimonioPDF } from '@/utils/pdfGenerator';
 import { generatePatrimonioCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
+import { formatarDataCalendario } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -38,11 +40,11 @@ const statusOptions = [
 ];
 
 function formatarData(data?: string) {
-  if (!data) return '—';
-  return new Date(data).toLocaleDateString('pt-BR');
+  return formatarDataCalendario(data, '—');
 }
 
 export default function AbaPatrimonio() {
+  useFusoAtual();
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');

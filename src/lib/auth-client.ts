@@ -14,6 +14,10 @@ export const authClient = createAuthClient({
           type: 'string',
           required: false,
         },
+        fuso_horario: {
+          type: 'string',
+          required: false,
+        },
       },
     }),
   ],
