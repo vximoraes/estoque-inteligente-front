@@ -1,12 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Copy, Check } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
 import { formatarDataHora } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
+
+function linkInterno(href: string | undefined): href is string {
+  return Boolean(href?.startsWith('/') && !href.startsWith('//'));
+}
+
+const componentesMarkdown: Components = {
+  img: ({ alt }) => (alt ? <span>{alt}</span> : null),
+  a: ({ href, children }) =>
+    linkInterno(href) ? <a href={href}>{children}</a> : <span>{children}</span>,
+};
 
 interface ChatMessageProps {
   mensagem: Mensagem;
@@ -115,7 +125,10 @@ export function ChatMessage({
               prose-a:text-[var(--ei-accent)] prose-a:no-underline hover:prose-a:underline
             "
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={componentesMarkdown}
+            >
               {mensagem.content}
             </ReactMarkdown>
           </div>
