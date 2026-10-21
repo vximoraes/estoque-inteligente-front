@@ -49,4 +49,4 @@ Specs nunca afirmam contagem absoluta (`totalDocs`/tamanho de lista) — sempre 
 
 ## Escrevendo uma spec nova
 
-Seguir o padrão dos domínios já cobertos (ver `documentacao/suites-de-teste/`): `beforeEach` com `cy.login()`, massa de dados via fábrica de `cypress/support/helpers.ts`, navegação via `cy.irPara(rota, marcadorPagina)`, interação só por `data-test`. Rodar a spec nova pelo menos duas vezes seguidas contra a API de teste (`npm run test:server`) antes de considerar pronta — idempotência é parte do contrato, dado que não há teardown entre specs.
+Seguir o padrão dos domínios já cobertos (ver `docs/suites-de-teste/`): `beforeEach` com `cy.login()`, massa de dados via fábrica de `cypress/support/helpers.ts`, navegação via `cy.irPara(rota, marcadorPagina)`, interação só por `data-test`. Rodar a spec nova pelo menos duas vezes seguidas contra a API de teste (`npm run test:server`) antes de considerar pronta — idempotência é parte do contrato, dado que não há teardown entre specs.
