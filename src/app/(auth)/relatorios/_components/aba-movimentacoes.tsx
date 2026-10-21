@@ -247,10 +247,7 @@ export default function AbaMovimentacoes() {
       data-test="relatorio-movimentacoes-page"
     >
       <div className="shrink-0 mb-6">
-        <div
-          className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
-          data-test="stats-grid"
-        >
+        <div className="grid grid-cols-3 gap-2 sm:gap-3" data-test="stats-grid">
           <StatCard
             title="Total de movimentações"
             value={resumo?.total_movimentacoes ?? 0}
@@ -265,15 +262,6 @@ export default function AbaMovimentacoes() {
             title="Saídas"
             value={resumo?.saidas ?? 0}
             data-test="stat-saidas"
-          />
-          <StatCard
-            title="Saldo"
-            value={resumo?.saldo ?? 0}
-            valueColor={
-              (resumo?.saldo ?? 0) < 0 ? 'var(--status-danger-text)' : undefined
-            }
-            data-test="stat-saldo"
-            hoverTitle="Entradas menos saídas no período"
           />
         </div>
       </div>
