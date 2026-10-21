@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import { ItemConsumoApiResponse } from '@/types/itens';
 import { deInputDataHora } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface Localizacao {
   _id: string;
@@ -183,7 +184,7 @@ export default function ModalCadastrarEmprestimo({
       return await post('/emprestimos', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      invalidarDadosDeEstoque(queryClient);
       toast.success('Empréstimo registrado com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,

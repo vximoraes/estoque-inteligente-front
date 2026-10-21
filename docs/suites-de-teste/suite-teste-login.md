@@ -2,7 +2,7 @@
 
 Testes E2E (UI) que validam o fluxo completo de autenticação: login, recuperação de senha, redefinição e ativação de conta.
 
-Arquivos: `cypress/e2e/auth/{01-login,02-esqueci-senha,03-redefinir-senha,04-ativar-conta}.cy.ts`
+Arquivos: `cypress/e2e/auth/{01-login,02-esqueci-senha,03-redefinir-senha,04-ativar-conta,05-permissoes}.cy.ts`
 
 ## Visão de Fluxo e Regras de Negócio
 
@@ -62,6 +62,13 @@ Arquivos: `cypress/e2e/auth/{01-login,02-esqueci-senha,03-redefinir-senha,04-ati
 | **Cenários tristes** |                                       |                                        |                                    |
 | Sem token na URL     | Deve exibir estado de token inválido. | Visitar `/ativar-conta` sem `?token=`. | Marcador `token-invalido` visível. |
 
+## Permissões na interface
+
+| Funcionalidade                | Comportamento Esperado                       | Verificações                                               | Critérios de Aceite                                   |
+| :---------------------------- | :------------------------------------------- | :--------------------------------------------------------- | :---------------------------------------------------- |
+| Admin vê Administração        | Menu de Usuários aparece e a tela abre.      | `cy.login()` padrão; `sidebar-btn-usuarios`; `/usuarios`.  | Botão existe e `usuarios-page` visível.               |
+| Usuário padrão sem `usuarios` | Menu some e a tela não abre, mesmo pela URL. | Login com `TEST_USER_COMUM_*`; visitar `/usuarios` direto. | `sidebar-btn-usuarios` e `usuarios-page` não existem. |
+
 ## Cenários Transversais Obrigatórios (E2E)
 
 | Tema                    | Verificação E2E                                                 |
@@ -77,14 +84,16 @@ Arquivos: `cypress/e2e/auth/{01-login,02-esqueci-senha,03-redefinir-senha,04-ati
 | `02-esqueci-senha.cy.ts`          | Fluxo de recuperação de senha.                                      |
 | `03-redefinir-senha.cy.ts`        | Fluxo de redefinição, token ausente, requisitos de senha.           |
 | `04-ativar-conta.cy.ts`           | Fluxo de ativação de conta convidada, token ausente.                |
+| `05-permissoes.cy.ts`             | Menu e tela de Usuários para admin e para o usuário padrão.         |
 
 ## Variáveis de Ambiente Usadas
 
-| Variável                               | Uso na suite                                         |
-| :------------------------------------- | :--------------------------------------------------- |
-| `FRONTEND_URL`                         | Base para `cy.visit`.                                |
-| `API_URL`                              | Base para `cy.request`/`cy.intercept` diretos à API. |
-| `TEST_USER_EMAIL`/`TEST_USER_PASSWORD` | Credenciais do admin semeado.                        |
+| Variável                                           | Uso na suite                                         |
+| :------------------------------------------------- | :--------------------------------------------------- |
+| `FRONTEND_URL`                                     | Base para `cy.visit`.                                |
+| `API_URL`                                          | Base para `cy.request`/`cy.intercept` diretos à API. |
+| `TEST_USER_EMAIL`/`TEST_USER_PASSWORD`             | Credenciais do admin semeado.                        |
+| `TEST_USER_COMUM_EMAIL`/`TEST_USER_COMUM_PASSWORD` | Usuário padrão semeado, sem permissão em `usuarios`. |
 
 ## Observações de Implementação para os Casos E2E
 

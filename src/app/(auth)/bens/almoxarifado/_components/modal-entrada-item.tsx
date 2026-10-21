@@ -15,6 +15,7 @@ import ModalEditarLocalizacao from '@/components/localizacao/modal-editar-locali
 import ModalExcluirLocalizacao from '@/components/localizacao/modal-excluir-localizacao';
 import { PulseLoader } from 'react-spinners';
 import type { Localizacao } from '@/types/itens';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface LocalizacoesApiResponse {
   error: boolean;
@@ -69,6 +70,15 @@ export default function ModalEntradaItem({
     useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
+  const [pesquisaNaApi, setPesquisaNaApi] = useState('');
+
+  useEffect(() => {
+    const espera = setTimeout(
+      () => setPesquisaNaApi(localizacaoPesquisa.trim()),
+      300,
+    );
+    return () => clearTimeout(espera);
+  }, [localizacaoPesquisa]);
   const [errors, setErrors] = useState<{
     quantidade?: string;
     localizacao?: string;
@@ -93,10 +103,13 @@ export default function ModalEntradaItem({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['localizacoes-infinite'],
+    queryKey: ['localizacoes-infinite', pesquisaNaApi],
     queryFn: async ({ pageParam = 1 }) => {
+      const nome = pesquisaNaApi
+        ? `&nome=${encodeURIComponent(pesquisaNaApi)}`
+        : '';
       return await get<LocalizacoesApiResponse>(
-        `/localizacoes?limite=20&page=${pageParam}`,
+        `/localizacoes?limite=20&page=${pageParam}${nome}`,
       );
     },
     getNextPageParam: (lastPage) => {
@@ -148,9 +161,7 @@ export default function ModalEntradaItem({
       return await post('/movimentacoes', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['itens'],
-      });
+      invalidarDadosDeEstoque(queryClient);
 
       queryClient.removeQueries({
         queryKey: ['estoques', itemId],

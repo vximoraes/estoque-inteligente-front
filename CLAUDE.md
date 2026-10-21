@@ -32,7 +32,7 @@ Variáveis de ambiente (ver `.env.example`): `NEXT_PUBLIC_API_URL` (chamadas cli
 - `src/middleware.ts` faz o gate de autenticação em toda navegação: encaminha o cookie da requisição para `${API_URL}/api/auth/get-session` e redireciona para `/login` (rotas privadas sem sessão) ou para `/bens/patrimonio` (rotas só-visitante já autenticado). Listas hardcoded em `PUBLIC_ROUTES`/`GUEST_ONLY_ROUTES`.
 - Autenticação de fato é feita pelo Better Auth (`src/lib/auth-client.ts`), com campos extras de usuário (`ativo`, `fotoPerfil`) injetados via plugin `inferAdditionalFields`.
 - `src/hooks/use-session.ts` expõe `useSession()` (client-side, wrapper de `authClient.useSession()`) — usar em vez de acessar `authClient` diretamente em componentes.
-- `src/hooks/use-permissions.ts` expõe `usePermissions()`, que busca as permissões do usuário (`GET /usuarios/:id`) e oferece `hasPermission(rota, action?)`, `isAdmin()`, `canManageUsers()`. Ações de permissão seguem o vocabulário da API: `'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'`.
+- `src/hooks/use-permissions.ts` expõe `usePermissions()`, que busca as permissões efetivas do usuário, já somando as dos grupos (`GET /usuarios/:id/permissoes`), e oferece `hasPermission(rota, action?)`, `isAdmin()`, `canManageUsers()`. Ações de permissão seguem o vocabulário da API: `'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'`.
 
 ### Padrão de página: server fetch + client component
 

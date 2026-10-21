@@ -20,13 +20,13 @@ interface CSVGeneratorOptions {
 
 const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
   { header: 'CÓDIGO', get: (e) => e.item._id },
-  { header: 'PRODUTO', get: (e) => e.item.nome },
+  { header: 'PRODUTO', get: (e) => e.item?.nome ?? '-' },
   { header: 'DESCRIÇÃO', get: (e) => e.item.descricao || '-' },
   { header: 'CATEGORIA', get: (e) => String(e.item.categoria) },
   { header: 'QUANTIDADE', get: (e) => e.quantidade.toString() },
   { header: 'ESTOQUE MÍNIMO', get: (e) => e.item.estoque_minimo.toString() },
   { header: 'STATUS', get: (e) => e.item.status },
-  { header: 'LOCALIZAÇÃO', get: (e) => e.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', get: (e) => e.localizacao?.nome ?? '-' },
   { header: 'DATA CRIAÇÃO', get: (e) => formatarDataHora(e.createdAt) },
   { header: 'ÚLTIMA ATUALIZAÇÃO', get: (e) => formatarDataHora(e.updatedAt) },
 ];
@@ -140,7 +140,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
   { header: 'Nº PATRIMÔNIO', get: (p) => p.numero_patrimonio },
   { header: 'MODELO', get: (p) => p.modelo || p.categoria.nome },
   { header: 'CATEGORIA', get: (p) => p.categoria.nome },
-  { header: 'LOCALIZAÇÃO', get: (p) => p.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', get: (p) => p.localizacao?.nome ?? '-' },
   { header: 'STATUS', get: (p) => p.status },
   {
     header: 'DATA AQUISIÇÃO',

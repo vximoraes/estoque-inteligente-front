@@ -587,9 +587,9 @@ export default function AbaAlmoxarifado() {
                       >
                         <span
                           className="truncate block max-w-[200px]"
-                          title={estoque.item._id}
+                          title={estoque.item?._id}
                         >
-                          {estoque.item._id.slice(-8)}
+                          {estoque.item?._id?.slice(-8) ?? '-'}
                         </span>
                       </TableCell>
                       <TableCell
@@ -598,9 +598,9 @@ export default function AbaAlmoxarifado() {
                       >
                         <span
                           className="truncate block max-w-[200px]"
-                          title={estoque.item.nome}
+                          title={estoque.item?.nome}
                         >
-                          {estoque.item.nome}
+                          {estoque.item?.nome ?? '-'}
                         </span>
                       </TableCell>
                       <TableCell
@@ -623,9 +623,9 @@ export default function AbaAlmoxarifado() {
                       >
                         <span
                           className="truncate inline-block max-w-[200px]"
-                          title={estoque.localizacao.nome}
+                          title={estoque.localizacao?.nome}
                         >
-                          {estoque.localizacao.nome}
+                          {estoque.localizacao?.nome ?? '-'}
                         </span>
                       </TableCell>
                     </TableRow>

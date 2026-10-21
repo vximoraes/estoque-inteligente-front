@@ -13,6 +13,7 @@ import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import { deInputDataHora } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface Localizacao {
   _id: string;
@@ -122,8 +123,7 @@ export default function ModalEmprestarItem({
       return await post('/emprestimos', payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      invalidarDadosDeEstoque(queryClient);
       queryClient.removeQueries({ queryKey: ['estoques', itemId] });
 
       toast.success('Empréstimo registrado com sucesso!', {

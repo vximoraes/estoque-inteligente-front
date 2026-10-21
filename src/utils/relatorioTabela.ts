@@ -192,6 +192,8 @@ export function gerarTabelaPDF<T>({
   return doc;
 }
 
+const SEPARADOR_CSV = ';';
+
 // Prevenir injeção de fórmula em CSV (=, +, -, @, tab) — mesma defesa que já
 // existia nos geradores originais.
 function escapeCSV(text: string): string {
@@ -231,16 +233,24 @@ export function gerarTabelaCSV<T>({
 
   if (stats && stats.length > 0 && linhas.length > 0) {
     lines.push('RESUMO ESTATÍSTICO');
-    stats.forEach(({ label, value }) => lines.push(`${label},${value}`));
+    stats.forEach(({ label, value }) =>
+      lines.push(
+        `"${escapeCSV(label)}"${SEPARADOR_CSV}"${escapeCSV(String(value))}"`,
+      ),
+    );
     lines.push('');
   }
 
   lines.push(nomeSecaoTabela);
-  lines.push(colunas.map((coluna) => coluna.header).join(','));
+  lines.push(
+    colunas
+      .map((coluna) => `"${escapeCSV(coluna.header)}"`)
+      .join(SEPARADOR_CSV),
+  );
 
   linhas.forEach((linha) => {
     const row = colunas.map((coluna) => `"${escapeCSV(coluna.get(linha))}"`);
-    lines.push(row.join(','));
+    lines.push(row.join(SEPARADOR_CSV));
   });
 
   lines.push('');

@@ -29,7 +29,7 @@ interface PDFGeneratorOptions {
 
 const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
   { header: 'CÓDIGO', width: 25, get: (e) => e.item._id.slice(-8) },
-  { header: 'PRODUTO', width: 60, get: (e) => e.item.nome },
+  { header: 'PRODUTO', width: 60, get: (e) => e.item?.nome ?? '-' },
   { header: 'QTD', width: 20, get: (e) => e.quantidade.toString() },
   {
     header: 'STATUS',
@@ -42,7 +42,7 @@ const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
           ? CORES.amareloEscuro
           : CORES.vermelho,
   },
-  { header: 'LOCALIZAÇÃO', width: 35, get: (e) => e.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (e) => e.localizacao?.nome ?? '-' },
 ];
 
 export const generateAlmoxarifadoPDF = async ({
@@ -175,7 +175,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
     width: 45,
     get: (p) => p.modelo || p.categoria.nome,
   },
-  { header: 'LOCALIZAÇÃO', width: 35, get: (p) => p.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (p) => p.localizacao?.nome ?? '-' },
   {
     header: 'STATUS',
     width: 25,

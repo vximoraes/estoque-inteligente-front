@@ -101,6 +101,17 @@ export function ChatPanel() {
     }
   };
 
+  const carimbarUltimaResposta = () => {
+    setMensagensLocais((prev) => {
+      const last = prev[prev.length - 1];
+      if (!last || last.role === 'user' || last.timestamp) return prev;
+      return [
+        ...prev.slice(0, -1),
+        { ...last, timestamp: new Date().toISOString() },
+      ];
+    });
+  };
+
   const marcarVazioComoErro = (mensagemErro: string) => {
     setMensagensLocais((prev) => {
       if (prev.length === 0) return prev;
@@ -111,11 +122,13 @@ export function ChatPanel() {
         { ...last, role: 'error' as const, content: mensagemErro },
       ];
     });
+    carimbarUltimaResposta();
   };
 
   const handleStop = () => {
     abortRef.current?.abort();
     setIsStreaming(false);
+    carimbarUltimaResposta();
     marcarVazioComoErro('Resposta cancelada.');
   };
 
@@ -135,7 +148,7 @@ export function ChatPanel() {
     const assistantMsg: Mensagem = {
       role: 'assistant',
       content: '',
-      timestamp: new Date().toISOString(),
+      timestamp: '',
     };
 
     setMensagensLocais((prev) => [...prev, userMsg, assistantMsg]);
@@ -199,6 +212,7 @@ export function ChatPanel() {
                 { ...last, role: 'error' as const, content: err },
               ];
             });
+            carimbarUltimaResposta();
           },
         },
         controller.signal,

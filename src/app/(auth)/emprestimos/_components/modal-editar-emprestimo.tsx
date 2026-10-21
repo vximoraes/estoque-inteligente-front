@@ -15,6 +15,7 @@ import {
   paraInputDataHora,
 } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface ModalEditarEmprestimoProps {
   isOpen: boolean;
@@ -110,7 +111,7 @@ export default function ModalEditarEmprestimo({
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      invalidarDadosDeEstoque(queryClient);
       toast.success('Devolução desfeita com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,

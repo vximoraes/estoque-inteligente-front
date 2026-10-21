@@ -298,3 +298,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   margin-right: 4px;
   cursor: pointer;
 }
+
+body .Toastify__toast-container--bottom-right {
+  bottom: calc(var(--toastify-toast-bottom, 1rem) + 76px);
+}

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-const senhaRegex =
-  /^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*[^\p{L}\d]).+$/u;
+const senhaRegex = /^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*[^\p{L}\d]).+$/u;
 
 export const loginSchema = z.object({
   email: z
