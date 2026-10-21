@@ -6,6 +6,18 @@ import remarkGfm from 'remark-gfm';
 import { Copy, Check } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
 
+function formatarDataHora(isoString: string): string {
+  const data = new Date(isoString);
+  if (isNaN(data.getTime())) return '';
+  return data.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 interface ChatMessageProps {
   mensagem: Mensagem;
   isStreaming?: boolean;
@@ -30,6 +42,9 @@ export function ChatMessage({
   };
 
   const podeCopiar = !isStreaming && mensagem.content.length > 0;
+  const dataHora = mensagem.timestamp
+    ? formatarDataHora(mensagem.timestamp)
+    : '';
 
   if (isError) {
     return (
@@ -115,36 +130,49 @@ export function ChatMessage({
           </div>
         )}
       </div>
-      {podeCopiar && (
-        <button
-          onClick={handleCopy}
-          aria-label="Copiar mensagem"
-          title="Copiar"
-          data-test="chat-copiar-mensagem"
-          className="
-            relative mt-1 p-1.5 rounded-md flex-shrink-0
+      <div
+        className={`mt-1 flex items-center gap-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      >
+        {dataHora && (
+          <time
+            dateTime={mensagem.timestamp}
+            data-test="chat-mensagem-data-hora"
+            className="text-xs text-muted-foreground"
+          >
+            {dataHora}
+          </time>
+        )}
+        {podeCopiar && (
+          <button
+            onClick={handleCopy}
+            aria-label="Copiar mensagem"
+            title="Copiar"
+            data-test="chat-copiar-mensagem"
+            className="
+            relative p-1.5 rounded-md flex-shrink-0
             text-foreground opacity-0 group-hover/msg:opacity-100
             hover:bg-muted transition-all duration-200 ease-out cursor-pointer
           "
-        >
-          <span className="relative block w-4 h-4">
-            <Copy
-              className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
-                copiado
-                  ? 'opacity-0 scale-50 -rotate-45'
-                  : 'opacity-100 scale-100 rotate-0'
-              }`}
-            />
-            <Check
-              className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
-                copiado
-                  ? 'opacity-100 scale-100 rotate-0'
-                  : 'opacity-0 scale-50 rotate-45'
-              }`}
-            />
-          </span>
-        </button>
-      )}
+          >
+            <span className="relative block w-4 h-4">
+              <Copy
+                className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                  copiado
+                    ? 'opacity-0 scale-50 -rotate-45'
+                    : 'opacity-100 scale-100 rotate-0'
+                }`}
+              />
+              <Check
+                className={`absolute inset-0 w-4 h-4 transition-all duration-200 ease-out ${
+                  copiado
+                    ? 'opacity-100 scale-100 rotate-0'
+                    : 'opacity-0 scale-50 rotate-45'
+                }`}
+              />
+            </span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
