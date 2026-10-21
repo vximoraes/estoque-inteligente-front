@@ -67,7 +67,7 @@ Ao adicionar uma nova página de listagem, siga esse mesmo padrão em vez de bus
 
 ### Testes E2E (Cypress)
 
-- Specs em `cypress/e2e/<dominio>/NN-descricao.cy.ts` — um domínio por área logada (`auth`, `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória. Documentação de cada suíte em `documentacao/suites-de-teste/`.
+- Specs em `cypress/e2e/<dominio>/NN-descricao.cy.ts` — um domínio por área logada (`auth`, `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`). Numeração de prefixo indica ordem lógica de fluxo, não ordem de execução obrigatória. Documentação de cada suíte em `docs/suites-de-teste/`.
 - `cypress/support/commands.ts`: `cy.getByData` (seleção por `data-test`), `cy.login`/`cy.loginViaAPI` (sessão real via API, cacheada com `cy.session`), `cy.api` (requisição autenticada), `cy.irPara` (visita + espera pelo marcador da página), `cy.esperarToast`.
 - `cypress/support/helpers.ts`: fábricas de dados por recurso (`criarCategoria`, `criarItem`, `criarPatrimonio`, etc.) e helpers de interação para componentes Radix (`selecionarNoCombobox`, `confirmarDialogo`).
 - `cypress.config.ts` usa `FRONTEND_URL` (env do Cypress) como `baseUrl`. O alvo padrão é uma API de teste dedicada (porta `3011`, banco efêmero, ver `.claude/rules/testing.md`) — rodar sempre o front em produção (`npm run build && npm run start`), nunca em `npm run dev`, para evitar timeout por compilação sob demanda do Next.
