@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Bot } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
 import { formatarDataHora } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
@@ -70,6 +70,39 @@ export function ChatMessage({
     );
   }
 
+  if (!isUser && aguardando) {
+    return (
+      <div
+        className="mb-3 px-1 py-1 text-sm"
+        data-test="chat-mensagem-assistente"
+      >
+        <div
+          data-test="chat-aguardando"
+          role="status"
+          className="flex items-center gap-2 leading-5"
+        >
+          <Bot
+            aria-hidden
+            size={18}
+            strokeWidth={2}
+            className="block shrink-0 text-[var(--ei-accent)] animate-pulsar motion-reduce:animate-none"
+          />
+          <span
+            data-test="chat-etapa"
+            className="bg-[linear-gradient(90deg,var(--muted-foreground)_35%,color-mix(in_oklab,var(--foreground)_40%,var(--muted-foreground))_50%,var(--muted-foreground)_65%)] bg-[length:200%_100%] bg-clip-text text-transparent animate-brilho motion-reduce:animate-none"
+          >
+            {mensagem.etapa ?? 'Pensando…'}
+          </span>
+        </div>
+        {demorando && (
+          <span className="block text-xs text-muted-foreground mt-1 pl-[26px]">
+            O modelo está mais lento que o normal, a resposta ainda vem.
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className={`group/msg flex flex-col ${isUser ? 'items-end' : 'items-start'} mb-3`}
@@ -87,51 +120,6 @@ export function ChatMessage({
       >
         {isUser ? (
           <p className="whitespace-pre-wrap">{mensagem.content}</p>
-        ) : aguardando ? (
-          <div className="flex flex-col gap-1" data-test="chat-aguardando">
-            <span className="flex items-center gap-1 py-1">
-              <span
-                className="rounded-full bg-muted-foreground animate-dot-pulse"
-                style={{
-                  width: '4px',
-                  height: '4px',
-                  minWidth: '4px',
-                  flexShrink: 0,
-                  animationDelay: '0s',
-                }}
-              />
-              <span
-                className="rounded-full bg-muted-foreground animate-dot-pulse"
-                style={{
-                  width: '4px',
-                  height: '4px',
-                  minWidth: '4px',
-                  flexShrink: 0,
-                  animationDelay: '0.2s',
-                }}
-              />
-              <span
-                className="rounded-full bg-muted-foreground animate-dot-pulse"
-                style={{
-                  width: '4px',
-                  height: '4px',
-                  minWidth: '4px',
-                  flexShrink: 0,
-                  animationDelay: '0.4s',
-                }}
-              />
-            </span>
-            {(mensagem.etapa || demorando) && (
-              <span
-                className="text-sm text-muted-foreground"
-                data-test="chat-etapa"
-              >
-                {mensagem.etapa ?? 'Pensando…'}
-                {demorando &&
-                  ' O modelo está mais lento que o normal, a resposta ainda vem.'}
-              </span>
-            )}
-          </div>
         ) : (
           <div
             className="

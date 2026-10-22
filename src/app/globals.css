@@ -59,6 +59,27 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --animate-dot-pulse: dot-pulse 1.4s ease-in-out infinite;
+  --animate-brilho: brilho 2.2s linear infinite;
+  --animate-pulsar: pulsar 2.8s ease-in-out infinite;
+  @keyframes pulsar {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(0.92);
+      opacity: 0.7;
+    }
+  }
+  @keyframes brilho {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
   @keyframes dot-pulse {
     0%,
     100% {
