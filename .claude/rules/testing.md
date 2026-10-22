@@ -1,6 +1,6 @@
 # Testing
 
-Não há testes unitários (ver `CLAUDE.md`). A suíte Cypress cobre autenticação e todas as telas da área logada: `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`.
+Não há testes unitários (ver `CLAUDE.md`). A suíte Cypress cobre autenticação e todas as telas da área logada: `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`. Além delas, `chat`, `filtros`, `imagens` e `regras` reúnem casos transversais (ver `docs/suites-de-teste/suite-teste-transversais.md`).
 
 ## Rodar
 
