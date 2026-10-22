@@ -24,19 +24,28 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(route),
   );
 
+  const cookie = req.headers.get('cookie') ?? '';
+  const temCookieDeSessao = cookie.includes('session_token');
+
   let isAuth = false;
+  let apiIndisponivel = false;
   let fusoHorario = '';
-  try {
-    const response = await fetch(`${API_URL}/api/auth/get-session`, {
-      headers: { cookie: req.headers.get('cookie') ?? '' },
-    });
-    if (response.ok) {
-      const session = await response.json();
-      isAuth = !!session?.user?.id;
-      fusoHorario = session?.user?.fuso_horario ?? '';
+  if (temCookieDeSessao) {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/get-session`, {
+        headers: { cookie },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) {
+        const session = await response.json();
+        isAuth = !!session?.user?.id;
+        fusoHorario = session?.user?.fuso_horario ?? '';
+      } else if (response.status >= 500) {
+        apiIndisponivel = true;
+      }
+    } catch {
+      apiIndisponivel = true;
     }
-  } catch {
-    isAuth = false;
   }
 
   if (isGuestOnlyRoute && isAuth) {
@@ -46,8 +55,9 @@ export async function middleware(req: NextRequest) {
   if (!isPublicRoute && !isAuth) {
     let from = pathname;
     if (req.nextUrl.search) from += req.nextUrl.search;
+    const aviso = apiIndisponivel ? '&indisponivel=1' : '';
     return NextResponse.redirect(
-      new URL(`/login?from=${encodeURIComponent(from)}`, req.url),
+      new URL(`/login?from=${encodeURIComponent(from)}${aviso}`, req.url),
     );
   }
 

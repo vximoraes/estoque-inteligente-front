@@ -51,6 +51,7 @@ export function ChatInput({
     <div className="flex items-end gap-2 p-3 border-t border-border bg-background">
       <div className="flex-1 flex flex-col gap-1">
         <textarea
+          data-test="chat-campo-mensagem"
           ref={textareaRef}
           rows={1}
           value={value}
@@ -76,6 +77,7 @@ export function ChatInput({
         <button
           onClick={onStop}
           aria-label="Parar resposta"
+          data-test="chat-parar"
           title="Parar"
           className="
             shrink-0 flex items-center justify-center
@@ -91,6 +93,7 @@ export function ChatInput({
           onClick={() => onSend()}
           disabled={!canSend}
           aria-label="Enviar mensagem"
+          data-test="chat-enviar"
           className="
             shrink-0 flex items-center justify-center
             w-11 h-11 rounded-md

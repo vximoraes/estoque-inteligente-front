@@ -257,6 +257,7 @@ export function ChatPanel() {
               </button>
               <button
                 onClick={() => handleDeleteConversa(confirmDeleteId)}
+                data-test="chat-confirmar-exclusao"
                 className="px-3 py-1.5 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
               >
                 Excluir
@@ -278,6 +279,7 @@ export function ChatPanel() {
               setShowHistory(false);
             }}
             aria-label="Nova conversa"
+            data-test="chat-nova-conversa"
             className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <SquarePen size={16} strokeWidth={2} />
@@ -285,6 +287,7 @@ export function ChatPanel() {
           <button
             onClick={() => setShowHistory((v) => !v)}
             aria-label="Histórico de conversas"
+            data-test="chat-historico"
             className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors cursor-pointer ${
               showHistory
                 ? 'text-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
@@ -296,6 +299,7 @@ export function ChatPanel() {
           <button
             onClick={fecharChat}
             aria-label="Fechar chat"
+            data-test="chat-fechar"
             className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <X size={16} strokeWidth={2} />

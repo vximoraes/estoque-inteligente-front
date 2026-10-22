@@ -49,7 +49,7 @@ export function ChatMessage({
 
   if (isError) {
     return (
-      <div className="flex justify-start mb-3">
+      <div className="flex justify-start mb-3" data-test="chat-mensagem-erro">
         <div className="max-w-[90%] px-3.5 py-2.5 rounded-tr-md rounded-br-md rounded-tl-md rounded-bl-md bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           {mensagem.content}
         </div>
@@ -60,6 +60,7 @@ export function ChatMessage({
   return (
     <div
       className={`group/msg flex flex-col ${isUser ? 'items-end' : 'items-start'} mb-3`}
+      data-test={isUser ? 'chat-mensagem-usuario' : 'chat-mensagem-assistente'}
     >
       <div
         className={`

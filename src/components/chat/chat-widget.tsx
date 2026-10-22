@@ -42,6 +42,7 @@ export function ChatWidget() {
         <button
           onClick={abrirChat}
           aria-label="Abrir assistente de IA"
+          data-test="chat-abrir"
           style={{ width: '52px', height: '52px' }}
           className={`
             fixed bottom-6 right-6 z-50

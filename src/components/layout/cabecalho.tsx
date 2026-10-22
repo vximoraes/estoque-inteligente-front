@@ -234,6 +234,7 @@ export default function Cabecalho({
           onClick={handleMenuClick}
           className="md:hidden w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
           aria-label="Menu"
+          data-test="botao-menu-mobile"
         >
           <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
         </button>

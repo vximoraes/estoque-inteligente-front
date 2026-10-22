@@ -124,8 +124,9 @@ export default function EmprestimosPageContent({
       params.append('tipo_controle', tipoControle);
 
       if (searchTerm) params.append('busca', searchTerm);
-      if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
-      if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+      if (statusFilter && statusFilter !== STATUS_FILTER_PADRAO) {
+        params.append('status', statusFilter.toLowerCase());
+      }
       if (ordenar) params.append('ordenar', ordenar);
 
       return await get<EmprestimosApiResponse>(

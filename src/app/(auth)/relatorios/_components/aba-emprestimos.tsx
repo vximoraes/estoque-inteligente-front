@@ -68,8 +68,9 @@ function buildParams(
   params.append('tipo_controle', tipoControle);
 
   if (searchTerm) params.append('busca', searchTerm);
-  if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
-  if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+  if (['Ativo', 'Atrasado', 'Devolvido'].includes(statusFilter)) {
+    params.append('status', statusFilter.toLowerCase());
+  }
   if (ordenar) params.append('ordenar', ordenar);
 
   return params;
@@ -186,10 +187,6 @@ export default function AbaEmprestimos() {
         page = response?.data?.nextPage || page + 1;
       }
 
-      // `busca`/`apenas_abertos`/`atrasados` já filtraram no servidor —
-      // "Devolvido" não tem parâmetro equivalente na API (mesma lacuna da
-      // tela original de empréstimos), então os docs aqui já são o universo
-      // correto pros três primeiros contadores.
       return {
         total: docs.length,
         ativos: docs.filter((e) => e.status === 'Ativo').length,

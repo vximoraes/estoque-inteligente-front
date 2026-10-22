@@ -33,7 +33,11 @@ function LoginContent() {
   const destino = destinoDepoisDoLogin(searchParams.get('from'));
 
   useEffect(() => {
-    if (searchParams.get('error')) {
+    if (searchParams.get('indisponivel')) {
+      setError(
+        'Não foi possível conectar ao servidor. Tente novamente em instantes.',
+      );
+    } else if (searchParams.get('error')) {
       setError(ERRO_GOOGLE_PADRAO);
     }
   }, [searchParams]);

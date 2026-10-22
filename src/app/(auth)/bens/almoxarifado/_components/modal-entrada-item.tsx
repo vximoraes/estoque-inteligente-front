@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, ChevronDown, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   useQuery,
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
@@ -117,6 +118,7 @@ export default function ModalEntradaItem({
     },
     initialPageParam: 1,
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
 
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
@@ -548,6 +550,7 @@ export default function ModalEntradaItem({
                       <input
                         type="text"
                         placeholder="Pesquisar..."
+                        data-test="modal-entrada-localizacao-pesquisa"
                         value={localizacaoPesquisa}
                         onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
                         className="w-full h-11 px-3 text-base md:text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50 focus:border-transparent"

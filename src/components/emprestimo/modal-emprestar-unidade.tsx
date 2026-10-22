@@ -158,6 +158,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="text"
               value={solicitanteNome}
+              data-test="modal-emprestar-unidade-solicitante"
               onChange={(e) => {
                 setSolicitanteNome(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
@@ -179,6 +180,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="email"
               value={solicitanteEmail}
+              data-test="modal-emprestar-unidade-email"
               onChange={(e) => {
                 setSolicitanteEmail(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
@@ -200,6 +202,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="datetime-local"
               value={dataPrevista}
+              data-test="modal-emprestar-unidade-data-prevista"
               onChange={(e) => {
                 setDataPrevista(e.target.value);
                 setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
@@ -219,6 +222,7 @@ export default function ModalEmprestarUnidade({
             </label>
             <textarea
               value={observacoes}
+              data-test="modal-emprestar-unidade-observacoes"
               onChange={(e) => setObservacoes(e.target.value)}
               className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
               rows={3}
@@ -233,6 +237,7 @@ export default function ModalEmprestarUnidade({
             <Button
               variant="outline"
               onClick={onClose}
+              data-test="modal-emprestar-unidade-cancelar"
               className="h-11 flex-1 cursor-pointer"
               disabled={emprestimoMutation.isPending}
             >
@@ -240,6 +245,7 @@ export default function ModalEmprestarUnidade({
             </Button>
             <Button
               onClick={handleSubmit}
+              data-test="modal-emprestar-unidade-confirmar"
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
               disabled={emprestimoMutation.isPending}

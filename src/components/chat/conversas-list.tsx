@@ -73,6 +73,7 @@ export function ConversasList({
                 ${isActive ? 'bg-[var(--ei-accent)]/10' : 'hover:bg-muted'}
               `}
               onClick={() => onSelectConversa(conversa)}
+              data-test="chat-conversa-item"
             >
               <div className="flex-1 min-w-0">
                 <p
@@ -91,6 +92,7 @@ export function ConversasList({
                   onRequestDelete(conversa._id);
                 }}
                 aria-label="Excluir conversa"
+                data-test="chat-excluir-conversa"
                 className="
                   shrink-0 opacity-0 group-hover:opacity-100
                   flex items-center justify-center w-5 h-5 rounded-md
