@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Copy, Check } from 'lucide-react';
 import type { Mensagem } from '@/types/chat';
 import { formatarDataHora } from '@/lib/datas';
 import { useFusoAtual } from '@/hooks/use-fuso-horario';
+
+const ESPERA_ATE_AVISAR_MS = 10_000;
 
 function linkInterno(href: string | undefined): href is string {
   return Boolean(href?.startsWith('/') && !href.startsWith('//'));
@@ -31,6 +33,17 @@ export function ChatMessage({
   const isUser = mensagem.role === 'user';
   const isError = mensagem.role === 'error';
   const [copiado, setCopiado] = useState(false);
+  const aguardando = isStreaming && !mensagem.content;
+  const [demorando, setDemorando] = useState(false);
+
+  useEffect(() => {
+    if (!aguardando) {
+      setDemorando(false);
+      return;
+    }
+    const timer = setTimeout(() => setDemorando(true), ESPERA_ATE_AVISAR_MS);
+    return () => clearTimeout(timer);
+  }, [aguardando]);
 
   const handleCopy = async () => {
     try {
@@ -74,39 +87,51 @@ export function ChatMessage({
       >
         {isUser ? (
           <p className="whitespace-pre-wrap">{mensagem.content}</p>
-        ) : isStreaming && !mensagem.content ? (
-          <span className="flex items-center gap-1 py-1">
-            <span
-              className="rounded-full bg-muted-foreground animate-dot-pulse"
-              style={{
-                width: '4px',
-                height: '4px',
-                minWidth: '4px',
-                flexShrink: 0,
-                animationDelay: '0s',
-              }}
-            />
-            <span
-              className="rounded-full bg-muted-foreground animate-dot-pulse"
-              style={{
-                width: '4px',
-                height: '4px',
-                minWidth: '4px',
-                flexShrink: 0,
-                animationDelay: '0.2s',
-              }}
-            />
-            <span
-              className="rounded-full bg-muted-foreground animate-dot-pulse"
-              style={{
-                width: '4px',
-                height: '4px',
-                minWidth: '4px',
-                flexShrink: 0,
-                animationDelay: '0.4s',
-              }}
-            />
-          </span>
+        ) : aguardando ? (
+          <div className="flex flex-col gap-1" data-test="chat-aguardando">
+            <span className="flex items-center gap-1 py-1">
+              <span
+                className="rounded-full bg-muted-foreground animate-dot-pulse"
+                style={{
+                  width: '4px',
+                  height: '4px',
+                  minWidth: '4px',
+                  flexShrink: 0,
+                  animationDelay: '0s',
+                }}
+              />
+              <span
+                className="rounded-full bg-muted-foreground animate-dot-pulse"
+                style={{
+                  width: '4px',
+                  height: '4px',
+                  minWidth: '4px',
+                  flexShrink: 0,
+                  animationDelay: '0.2s',
+                }}
+              />
+              <span
+                className="rounded-full bg-muted-foreground animate-dot-pulse"
+                style={{
+                  width: '4px',
+                  height: '4px',
+                  minWidth: '4px',
+                  flexShrink: 0,
+                  animationDelay: '0.4s',
+                }}
+              />
+            </span>
+            {(mensagem.etapa || demorando) && (
+              <span
+                className="text-sm text-muted-foreground"
+                data-test="chat-etapa"
+              >
+                {mensagem.etapa ?? 'Pensando…'}
+                {demorando &&
+                  ' O modelo está mais lento que o normal, a resposta ainda vem.'}
+              </span>
+            )}
+          </div>
         ) : (
           <div
             className="

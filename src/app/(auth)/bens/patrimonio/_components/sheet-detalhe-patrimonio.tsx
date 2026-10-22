@@ -57,6 +57,7 @@ const TIPO_LABEL: Record<PatrimonioEventoTipo, string> = {
   transferencia: 'Transferência',
   baixa: 'Baixa',
   reativacao: 'Reativação',
+  inativacao: 'Removido',
 };
 
 function formatarData(data?: string) {

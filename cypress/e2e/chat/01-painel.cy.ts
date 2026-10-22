@@ -54,6 +54,56 @@ describe('Chat - painel do agente', () => {
       .should('exist');
   });
 
+  it('mostra a etapa enquanto a IA consulta os dados', () => {
+    cy.on('window:before:load', (win) => {
+      const fetchOriginal = win.fetch.bind(win);
+      win.fetch = (entrada, opcoes) => {
+        if (!String(entrada).endsWith('/mensagens')) {
+          return fetchOriginal(entrada, opcoes);
+        }
+        const codificador = new win.TextEncoder();
+        const evento = (dados: object) =>
+          codificador.encode(`data: ${JSON.stringify(dados)}\n\n`);
+        const corpo = new win.ReadableStream({
+          start(controle) {
+            controle.enqueue(
+              evento({ type: 'status', message: 'Consultando empréstimos…' }),
+            );
+            setTimeout(() => {
+              controle.enqueue(
+                evento({
+                  type: 'token',
+                  content: 'Há 3 empréstimos atrasados.',
+                }),
+              );
+              controle.enqueue(evento({ type: 'done' }));
+              controle.close();
+            }, 1500);
+          },
+        });
+        return Promise.resolve(
+          new win.Response(corpo, {
+            status: 200,
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+        );
+      };
+    });
+
+    abrirNovaConversa();
+    enviar('Quais empréstimos estão atrasados?');
+
+    cy.getByData('chat-etapa').should(
+      'contain.text',
+      'Consultando empréstimos…',
+    );
+    cy.getByData('chat-mensagem-assistente').should(
+      'contain.text',
+      'Há 3 empréstimos atrasados.',
+    );
+    cy.getByData('chat-etapa').should('not.exist');
+  });
+
   it('não carrega imagem nem link externo vindos da resposta', () => {
     cy.intercept(
       'POST',

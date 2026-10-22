@@ -20,7 +20,7 @@ describe('Empréstimos - devolução, edição e exclusão', () => {
     });
   });
 
-  it('edita as observações de um empréstimo existente', () => {
+  it('edita o solicitante e mostra a alteração no detalhe', () => {
     criarEmprestimo().then((emprestimo) => {
       cy.irPara('/emprestimos', 'emprestimos-page');
       cy.getByData('emprestimos-tab-quantidade').click();
@@ -40,6 +40,12 @@ describe('Empréstimos - devolução, edição e exclusão', () => {
       cy.getByData('search-input').should('have.value', '');
       cy.getByData('search-input').type(novoSolicitante);
       cy.contains(novoSolicitante).should('be.visible');
+
+      cy.getByData('emprestimo-row-0').click();
+      cy.getByData('emprestimo-alteracoes')
+        .should('contain.text', 'Solicitante')
+        .and('contain.text', emprestimo.solicitante_nome)
+        .and('contain.text', novoSolicitante);
     });
   });
 

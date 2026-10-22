@@ -191,6 +191,13 @@ export function ChatPanel() {
               ];
             });
           },
+          onStatus: (etapa) => {
+            setMensagensLocais((prev) => {
+              const last = prev[prev.length - 1];
+              if (!last || last.role !== 'assistant') return prev;
+              return [...prev.slice(0, -1), { ...last, etapa }];
+            });
+          },
           onDone: () => {
             setIsStreaming(false);
             marcarVazioComoErro(

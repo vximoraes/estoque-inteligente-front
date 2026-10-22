@@ -22,6 +22,14 @@ export interface EmprestimoUsuarioResponsavel {
   email: string;
 }
 
+export interface EmprestimoAlteracao {
+  campo: string;
+  anterior: string;
+  novo: string;
+  usuario?: { _id: string; nome: string } | null;
+  data_hora: string;
+}
+
 export type EmprestimoStatus = 'Ativo' | 'Atrasado' | 'Devolvido';
 
 export interface Emprestimo {
@@ -41,6 +49,7 @@ export interface Emprestimo {
   observacoes_emprestimo?: string;
   observacoes_devolucao?: string;
   usuario_responsavel: EmprestimoUsuarioResponsavel;
+  alteracoes?: EmprestimoAlteracao[];
   ativo: boolean;
   status: EmprestimoStatus;
   createdAt: string;
