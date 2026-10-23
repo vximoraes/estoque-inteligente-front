@@ -8,6 +8,7 @@ import {
   formatarDataHora,
   type ColunaRelatorio,
 } from './relatorioTabela';
+import { formatarData, formatarDataCalendario } from '@/lib/datas';
 
 const CORES = {
   verde: [0, 128, 0] as [number, number, number],
@@ -28,7 +29,7 @@ interface PDFGeneratorOptions {
 
 const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
   { header: 'CÓDIGO', width: 25, get: (e) => e.item._id.slice(-8) },
-  { header: 'PRODUTO', width: 60, get: (e) => e.item.nome },
+  { header: 'PRODUTO', width: 60, get: (e) => e.item?.nome ?? '-' },
   { header: 'QTD', width: 20, get: (e) => e.quantidade.toString() },
   {
     header: 'STATUS',
@@ -41,7 +42,7 @@ const colunasAlmoxarifado: ColunaRelatorio<EstoqueData>[] = [
           ? CORES.amareloEscuro
           : CORES.vermelho,
   },
-  { header: 'LOCALIZAÇÃO', width: 35, get: (e) => e.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (e) => e.localizacao?.nome ?? '-' },
 ];
 
 export const generateAlmoxarifadoPDF = async ({
@@ -118,16 +119,12 @@ const colunasEmprestimos: ColunaRelatorio<Emprestimo>[] = [
   {
     header: 'SAÍDA',
     width: 30,
-    get: (e) =>
-      e.data_saida ? new Date(e.data_saida).toLocaleDateString('pt-BR') : '-',
+    get: (e) => formatarData(e.data_saida),
   },
   {
     header: 'PREVISÃO',
     width: 30,
-    get: (e) =>
-      e.data_prevista_devolucao
-        ? new Date(e.data_prevista_devolucao).toLocaleDateString('pt-BR')
-        : 'Sem previsão',
+    get: (e) => formatarData(e.data_prevista_devolucao, 'Sem previsão'),
   },
 ];
 
@@ -178,7 +175,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
     width: 45,
     get: (p) => p.modelo || p.categoria.nome,
   },
-  { header: 'LOCALIZAÇÃO', width: 35, get: (p) => p.localizacao.nome },
+  { header: 'LOCALIZAÇÃO', width: 35, get: (p) => p.localizacao?.nome ?? '-' },
   {
     header: 'STATUS',
     width: 25,
@@ -193,10 +190,7 @@ const colunasPatrimonio: ColunaRelatorio<PatrimonioData>[] = [
   {
     header: 'AQUISIÇÃO',
     width: 25,
-    get: (p) =>
-      p.data_aquisicao
-        ? new Date(p.data_aquisicao).toLocaleDateString('pt-BR')
-        : '—',
+    get: (p) => formatarDataCalendario(p.data_aquisicao, '—'),
   },
 ];
 

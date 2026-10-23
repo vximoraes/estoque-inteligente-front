@@ -32,6 +32,8 @@ import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
 import { generateEmprestimosPDF } from '@/utils/pdfGenerator';
 import { generateEmprestimosCSV } from '@/utils/csvGenerator';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -66,14 +68,16 @@ function buildParams(
   params.append('tipo_controle', tipoControle);
 
   if (searchTerm) params.append('busca', searchTerm);
-  if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
-  if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+  if (['Ativo', 'Atrasado', 'Devolvido'].includes(statusFilter)) {
+    params.append('status', statusFilter.toLowerCase());
+  }
   if (ordenar) params.append('ordenar', ordenar);
 
   return params;
 }
 
 export default function AbaEmprestimos() {
+  useFusoAtual();
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -183,10 +187,6 @@ export default function AbaEmprestimos() {
         page = response?.data?.nextPage || page + 1;
       }
 
-      // `busca`/`apenas_abertos`/`atrasados` já filtraram no servidor —
-      // "Devolvido" não tem parâmetro equivalente na API (mesma lacuna da
-      // tela original de empréstimos), então os docs aqui já são o universo
-      // correto pros três primeiros contadores.
       return {
         total: docs.length,
         ativos: docs.filter((e) => e.status === 'Ativo').length,
@@ -223,12 +223,8 @@ export default function AbaEmprestimos() {
   const atrasados = globalStats?.atrasados ?? atrasadosLocal;
   const devolvidos = globalStats?.devolvidos ?? devolvidosLocal;
 
-  const formatarData = (data?: string | null) => {
-    if (!data) return 'Sem previsão';
-    const parsed = new Date(data);
-    if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
-    return parsed.toLocaleString('pt-BR');
-  };
+  const formatarData = (data?: string | null) =>
+    formatarDataHora(data, 'Sem previsão');
 
   const handleSelectAll = () => {
     if (selectedItems.size === emprestimosFiltrados.length) {

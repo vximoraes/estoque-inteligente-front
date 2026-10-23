@@ -7,6 +7,13 @@ export function sufixoUnico(prefixo = 'zz-teste') {
   return `${prefixo}-${Cypress._.random(0, 1e9)}`;
 }
 
+export function nomeDeUsuarioUnico() {
+  const letras = Array.from({ length: 8 }, () =>
+    String.fromCharCode(97 + Cypress._.random(0, 25)),
+  ).join('');
+  return `Zz Usuario X${letras}`;
+}
+
 export function criarCategoria(overrides: Record<string, unknown> = {}) {
   return cy
     .api('POST', '/categorias', {
@@ -172,7 +179,7 @@ export function criarNotificacao(overrides: Record<string, unknown> = {}) {
 export function convidarUsuario(overrides: Record<string, unknown> = {}) {
   return cy
     .api('POST', '/usuarios/convidar', {
-      nome: sufixoUnico('zz-usuario'),
+      nome: nomeDeUsuarioUnico(),
       email: `${sufixoUnico('zz-usuario')}@teste.com`,
       ...overrides,
     })

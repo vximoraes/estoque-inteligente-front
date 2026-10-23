@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { X, Copy, Check } from 'lucide-react';
 import { get } from '@/lib/fetchData';
 import { ModalShell } from '@/components/ui/modal-shell';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface Usuario {
   _id: string;
@@ -41,6 +43,7 @@ export default function ModalDetalhesUsuario({
   onClose,
   usuarioId,
 }: ModalDetalhesUsuarioProps) {
+  useFusoAtual();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -225,13 +228,7 @@ export default function ModalDetalhesUsuario({
                     Convidado em
                   </label>
                   <p className="text-base text-muted-foreground">
-                    {new Date(usuario.convidadoEm).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatarDataHora(usuario.convidadoEm)}
                   </p>
                 </div>
               )}
@@ -241,13 +238,7 @@ export default function ModalDetalhesUsuario({
                     Ativado em
                   </label>
                   <p className="text-base text-muted-foreground">
-                    {new Date(usuario.ativadoEm).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatarDataHora(usuario.ativadoEm)}
                   </p>
                 </div>
               )}
@@ -257,13 +248,7 @@ export default function ModalDetalhesUsuario({
                     Criado em
                   </label>
                   <p className="text-base text-muted-foreground">
-                    {new Date(usuario.createdAt).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatarDataHora(usuario.createdAt)}
                   </p>
                 </div>
               )}
@@ -273,13 +258,7 @@ export default function ModalDetalhesUsuario({
                     Atualizado em
                   </label>
                   <p className="text-base text-muted-foreground">
-                    {new Date(usuario.updatedAt).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatarDataHora(usuario.updatedAt)}
                   </p>
                 </div>
               )}

@@ -59,20 +59,6 @@ export default function CardItemBase({
     }
   };
 
-  const categoriaFormatada = React.useMemo(() => {
-    if (!categoria) return '';
-
-    return categoria
-      .toLocaleLowerCase('pt-BR')
-      .split(' ')
-      .filter(Boolean)
-      .map(
-        (palavra) =>
-          palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1),
-      )
-      .join(' ');
-  }, [categoria]);
-
   const imagemComTimestamp = React.useMemo(() => {
     if (!imagem) return undefined;
     const separator = imagem.includes('?') ? '&' : '?';
@@ -148,10 +134,10 @@ export default function CardItemBase({
             </h3>
             <p
               className="text-sm font-medium tracking-[0.03em] text-muted-foreground truncate mt-0.5"
-              title={`${categoriaFormatada}`}
+              title={categoria}
               data-test="component-category"
             >
-              {categoriaFormatada}
+              {categoria}
             </p>
           </div>
         </div>

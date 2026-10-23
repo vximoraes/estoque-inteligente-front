@@ -11,6 +11,9 @@ import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
+import { deInputDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface Localizacao {
   _id: string;
@@ -65,6 +68,7 @@ export default function ModalEmprestarItem({
   itemNome,
   onSuccess,
 }: ModalEmprestarItemProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -119,8 +123,7 @@ export default function ModalEmprestarItem({
       return await post('/emprestimos', payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      invalidarDadosDeEstoque(queryClient);
       queryClient.removeQueries({ queryKey: ['estoques', itemId] });
 
       toast.success('Empréstimo registrado com sucesso!', {
@@ -278,15 +281,15 @@ export default function ModalEmprestarItem({
     }
 
     if (dataEmprestimo) {
-      const data = new Date(dataEmprestimo);
-      if (Number.isNaN(data.getTime()) || data > new Date()) {
+      const data = deInputDataHora(dataEmprestimo);
+      if (!data || data > new Date()) {
         newErrors.dataEmprestimo = 'A data do empréstimo não pode ser futura';
       }
     }
 
     if (dataPrevista) {
-      const data = new Date(dataPrevista);
-      if (Number.isNaN(data.getTime()) || data <= new Date()) {
+      const data = deInputDataHora(dataPrevista);
+      if (!data || data <= new Date()) {
         newErrors.dataPrevista = 'A data prevista deve ser futura';
       }
     }
@@ -304,12 +307,8 @@ export default function ModalEmprestarItem({
       quantidade_emprestada: Number(quantidade),
       solicitante_nome: solicitanteNome.trim(),
       solicitante_email: solicitanteEmail.trim() || undefined,
-      data_saida: dataEmprestimo
-        ? new Date(dataEmprestimo).toISOString()
-        : undefined,
-      data_prevista_devolucao: dataPrevista
-        ? new Date(dataPrevista).toISOString()
-        : undefined,
+      data_saida: deInputDataHora(dataEmprestimo)?.toISOString(),
+      data_prevista_devolucao: deInputDataHora(dataPrevista)?.toISOString(),
       observacoes_emprestimo: observacoes.trim() || undefined,
     });
   };

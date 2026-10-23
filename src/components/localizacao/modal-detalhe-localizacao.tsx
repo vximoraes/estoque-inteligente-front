@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { ModalShell } from '@/components/ui/modal-shell';
+import { formatarData as formatarDataDoFuso } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalDetalheLocalizacaoProps {
   isOpen: boolean;
@@ -14,10 +16,7 @@ interface ModalDetalheLocalizacaoProps {
 }
 
 function formatarData(data?: string) {
-  if (!data) return '—';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '—';
-  return parsed.toLocaleDateString('pt-BR');
+  return formatarDataDoFuso(data, '—');
 }
 
 export default function ModalDetalheLocalizacao({
@@ -27,6 +26,7 @@ export default function ModalDetalheLocalizacao({
   localizacaoDescricao,
   localizacaoCriadoEm,
 }: ModalDetalheLocalizacaoProps) {
+  useFusoAtual();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

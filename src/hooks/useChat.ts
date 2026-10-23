@@ -58,6 +58,7 @@ export function useDeleteConversa() {
 
 export interface SendMessageCallbacks {
   onToken: (chunk: string) => void;
+  onStatus?: (etapa: string) => void;
   onDone: () => void;
   onError: (err: string) => void;
 }
@@ -140,6 +141,8 @@ export async function sendMessage(
         const event = JSON.parse(jsonStr);
         if (event.type === 'token') {
           callbacks.onToken(event.content);
+        } else if (event.type === 'status') {
+          callbacks.onStatus?.(event.message);
         } else if (event.type === 'done') {
           finalizado = true;
           callbacks.onDone();

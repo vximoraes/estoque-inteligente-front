@@ -101,6 +101,17 @@ export function ChatPanel() {
     }
   };
 
+  const carimbarUltimaResposta = () => {
+    setMensagensLocais((prev) => {
+      const last = prev[prev.length - 1];
+      if (!last || last.role === 'user' || last.timestamp) return prev;
+      return [
+        ...prev.slice(0, -1),
+        { ...last, timestamp: new Date().toISOString() },
+      ];
+    });
+  };
+
   const marcarVazioComoErro = (mensagemErro: string) => {
     setMensagensLocais((prev) => {
       if (prev.length === 0) return prev;
@@ -111,11 +122,13 @@ export function ChatPanel() {
         { ...last, role: 'error' as const, content: mensagemErro },
       ];
     });
+    carimbarUltimaResposta();
   };
 
   const handleStop = () => {
     abortRef.current?.abort();
     setIsStreaming(false);
+    carimbarUltimaResposta();
     marcarVazioComoErro('Resposta cancelada.');
   };
 
@@ -135,7 +148,7 @@ export function ChatPanel() {
     const assistantMsg: Mensagem = {
       role: 'assistant',
       content: '',
-      timestamp: new Date().toISOString(),
+      timestamp: '',
     };
 
     setMensagensLocais((prev) => [...prev, userMsg, assistantMsg]);
@@ -178,6 +191,13 @@ export function ChatPanel() {
               ];
             });
           },
+          onStatus: (etapa) => {
+            setMensagensLocais((prev) => {
+              const last = prev[prev.length - 1];
+              if (!last || last.role !== 'assistant') return prev;
+              return [...prev.slice(0, -1), { ...last, etapa }];
+            });
+          },
           onDone: () => {
             setIsStreaming(false);
             marcarVazioComoErro(
@@ -199,6 +219,7 @@ export function ChatPanel() {
                 { ...last, role: 'error' as const, content: err },
               ];
             });
+            carimbarUltimaResposta();
           },
         },
         controller.signal,
@@ -243,6 +264,7 @@ export function ChatPanel() {
               </button>
               <button
                 onClick={() => handleDeleteConversa(confirmDeleteId)}
+                data-test="chat-confirmar-exclusao"
                 className="px-3 py-1.5 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
               >
                 Excluir
@@ -264,6 +286,7 @@ export function ChatPanel() {
               setShowHistory(false);
             }}
             aria-label="Nova conversa"
+            data-test="chat-nova-conversa"
             className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <SquarePen size={16} strokeWidth={2} />
@@ -271,6 +294,7 @@ export function ChatPanel() {
           <button
             onClick={() => setShowHistory((v) => !v)}
             aria-label="Histórico de conversas"
+            data-test="chat-historico"
             className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors cursor-pointer ${
               showHistory
                 ? 'text-[var(--ei-accent)] bg-[var(--ei-accent)]/10'
@@ -282,6 +306,7 @@ export function ChatPanel() {
           <button
             onClick={fecharChat}
             aria-label="Fechar chat"
+            data-test="chat-fechar"
             className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <X size={16} strokeWidth={2} />

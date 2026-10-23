@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { erroDeImagem, TIPOS_DE_IMAGEM } from '@/lib/imagem';
 
 interface CampoImagemProps {
   previewUrl: string | null;
@@ -19,9 +20,16 @@ export default function CampoImagem({
   onRemover,
 }: CampoImagemProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const lerArquivo = (file: File) => {
+    const mensagem = erroDeImagem(file);
+    setErro(mensagem);
+    if (mensagem) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => {
       onChange(file, reader.result as string);
@@ -59,9 +67,7 @@ export default function CampoImagem({
     setIsDragging(false);
 
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      lerArquivo(file);
-    }
+    if (file) lerArquivo(file);
   };
 
   return (
@@ -116,11 +122,17 @@ export default function CampoImagem({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={TIPOS_DE_IMAGEM}
         onChange={handleImageChange}
         className="hidden"
         name="file"
+        data-test="campo-imagem-input"
       />
+      {erro && (
+        <p className="mt-1 text-xs text-destructive" data-test="erro-imagem">
+          {erro}
+        </p>
+      )}
     </div>
   );
 }

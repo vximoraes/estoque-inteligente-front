@@ -7,6 +7,7 @@ import { del } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface ModalExcluirEmprestimoProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export default function ModalExcluirEmprestimo({
   const excluirMutation = useMutation({
     mutationFn: async () => del(`/emprestimos/${emprestimoId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      invalidarDadosDeEstoque(queryClient);
       toast.success('Empréstimo excluído com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,

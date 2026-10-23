@@ -20,6 +20,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { alterarSenhaSchema, type AlterarSenhaFormData } from '@/schemas';
+import { formatarData } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
+import { erroDeImagem, TIPOS_DE_IMAGEM } from '@/lib/imagem';
 
 interface PasswordRequirement {
   text: string;
@@ -78,6 +81,7 @@ interface NotificacoesApiResponse {
 }
 
 export default function HomePage() {
+  useFusoAtual();
   const { user, refetch: refetchSession } = useSession();
   const [isEditingFoto, setIsEditingFoto] = useState(false);
   const [isEditingNome, setIsEditingNome] = useState(false);
@@ -465,20 +469,27 @@ export default function HomePage() {
   }
 
   function formatDate(dateString?: string) {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return formatarData(dateString, 'N/A');
   }
+
+  const selecionarFoto = (file: File) => {
+    const erro = erroDeImagem(file);
+    if (erro) {
+      toast.error(erro, { position: 'bottom-right', autoClose: 4000 });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    setNovaFoto(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagemPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setNovaFoto(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagemPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (file) selecionarFoto(file);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -498,18 +509,8 @@ export default function HomePage() {
     e.stopPropagation();
     setIsDragging(false);
 
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith('image/')) {
-        setNovaFoto(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagemPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+    const file = e.dataTransfer.files?.[0];
+    if (file) selecionarFoto(file);
   };
 
   const handleSalvarFoto = () => {
@@ -1307,7 +1308,7 @@ export default function HomePage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={TIPOS_DE_IMAGEM}
                   onChange={handleFotoChange}
                   className="hidden"
                   data-test="foto-file-input"
