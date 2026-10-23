@@ -41,12 +41,12 @@ Arquivos: `cypress/e2e/emprestimos/{01-listagem-filtros,02-cadastro,03-devolucao
 
 ## Devolução, edição e exclusão
 
-| Funcionalidade               | Comportamento Esperado                             | Verificações                                                          | Critérios de Aceite                |
-| :--------------------------- | :------------------------------------------------- | :-------------------------------------------------------------------- | :--------------------------------- |
-| **Cenários felizes**         |                                                    |                                                                       |                                    |
-| Devolução parcial            | Deve fechar o modal de devolução com sucesso.      | Ação "Devolver", preencher quantidade menor que o total, confirmar.   | `modal-devolver-item` fecha.       |
-| Editar observações           | Deve permitir alterar o solicitante do empréstimo. | Ação "Editar", alterar `modal-editar-emprestimo-solicitante`, salvar. | Novo solicitante aparece na busca. |
-| Excluir após devolução total | Deve remover o empréstimo da listagem.             | Devolver a quantidade total, depois ação "Excluir", confirmar.        | Empréstimo some da busca.          |
+| Funcionalidade               | Comportamento Esperado                                                     | Verificações                                                                           | Critérios de Aceite                                                                                      |
+| :--------------------------- | :------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Cenários felizes**         |                                                                            |                                                                                        |                                                                                                          |
+| Devolução parcial            | Deve fechar o modal de devolução com sucesso.                              | Ação "Devolver", preencher quantidade menor que o total, confirmar.                    | `modal-devolver-item` fecha.                                                                             |
+| Editar solicitante           | Deve permitir alterar o solicitante do empréstimo e registrar a alteração. | Ação "Editar", alterar `modal-editar-emprestimo-solicitante`, salvar, abrir o detalhe. | Novo solicitante aparece na busca; o detalhe (`emprestimo-alteracoes`) mostra o valor anterior e o novo. |
+| Excluir após devolução total | Deve remover o empréstimo da listagem.                                     | Devolver a quantidade total, depois ação "Excluir", confirmar.                         | Empréstimo some da busca.                                                                                |
 
 ## Cenários Transversais Obrigatórios (E2E)
 

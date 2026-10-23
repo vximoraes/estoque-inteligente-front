@@ -17,6 +17,9 @@ describe('Almoxarifado - entrada e saída de estoque', () => {
 
         cy.getByData('modal-entrada-quantidade-input').type('20');
         cy.getByData('modal-entrada-localizacao-dropdown').click();
+        cy.getByData('modal-entrada-localizacao-pesquisa').type(
+          localizacao.nome,
+        );
         cy.contains(localizacao.nome).click();
         cy.getByData('modal-entrada-confirmar').click();
         cy.getByData('modal-entrada-content').should('not.exist');
@@ -34,6 +37,9 @@ describe('Almoxarifado - entrada e saída de estoque', () => {
         cy.getByData('entrada-icon').first().click();
         cy.getByData('modal-entrada-quantidade-input').type('20');
         cy.getByData('modal-entrada-localizacao-dropdown').click();
+        cy.getByData('modal-entrada-localizacao-pesquisa').type(
+          localizacao.nome,
+        );
         cy.contains(localizacao.nome).click();
         cy.getByData('modal-entrada-confirmar').click();
         cy.getByData('modal-entrada-content').should('not.exist');

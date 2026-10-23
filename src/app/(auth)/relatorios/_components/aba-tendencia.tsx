@@ -3,7 +3,6 @@
 import StatCard from '@/app/(auth)/relatorios/_components/stat-card';
 import EmptyState from '@/components/comum/empty-state';
 import FiltroPeriodo, {
-  formatarISO,
   type AtalhoPeriodo,
 } from '@/app/(auth)/relatorios/_components/filtro-periodo';
 import { useQuery } from '@tanstack/react-query';
@@ -25,19 +24,13 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-
-function ultimosMeses(n: number) {
-  const fim = new Date();
-  const inicio = new Date();
-  inicio.setUTCMonth(inicio.getUTCMonth() - (n - 1));
-  inicio.setUTCDate(1);
-  return { inicio: formatarISO(inicio), fim: formatarISO(fim) };
-}
+import { periodoUltimosMeses } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const ATALHOS_TENDENCIA: AtalhoPeriodo[] = [
-  { label: 'Últimos 6 meses', calcular: () => ultimosMeses(6) },
-  { label: 'Últimos 12 meses', calcular: () => ultimosMeses(12) },
-  { label: 'Últimos 24 meses', calcular: () => ultimosMeses(24) },
+  { label: 'Últimos 6 meses', calcular: () => periodoUltimosMeses(6) },
+  { label: 'Últimos 12 meses', calcular: () => periodoUltimosMeses(12) },
+  { label: 'Últimos 24 meses', calcular: () => periodoUltimosMeses(24) },
 ];
 
 interface PontoCombinado {
@@ -60,7 +53,8 @@ function formatarMesLabel(mes: string) {
 }
 
 export default function AbaTendencia() {
-  const periodoPadrao = ultimosMeses(12);
+  useFusoAtual();
+  const periodoPadrao = periodoUltimosMeses(12);
   const [dataInicio, setDataInicio] = useState(periodoPadrao.inicio);
   const [dataFim, setDataFim] = useState(periodoPadrao.fim);
 

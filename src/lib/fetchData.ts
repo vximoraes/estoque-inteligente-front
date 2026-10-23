@@ -8,6 +8,26 @@ interface FetchError {
   [key: string]: unknown;
 }
 
+const TIMEOUT_MS = 30_000;
+
+export class ErroApi extends Error {
+  status: number;
+  errors: Array<{ path?: string; message: string }>;
+  response: { status: number; data: unknown };
+
+  constructor(status: number, dados: unknown) {
+    const corpo = (dados ?? {}) as {
+      message?: string;
+      errors?: Array<{ path?: string; message: string }>;
+    };
+    super(corpo.message || 'Erro na requisição');
+    this.name = 'ErroApi';
+    this.status = status;
+    this.errors = Array.isArray(corpo.errors) ? corpo.errors : [];
+    this.response = { status, data: dados };
+  }
+}
+
 let isRedirecting = false;
 
 export async function fetchData<T>(
@@ -26,6 +46,7 @@ export async function fetchData<T>(
     method,
     headers,
     credentials: 'include', // envia cookie de sessão Better Auth
+    signal: AbortSignal.timeout(TIMEOUT_MS),
     ...(body ? { body: JSON.stringify(body) } : {}),
   };
 
@@ -33,6 +54,9 @@ export async function fetchData<T>(
   try {
     response = await fetch(`${API_URL}${url}`, options);
   } catch (err) {
+    if ((err as Error)?.name === 'TimeoutError') {
+      throw new Error('A API demorou demais para responder');
+    }
     console.error('Erro de conexão com a API:', err);
     throw new Error('Erro de conexão com a API');
   }
@@ -59,7 +83,7 @@ export async function fetchData<T>(
       }
       throw new Error('Sessão expirada');
     }
-    throw new Error((data as FetchError)?.message || 'Erro na requisição');
+    throw new ErroApi(response.status, data);
   }
 
   return data as T;

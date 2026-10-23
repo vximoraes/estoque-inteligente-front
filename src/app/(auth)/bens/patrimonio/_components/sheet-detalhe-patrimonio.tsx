@@ -39,6 +39,8 @@ import type {
   PatrimonioEventoData,
   PatrimonioEventoTipo,
 } from '@/types/patrimonios';
+import { formatarDataCalendario, formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface SheetDetalhePatrimonioProps {
   patrimonio: PatrimonioData | null;
@@ -55,25 +57,15 @@ const TIPO_LABEL: Record<PatrimonioEventoTipo, string> = {
   transferencia: 'Transferência',
   baixa: 'Baixa',
   reativacao: 'Reativação',
+  inativacao: 'Removido',
 };
 
 function formatarData(data?: string) {
-  if (!data) return '—';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '—';
-  return parsed.toLocaleDateString('pt-BR');
+  return formatarDataCalendario(data, '—');
 }
 
 function formatarDataCompleta(data: string) {
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '-';
-  return parsed.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatarDataHora(data);
 }
 
 function nomeUsuario(usuario: PatrimonioEventoData['usuario']) {
@@ -85,6 +77,7 @@ export default function SheetDetalhePatrimonio({
   open,
   onOpenChange,
 }: SheetDetalhePatrimonioProps) {
+  useFusoAtual();
   const [eventoSelecionado, setEventoSelecionado] =
     useState<PatrimonioEventoData | null>(null);
   const [modalEventoAberto, setModalEventoAberto] = useState(false);

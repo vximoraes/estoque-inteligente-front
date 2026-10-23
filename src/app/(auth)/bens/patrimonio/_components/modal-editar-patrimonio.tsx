@@ -25,6 +25,8 @@ import CampoImagem from '@/components/item-form/campo-imagem';
 import CamposPersonalizadosEditor from '@/app/(auth)/bens/patrimonio/_components/campos-personalizados-editor';
 import { useUploadImagemPatrimonio } from '@/hooks/use-upload-imagem-patrimonio';
 import type { CampoPersonalizado, PatrimonioData } from '@/types/patrimonios';
+import { paraInputDataCalendario } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalEditarPatrimonioProps {
   isOpen: boolean;
@@ -34,10 +36,7 @@ interface ModalEditarPatrimonioProps {
 }
 
 function formatarDataInput(data?: string) {
-  if (!data) return '';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '';
-  return parsed.toISOString().slice(0, 10);
+  return paraInputDataCalendario(data);
 }
 
 export default function ModalEditarPatrimonio({
@@ -46,6 +45,7 @@ export default function ModalEditarPatrimonio({
   patrimonio,
   onSuccess,
 }: ModalEditarPatrimonioProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
   const [numeroPatrimonio, setNumeroPatrimonio] = useState('');
   const [modelo, setModelo] = useState('');

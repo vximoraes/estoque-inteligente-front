@@ -2,35 +2,38 @@ import { useSession } from '@/hooks/use-session';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 
+type AcaoPermissao =
+  | 'buscar'
+  | 'enviar'
+  | 'substituir'
+  | 'modificar'
+  | 'excluir';
+
+interface PermissaoEfetiva extends Record<AcaoPermissao, boolean> {
+  rota: string;
+  ativo: boolean;
+}
+
 export function usePermissions() {
   const { user, isLoading: sessionLoading } = useSession();
 
   const { data, isLoading } = useQuery({
     queryKey: ['user-permissions', user?.id],
     queryFn: async () => {
-      const response = await get<any>(`/usuarios/${user!.id}`);
-      return {
-        permissoes: response?.data?.permissoes || [],
-        grupos: response?.data?.grupos || [],
-      };
+      const response = await get<{ data: PermissaoEfetiva[] }>(
+        `/usuarios/${user!.id}/permissoes`,
+      );
+      return response?.data ?? [];
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 
-  const permissoes = data?.permissoes || [];
-  const grupos = data?.grupos || [];
+  const permissoes = data ?? [];
 
-  const hasPermission = (
-    rota: string,
-    action?: 'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir',
-  ): boolean => {
-    if (!permissoes || !Array.isArray(permissoes)) {
-      return false;
-    }
-
-    const permission = permissoes.find((p: any) => p.rota === rota);
+  const hasPermission = (rota: string, action?: AcaoPermissao): boolean => {
+    const permission = permissoes.find((p) => p.rota === rota);
 
     if (!permission) {
       return false;
@@ -45,14 +48,12 @@ export function usePermissions() {
 
   const isAdmin = (): boolean => {
     return (
-      hasPermission('usuarios', 'buscar') ||
-      hasPermission('usuarios', 'enviar') ||
-      grupos?.some((grupo: string) => grupo.toLowerCase().includes('admin'))
+      hasPermission('usuarios', 'buscar') || hasPermission('usuarios', 'enviar')
     );
   };
 
   const canManageUsers = (): boolean => {
-    return hasPermission('usuarios');
+    return hasPermission('usuarios', 'buscar');
   };
 
   return {
@@ -60,7 +61,6 @@ export function usePermissions() {
     isAdmin,
     canManageUsers,
     permissoes,
-    grupos,
     // Enquanto a sessão ainda resolve, `user?.id` é undefined e a query de
     // permissões fica `enabled: false` — nesse estado o React Query reporta
     // isLoading=false (não é "carregando", é "desabilitada"), então sem

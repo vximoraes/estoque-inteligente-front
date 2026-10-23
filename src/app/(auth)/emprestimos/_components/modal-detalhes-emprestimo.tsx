@@ -5,6 +5,8 @@ import { X } from 'lucide-react';
 import { Emprestimo } from '@/types/emprestimos';
 import { getEmprestimoNome } from '@/lib/emprestimo';
 import { ModalShell } from '@/components/ui/modal-shell';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ModalDetalhesEmprestimoProps {
   isOpen: boolean;
@@ -25,16 +27,19 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 function formatarData(data?: string | null) {
-  if (!data) return '-';
-  const parsed = new Date(data);
-  if (Number.isNaN(parsed.getTime())) return '-';
-  return parsed.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatarDataHora(data);
+}
+
+const ROTULO_CAMPO: Record<string, string> = {
+  solicitante_nome: 'Solicitante',
+  solicitante_email: 'E-mail do solicitante',
+  data_prevista_devolucao: 'Data prevista de devolução',
+  observacoes_emprestimo: 'Observações do empréstimo',
+};
+
+function valorAlterado(campo: string, valor: string) {
+  if (!valor) return '-';
+  return campo === 'data_prevista_devolucao' ? formatarData(valor) : valor;
 }
 
 export default function ModalDetalhesEmprestimo({
@@ -42,6 +47,7 @@ export default function ModalDetalhesEmprestimo({
   onClose,
   emprestimo,
 }: ModalDetalhesEmprestimoProps) {
+  useFusoAtual();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -214,6 +220,29 @@ export default function ModalDetalhesEmprestimo({
             {temObsDevolucao ? emprestimo.observacoes_devolucao : '-'}
           </p>
         </div>
+
+        {(emprestimo.alteracoes?.length ?? 0) > 0 && (
+          <div className="pt-4 border-t" data-test="emprestimo-alteracoes">
+            <label className="text-base font-medium text-muted-foreground block mb-2">
+              Alterações
+            </label>
+            <ul className="space-y-2">
+              {emprestimo.alteracoes!.map((alteracao, i) => (
+                <li key={i} className="text-sm text-foreground">
+                  <span className="font-medium">
+                    {ROTULO_CAMPO[alteracao.campo] ?? alteracao.campo}
+                  </span>
+                  : {valorAlterado(alteracao.campo, alteracao.anterior)} →{' '}
+                  {valorAlterado(alteracao.campo, alteracao.novo)}
+                  <span className="block text-muted-foreground">
+                    {alteracao.usuario?.nome ?? 'Usuário removido'} em{' '}
+                    {formatarData(alteracao.data_hora)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {(emprestimo.createdAt || emprestimo.updatedAt) && (
           <div className="pt-4 border-t grid grid-cols-2 gap-4">

@@ -58,7 +58,8 @@ export type PatrimonioEventoTipo =
   | 'manutencao_saida'
   | 'transferencia'
   | 'baixa'
-  | 'reativacao';
+  | 'reativacao'
+  | 'inativacao';
 
 export interface PatrimonioEventoData {
   _id: string;

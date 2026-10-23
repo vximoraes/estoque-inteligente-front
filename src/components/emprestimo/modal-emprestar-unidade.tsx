@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'react-toastify';
 import type { PatrimonioData } from '@/types/patrimonios';
+import { deInputDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface EmprestimoUnidadeRequest {
   patrimonio: string;
@@ -44,6 +46,7 @@ export default function ModalEmprestarUnidade({
   patrimonio,
   onSuccess,
 }: ModalEmprestarUnidadeProps) {
+  useFusoAtual();
   const queryClient = useQueryClient();
 
   const [solicitanteNome, setSolicitanteNome] = useState('');
@@ -106,8 +109,8 @@ export default function ModalEmprestarUnidade({
     }
 
     if (dataPrevista) {
-      const data = new Date(dataPrevista);
-      if (Number.isNaN(data.getTime()) || data <= new Date()) {
+      const data = deInputDataHora(dataPrevista);
+      if (!data || data <= new Date()) {
         newErrors.dataPrevista = 'A data prevista deve ser futura';
       }
     }
@@ -123,9 +126,7 @@ export default function ModalEmprestarUnidade({
       patrimonio: patrimonio._id,
       solicitante_nome: solicitanteNome.trim(),
       solicitante_email: solicitanteEmail.trim() || undefined,
-      data_prevista_devolucao: dataPrevista
-        ? new Date(dataPrevista).toISOString()
-        : undefined,
+      data_prevista_devolucao: deInputDataHora(dataPrevista)?.toISOString(),
       observacoes_emprestimo: observacoes.trim() || undefined,
     });
   };
@@ -157,6 +158,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="text"
               value={solicitanteNome}
+              data-test="modal-emprestar-unidade-solicitante"
               onChange={(e) => {
                 setSolicitanteNome(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteNome: undefined }));
@@ -178,6 +180,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="email"
               value={solicitanteEmail}
+              data-test="modal-emprestar-unidade-email"
               onChange={(e) => {
                 setSolicitanteEmail(e.target.value);
                 setErrors((prev) => ({ ...prev, solicitanteEmail: undefined }));
@@ -199,6 +202,7 @@ export default function ModalEmprestarUnidade({
             <input
               type="datetime-local"
               value={dataPrevista}
+              data-test="modal-emprestar-unidade-data-prevista"
               onChange={(e) => {
                 setDataPrevista(e.target.value);
                 setErrors((prev) => ({ ...prev, dataPrevista: undefined }));
@@ -218,6 +222,7 @@ export default function ModalEmprestarUnidade({
             </label>
             <textarea
               value={observacoes}
+              data-test="modal-emprestar-unidade-observacoes"
               onChange={(e) => setObservacoes(e.target.value)}
               className="w-full px-3 py-2 text-base md:text-sm border border-border rounded-md outline-none focus:ring-2 focus:ring-[var(--ei-accent)]/50"
               rows={3}
@@ -232,6 +237,7 @@ export default function ModalEmprestarUnidade({
             <Button
               variant="outline"
               onClick={onClose}
+              data-test="modal-emprestar-unidade-cancelar"
               className="h-11 flex-1 cursor-pointer"
               disabled={emprestimoMutation.isPending}
             >
@@ -239,6 +245,7 @@ export default function ModalEmprestarUnidade({
             </Button>
             <Button
               onClick={handleSubmit}
+              data-test="modal-emprestar-unidade-confirmar"
               className="h-11 flex-1 text-ei-accent-foreground cursor-pointer hover:opacity-90"
               style={{ backgroundColor: 'var(--ei-accent)' }}
               disabled={emprestimoMutation.isPending}

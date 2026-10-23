@@ -28,6 +28,8 @@ import { generatePatrimonioPDF } from '@/utils/pdfGenerator';
 import { generatePatrimonioCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
 import { useSession } from '@/hooks/use-session';
+import { formatarDataCalendario } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -38,11 +40,19 @@ const statusOptions = [
 ];
 
 function formatarData(data?: string) {
-  if (!data) return '—';
-  return new Date(data).toLocaleDateString('pt-BR');
+  return formatarDataCalendario(data, '—');
+}
+
+interface PatrimonioStats {
+  total: number;
+  disponiveis: number;
+  emprestadas: number;
+  manutencao: number;
+  baixadas: number;
 }
 
 export default function AbaPatrimonio() {
+  useFusoAtual();
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
@@ -128,9 +138,6 @@ export default function AbaPatrimonio() {
 
   const todosPatrimonios = data?.pages.flatMap((page) => page.data.docs) || [];
 
-  // Sem endpoint de stats dedicado para patrimônio (diferente de
-  // `/itens/stats`) — os contadores refletem só as páginas já carregadas
-  // pelo scroll infinito, não o total absoluto quando o filtro é amplo.
   // Busca/filtros/ordenação já delegados à API — só descarta linhas com
   // categoria/localização não populadas (guarda defensiva).
   const patrimoniosFiltrados = todosPatrimonios.filter(
@@ -153,16 +160,32 @@ export default function AbaPatrimonio() {
     (cat) => cat._id === categoriaFilter,
   )?.nome;
 
-  const totalUnidades = patrimoniosFiltrados.length;
-  const disponiveis = patrimoniosFiltrados.filter(
-    (p) => p.status === 'Disponível',
-  ).length;
-  const emprestadas = patrimoniosFiltrados.filter(
-    (p) => p.status === 'Emprestado',
-  ).length;
-  const baixadas = patrimoniosFiltrados.filter(
-    (p) => p.status === 'Baixado',
-  ).length;
+  const { data: stats } = useQuery<PatrimonioStats>({
+    queryKey: [
+      'patrimonios-relatorio-stats',
+      searchTerm,
+      categoriaFilter,
+      statusFilter,
+      localizacaoFilter,
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('busca', searchTerm);
+      if (categoriaFilter) params.append('categoria', categoriaFilter);
+      if (statusFilter) params.append('status', statusFilter);
+      if (localizacaoFilter) params.append('localizacao', localizacaoFilter);
+      const response = await get<{ data: PatrimonioStats }>(
+        `/patrimonios/stats?${params.toString()}`,
+      );
+      return response.data;
+    },
+    staleTime: 30_000,
+  });
+
+  const totalUnidades = stats?.total ?? 0;
+  const disponiveis = stats?.disponiveis ?? 0;
+  const emprestadas = stats?.emprestadas ?? 0;
+  const baixadas = stats?.baixadas ?? 0;
 
   const handleOpenFiltrosModal = () => setIsFiltrosModalOpen(true);
   const handleCloseFiltrosModal = () => setIsFiltrosModalOpen(false);
@@ -246,7 +269,7 @@ export default function AbaPatrimonio() {
             title="Total de unidades"
             value={totalUnidades}
             data-test="stat-total-unidades"
-            hoverTitle={`Total de unidades carregadas: ${totalUnidades}`}
+            hoverTitle={`Total de unidades: ${totalUnidades}`}
           />
           <StatCard
             title="Disponíveis"

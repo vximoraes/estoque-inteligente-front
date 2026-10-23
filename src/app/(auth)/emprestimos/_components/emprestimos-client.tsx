@@ -45,6 +45,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PulseLoader } from 'react-spinners';
+import { formatarDataHora } from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 const TIPO_CONTROLE_LABEL: Record<'quantidade' | 'unidade', string> = {
   quantidade: 'Almoxarifado',
@@ -64,6 +66,7 @@ export default function EmprestimosPageContent({
 }: {
   initialData?: EmprestimosApiResponse;
 }) {
+  useFusoAtual();
   const [searchTerm, setSearchTerm] = useQueryState('busca', {
     defaultValue: '',
   });
@@ -121,8 +124,9 @@ export default function EmprestimosPageContent({
       params.append('tipo_controle', tipoControle);
 
       if (searchTerm) params.append('busca', searchTerm);
-      if (statusFilter === 'Ativo') params.append('apenas_abertos', 'true');
-      if (statusFilter === 'Atrasado') params.append('atrasados', 'true');
+      if (statusFilter && statusFilter !== STATUS_FILTER_PADRAO) {
+        params.append('status', statusFilter.toLowerCase());
+      }
       if (ordenar) params.append('ordenar', ordenar);
 
       return await get<EmprestimosApiResponse>(
@@ -161,12 +165,8 @@ export default function EmprestimosPageContent({
 
   const emprestimos = data?.pages.flatMap((page) => page.data.docs) || [];
 
-  const formatarDataPrevista = (data?: string | null) => {
-    if (!data) return 'Sem previsão';
-    const parsed = new Date(data);
-    if (Number.isNaN(parsed.getTime())) return 'Sem previsão';
-    return parsed.toLocaleString('pt-BR');
-  };
+  const formatarDataPrevista = (data?: string | null) =>
+    formatarDataHora(data, 'Sem previsão');
 
   return (
     <div

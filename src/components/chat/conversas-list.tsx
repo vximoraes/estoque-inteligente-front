@@ -2,6 +2,12 @@
 
 import { Trash2, MessageSquare } from 'lucide-react';
 import type { ConversaResumo } from '@/types/chat';
+import {
+  diasDeCalendarioDesde,
+  formatarDiaMes,
+  formatarHora,
+} from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 interface ConversasListProps {
   conversas: ConversaResumo[];
@@ -12,20 +18,12 @@ interface ConversasListProps {
 }
 
 function formatDate(isoString: string): string {
-  const date = new Date(isoString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  const diffDays = diasDeCalendarioDesde(isoString);
+  if (diffDays === null) return '';
+  if (diffDays <= 0) return formatarHora(isoString);
   if (diffDays === 1) return 'Ontem';
   if (diffDays < 7) return `${diffDays}d atrás`;
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return formatarDiaMes(isoString);
 }
 
 export function ConversasList({
@@ -35,6 +33,7 @@ export function ConversasList({
   onSelectConversa,
   onRequestDelete,
 }: ConversasListProps) {
+  useFusoAtual();
   return (
     <div className="flex flex-col h-full w-full bg-card shrink-0">
       {/* Header */}
@@ -74,6 +73,7 @@ export function ConversasList({
                 ${isActive ? 'bg-[var(--ei-accent)]/10' : 'hover:bg-muted'}
               `}
               onClick={() => onSelectConversa(conversa)}
+              data-test="chat-conversa-item"
             >
               <div className="flex-1 min-w-0">
                 <p
@@ -92,6 +92,7 @@ export function ConversasList({
                   onRequestDelete(conversa._id);
                 }}
                 aria-label="Excluir conversa"
+                data-test="chat-excluir-conversa"
                 className="
                   shrink-0 opacity-0 group-hover:opacity-100
                   flex items-center justify-center w-5 h-5 rounded-md

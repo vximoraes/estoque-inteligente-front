@@ -32,4 +32,4 @@ Atenção: os schemas Zod de formulário (`src/schemas/*.schema.ts`) usam camelC
 
 ## Permissões
 
-`usePermissions()` (`src/hooks/use-permissions.ts`) busca `GET /usuarios/:id` e expõe `hasPermission(rota, action?)` com ações `'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'`. Esse vocabulário vem da API — não inventar novas ações sem confirmar que a API as reconhece.
+`usePermissions()` (`src/hooks/use-permissions.ts`) busca `GET /usuarios/:id/permissoes` (permissões efetivas: usuário + grupos, a mesma união que a API usa para autorizar) e expõe `hasPermission(rota, action?)` com ações `'buscar' | 'enviar' | 'substituir' | 'modificar' | 'excluir'`. Esse vocabulário vem da API — não inventar novas ações sem confirmar que a API as reconhece.

@@ -2,6 +2,7 @@ export interface Mensagem {
   role: 'user' | 'assistant' | 'error';
   content: string;
   timestamp: string;
+  etapa?: string;
 }
 
 export interface ConversaResumo {

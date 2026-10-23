@@ -96,11 +96,11 @@ function AtivarContaContent() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/ativar-conta?token=${token}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/ativar-conta`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ senha: data.senha }),
+          body: JSON.stringify({ token, senha: data.senha }),
         },
       );
       const responseData = await res.json();

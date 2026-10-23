@@ -1,6 +1,6 @@
 # Testing
 
-Não há testes unitários (ver `CLAUDE.md`). A suíte Cypress cobre autenticação e todas as telas da área logada: `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`.
+Não há testes unitários (ver `CLAUDE.md`). A suíte Cypress cobre autenticação e todas as telas da área logada: `patrimonio`, `almoxarifado`, `categorias`, `localizacoes`, `emprestimos`, `fornecedores`, `usuarios`, `perfil`, `relatorios`. Essa é a suíte descrita no artigo do TCC (25 especificações, 79 casos): não acrescentar caso em `cypress/e2e`. Os casos escritos depois da entrega ficam em `cypress/e2e-regressao/` (`npm run test:regressao`), inclusive `chat`, `filtros`, `imagens` e `regras` (ver `docs/suites-de-teste/suite-teste-transversais.md`). Spec nova vai para lá.
 
 ## Rodar
 
@@ -13,7 +13,8 @@ npm run test:server                                         # porta 3011, Mongo 
 npm run build && npm run start
 
 # Suíte Cypress
-npm run test                                                # roda tudo (cypress run)
+npm run test                                                # suíte do artigo (cypress/e2e)
+npm run test:regressao                                      # cypress/e2e-regressao
 npx cypress open                                            # modo interativo — funciona também contra a API de dev normal
 npx cypress run --spec "cypress/e2e/patrimonio/*.cy.ts"     # uma pasta por vez durante o desenvolvimento
 ```

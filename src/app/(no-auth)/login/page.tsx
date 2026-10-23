@@ -16,6 +16,11 @@ import AuthLeftPanel from '@/app/(no-auth)/_components/auth-left-panel';
 import GoogleIcon from '@/app/(no-auth)/_components/google-icon';
 import { loginSchema, type LoginFormData } from '@/schemas';
 
+function destinoDepoisDoLogin(from: string | null) {
+  if (from && /^\/(?![/\\])/.test(from)) return from;
+  return '/bens/patrimonio';
+}
+
 const ERRO_GOOGLE_PADRAO = 'Erro ao fazer login. Tente novamente.';
 
 function LoginContent() {
@@ -25,9 +30,14 @@ function LoginContent() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const destino = destinoDepoisDoLogin(searchParams.get('from'));
 
   useEffect(() => {
-    if (searchParams.get('error')) {
+    if (searchParams.get('indisponivel')) {
+      setError(
+        'Não foi possível conectar ao servidor. Tente novamente em instantes.',
+      );
+    } else if (searchParams.get('error')) {
       setError(ERRO_GOOGLE_PADRAO);
     }
   }, [searchParams]);
@@ -69,7 +79,7 @@ function LoginContent() {
           setError('E-mail ou senha incorretos.');
         }
       } else {
-        router.push('/bens/patrimonio');
+        router.push(destino);
       }
     } catch {
       setError('Erro ao fazer login. Tente novamente.');
@@ -82,7 +92,7 @@ function LoginContent() {
 
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: `${window.location.origin}/bens/patrimonio`,
+      callbackURL: `${window.location.origin}${destino}`,
     });
 
     if (error) {

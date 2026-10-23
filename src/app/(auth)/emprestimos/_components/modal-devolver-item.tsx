@@ -6,6 +6,7 @@ import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface ModalDevolverItemProps {
   isOpen: boolean;
@@ -37,8 +38,7 @@ export default function ModalDevolverItem({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['itens'] });
+      invalidarDadosDeEstoque(queryClient);
 
       toast.success('Devolução registrada com sucesso!', {
         position: 'bottom-right',

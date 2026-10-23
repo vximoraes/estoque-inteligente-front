@@ -10,6 +10,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  periodoEsteAno,
+  periodoEsteMes,
+  periodoUltimosDias,
+} from '@/lib/datas';
+import { useFusoAtual } from '@/hooks/use-fuso-horario';
 
 export interface AtalhoPeriodo {
   label: string;
@@ -27,11 +33,6 @@ interface FiltroPeriodoProps {
   justify?: 'start' | 'end';
   /** Exibe um botão pra limpar o período selecionado. Default false. */
   permitirLimpar?: boolean;
-}
-
-// UTC — usado pelos atalhos (7 dias, este mês...), que partem de "agora".
-export function formatarISO(data: Date) {
-  return data.toISOString().slice(0, 10);
 }
 
 // Local — usado pela seleção no calendário, pra não deslocar o dia em fusos
@@ -56,30 +57,11 @@ function formatarLabel(valor: string): string {
   return data ? data.toLocaleDateString('pt-BR') : '';
 }
 
-function ultimosDias(dias: number) {
-  const fim = new Date();
-  const inicio = new Date();
-  inicio.setDate(inicio.getDate() - (dias - 1));
-  return { inicio: formatarISO(inicio), fim: formatarISO(fim) };
-}
-
-function esteMes() {
-  const hoje = new Date();
-  const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  return { inicio: formatarISO(inicio), fim: formatarISO(hoje) };
-}
-
-function esteAno() {
-  const hoje = new Date();
-  const inicio = new Date(hoje.getFullYear(), 0, 1);
-  return { inicio: formatarISO(inicio), fim: formatarISO(hoje) };
-}
-
 const ATALHOS_PADRAO: AtalhoPeriodo[] = [
-  { label: '7 dias', calcular: () => ultimosDias(7) },
-  { label: '30 dias', calcular: () => ultimosDias(30) },
-  { label: 'Este mês', calcular: esteMes },
-  { label: 'Este ano', calcular: esteAno },
+  { label: '7 dias', calcular: () => periodoUltimosDias(7) },
+  { label: '30 dias', calcular: () => periodoUltimosDias(30) },
+  { label: 'Este mês', calcular: periodoEsteMes },
+  { label: 'Este ano', calcular: periodoEsteAno },
 ];
 
 export default function FiltroPeriodo({
@@ -90,6 +72,7 @@ export default function FiltroPeriodo({
   justify = 'start',
   permitirLimpar = false,
 }: FiltroPeriodoProps) {
+  useFusoAtual();
   const [aberto, setAberto] = useState(false);
 
   const range: DateRange | undefined = {

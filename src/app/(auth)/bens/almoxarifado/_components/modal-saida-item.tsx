@@ -8,6 +8,7 @@ import { ModalShell } from '@/components/ui/modal-shell';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from '@/components/localizacao/modal-editar-localizacao';
 import ModalExcluirLocalizacao from '@/components/localizacao/modal-excluir-localizacao';
+import { invalidarDadosDeEstoque } from '@/lib/invalidarEstoque';
 
 interface Localizacao {
   _id: string;
@@ -97,9 +98,7 @@ export default function ModalSaidaItem({
       return await post('/movimentacoes', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['itens'],
-      });
+      invalidarDadosDeEstoque(queryClient);
 
       queryClient.removeQueries({
         queryKey: ['estoques', itemId],

@@ -2,12 +2,14 @@
   "name": "estoque-inteligente-front",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.16.0",
   "license": "MIT",
   "scripts": {
     "dev": "clear && next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "test": "cypress run",
+    "test:regressao": "cypress run --config specPattern=cypress/e2e-regressao/**/*.cy.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -15,6 +17,7 @@
     "fix": "eslint . --fix; prettier --write ."
   },
   "dependencies": {
+    "@date-fns/tz": "^1.5.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
