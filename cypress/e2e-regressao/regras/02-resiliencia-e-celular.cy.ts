@@ -45,7 +45,9 @@ describe('Resiliência e tela de celular', () => {
     it('abre o menu lateral pelo botão do cabeçalho', () => {
       cy.visit('/bens/patrimonio');
       cy.getByData('botao-menu-mobile').click();
-      cy.getByData('sidebar-btn-sair-mobile').should('be.visible');
+      cy.getByData('sidebar-btn-sair-mobile')
+        .scrollIntoView()
+        .should('be.visible');
     });
   });
 });
